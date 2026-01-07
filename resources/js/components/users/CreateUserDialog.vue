@@ -4,7 +4,7 @@ import { UserRole } from '@/types/app-data';
 
 const emit = defineEmits(['update:open', 'created']);
 
-const props = defineProps<{
+defineProps<{
     open: boolean;
 }>();
 

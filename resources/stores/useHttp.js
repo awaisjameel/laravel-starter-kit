@@ -1,4 +1,3 @@
-const { ref } = require('vue');
 import { defineStore } from 'pinia';
 
 export const useHttp = defineStore('useHttp', () => {

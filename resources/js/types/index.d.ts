@@ -26,16 +26,16 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
     sidebarOpen: boolean;
 };
 
-export interface User extends UserData {}
+export type User = UserData;
 
 export interface Paginated<T> {
     data: T[];
-    per_page: Number;
-    current_page: Number;
+    per_page: number;
+    current_page: number;
     from: number;
-    to: Number;
-    last_page: Number;
-    total: Number;
+    to: number;
+    last_page: number;
+    total: number;
 }
 
 export interface UsersPageProps {

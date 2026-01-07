@@ -22,7 +22,7 @@ const currentNodeVersion = process.versions.node;
 let currentNpmVersion;
 try {
     currentNpmVersion = execSync('npm -v', { encoding: 'utf8' }).trim();
-} catch (error) {
+} catch {
     console.error('Error: Could not determine npm version. Is npm installed correctly?');
     process.exit(1);
 }

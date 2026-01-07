@@ -4,7 +4,7 @@ import { type User } from '@/types';
 
 const emit = defineEmits(['update:open', 'deleted']);
 
-const props = defineProps<{
+defineProps<{
     open: boolean;
     user: User;
 }>();
