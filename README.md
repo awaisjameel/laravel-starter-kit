@@ -312,9 +312,10 @@ Includes:
 
 ```bash
 composer cleanup
+npm run cleanup
 ```
 
-Runs Pint, Rector, and Prettier for consistent formatting.
+Run both before opening a pull request to keep backend and frontend code clean and consistent. `composer cleanup` runs Pint, Rector, and Prettier, while `npm run cleanup` formats and lints frontend files.
 
 ### Frontend linting and type checks
 
