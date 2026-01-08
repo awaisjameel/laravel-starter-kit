@@ -1,16 +1,10 @@
-import { queryParams, type QueryParams } from './../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../wayfinder';
 /**
  * @see \Laravel\Sanctum\Http\Controllers\CsrfCookieController::csrfCookie
  * @see vendor/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php:17
  * @route '/sanctum/csrf-cookie'
  */
-export const csrfCookie = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const csrfCookie = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: csrfCookie.url(options),
     method: 'get',
 });
@@ -18,14 +12,14 @@ export const csrfCookie = (options?: {
 csrfCookie.definition = {
     methods: ['get', 'head'],
     url: '/sanctum/csrf-cookie',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \Laravel\Sanctum\Http\Controllers\CsrfCookieController::csrfCookie
  * @see vendor/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php:17
  * @route '/sanctum/csrf-cookie'
  */
-csrfCookie.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+csrfCookie.url = (options?: RouteQueryOptions) => {
     return csrfCookie.definition.url + queryParams(options);
 };
 
@@ -34,13 +28,7 @@ csrfCookie.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) =
  * @see vendor/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php:17
  * @route '/sanctum/csrf-cookie'
  */
-csrfCookie.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+csrfCookie.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: csrfCookie.url(options),
     method: 'get',
 });
@@ -49,18 +37,12 @@ csrfCookie.get = (options?: {
  * @see vendor/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php:17
  * @route '/sanctum/csrf-cookie'
  */
-csrfCookie.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+csrfCookie.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: csrfCookie.url(options),
     method: 'head',
 });
 const sanctum = {
-    csrfCookie,
+    csrfCookie: Object.assign(csrfCookie, csrfCookie),
 };
 
 export default sanctum;

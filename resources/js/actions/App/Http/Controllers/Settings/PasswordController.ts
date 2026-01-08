@@ -1,16 +1,10 @@
-import { queryParams, type QueryParams } from './../../../../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
  * @see app/Http/Controllers/Settings/PasswordController.php:20
  * @route '/settings/password'
  */
-export const edit = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const edit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(options),
     method: 'get',
 });
@@ -18,14 +12,14 @@ export const edit = (options?: {
 edit.definition = {
     methods: ['get', 'head'],
     url: '/settings/password',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
  * @see app/Http/Controllers/Settings/PasswordController.php:20
  * @route '/settings/password'
  */
-edit.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+edit.url = (options?: RouteQueryOptions) => {
     return edit.definition.url + queryParams(options);
 };
 
@@ -34,13 +28,7 @@ edit.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/Settings/PasswordController.php:20
  * @route '/settings/password'
  */
-edit.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(options),
     method: 'get',
 });
@@ -49,13 +37,7 @@ edit.get = (options?: {
  * @see app/Http/Controllers/Settings/PasswordController.php:20
  * @route '/settings/password'
  */
-edit.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(options),
     method: 'head',
 });
@@ -65,13 +47,7 @@ edit.head = (options?: {
  * @see app/Http/Controllers/Settings/PasswordController.php:28
  * @route '/settings/password'
  */
-export const update = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'put';
-} => ({
+export const update = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(options),
     method: 'put',
 });
@@ -79,14 +55,14 @@ export const update = (options?: {
 update.definition = {
     methods: ['put'],
     url: '/settings/password',
-};
+} satisfies RouteDefinition<['put']>;
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
  * @see app/Http/Controllers/Settings/PasswordController.php:28
  * @route '/settings/password'
  */
-update.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+update.url = (options?: RouteQueryOptions) => {
     return update.definition.url + queryParams(options);
 };
 
@@ -95,13 +71,7 @@ update.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/Settings/PasswordController.php:28
  * @route '/settings/password'
  */
-update.put = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'put';
-} => ({
+update.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(options),
     method: 'put',
 });

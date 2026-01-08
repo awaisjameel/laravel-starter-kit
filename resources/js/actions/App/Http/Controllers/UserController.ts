@@ -1,16 +1,10 @@
-import { queryParams, type QueryParams } from './../../../../wayfinder';
+import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../wayfinder';
 /**
  * @see \App\Http\Controllers\UserController::index
  * @see app/Http/Controllers/UserController.php:18
  * @route '/users'
  */
-export const index = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(options),
     method: 'get',
 });
@@ -18,14 +12,14 @@ export const index = (options?: {
 index.definition = {
     methods: ['get', 'head'],
     url: '/users',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\UserController::index
  * @see app/Http/Controllers/UserController.php:18
  * @route '/users'
  */
-index.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+index.url = (options?: RouteQueryOptions) => {
     return index.definition.url + queryParams(options);
 };
 
@@ -34,13 +28,7 @@ index.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/UserController.php:18
  * @route '/users'
  */
-index.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(options),
     method: 'get',
 });
@@ -49,13 +37,7 @@ index.get = (options?: {
  * @see app/Http/Controllers/UserController.php:18
  * @route '/users'
  */
-index.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(options),
     method: 'head',
 });
@@ -65,13 +47,7 @@ index.head = (options?: {
  * @see app/Http/Controllers/UserController.php:34
  * @route '/users'
  */
-export const store = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 });
@@ -79,14 +55,14 @@ export const store = (options?: {
 store.definition = {
     methods: ['post'],
     url: '/users',
-};
+} satisfies RouteDefinition<['post']>;
 
 /**
  * @see \App\Http\Controllers\UserController::store
  * @see app/Http/Controllers/UserController.php:34
  * @route '/users'
  */
-store.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options);
 };
 
@@ -95,13 +71,7 @@ store.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/UserController.php:34
  * @route '/users'
  */
-store.post = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 });
@@ -113,11 +83,8 @@ store.post = (options?: {
  */
 export const show = (
     args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 });
@@ -125,17 +92,14 @@ export const show = (
 show.definition = {
     methods: ['get', 'head'],
     url: '/users/{user}',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\UserController::show
  * @see app/Http/Controllers/UserController.php:0
  * @route '/users/{user}'
  */
-show.url = (
-    args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-) => {
+show.url = (args: { user: string | number } | [user: string | number] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { user: args };
     }
@@ -145,6 +109,8 @@ show.url = (
             user: args[0],
         };
     }
+
+    args = applyUrlDefaults(args);
 
     const parsedArgs = {
         user: args.user,
@@ -158,13 +124,7 @@ show.url = (
  * @see app/Http/Controllers/UserController.php:0
  * @route '/users/{user}'
  */
-show.get = (
-    args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+show.get = (args: { user: string | number } | [user: string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 });
@@ -173,13 +133,7 @@ show.get = (
  * @see app/Http/Controllers/UserController.php:0
  * @route '/users/{user}'
  */
-show.head = (
-    args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'head';
-} => ({
+show.head = (args: { user: string | number } | [user: string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 });
@@ -191,11 +145,8 @@ show.head = (
  */
 export const edit = (
     args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 });
@@ -203,17 +154,14 @@ export const edit = (
 edit.definition = {
     methods: ['get', 'head'],
     url: '/users/{user}/edit',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\UserController::edit
  * @see app/Http/Controllers/UserController.php:0
  * @route '/users/{user}/edit'
  */
-edit.url = (
-    args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-) => {
+edit.url = (args: { user: string | number } | [user: string | number] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { user: args };
     }
@@ -223,6 +171,8 @@ edit.url = (
             user: args[0],
         };
     }
+
+    args = applyUrlDefaults(args);
 
     const parsedArgs = {
         user: args.user,
@@ -236,13 +186,7 @@ edit.url = (
  * @see app/Http/Controllers/UserController.php:0
  * @route '/users/{user}/edit'
  */
-edit.get = (
-    args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+edit.get = (args: { user: string | number } | [user: string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 });
@@ -251,13 +195,7 @@ edit.get = (
  * @see app/Http/Controllers/UserController.php:0
  * @route '/users/{user}/edit'
  */
-edit.head = (
-    args: { user: string | number } | [user: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'head';
-} => ({
+edit.head = (args: { user: string | number } | [user: string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
     method: 'head',
 });
@@ -269,11 +207,8 @@ edit.head = (
  */
 export const update = (
     args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'put';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 });
@@ -281,17 +216,14 @@ export const update = (
 update.definition = {
     methods: ['put', 'patch'],
     url: '/users/{user}',
-};
+} satisfies RouteDefinition<['put', 'patch']>;
 
 /**
  * @see \App\Http\Controllers\UserController::update
  * @see app/Http/Controllers/UserController.php:43
  * @route '/users/{user}'
  */
-update.url = (
-    args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-) => {
+update.url = (args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { user: args };
     }
@@ -305,6 +237,8 @@ update.url = (
             user: args[0],
         };
     }
+
+    args = applyUrlDefaults(args);
 
     const parsedArgs = {
         user: typeof args.user === 'object' ? args.user.id : args.user,
@@ -320,11 +254,8 @@ update.url = (
  */
 update.put = (
     args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'put';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 });
@@ -335,11 +266,8 @@ update.put = (
  */
 update.patch = (
     args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'patch';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 });
@@ -351,11 +279,8 @@ update.patch = (
  */
 export const destroy = (
     args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'delete';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 });
@@ -363,17 +288,14 @@ export const destroy = (
 destroy.definition = {
     methods: ['delete'],
     url: '/users/{user}',
-};
+} satisfies RouteDefinition<['delete']>;
 
 /**
  * @see \App\Http\Controllers\UserController::destroy
  * @see app/Http/Controllers/UserController.php:58
  * @route '/users/{user}'
  */
-destroy.url = (
-    args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-) => {
+destroy.url = (args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { user: args };
     }
@@ -387,6 +309,8 @@ destroy.url = (
             user: args[0],
         };
     }
+
+    args = applyUrlDefaults(args);
 
     const parsedArgs = {
         user: typeof args.user === 'object' ? args.user.id : args.user,
@@ -402,11 +326,8 @@ destroy.url = (
  */
 destroy.delete = (
     args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number },
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'delete';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 });

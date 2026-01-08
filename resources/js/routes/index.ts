@@ -1,15 +1,9 @@
-import { queryParams, type QueryParams } from './../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../wayfinder';
 /**
  * @see routes/web.php:9
  * @route '/'
  */
-export const home = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const home = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: home.url(options),
     method: 'get',
 });
@@ -17,13 +11,13 @@ export const home = (options?: {
 home.definition = {
     methods: ['get', 'head'],
     url: '/',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see routes/web.php:9
  * @route '/'
  */
-home.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+home.url = (options?: RouteQueryOptions) => {
     return home.definition.url + queryParams(options);
 };
 
@@ -31,13 +25,7 @@ home.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see routes/web.php:9
  * @route '/'
  */
-home.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: home.url(options),
     method: 'get',
 });
@@ -45,13 +33,7 @@ home.get = (options?: {
  * @see routes/web.php:9
  * @route '/'
  */
-home.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: home.url(options),
     method: 'head',
 });
@@ -60,13 +42,7 @@ home.head = (options?: {
  * @see routes/web.php:11
  * @route '/dashboard'
  */
-export const dashboard = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const dashboard = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: dashboard.url(options),
     method: 'get',
 });
@@ -74,13 +50,13 @@ export const dashboard = (options?: {
 dashboard.definition = {
     methods: ['get', 'head'],
     url: '/dashboard',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see routes/web.php:11
  * @route '/dashboard'
  */
-dashboard.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+dashboard.url = (options?: RouteQueryOptions) => {
     return dashboard.definition.url + queryParams(options);
 };
 
@@ -88,13 +64,7 @@ dashboard.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) =>
  * @see routes/web.php:11
  * @route '/dashboard'
  */
-dashboard.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: dashboard.url(options),
     method: 'get',
 });
@@ -102,13 +72,7 @@ dashboard.get = (options?: {
  * @see routes/web.php:11
  * @route '/dashboard'
  */
-dashboard.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: dashboard.url(options),
     method: 'head',
 });
@@ -117,13 +81,7 @@ dashboard.head = (options?: {
  * @see routes/settings.php:20
  * @route '/settings/appearance'
  */
-export const appearance = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const appearance = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: appearance.url(options),
     method: 'get',
 });
@@ -131,13 +89,13 @@ export const appearance = (options?: {
 appearance.definition = {
     methods: ['get', 'head'],
     url: '/settings/appearance',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see routes/settings.php:20
  * @route '/settings/appearance'
  */
-appearance.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+appearance.url = (options?: RouteQueryOptions) => {
     return appearance.definition.url + queryParams(options);
 };
 
@@ -145,13 +103,7 @@ appearance.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) =
  * @see routes/settings.php:20
  * @route '/settings/appearance'
  */
-appearance.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+appearance.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: appearance.url(options),
     method: 'get',
 });
@@ -159,13 +111,7 @@ appearance.get = (options?: {
  * @see routes/settings.php:20
  * @route '/settings/appearance'
  */
-appearance.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+appearance.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: appearance.url(options),
     method: 'head',
 });
@@ -175,13 +121,7 @@ appearance.head = (options?: {
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:21
  * @route '/login'
  */
-export const login = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+export const login = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: login.url(options),
     method: 'get',
 });
@@ -189,14 +129,14 @@ export const login = (options?: {
 login.definition = {
     methods: ['get', 'head'],
     url: '/login',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::login
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:21
  * @route '/login'
  */
-login.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+login.url = (options?: RouteQueryOptions) => {
     return login.definition.url + queryParams(options);
 };
 
@@ -205,13 +145,7 @@ login.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:21
  * @route '/login'
  */
-login.get = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'get';
-} => ({
+login.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: login.url(options),
     method: 'get',
 });
@@ -220,13 +154,7 @@ login.get = (options?: {
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:21
  * @route '/login'
  */
-login.head = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'head';
-} => ({
+login.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: login.url(options),
     method: 'head',
 });
@@ -236,13 +164,7 @@ login.head = (options?: {
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:44
  * @route '/logout'
  */
-export const logout = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+export const logout = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: logout.url(options),
     method: 'post',
 });
@@ -250,14 +172,14 @@ export const logout = (options?: {
 logout.definition = {
     methods: ['post'],
     url: '/logout',
-};
+} satisfies RouteDefinition<['post']>;
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::logout
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:44
  * @route '/logout'
  */
-logout.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+logout.url = (options?: RouteQueryOptions) => {
     return logout.definition.url + queryParams(options);
 };
 
@@ -266,13 +188,7 @@ logout.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:44
  * @route '/logout'
  */
-logout.post = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+logout.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: logout.url(options),
     method: 'post',
 });

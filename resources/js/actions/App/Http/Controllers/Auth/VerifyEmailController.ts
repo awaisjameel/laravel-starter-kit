@@ -1,4 +1,4 @@
-import { queryParams, type QueryParams } from './../../../../../wayfinder';
+import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
  * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
@@ -6,11 +6,8 @@ import { queryParams, type QueryParams } from './../../../../../wayfinder';
  */
 const VerifyEmailController = (
     args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'get'> => ({
     url: VerifyEmailController.url(args, options),
     method: 'get',
 });
@@ -18,7 +15,7 @@ const VerifyEmailController = (
 VerifyEmailController.definition = {
     methods: ['get', 'head'],
     url: '/verify-email/{id}/{hash}',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
@@ -27,7 +24,7 @@ VerifyEmailController.definition = {
  */
 VerifyEmailController.url = (
     args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
+    options?: RouteQueryOptions,
 ) => {
     if (Array.isArray(args)) {
         args = {
@@ -35,6 +32,8 @@ VerifyEmailController.url = (
             hash: args[1],
         };
     }
+
+    args = applyUrlDefaults(args);
 
     const parsedArgs = {
         id: args.id,
@@ -56,11 +55,8 @@ VerifyEmailController.url = (
  */
 VerifyEmailController.get = (
     args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'get'> => ({
     url: VerifyEmailController.url(args, options),
     method: 'get',
 });
@@ -71,11 +67,8 @@ VerifyEmailController.get = (
  */
 VerifyEmailController.head = (
     args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'head';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'head'> => ({
     url: VerifyEmailController.url(args, options),
     method: 'head',
 });

@@ -1,6 +1,24 @@
 export type QueryParams = Record<string, string | number | boolean | string[] | null | undefined | Record<string, string | number | boolean>>;
 
-export const queryParams = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+type Method = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options';
+
+let urlDefaults: Record<string, unknown> = {};
+
+export type RouteDefinition<TMethod extends Method | Method[]> = {
+    url: string;
+} & (TMethod extends Method[] ? { methods: TMethod } : { method: TMethod });
+
+export type RouteFormDefinition<TMethod extends Method> = {
+    action: string;
+    method: TMethod;
+};
+
+export type RouteQueryOptions = {
+    query?: QueryParams;
+    mergeQuery?: QueryParams;
+};
+
+export const queryParams = (options?: RouteQueryOptions) => {
     if (!options || (!options.query && !options.mergeQuery)) {
         return '';
     }
@@ -44,6 +62,10 @@ export const queryParams = (options?: { query?: QueryParams; mergeQuery?: QueryP
             });
 
             for (const subKey in query[key]) {
+                if (typeof query[key][subKey] === 'undefined') {
+                    continue;
+                }
+
                 if (['string', 'number', 'boolean'].includes(typeof query[key][subKey])) {
                     params.set(`${key}[${subKey}]`, getValue(query[key][subKey]));
                 }
@@ -56,6 +78,26 @@ export const queryParams = (options?: { query?: QueryParams; mergeQuery?: QueryP
     const str = params.toString();
 
     return str.length > 0 ? `?${str}` : '';
+};
+
+export const setUrlDefaults = (params: Record<string, unknown>) => {
+    urlDefaults = params;
+};
+
+export const addUrlDefault = (key: string, value: string | number | boolean) => {
+    urlDefaults[key] = value;
+};
+
+export const applyUrlDefaults = <T extends Record<string, unknown> | undefined>(existing: T): T => {
+    const existingParams = { ...(existing ?? ({} as Record<string, unknown>)) };
+
+    for (const key in urlDefaults) {
+        if (existingParams[key] === undefined && urlDefaults[key] !== undefined) {
+            (existingParams as Record<string, unknown>)[key] = urlDefaults[key];
+        }
+    }
+
+    return existingParams as T;
 };
 
 export const validateParameters = (args: Record<string, unknown> | undefined, optional: string[]) => {

@@ -49,6 +49,7 @@ final class UserController extends Controller
         if ($request->validated('password')) {
             $user->password = $request->validated('password');
         }
+
         $user->save();
 
         return redirect()->route('users.index')

@@ -1,16 +1,10 @@
-import { queryParams, type QueryParams } from './../../../../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
 /**
  * @see \App\Http\Controllers\Auth\EmailVerificationNotificationController::store
  * @see app/Http/Controllers/Auth/EmailVerificationNotificationController.php:16
  * @route '/email/verification-notification'
  */
-export const store = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 });
@@ -18,14 +12,14 @@ export const store = (options?: {
 store.definition = {
     methods: ['post'],
     url: '/email/verification-notification',
-};
+} satisfies RouteDefinition<['post']>;
 
 /**
  * @see \App\Http\Controllers\Auth\EmailVerificationNotificationController::store
  * @see app/Http/Controllers/Auth/EmailVerificationNotificationController.php:16
  * @route '/email/verification-notification'
  */
-store.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options);
 };
 
@@ -34,13 +28,7 @@ store.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/Auth/EmailVerificationNotificationController.php:16
  * @route '/email/verification-notification'
  */
-store.post = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 });

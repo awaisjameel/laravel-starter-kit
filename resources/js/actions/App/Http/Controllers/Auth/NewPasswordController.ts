@@ -1,4 +1,4 @@
-import { queryParams, type QueryParams } from './../../../../../wayfinder';
+import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::create
  * @see app/Http/Controllers/Auth/NewPasswordController.php:24
@@ -6,11 +6,8 @@ import { queryParams, type QueryParams } from './../../../../../wayfinder';
  */
 export const create = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'get'> => ({
     url: create.url(args, options),
     method: 'get',
 });
@@ -18,17 +15,14 @@ export const create = (
 create.definition = {
     methods: ['get', 'head'],
     url: '/reset-password/{token}',
-};
+} satisfies RouteDefinition<['get', 'head']>;
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::create
  * @see app/Http/Controllers/Auth/NewPasswordController.php:24
  * @route '/reset-password/{token}'
  */
-create.url = (
-    args: { token: string | number } | [token: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-) => {
+create.url = (args: { token: string | number } | [token: string | number] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { token: args };
     }
@@ -38,6 +32,8 @@ create.url = (
             token: args[0],
         };
     }
+
+    args = applyUrlDefaults(args);
 
     const parsedArgs = {
         token: args.token,
@@ -53,11 +49,8 @@ create.url = (
  */
 create.get = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'get';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'get'> => ({
     url: create.url(args, options),
     method: 'get',
 });
@@ -68,11 +61,8 @@ create.get = (
  */
 create.head = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: { query?: QueryParams; mergeQuery?: QueryParams },
-): {
-    url: string;
-    method: 'head';
-} => ({
+    options?: RouteQueryOptions,
+): RouteDefinition<'head'> => ({
     url: create.url(args, options),
     method: 'head',
 });
@@ -82,13 +72,7 @@ create.head = (
  * @see app/Http/Controllers/Auth/NewPasswordController.php:37
  * @route '/reset-password'
  */
-export const store = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 });
@@ -96,14 +80,14 @@ export const store = (options?: {
 store.definition = {
     methods: ['post'],
     url: '/reset-password',
-};
+} satisfies RouteDefinition<['post']>;
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
  * @see app/Http/Controllers/Auth/NewPasswordController.php:37
  * @route '/reset-password'
  */
-store.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
+store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options);
 };
 
@@ -112,13 +96,7 @@ store.url = (options?: { query?: QueryParams; mergeQuery?: QueryParams }) => {
  * @see app/Http/Controllers/Auth/NewPasswordController.php:37
  * @route '/reset-password'
  */
-store.post = (options?: {
-    query?: QueryParams;
-    mergeQuery?: QueryParams;
-}): {
-    url: string;
-    method: 'post';
-} => ({
+store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 });
