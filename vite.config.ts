@@ -44,7 +44,6 @@ export default defineConfig({
             ],
             dirs: [
                 'resources/js/composables/**',
-                'resources/js/components/**',
                 'resources/js/stores/**',
                 'resources/js/lib/**',
                 'resources/js/utils/**',
