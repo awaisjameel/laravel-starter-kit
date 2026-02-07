@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Users;
 
-use Illuminate\Validation\Rules\Password;
-use Illuminate\Contracts\Validation\ValidationRule;
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rules\Password;
 
 final class UserUpdateRequest extends FormRequest
 {

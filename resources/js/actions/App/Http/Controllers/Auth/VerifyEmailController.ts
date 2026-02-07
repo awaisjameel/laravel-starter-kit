@@ -1,7 +1,7 @@
 import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder'
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 const VerifyEmailController = (
@@ -19,7 +19,7 @@ VerifyEmailController.definition = {
 
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 VerifyEmailController.url = (
@@ -50,7 +50,7 @@ VerifyEmailController.url = (
 
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 VerifyEmailController.get = (
@@ -62,7 +62,7 @@ VerifyEmailController.get = (
 })
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 VerifyEmailController.head = (

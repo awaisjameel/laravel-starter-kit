@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use Spatie\LaravelTypeScriptTransformer\Transformers\DtoTransformer;
+use Spatie\LaravelTypeScriptTransformer\Transformers\SpatieStateTransformer;
 use Spatie\TypeScriptTransformer\Collectors\DefaultCollector;
 use Spatie\TypeScriptTransformer\Collectors\EnumCollector;
-use Spatie\LaravelTypeScriptTransformer\Transformers\SpatieStateTransformer;
-use Spatie\TypeScriptTransformer\Transformers\EnumTransformer;
-use Spatie\LaravelTypeScriptTransformer\Transformers\DtoTransformer;
-use Carbon\CarbonInterface;
-use Carbon\CarbonImmutable;
-use Carbon\Carbon;
-use Spatie\TypeScriptTransformer\Writers\ModuleWriter;
 use Spatie\TypeScriptTransformer\Formatters\PrettierFormatter;
+use Spatie\TypeScriptTransformer\Transformers\EnumTransformer;
+use Spatie\TypeScriptTransformer\Writers\ModuleWriter;
 
 return [
     /*

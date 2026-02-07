@@ -44,7 +44,7 @@ notice.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 export const verify = (
@@ -62,7 +62,7 @@ verify.definition = {
 
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 verify.url = (args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number], options?: RouteQueryOptions) => {
@@ -88,7 +88,7 @@ verify.url = (args: { id: string | number; hash: string | number } | [id: string
 
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 verify.get = (
@@ -100,7 +100,7 @@ verify.get = (
 })
 /**
  * @see \App\Http\Controllers\Auth\VerifyEmailController::__invoke
- * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:18
  * @route '/verify-email/{id}/{hash}'
  */
 verify.head = (

@@ -75,7 +75,7 @@ final class UserManagementTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         $target = User::factory()->create(['role' => UserRole::User]);
 
-        $testResponse = $this->actingAs($admin)->put('/users/' . $target->id, [
+        $testResponse = $this->actingAs($admin)->put('/users/'.$target->id, [
             'name' => 'Updated Name',
             'email' => 'updated@example.com',
             'password' => '',
@@ -97,7 +97,7 @@ final class UserManagementTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         $target = User::factory()->create(['role' => UserRole::User]);
 
-        $testResponse = $this->actingAs($admin)->delete('/users/' . $target->id);
+        $testResponse = $this->actingAs($admin)->delete('/users/'.$target->id);
 
         $testResponse->assertRedirect('/users');
         $this->assertDatabaseMissing('users', ['id' => $target->id]);
@@ -107,7 +107,7 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->delete('/users/' . $admin->id);
+        $testResponse = $this->actingAs($admin)->delete('/users/'.$admin->id);
 
         $testResponse->assertForbidden();
         $this->assertDatabaseHas('users', ['id' => $admin->id]);

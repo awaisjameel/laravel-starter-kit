@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Users;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use App\Models\User;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class UserDestroyRequest extends FormRequest
