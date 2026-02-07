@@ -13,6 +13,8 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
 - Node requirements: Node `>=24.1.0`, npm `>=11.2.1`, npm only (enforced by `ensure-node-env.js`)
 
 ## Non-Negotiable Rules
+- Before making any code changes, fully understand all requirements and the current implementation across related files, flows, and dependencies.
+- Write or modify code only after that understanding is clear, then implement in the most efficient, maintainable, and logically structured way.
 - Match existing conventions before introducing new patterns.
 - Reuse existing components, composables, DTOs, enums, and helpers before creating new ones.
 - Do not change dependencies, core folder structure, or app architecture without explicit approval.
