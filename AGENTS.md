@@ -156,6 +156,15 @@ After schema/DTO/enum/route changes:
 - Avoid unnecessary watchers/computeds when derived values are static.
 - Keep payloads minimal and typed.
 
+### Refactoring Automation (Rector)
+
+- Central Rector config is `rector.php`.
+- Rector runs over `app`, `bootstrap`, `config`, `database`, `public`, `routes`, and `tests`.
+- Enabled Rector sets include dead code, code quality, coding style, type declarations/docblocks, privatization, naming, `instanceof`, early return, and PHP-version upgrades.
+- Import names cleanup is enabled with unused import removal.
+- Cache path is project-local at `storage/framework/cache/rector`.
+- Keep `AddOverrideAttributeToOverriddenMethodsRector` skipped to avoid unsafe override attribute churn in framework-integrated classes.
+
 ## Validation and Quality Gate
 
 Before finalizing code changes:
