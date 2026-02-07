@@ -1,428 +1,170 @@
-<laravel-boost-guidelines>
-=== foundation rules ===
+# AGENTS.md
 
-# Laravel Boost Guidelines
+## Intent
+This file defines mandatory rules for coding agents working in this repository.
+The goal is clean, consistent, end-to-end type-safe, secure, and performant code.
 
-These rules are mandatory. Follow them exactly. If a rule conflicts with existing project conventions, ask before proceeding. Dev GUIDE: [READEME](./READEME.md)
+## Stack Snapshot (Current Project)
+- Backend: PHP `^8.4`, Laravel `^12.50`, Inertia Laravel `^2.0`, Sanctum `^4.3`, Wayfinder `^0.1`, Ziggy `^2.6`
+- Typed backend contracts: Spatie Laravel Data `^4.19`, Spatie TypeScript Transformer `^2.5`
+- Frontend: Vue `^3.5`, Inertia Vue `^2.3`, Tailwind CSS `^4.1`, Pinia `^3`
+- UI primitives: shadcn-vue style components on Reka UI
+- Tooling: Vite `^7`, TypeScript `^5.9` (strict), ESLint `^9`, Prettier `^3`, Pint `^1`, Rector `^2`, PHPUnit `^12`
+- Node requirements: Node `>=24.1.0`, npm `>=11.2.1`, npm only (enforced by `ensure-node-env.js`)
 
-## Foundational Context
+## Non-Negotiable Rules
+- Match existing conventions before introducing new patterns.
+- Reuse existing components, composables, DTOs, enums, and helpers before creating new ones.
+- Do not change dependencies, core folder structure, or app architecture without explicit approval.
+- Do not add new documentation files unless explicitly requested.
+- No dead code, commented-out code, placeholder TODOs, or magic strings where typed/shared constants exist.
+- For behavior changes, update or add tests that cover happy path, failure path, and relevant edge cases.
+- Every new or changed implementation must follow the same project patterns and best practices: clean, reusable, type-safe code with the most logical structure.
 
-This application is a Laravel application. You are an expert in the exact packages and versions below and must follow their version-specific best practices.
+## Documentation Accountability Policy
+- Any new entity, feature, service, integration, or major update to existing behavior must be documented in `AGENTS.md`.
+- `AGENTS.md` updates must be made in the same change set as the code change.
+- Documentation must be specific enough for accountability and long-term maintenance.
+- At minimum, document: purpose, impacted routes/entry points, data contracts (DTO/enums/types), validation/authorization rules, background processing, and test expectations.
+- A change is not complete until `AGENTS.md` is updated when applicable.
 
-- php - 8.4.16
-- inertiajs/inertia-laravel (INERTIA) - v2
-- laravel/framework (LARAVEL) - v12
-- laravel/prompts (PROMPTS) - v0
-- laravel/sanctum (SANCTUM) - v4
-- laravel/wayfinder (WAYFINDER) - v0
-- tightenco/ziggy (ZIGGY) - v2
-- laravel/mcp (MCP) - v0
-- laravel/pint (PINT) - v1
-- laravel/sail (SAIL) - v1
-- phpunit/phpunit (PHPUNIT) - v12
-- rector/rector (RECTOR) - v2
-- @inertiajs/vue3 (INERTIA) - v2
-- tailwindcss (TAILWINDCSS) - v4
-- vue (VUE) - v3
-- @laravel/vite-plugin-wayfinder (WAYFINDER) - v0
-- eslint (ESLINT) - v9
-- prettier (PRETTIER) - v3
+## Architecture Map
 
-## Non-Negotiable Conventions
+### Backend
+- Application bootstrap and middleware registration: `bootstrap/app.php`
+- Providers: `bootstrap/providers.php`
+- Route files:
+  - `routes/web.php`
+  - `routes/auth.php`
+  - `routes/settings.php`
+  - `routes/api.php`
+  - `routes/console.php`
+- Domain model:
+  - `app/Models/User.php` with enum cast (`UserRole`) and hashed password cast
+  - `app/Enums/UserRole.php` (`Admin`, `User`)
+  - `app/Data/UserData.php` as DTO exported to TypeScript
+- Authorization:
+  - Gate `manage-users` in `app/Providers/AuthServiceProvider.php`
+- Middleware:
+  - `HandleAppearance` shares appearance from cookie
+  - `HandleInertiaRequests` shares `name`, `quote`, `auth.user`, `ziggy`, `sidebarOpen`
+  - Cookie encryption excludes `appearance` and `sidebar_state`
+- Validation:
+  - Form Requests used for user CRUD and login
+  - Some auth/settings controllers still use inline `$request->validate()` (legacy starter defaults)
+- Persistence:
+  - Users, password reset tokens, sessions, personal access tokens
+  - Cache, job, batch, failed job tables
+  - Default seeded users controlled by `APP_SEED_USERS`
 
-- Follow existing code conventions exactly. Always review sibling files before editing or creating a file.
-- Use descriptive, intention-revealing names. Example: `isRegisteredForDiscounts`, not `discount()`.
-- Prefer reuse: find and use existing components, helpers, and types before writing new ones.
-- Do not change dependencies, base folders, or the application structure without explicit approval.
-- Do not create documentation unless explicitly requested.
-- Be concise in explanations. Focus only on non-obvious decisions and trade-offs.
+### Frontend
+- Entry points:
+  - `resources/js/app.ts` (CSR)
+  - `resources/js/ssr.ts` (SSR)
+- Inertia pages: `resources/js/pages` (lowercase directory is intentional)
+- Layouts:
+  - `AppLayout` (header shell)
+  - `AppFunnelLayout` (sidebar shell)
+  - `AuthLayout` -> `AuthSimpleLayout`
+  - `settings/Layout.vue`
+- Navigation and shell components:
+  - `AppHeader`, `AppSidebar`, `AppShell`, `AppContent`, `NavMain`, `NavUser`, `UserMenuContent`
+- Appearance/theming:
+  - `useAppearance.ts` stores preference in `localStorage` and `appearance` cookie
+  - Dark mode is class-based (`.dark`), initialized early in `resources/views/app.blade.php`
+- UI component system:
+  - App components: `resources/js/components`
+  - UI primitives: `resources/js/components/ui`
+  - Auto-registration enabled with namespaces (`directoryAsNamespace: true`)
+- Type declarations:
+  - Shared page props and app types in `resources/js/types`
 
-## Quality Gate (Strict)
+## Existing Features (What Agents Must Know)
+- Auth flows: login, logout, forgot/reset password, confirm password, email verification.
+- Settings flows: profile update, password update, appearance toggle, account deletion.
+- Dashboard page behind `auth` + `verified` middleware.
+- User management (`/users`) for admins only:
+  - Server-side pagination
+  - Create, update, delete via dialogs
+  - Role managed via `UserRole` enum
+- API endpoint `/api/user` protected by Sanctum.
 
-- Code must be type-safe, reusable, and maintainable by default. Avoid implicit types, magic strings, and ambiguous APIs.
-- Validate before marking complete: ensure static analysis, formatting, and tests (if applicable) are clean and relevant.
-- Never leave dead code, TODOs, or commented-out logic.
+## Generated Files and Codegen
+Treat these as generated artifacts and do not hand-edit unless explicitly requested:
+- `resources/js/routes/**` (Wayfinder named route helpers)
+- `resources/js/actions/**` (Wayfinder controller action helpers)
+- `resources/js/wayfinder/index.ts`
+- `resources/js/types/app-data.ts` (Spatie transformer output)
+- `resources/js/types/auto-imports.d.ts`
+- `resources/js/types/components.d.ts`
 
-## Verification Scripts
+After schema/DTO/enum/route changes:
+1. `composer generate`
+2. If needed, run `php artisan wayfinder:generate --no-interaction`
 
-- Do not create verification scripts or tinker when tests already cover the behavior. Prefer unit/feature tests.
+## Implementation Standards
 
-## Frontend Bundling
-
-- If UI changes are not visible, ask the user to run `npm run build`, `npm run dev`, or `composer run dev`.
-
-=== boost rules ===
-
-## Laravel Boost
-
-- Laravel Boost is an MCP server for this app. Use its tools when relevant. If an MCP tool fails, use an equivalent shell command.
-
-## Artisan
-
-- Use the `list-artisan-commands` tool before running `php artisan` to confirm available options and flags.
-- Always pass `--no-interaction` to Artisan commands.
-
-## URLs
-
-- Use `get-absolute-url` when sharing project URLs.
-
-## Tinker / Debugging
-
-- Use `tinker` for PHP-level debugging or Eloquent queries.
-- Use `database-query` when you only need to read from the database.
-
-## Browser Logs
-
-- Use `browser-logs` to inspect recent browser errors. Ignore stale logs.
-
-## Searching Documentation (Mandatory)
-
-- Use `search-docs` before making Laravel-ecosystem changes.
-- Use multiple broad queries first. Do not include package names in queries.
-- If unsure, search docs rather than guessing.
-
-=== php rules ===
-
-## PHP
-
-- Always use curly braces for control structures.
-- Follow modern PHP 8.4 best practices.
-
-### Constructors
-
-- Use constructor property promotion.
-- Do not define an empty constructor.
-
-`<code-snippet lang="php">`
-public function \_\_construct(public GitHub $github)
-{
-}
-`</code-snippet>`
-
-### Type Declarations (Strict)
-
-- All functions and methods must declare parameter and return types.
-- Use nullable types and union types explicitly where needed.
-
-`<code-snippet name="Explicit Return Types and Method Params" lang="php">`
-protected function isAccessible(User $user, ?string $path = null): bool
-{
-// ...
-}
-`</code-snippet>`
-
-## Comments
-
-- Avoid inline comments. Use PHPDoc blocks only when complexity or static analysis requires it.
-
-## PHPDoc Blocks
-
-- Use PHPDoc for array shapes and complex generics when native types are insufficient.
-
-## Enums
-
-- Enum case names should be TitleCase.
-
-=== tests rules ===
-
-## Test Enforcement
-
-- Every change must be validated before completion.
-- Do not add tests unless explicitly requested.
-
-=== inertia-laravel/core rules ===
-
-## Inertia Core
-
-- Place Inertia pages in `resources/js/Pages` unless Vite config dictates otherwise.
-- Use `Inertia::render()` for server-side routing.
-- Use `search-docs` for Inertia-specific guidance.
-
-`<code-snippet lang="php" name="Inertia::render Example">`
-// routes/web.php example
-Route::get('/users', function () {
-return Inertia::render('Users/Index', [
-'users' => User::all(),
-]);
-});
-`</code-snippet>`
-
-=== inertia-laravel/v2 rules ===
-
-## Inertia v2
-
-- Use v2 features where they improve UX or performance; confirm usage via `search-docs` first.
-
-### Inertia v2 New Features
-
-- Polling
-- Prefetching
-- Deferred props
-- Infinite scrolling via merging props and `WhenVisible`
-- Lazy loading on scroll
-
-### Deferred Props & Empty States
-
-- When using deferred props, provide skeletons or loading states.
-
-### Inertia Form Guidance
-
-- Prefer `<Form>` for common use cases; use `useForm` when additional control is needed.
-- Use `search-docs` for `<Form>` and `useForm` options.
-
-=== laravel/core rules ===
-
-## Do Things the Laravel Way
-
-- Use `php artisan make:` commands to generate framework files.
-- For generic PHP classes, use `php artisan make:class`.
-
-### Database
-
-- Use Eloquent relationships with proper return types.
-- Prefer `Model::query()` and avoid `DB::` unless absolutely necessary.
+### PHP / Laravel
+- All PHP files must use `declare(strict_types=1);`.
+- Use explicit parameter and return types on all methods/functions.
+- Prefer `final class` for concrete classes unless extension is required.
+- Use Form Request classes for new validation logic.
+- Use Eloquent (`Model::query()`) and relationships before dropping to query builder.
 - Prevent N+1 queries with eager loading.
-- Use the query builder only for complex queries that Eloquent cannot express cleanly.
-
-### Model Creation
-
-- When creating models, also create factories and seeders if they are not present.
-- Ask before adding additional files beyond the model, unless conventions already require them.
-
-### APIs & Eloquent Resources
-
-- Default to Eloquent API Resources and API versioning unless the project conventions differ.
-
-### Controllers & Validation
-
-- Always use Form Request classes for validation, including custom messages.
-- Match existing convention for array vs. string rule syntax.
-
-### Queues
-
-- Use queued jobs with `ShouldQueue` for time-consuming work.
-
-### Authentication & Authorization
-
-- Use built-in authentication and authorization features (gates, policies, Sanctum).
-
-### URL Generation
-
-- Use named routes and `route()` for URL generation.
-
-### Configuration
-
-- Never call `env()` outside config files. Use `config()`.
-
-### Testing
-
-- Use model factories in tests.
-- Follow existing conventions for `fake()` vs `$this->faker`.
-- Use `php artisan make:test --phpunit` for test creation when needed.
-
-### Vite Error
-
-- For Vite manifest errors, run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
-
-=== laravel/v12 rules ===
-
-## Laravel 12 Structure
-
-- No middleware files in `app/Http/Middleware/` (register in `bootstrap/app.php`).
-- Use `bootstrap/app.php` for middleware, exceptions, and routing.
-- Use `bootstrap/providers.php` for application service providers.
-- No `app/Console/Kernel.php`.
-- Commands in `app/Console/Commands/` auto-register.
-
-### Database
-
-- When modifying a column, include all existing attributes to avoid losing them.
-- Laravel 11+ supports limiting eager loads with `$query->latest()->limit(10);`.
-
-### Models
-
-- Prefer `casts()` method over `$casts` when consistent with existing models.
-
-=== wayfinder/core rules ===
-
-## Laravel Wayfinder
-
-Wayfinder generates TypeScript actions and types for Laravel routes.
-
-### Development Guidelines
-
-- Understand requirements and current implementation before changing code.
-- Check sibling files for conventions.
-- Always use `search-docs` for Wayfinder usage.
-- Prefer named imports for tree-shaking.
-- Avoid default controller imports.
-- Run `php artisan wayfinder:generate` after route changes if the Vite plugin is not installed.
-
-### Feature Overview
-
-- Form Support: `store.form()` for `<Form>` attributes.
-- HTTP Methods: `.get()`, `.post()`, `.patch()`, `.put()`, `.delete()`.
-- Invokable Controllers: import and call as functions.
-- Named Routes: import from `@/routes/`.
-- Parameter Binding: accepts route keys via object or scalar.
-- Query Merging: `mergeQuery` supports removal via `null`.
-- Query Parameters: pass `{ query: {...} }`.
-- Route Objects: return `{ url, method }`.
-- URL Extraction: use `.url()`.
-
-`<code-snippet name="Wayfinder Basic Usage" lang="typescript">`
-// Import controller methods (tree-shakable)
-import { show, store, update } from '@/actions/App/Http/Controllers/PostController';
-
-show(1); // { url: "/posts/1", method: "get" }
-show.url(1); // "/posts/1"
-show.get(1); // { url: "/posts/1", method: "get" }
-show.head(1); // { url: "/posts/1", method: "head" }
-
-import { show as postShow } from '@/routes/post';
-postShow(1); // { url: "/posts/1", method: "get" }
-`</code-snippet>`
-
-### Wayfinder + Inertia
-
-Use Wayfinder with Inertia `<Form>` for action and method generation.
-
-`<code-snippet name="Wayfinder Form Component (Vue)" lang="vue">`
-
-<Form v-bind="store.form()">
-    <input name="title" />
-</Form>
-`</code-snippet>`
-
-=== pint/core rules ===
-
-## Laravel Pint Code Formatter
-
-- Run `composer generate-and-cleanup && npm run cleanup` before finalizing changes.
-- Ensure those commands report no errors or warnings.
-
-=== phpunit/core rules ===
-
-## PHPUnit Core
-
-- All tests are PHPUnit classes.
-- Convert any Pest tests to PHPUnit if encountered.
-- When updating a test, run only that test.
-- Ask the user if they want the full test suite after relevant tests pass.
-- Tests must cover happy paths, failure paths, and edge cases.
-- Never delete tests without approval.
-
-### Running Tests
-
-- Run the minimal relevant set of tests.
-- `php artisan test` (all tests).
-- `php artisan test tests/Feature/ExampleTest.php` (single file).
-- `php artisan test --filter=testName` (single test).
-
-=== inertia-vue/core rules ===
-
-## Inertia + Vue
-
-- Vue components must have a single root element.
-- Use `<Link>` or `router.visit()` for navigation.
-
-`<code-snippet name="Inertia Client Navigation" lang="vue">`
-import { Link } from '@inertiajs/vue3';
-
-<Link href="/">Home</Link>
-`</code-snippet>`
-
-=== inertia-vue/v2/forms rules ===
-
-## Inertia + Vue Forms
-
-`<code-snippet name="<Form> Component Example" lang="vue">`
-
-<Form
-    action="/users"
-    method="post"
-    #default="{ errors, hasErrors, processing, progress, wasSuccessful, recentlySuccessful, setError, clearErrors, resetAndClearErrors, defaults, isDirty, reset, submit }"
->
-    <input type="text" name="name" />
-
-    <div v-if="errors.name">
-        {{ errors.name }}
-    </div>
-
-    <button type="submit" :disabled="processing">
-        {{ processing ? 'Creating...' : 'Create User' }}
-    </button>
-
-    <div v-if="wasSuccessful">User created successfully!</div>
-
-</Form>
-`</code-snippet>`
-
-=== tailwindcss/core rules ===
-
-## Tailwind Core
-
-- Use Tailwind utility classes; match existing conventions.
-- Extract repeated patterns into components where appropriate.
-- Be deliberate about class placement, order, and redundancy.
-
-### Spacing
-
-- For lists, use gap utilities instead of margins.
-
-`<code-snippet name="Valid Flex Gap Spacing Example" lang="html">`
-
-<div class="flex gap-8">
-    <div>Superior</div>
-    <div>Michigan</div>
-    <div>Erie</div>
-</div>
-`</code-snippet>`
-
-### Dark Mode
-
-- If the app supports dark mode, new UI must support it using `dark:` utilities.
-
-=== tailwindcss/v4 rules ===
-
-## Tailwind 4
-
-- Use Tailwind v4 only. Do not use deprecated utilities.
-- `corePlugins` is not supported in v4.
-- Tailwind v4 is CSS-first using `@theme`.
-- Import Tailwind with `@import "tailwindcss";`.
-
-`<code-snippet name="Extending Theme in CSS" lang="css">`
-@theme {
---color-brand: oklch(0.72 0.11 178);
-}
-`</code-snippet>`
-
-`<code-snippet name="Tailwind v4 Import Tailwind Diff" lang="diff">`
-
-- @tailwind base;
-- @tailwind components;
-- @tailwind utilities;
-
-* @import "tailwindcss";
-  `</code-snippet>`
-
-### Replaced Utilities
-
-- Do not use deprecated utilities. Use replacements below.
-
-| Deprecated             | Replacement          |
-| ---------------------- | -------------------- |
-| bg-opacity-\_          | bg-black/\_          |
-| text-opacity-\_        | text-black/\_        |
-| border-opacity-\_      | border-black/\_      |
-| divide-opacity-\_      | divide-black/\_      |
-| ring-opacity-\_        | ring-black/\_        |
-| placeholder-opacity-\_ | placeholder-black/\_ |
-| flex-shrink-\_         | shrink-\_            |
-| flex-grow-\_           | grow-\_              |
-| overflow-ellipsis      | text-ellipsis        |
-| decoration-slice       | box-decoration-slice |
-| decoration-clone       | box-decoration-clone |
-
-</laravel-boost-guidelines>
+- Use named routes and route helpers, not hard-coded URLs.
+- Keep authorization on server side (gates/policies/middleware), not only in Vue.
+- Never use `env()` outside config files.
+
+### Vue / TypeScript / JavaScript
+- Default to `<script setup lang="ts">` for new Vue components.
+- Prefer TypeScript files over JavaScript for new frontend logic.
+- Keep strict typings end-to-end from backend DTO/enum -> frontend props/forms.
+- Use Inertia primitives (`useForm`, `router`, `<Link>`) for navigation and form submission.
+- Prefer Wayfinder route/action helpers over hard-coded endpoints.
+- Keep pages in `resources/js/pages` and map server renders exactly.
+- Reuse `resources/js/components/ui` primitives before adding new custom base components.
+- All new UI must support both light and dark themes.
+
+### Styling and UX
+- Tailwind v4 only (`@import 'tailwindcss';` already configured).
+- Reuse existing tokens and utilities in `resources/css/app.css`.
+- Keep class lists intentional and avoid redundant utility noise.
+- Use `gap-*` for spacing in lists/grouped layouts.
+
+### Performance
+- Paginate large datasets (follow `/users` pattern).
+- Avoid unnecessary client state duplication of server props.
+- Avoid unnecessary watchers/computeds when derived values are static.
+- Keep payloads minimal and typed.
+
+## Validation and Quality Gate
+Before finalizing code changes:
+1. `composer generate-and-cleanup`
+2. `npm run cleanup`
+3. `npm run typecheck`
+4. Run targeted PHPUnit tests for changed behavior
+
+If the change affects many areas, run full tests:
+- `php artisan test --no-interaction`
+
+## Laravel Boost MCP Workflow
+When Laravel Boost MCP tools are available:
+- Use `search-docs` before Laravel/Inertia/Wayfinder/Sanctum/Tailwind ecosystem changes.
+- Use `list-artisan-commands` before running Artisan commands.
+- Always run Artisan with `--no-interaction`.
+- Use MCP equivalents (`tinker`, `database-query`, `browser-logs`) when applicable.
+If MCP tools fail, use equivalent shell commands.
+
+## Known Caveats (Current Starter Kit State)
+- Registration controller and page exist, but registration routes are commented out in `routes/auth.php`.
+- `Route::resource('users', ...)` includes `show` and `edit`, but `UserController` does not implement these methods.
+  - Do not call these routes until controller methods and route definitions are aligned.
+- `resources/stores/useHttp.js` exists outside `resources/js` and is not part of the main typed frontend pattern.
+  - Prefer Inertia + Wayfinder unless you are explicitly implementing API-client logic.
+- Marketing copy may mention tools not installed (for example PHPStan). Validate against `composer.json` before assuming tooling exists.
+
+## CI Expectations
+GitHub Actions currently run:
+- Lint workflow: Pint, frontend format, frontend lint
+- Test workflow: build assets and run PHPUnit
+Agents should keep local changes compatible with those checks.
