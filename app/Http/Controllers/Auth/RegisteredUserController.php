@@ -24,9 +24,9 @@ final class RegisteredUserController extends Controller
         return Inertia::render('auth/Register');
     }
 
-    public function store(RegisterUserRequest $request): RedirectResponse
+    public function store(RegisterUserRequest $registerUserRequest): RedirectResponse
     {
-        $validated = $request->validated();
+        $validated = $registerUserRequest->validated();
 
         $user = User::create([
             'name' => $validated['name'],

@@ -18,53 +18,53 @@ use Inertia\Response;
 
 final class UserController extends Controller
 {
-    public function index(UserIndexRequest $request): Response
+    public function index(UserIndexRequest $userIndexRequest): Response
     {
-        $users = User::query()
+        $lengthAwarePaginator = User::query()
             ->latest()
             ->paginate(
-                perPage: $request->perPage(),
-                page: $request->pageNumber(),
+                perPage: $userIndexRequest->perPage(),
+                page: $userIndexRequest->pageNumber(),
             )
             ->withQueryString()
             ->through(fn (User $user): UserData => $user->toData());
 
         return Inertia::render('users/Index', [
-            'users' => $users,
+            'users' => $lengthAwarePaginator,
         ]);
     }
 
-    public function store(UserCreateRequest $request): RedirectResponse
+    public function store(UserCreateRequest $userCreateRequest): RedirectResponse
     {
-        $actor = $request->user();
+        $actor = $userCreateRequest->user();
         if (! $actor instanceof User) {
             abort(403);
         }
 
-        $userData = UserData::from($request->validated());
+        $userData = UserData::from($userCreateRequest->validated());
         $createdUser = User::create($userData->toArray());
 
         AuditLogger::logUserManagement(
             action: 'create',
             actor: $actor,
             target: $createdUser,
-            request: $request,
+            request: $userCreateRequest,
         );
 
         return redirect()->route('users.index')
             ->with('message', 'User created successfully');
     }
 
-    public function update(UserUpdateRequest $request, User $user): RedirectResponse
+    public function update(UserUpdateRequest $userUpdateRequest, User $user): RedirectResponse
     {
-        $actor = $request->user();
+        $actor = $userUpdateRequest->user();
         if (! $actor instanceof User) {
             abort(403);
         }
 
         $before = $user->only(['name', 'email', 'role']);
 
-        $validated = $request->validated();
+        $validated = $userUpdateRequest->validated();
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -99,7 +99,7 @@ final class UserController extends Controller
             action: 'update',
             actor: $actor,
             target: $user,
-            request: $request,
+            request: $userUpdateRequest,
             changes: $changes,
         );
 
@@ -107,9 +107,9 @@ final class UserController extends Controller
             ->with('message', 'User updated successfully');
     }
 
-    public function destroy(UserDestroyRequest $request, User $user): RedirectResponse
+    public function destroy(UserDestroyRequest $userDestroyRequest, User $user): RedirectResponse
     {
-        $actor = $request->user();
+        $actor = $userDestroyRequest->user();
         if (! $actor instanceof User) {
             abort(403);
         }
@@ -118,7 +118,7 @@ final class UserController extends Controller
             action: 'delete',
             actor: $actor,
             target: $user,
-            request: $request,
+            request: $userDestroyRequest,
         );
 
         $user->delete();

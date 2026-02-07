@@ -13,11 +13,11 @@ final class PasswordUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_password_can_be_updated()
+    public function test_password_can_be_updated(): void
     {
         $user = User::factory()->create();
 
-        $response = $this
+        $testResponse = $this
             ->actingAs($user)
             ->from('/settings/password')
             ->put('/settings/password', [
@@ -26,18 +26,18 @@ final class PasswordUpdateTest extends TestCase
                 'password_confirmation' => 'new-password',
             ]);
 
-        $response
+        $testResponse
             ->assertSessionHasNoErrors()
             ->assertRedirect('/settings/password');
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
 
-    public function test_correct_password_must_be_provided_to_update_password()
+    public function test_correct_password_must_be_provided_to_update_password(): void
     {
         $user = User::factory()->create();
 
-        $response = $this
+        $testResponse = $this
             ->actingAs($user)
             ->from('/settings/password')
             ->put('/settings/password', [
@@ -46,7 +46,7 @@ final class PasswordUpdateTest extends TestCase
                 'password_confirmation' => 'new-password',
             ]);
 
-        $response
+        $testResponse
             ->assertSessionHasErrors('current_password')
             ->assertRedirect('/settings/password');
     }

@@ -34,14 +34,14 @@ final class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $profileUpdateRequest): RedirectResponse
     {
-        $user = $request->user();
+        $user = $profileUpdateRequest->user();
         if (! $user instanceof User) {
             abort(403);
         }
 
-        $user->fill($request->validated());
+        $user->fill($profileUpdateRequest->validated());
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -55,9 +55,9 @@ final class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
-    public function destroy(ProfileDestroyRequest $request): RedirectResponse
+    public function destroy(ProfileDestroyRequest $profileDestroyRequest): RedirectResponse
     {
-        $user = $request->user();
+        $user = $profileDestroyRequest->user();
         if (! $user instanceof User) {
             abort(403);
         }
@@ -66,8 +66,8 @@ final class ProfileController extends Controller
 
         $user->delete();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $profileDestroyRequest->session()->invalidate();
+        $profileDestroyRequest->session()->regenerateToken();
 
         return redirect('/');
     }

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Users;
 
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Contracts\Validation\ValidationRule;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rules\Enum;
 
 final class UserCreateRequest extends FormRequest
@@ -18,14 +19,14 @@ final class UserCreateRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', Rules\Password::defaults()],
+            'password' => ['required', 'string', Password::defaults()],
             'role' => ['required', 'string', new Enum(UserRole::class)],
         ];
     }

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Users;
 
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Contracts\Validation\ValidationRule;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rules\Enum;
 
 final class UserUpdateRequest extends FormRequest
@@ -21,7 +22,7 @@ final class UserUpdateRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -37,7 +38,7 @@ final class UserUpdateRequest extends FormRequest
                 Rule::unique(User::class, 'email')->ignore($user instanceof User ? $user->id : null),
             ],
             'role' => ['required', 'string', new Enum(UserRole::class)],
-            'password' => ['nullable', 'string', Rules\Password::defaults()],
+            'password' => ['nullable', 'string', Password::defaults()],
         ];
     }
 }

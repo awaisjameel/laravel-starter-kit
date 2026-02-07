@@ -34,20 +34,20 @@ final class NewPasswordController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(ResetPasswordRequest $request): RedirectResponse
+    public function store(ResetPasswordRequest $resetPasswordRequest): RedirectResponse
     {
-        $validated = $request->validated();
+        $validated = $resetPasswordRequest->validated();
 
         $status = Password::reset(
             [
                 'email' => $validated['email'],
                 'password' => $validated['password'],
-                'password_confirmation' => $request->input('password_confirmation'),
+                'password_confirmation' => $resetPasswordRequest->input('password_confirmation'),
                 'token' => $validated['token'],
             ],
-            function ($user) use ($request): void {
+            function ($user) use ($resetPasswordRequest): void {
                 $user->forceFill([
-                    'password' => Hash::make($request->validated('password')),
+                    'password' => Hash::make($resetPasswordRequest->validated('password')),
                     'remember_token' => Str::random(60),
                 ])->save();
 

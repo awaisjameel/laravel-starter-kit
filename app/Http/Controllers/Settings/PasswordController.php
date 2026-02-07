@@ -24,14 +24,14 @@ final class PasswordController extends Controller
     /**
      * Update the user's password.
      */
-    public function update(PasswordUpdateRequest $request): RedirectResponse
+    public function update(PasswordUpdateRequest $passwordUpdateRequest): RedirectResponse
     {
-        $user = $request->user();
+        $user = $passwordUpdateRequest->user();
         if (! $user instanceof User) {
             abort(403);
         }
 
-        $validated = $request->validated();
+        $validated = $passwordUpdateRequest->validated();
 
         $user->update([
             'password' => $validated['password'],

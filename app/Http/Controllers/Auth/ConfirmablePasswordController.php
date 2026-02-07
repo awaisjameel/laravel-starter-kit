@@ -26,14 +26,14 @@ final class ConfirmablePasswordController extends Controller
     /**
      * Confirm the user's password.
      */
-    public function store(ConfirmPasswordRequest $request): RedirectResponse
+    public function store(ConfirmPasswordRequest $confirmPasswordRequest): RedirectResponse
     {
-        $user = $request->user();
+        $user = $confirmPasswordRequest->user();
         if (! $user instanceof User) {
             abort(403);
         }
 
-        $validated = $request->validated();
+        $validated = $confirmPasswordRequest->validated();
 
         if (! Auth::guard('web')->validate([
             'email' => $user->email,
@@ -44,7 +44,7 @@ final class ConfirmablePasswordController extends Controller
             ]);
         }
 
-        $request->session()->put('auth.password_confirmed_at', time());
+        $confirmPasswordRequest->session()->put('auth.password_confirmed_at', time());
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
