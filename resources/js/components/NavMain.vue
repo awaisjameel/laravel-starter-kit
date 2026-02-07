@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { type NavItem } from '@/types';
+    import { type NavItem } from '@/types'
 
-defineProps<{
-    items: NavItem[];
-}>();
+    defineProps<{
+        items: NavItem[]
+    }>()
 
-const page = usePage();
+    const page = usePage()
 </script>
 
 <template>

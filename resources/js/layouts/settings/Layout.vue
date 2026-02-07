@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { type NavItem } from '@/types';
+    import { type NavItem } from '@/types'
 
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: '/settings/profile',
-    },
-    {
-        title: 'Password',
-        href: '/settings/password',
-    },
-    {
-        title: 'Appearance',
-        href: '/settings/appearance',
-    },
-];
+    const sidebarNavItems: NavItem[] = [
+        {
+            title: 'Profile',
+            href: '/settings/profile'
+        },
+        {
+            title: 'Password',
+            href: '/settings/password'
+        },
+        {
+            title: 'Appearance',
+            href: '/settings/appearance'
+        }
+    ]
 
-const page = usePage();
+    const page = usePage()
 
-const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : '';
+    const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : ''
 </script>
 
 <template>

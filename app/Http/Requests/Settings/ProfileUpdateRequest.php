@@ -10,6 +10,11 @@ use Illuminate\Validation\Rule;
 
 final class ProfileUpdateRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        return $this->user() !== null;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

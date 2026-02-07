@@ -1,4 +1,4 @@
-import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
+import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder'
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::create
  * @see app/Http/Controllers/Auth/NewPasswordController.php:24
@@ -6,16 +6,16 @@ import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOpt
  */
 export const create = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: RouteQueryOptions,
+    options?: RouteQueryOptions
 ): RouteDefinition<'get'> => ({
     url: create.url(args, options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 create.definition = {
     methods: ['get', 'head'],
-    url: '/reset-password/{token}',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/reset-password/{token}'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::create
@@ -24,23 +24,23 @@ create.definition = {
  */
 create.url = (args: { token: string | number } | [token: string | number] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
-        args = { token: args };
+        args = { token: args }
     }
 
     if (Array.isArray(args)) {
         args = {
-            token: args[0],
-        };
+            token: args[0]
+        }
     }
 
-    args = applyUrlDefaults(args);
+    args = applyUrlDefaults(args)
 
     const parsedArgs = {
-        token: args.token,
-    };
+        token: args.token
+    }
 
-    return create.definition.url.replace('{token}', parsedArgs.token.toString()).replace(/\/+$/, '') + queryParams(options);
-};
+    return create.definition.url.replace('{token}', parsedArgs.token.toString()).replace(/\/+$/, '') + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::create
@@ -49,11 +49,11 @@ create.url = (args: { token: string | number } | [token: string | number] | stri
  */
 create.get = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: RouteQueryOptions,
+    options?: RouteQueryOptions
 ): RouteDefinition<'get'> => ({
     url: create.url(args, options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::create
  * @see app/Http/Controllers/Auth/NewPasswordController.php:24
@@ -61,11 +61,11 @@ create.get = (
  */
 create.head = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: RouteQueryOptions,
+    options?: RouteQueryOptions
 ): RouteDefinition<'head'> => ({
     url: create.url(args, options),
-    method: 'head',
-});
+    method: 'head'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
@@ -74,13 +74,13 @@ create.head = (
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 store.definition = {
     methods: ['post'],
-    url: '/reset-password',
-} satisfies RouteDefinition<['post']>;
+    url: '/reset-password'
+} satisfies RouteDefinition<['post']>
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
@@ -88,8 +88,8 @@ store.definition = {
  * @route '/reset-password'
  */
 store.url = (options?: RouteQueryOptions) => {
-    return store.definition.url + queryParams(options);
-};
+    return store.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
@@ -98,8 +98,8 @@ store.url = (options?: RouteQueryOptions) => {
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post',
-});
-const NewPasswordController = { create, store };
+    method: 'post'
+})
+const NewPasswordController = { create, store }
 
-export default NewPasswordController;
+export default NewPasswordController

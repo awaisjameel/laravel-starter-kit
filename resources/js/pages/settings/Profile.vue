@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { type BreadcrumbItem, type User } from '@/types';
+    import { type BreadcrumbItem, type User } from '@/types'
 
-interface Props {
-    mustVerifyEmail: boolean;
-    status?: string;
-}
+    interface Props {
+        mustVerifyEmail: boolean
+        status?: string
+    }
 
-defineProps<Props>();
+    defineProps<Props>()
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Profile settings',
-        href: '/settings/profile',
-    },
-];
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Profile settings',
+            href: '/settings/profile'
+        }
+    ]
 
-const page = usePage();
-const user = page.props.auth.user as User;
+    const page = usePage()
+    const user = page.props.auth.user as User
 
-const form = useForm({
-    name: user.name,
-    email: user.email,
-});
+    const form = useForm({
+        name: user.name,
+        email: user.email
+    })
 
-const submit = () => {
-    form.patch(route('profile.update'), {
-        preserveScroll: true,
-    });
-};
+    const submit = () => {
+        form.patch(route('profile.update'), {
+            preserveScroll: true
+        })
+    }
 </script>
 
 <template>

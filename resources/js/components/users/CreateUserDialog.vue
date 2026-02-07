@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import users from '@/routes/users';
-import { UserRole } from '@/types/app-data';
+    import users from '@/routes/users'
+    import { UserRole } from '@/types/app-data'
 
-const emit = defineEmits(['update:open', 'created']);
+    const emit = defineEmits(['update:open', 'created'])
 
-defineProps<{
-    open: boolean;
-}>();
+    defineProps<{
+        open: boolean
+    }>()
 
-const rolesList = getEnumOptions(UserRole);
+    const rolesList = getEnumOptions(UserRole)
 
-const form = useForm({
-    name: '',
-    email: '',
-    role: '',
-    password: '',
-});
+    const form = useForm({
+        name: '',
+        email: '',
+        role: '',
+        password: ''
+    })
 </script>
 
 <template>

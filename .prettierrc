@@ -11,14 +11,8 @@
     "singleAttributePerLine": false,
     "htmlWhitespaceSensitivity": "css",
     "tailwindStylesheet": "resources/css/app.css",
-    "plugins": [
-        "prettier-plugin-organize-imports",
-        "prettier-plugin-tailwindcss"
-    ],
-    "tailwindFunctions": [
-        "clsx",
-        "cn"
-    ],
+    "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
+    "tailwindFunctions": ["clsx", "cn"],
     "overrides": [
         {
             "files": "**/*.yml",

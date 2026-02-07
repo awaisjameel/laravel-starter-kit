@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { LoaderCircle } from 'lucide-vue-next';
+    import { LoaderCircle } from 'lucide-vue-next'
 
-const form = useForm({
-    password: '',
-});
+    const form = useForm({
+        password: ''
+    })
 
-const submit = () => {
-    form.post(route('password.confirm'), {
-        onFinish: () => {
-            form.reset();
-        },
-    });
-};
+    const submit = () => {
+        form.post(route('password.confirm'), {
+            onFinish: () => {
+                form.reset()
+            }
+        })
+    }
 </script>
 
 <template>

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { LoaderCircle } from 'lucide-vue-next';
+    import { LoaderCircle } from 'lucide-vue-next'
 
-defineProps<{
-    status?: string;
-}>();
+    defineProps<{
+        status?: string
+    }>()
 
-const form = useForm({
-    email: '',
-});
+    const form = useForm({
+        email: ''
+    })
 
-const submit = () => {
-    form.post(route('password.email'));
-};
+    const submit = () => {
+        form.post(route('password.email'))
+    }
 </script>
 
 <template>

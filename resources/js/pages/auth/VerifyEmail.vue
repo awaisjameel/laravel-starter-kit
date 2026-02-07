@@ -1,13 +1,13 @@
 <script setup lang="ts">
-defineProps<{
-    status?: string;
-}>();
+    defineProps<{
+        status?: string
+    }>()
 
-const form = useForm({});
+    const form = useForm({})
 
-const submit = () => {
-    form.post(route('verification.send'));
-};
+    const submit = () => {
+        form.post(route('verification.send'))
+    }
 </script>
 
 <template>

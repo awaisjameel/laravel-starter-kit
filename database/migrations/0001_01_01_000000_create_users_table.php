@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Data\UserData;
 use App\Enums\UserRole;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -22,7 +23,7 @@ return new class extends Migration
                 name: 'Admin',
                 email: 'admin@app.com',
                 role: UserRole::Admin,
-                email_verified_at: new DateTimeImmutable('now'),
+                email_verified_at: CarbonImmutable::now(),
                 password: 'Admin123!@#',
             ),
             new UserData(

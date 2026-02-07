@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const patternId = computed(() => `pattern-${Math.random().toString(36).substring(2, 9)}`);
+    const patternId = computed(() => `pattern-${Math.random().toString(36).substring(2, 9)}`)
 </script>
 
 <template>

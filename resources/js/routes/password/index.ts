@@ -1,157 +1,157 @@
-import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../wayfinder';
+import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../wayfinder'
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:20
+ * @see app/Http/Controllers/Settings/PasswordController.php:19
  * @route '/settings/password'
  */
 export const edit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 edit.definition = {
     methods: ['get', 'head'],
-    url: '/settings/password',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/settings/password'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:20
+ * @see app/Http/Controllers/Settings/PasswordController.php:19
  * @route '/settings/password'
  */
 edit.url = (options?: RouteQueryOptions) => {
-    return edit.definition.url + queryParams(options);
-};
+    return edit.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:20
+ * @see app/Http/Controllers/Settings/PasswordController.php:19
  * @route '/settings/password'
  */
 edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:20
+ * @see app/Http/Controllers/Settings/PasswordController.php:19
  * @route '/settings/password'
  */
 edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(options),
-    method: 'head',
-});
+    method: 'head'
+})
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
- * @see app/Http/Controllers/Settings/PasswordController.php:28
+ * @see app/Http/Controllers/Settings/PasswordController.php:27
  * @route '/settings/password'
  */
 export const update = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(options),
-    method: 'put',
-});
+    method: 'put'
+})
 
 update.definition = {
     methods: ['put'],
-    url: '/settings/password',
-} satisfies RouteDefinition<['put']>;
+    url: '/settings/password'
+} satisfies RouteDefinition<['put']>
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
- * @see app/Http/Controllers/Settings/PasswordController.php:28
+ * @see app/Http/Controllers/Settings/PasswordController.php:27
  * @route '/settings/password'
  */
 update.url = (options?: RouteQueryOptions) => {
-    return update.definition.url + queryParams(options);
-};
+    return update.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
- * @see app/Http/Controllers/Settings/PasswordController.php:28
+ * @see app/Http/Controllers/Settings/PasswordController.php:27
  * @route '/settings/password'
  */
 update.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(options),
-    method: 'put',
-});
+    method: 'put'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::request
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:19
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:20
  * @route '/forgot-password'
  */
 export const request = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: request.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 request.definition = {
     methods: ['get', 'head'],
-    url: '/forgot-password',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/forgot-password'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::request
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:19
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:20
  * @route '/forgot-password'
  */
 request.url = (options?: RouteQueryOptions) => {
-    return request.definition.url + queryParams(options);
-};
+    return request.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::request
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:19
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:20
  * @route '/forgot-password'
  */
 request.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: request.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::request
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:19
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:20
  * @route '/forgot-password'
  */
 request.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: request.url(options),
-    method: 'head',
-});
+    method: 'head'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::email
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:31
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:27
  * @route '/forgot-password'
  */
 export const email = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: email.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 email.definition = {
     methods: ['post'],
-    url: '/forgot-password',
-} satisfies RouteDefinition<['post']>;
+    url: '/forgot-password'
+} satisfies RouteDefinition<['post']>
 
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::email
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:31
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:27
  * @route '/forgot-password'
  */
 email.url = (options?: RouteQueryOptions) => {
-    return email.definition.url + queryParams(options);
-};
+    return email.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\PasswordResetLinkController::email
- * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:31
+ * @see app/Http/Controllers/Auth/PasswordResetLinkController.php:27
  * @route '/forgot-password'
  */
 email.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: email.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::reset
@@ -160,16 +160,16 @@ email.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
  */
 export const reset = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: RouteQueryOptions,
+    options?: RouteQueryOptions
 ): RouteDefinition<'get'> => ({
     url: reset.url(args, options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 reset.definition = {
     methods: ['get', 'head'],
-    url: '/reset-password/{token}',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/reset-password/{token}'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::reset
@@ -178,23 +178,23 @@ reset.definition = {
  */
 reset.url = (args: { token: string | number } | [token: string | number] | string | number, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
-        args = { token: args };
+        args = { token: args }
     }
 
     if (Array.isArray(args)) {
         args = {
-            token: args[0],
-        };
+            token: args[0]
+        }
     }
 
-    args = applyUrlDefaults(args);
+    args = applyUrlDefaults(args)
 
     const parsedArgs = {
-        token: args.token,
-    };
+        token: args.token
+    }
 
-    return reset.definition.url.replace('{token}', parsedArgs.token.toString()).replace(/\/+$/, '') + queryParams(options);
-};
+    return reset.definition.url.replace('{token}', parsedArgs.token.toString()).replace(/\/+$/, '') + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::reset
@@ -203,8 +203,8 @@ reset.url = (args: { token: string | number } | [token: string | number] | strin
  */
 reset.get = (args: { token: string | number } | [token: string | number] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: reset.url(args, options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::reset
  * @see app/Http/Controllers/Auth/NewPasswordController.php:24
@@ -212,11 +212,11 @@ reset.get = (args: { token: string | number } | [token: string | number] | strin
  */
 reset.head = (
     args: { token: string | number } | [token: string | number] | string | number,
-    options?: RouteQueryOptions,
+    options?: RouteQueryOptions
 ): RouteDefinition<'head'> => ({
     url: reset.url(args, options),
-    method: 'head',
-});
+    method: 'head'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
@@ -225,13 +225,13 @@ reset.head = (
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 store.definition = {
     methods: ['post'],
-    url: '/reset-password',
-} satisfies RouteDefinition<['post']>;
+    url: '/reset-password'
+} satisfies RouteDefinition<['post']>
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
@@ -239,8 +239,8 @@ store.definition = {
  * @route '/reset-password'
  */
 store.url = (options?: RouteQueryOptions) => {
-    return store.definition.url + queryParams(options);
-};
+    return store.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\NewPasswordController::store
@@ -249,51 +249,51 @@ store.url = (options?: RouteQueryOptions) => {
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\ConfirmablePasswordController::confirm
- * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:20
+ * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:21
  * @route '/confirm-password'
  */
 export const confirm = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: confirm.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 confirm.definition = {
     methods: ['get', 'head'],
-    url: '/confirm-password',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/confirm-password'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Auth\ConfirmablePasswordController::confirm
- * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:20
+ * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:21
  * @route '/confirm-password'
  */
 confirm.url = (options?: RouteQueryOptions) => {
-    return confirm.definition.url + queryParams(options);
-};
+    return confirm.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\ConfirmablePasswordController::confirm
- * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:20
+ * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:21
  * @route '/confirm-password'
  */
 confirm.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: confirm.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Auth\ConfirmablePasswordController::confirm
- * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:20
+ * @see app/Http/Controllers/Auth/ConfirmablePasswordController.php:21
  * @route '/confirm-password'
  */
 confirm.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: confirm.url(options),
-    method: 'head',
-});
+    method: 'head'
+})
 const password = {
     edit: Object.assign(edit, edit),
     update: Object.assign(update, update),
@@ -301,7 +301,7 @@ const password = {
     email: Object.assign(email, email),
     reset: Object.assign(reset, reset),
     store: Object.assign(store, store),
-    confirm: Object.assign(confirm, confirm),
-};
+    confirm: Object.assign(confirm, confirm)
+}
 
-export default password;
+export default password

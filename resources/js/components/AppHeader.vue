@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import type { BreadcrumbItem, NavItem } from '@/types';
-import { UserRole } from '@/types/app-data';
-import { LayoutGrid, Menu, Search, Users } from 'lucide-vue-next';
+    import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu'
+    import type { BreadcrumbItem, NavItem } from '@/types'
+    import { UserRole } from '@/types/app-data'
+    import { LayoutGrid, Menu, Search, Users } from 'lucide-vue-next'
 
-interface Props {
-    breadcrumbs?: BreadcrumbItem[];
-}
+    interface Props {
+        breadcrumbs?: BreadcrumbItem[]
+    }
 
-const props = withDefaults(defineProps<Props>(), {
-    breadcrumbs: () => [],
-});
+    const props = withDefaults(defineProps<Props>(), {
+        breadcrumbs: () => []
+    })
 
-const { getInitials } = useInitials();
-const page = usePage();
-const auth = computed(() => page.props.auth);
+    const { getInitials } = useInitials()
+    const page = usePage()
+    const auth = computed(() => page.props.auth)
 
-const isCurrentRoute = computed(() => (url: string) => page.url === url);
+    const isCurrentRoute = computed(() => (url: string) => page.url === url)
 
-const activeItemStyles = computed(
-    () => (url: string) => (isCurrentRoute.value(url) ? 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100' : ''),
-);
+    const activeItemStyles = computed(
+        () => (url: string) => (isCurrentRoute.value(url) ? 'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100' : '')
+    )
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-];
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: '/dashboard',
+            icon: LayoutGrid
+        }
+    ]
 
-if (page.props.auth.user.role === UserRole.Admin) {
-    mainNavItems.push({
-        title: 'Users',
-        href: '/users',
-        icon: Users,
-    });
-}
+    if (page.props.auth.user.role === UserRole.Admin) {
+        mainNavItems.push({
+            title: 'Users',
+            href: '/users',
+            icon: Users
+        })
+    }
 
-const rightNavItems: NavItem[] = [];
+    const rightNavItems: NavItem[] = []
 </script>
 
 <template>

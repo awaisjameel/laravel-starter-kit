@@ -1,25 +1,25 @@
 <script setup lang="ts">
-const passwordInput = ref<HTMLInputElement | null>(null);
+    const passwordInput = ref<HTMLInputElement | null>(null)
 
-const form = useForm({
-    password: '',
-});
+    const form = useForm({
+        password: ''
+    })
 
-const deleteUser = (e: Event) => {
-    e.preventDefault();
+    const deleteUser = (e: Event) => {
+        e.preventDefault()
 
-    form.delete(route('profile.destroy'), {
-        preserveScroll: true,
-        onSuccess: () => closeModal(),
-        onError: () => passwordInput.value?.focus(),
-        onFinish: () => form.reset(),
-    });
-};
+        form.delete(route('profile.destroy'), {
+            preserveScroll: true,
+            onSuccess: () => closeModal(),
+            onError: () => passwordInput.value?.focus(),
+            onFinish: () => form.reset()
+        })
+    }
 
-const closeModal = () => {
-    form.clearErrors();
-    form.reset();
-};
+    const closeModal = () => {
+        form.clearErrors()
+        form.reset()
+    }
 </script>
 
 <template>

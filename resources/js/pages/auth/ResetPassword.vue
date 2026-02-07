@@ -1,25 +1,25 @@
 <script setup lang="ts">
-interface Props {
-    token: string;
-    email: string;
-}
+    interface Props {
+        token: string
+        email: string
+    }
 
-const props = defineProps<Props>();
+    const props = defineProps<Props>()
 
-const form = useForm({
-    token: props.token,
-    email: props.email,
-    password: '',
-    password_confirmation: '',
-});
+    const form = useForm({
+        token: props.token,
+        email: props.email,
+        password: '',
+        password_confirmation: ''
+    })
 
-const submit = () => {
-    form.post(route('password.store'), {
-        onFinish: () => {
-            form.reset('password', 'password_confirmation');
-        },
-    });
-};
+    const submit = () => {
+        form.post(route('password.store'), {
+            onFinish: () => {
+                form.reset('password', 'password_confirmation')
+            }
+        })
+    }
 </script>
 
 <template>

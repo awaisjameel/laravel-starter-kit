@@ -11,10 +11,10 @@ Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 Route::get('dashboard', fn () => Inertia::render('Dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
 
 // User management routes
-Route::middleware(['auth', 'can:manage-users'])
+Route::middleware(['auth'])
     ->group(function (): void {
         Route::resource('users', UserController::class)
-            ->except(['create']);
+            ->except(['create', 'edit', 'show']);
     });
 
 require __DIR__.'/settings.php';

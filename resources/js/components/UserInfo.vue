@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { User } from '@/types';
+    import type { User } from '@/types'
 
-interface Props {
-    user: User;
-    showEmail?: boolean;
-}
+    interface Props {
+        user: User
+        showEmail?: boolean
+    }
 
-withDefaults(defineProps<Props>(), {
-    showEmail: false,
-});
+    withDefaults(defineProps<Props>(), {
+        showEmail: false
+    })
 
-const { getInitials } = useInitials();
+    const { getInitials } = useInitials()
 </script>
 
 <template>

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\ProfileDestroyRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,8 +22,11 @@ final class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+
         return Inertia::render('settings/Profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user !== null
+                && in_array(MustVerifyEmail::class, class_implements($user), true),
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -31,13 +36,18 @@ final class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user = $request->user();
+        if (! $user instanceof User) {
+            abort(403);
         }
 
-        $request->user()->save();
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return to_route('profile.edit');
     }
@@ -45,13 +55,12 @@ final class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(ProfileDestroyRequest $request): RedirectResponse
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
+        if (! $user instanceof User) {
+            abort(403);
+        }
 
         Auth::logout();
 

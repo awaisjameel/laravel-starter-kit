@@ -1,43 +1,43 @@
 <script setup lang="ts">
-import { type BreadcrumbItem } from '@/types';
+    import { type BreadcrumbItem } from '@/types'
 
-const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Password settings',
-        href: '/settings/password',
-    },
-];
+    const breadcrumbItems: BreadcrumbItem[] = [
+        {
+            title: 'Password settings',
+            href: '/settings/password'
+        }
+    ]
 
-const passwordInput = ref<HTMLInputElement | null>(null);
-const currentPasswordInput = ref<HTMLInputElement | null>(null);
+    const passwordInput = ref<HTMLInputElement | null>(null)
+    const currentPasswordInput = ref<HTMLInputElement | null>(null)
 
-const form = useForm({
-    current_password: '',
-    password: '',
-    password_confirmation: '',
-});
+    const form = useForm({
+        current_password: '',
+        password: '',
+        password_confirmation: ''
+    })
 
-const updatePassword = () => {
-    form.put(route('password.update'), {
-        preserveScroll: true,
-        onSuccess: () => form.reset(),
-        onError: (errors: any) => {
-            if (errors.password) {
-                form.reset('password', 'password_confirmation');
-                if (passwordInput.value instanceof HTMLInputElement) {
-                    passwordInput.value.focus();
+    const updatePassword = () => {
+        form.put(route('password.update'), {
+            preserveScroll: true,
+            onSuccess: () => form.reset(),
+            onError: (errors: Record<string, string>) => {
+                if (errors.password) {
+                    form.reset('password', 'password_confirmation')
+                    if (passwordInput.value instanceof HTMLInputElement) {
+                        passwordInput.value.focus()
+                    }
+                }
+
+                if (errors.current_password) {
+                    form.reset('current_password')
+                    if (currentPasswordInput.value instanceof HTMLInputElement) {
+                        currentPasswordInput.value.focus()
+                    }
                 }
             }
-
-            if (errors.current_password) {
-                form.reset('current_password');
-                if (currentPasswordInput.value instanceof HTMLInputElement) {
-                    currentPasswordInput.value.focus();
-                }
-            }
-        },
-    });
-};
+        })
+    }
 </script>
 
 <template>

@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import users from '@/routes/users';
-import { type User } from '@/types';
+    import users from '@/routes/users'
+    import { type User } from '@/types'
 
-const emit = defineEmits(['update:open', 'deleted']);
+    const emit = defineEmits(['update:open', 'deleted'])
 
-defineProps<{
-    open: boolean;
-    user: User;
-}>();
+    defineProps<{
+        open: boolean
+        user: User
+    }>()
 
-const form = useForm({});
+    const form = useForm({})
 </script>
 
 <template>

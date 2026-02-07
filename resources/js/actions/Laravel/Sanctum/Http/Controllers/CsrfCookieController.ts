@@ -1,4 +1,4 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder'
 /**
  * @see \Laravel\Sanctum\Http\Controllers\CsrfCookieController::show
  * @see vendor/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php:17
@@ -6,13 +6,13 @@ import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../
  */
 export const show = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 show.definition = {
     methods: ['get', 'head'],
-    url: '/sanctum/csrf-cookie',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/sanctum/csrf-cookie'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \Laravel\Sanctum\Http\Controllers\CsrfCookieController::show
@@ -20,8 +20,8 @@ show.definition = {
  * @route '/sanctum/csrf-cookie'
  */
 show.url = (options?: RouteQueryOptions) => {
-    return show.definition.url + queryParams(options);
-};
+    return show.definition.url + queryParams(options)
+}
 
 /**
  * @see \Laravel\Sanctum\Http\Controllers\CsrfCookieController::show
@@ -30,8 +30,8 @@ show.url = (options?: RouteQueryOptions) => {
  */
 show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \Laravel\Sanctum\Http\Controllers\CsrfCookieController::show
  * @see vendor/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php:17
@@ -39,8 +39,8 @@ show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
  */
 show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(options),
-    method: 'head',
-});
-const CsrfCookieController = { show };
+    method: 'head'
+})
+const CsrfCookieController = { show }
 
-export default CsrfCookieController;
+export default CsrfCookieController

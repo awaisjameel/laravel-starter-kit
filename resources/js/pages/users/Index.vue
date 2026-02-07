@@ -1,68 +1,68 @@
 <script setup lang="ts">
-import { UsersPageProps, type BreadcrumbItem, type User } from '@/types';
+    import { UsersPageProps, type BreadcrumbItem, type User } from '@/types'
 
-const page = usePage();
-const props = defineProps<UsersPageProps>();
+    const page = usePage()
+    const props = defineProps<UsersPageProps>()
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Users',
-        href: '/users',
-    },
-];
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Users',
+            href: '/users'
+        }
+    ]
 
-const isCreateDialogOpen = ref(false);
-const isEditDialogOpen = ref(false);
-const isDeleteDialogOpen = ref(false);
-const selectedUser = ref<User>(props.users.data[0]);
+    const isCreateDialogOpen = ref(false)
+    const isEditDialogOpen = ref(false)
+    const isDeleteDialogOpen = ref(false)
+    const selectedUser = ref<User | null>(props.users.data[0] ?? null)
 
-const currentPage = computed(() => Number(props.users.current_page) || 1);
-const totalPages = computed(() => Number(props.users.last_page) || 1);
-const itemsPerPage = computed(() => Number(props.users.per_page) || 10);
-const totalItems = computed(() => Number(props.users.total) || 0);
+    const currentPage = computed(() => Number(props.users.current_page) || 1)
+    const totalPages = computed(() => Number(props.users.last_page) || 1)
+    const itemsPerPage = computed(() => Number(props.users.per_page) || 10)
+    const totalItems = computed(() => Number(props.users.total) || 0)
 
-const pageNumbers = computed(() => {
-    const pages: number[] = [];
-    const siblingCount = 2;
-    const validTotalPages = Math.max(1, totalPages.value);
-    const validCurrentPage = Math.max(1, Math.min(currentPage.value, validTotalPages));
-    const start = Math.max(1, validCurrentPage - siblingCount);
-    const end = Math.min(validTotalPages, validCurrentPage + siblingCount);
+    const pageNumbers = computed(() => {
+        const pages: number[] = []
+        const siblingCount = 2
+        const validTotalPages = Math.max(1, totalPages.value)
+        const validCurrentPage = Math.max(1, Math.min(currentPage.value, validTotalPages))
+        const start = Math.max(1, validCurrentPage - siblingCount)
+        const end = Math.min(validTotalPages, validCurrentPage + siblingCount)
 
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
+        for (let i = start; i <= end; i++) {
+            pages.push(i)
+        }
+
+        return pages.length > 0 ? pages : [1]
+    })
+
+    const onPageChange = (page: number) => {
+        if (page !== currentPage.value && page >= 1 && page <= totalPages.value) {
+            router.get('/users', { page, perPage: itemsPerPage.value }, { preserveState: true })
+        }
     }
 
-    return pages.length > 0 ? pages : [1];
-});
-
-const onPageChange = (page: number) => {
-    if (page !== currentPage.value && page >= 1 && page <= totalPages.value) {
-        router.get('/users', { page, perPage: itemsPerPage.value }, { preserveState: true });
+    const onCreateUser = async () => {
+        isCreateDialogOpen.value = false
     }
-};
 
-const onCreateUser = async () => {
-    isCreateDialogOpen.value = false;
-};
+    const onEditUser = (user: User) => {
+        selectedUser.value = user
+        isEditDialogOpen.value = true
+    }
 
-const onEditUser = (user: User) => {
-    selectedUser.value = user;
-    isEditDialogOpen.value = true;
-};
+    const onUpdateUser = async () => {
+        isEditDialogOpen.value = false
+    }
 
-const onUpdateUser = async () => {
-    isEditDialogOpen.value = false;
-};
+    const onDeleteUser = (user: User) => {
+        selectedUser.value = user
+        isDeleteDialogOpen.value = true
+    }
 
-const onDeleteUser = (user: User) => {
-    selectedUser.value = user;
-    isDeleteDialogOpen.value = true;
-};
-
-const onUserDeleted = async () => {
-    isDeleteDialogOpen.value = false;
-};
+    const onUserDeleted = async () => {
+        isDeleteDialogOpen.value = false
+    }
 </script>
 
 <template>
@@ -171,7 +171,7 @@ const onUserDeleted = async () => {
             />
 
             <UsersEditUserDialog
-                v-if="isEditDialogOpen"
+                v-if="isEditDialogOpen && selectedUser"
                 :open="isEditDialogOpen"
                 :user="selectedUser"
                 @update:open="isEditDialogOpen = $event"
@@ -179,7 +179,7 @@ const onUserDeleted = async () => {
             />
 
             <UsersDeleteUserDialog
-                v-if="isDeleteDialogOpen"
+                v-if="isDeleteDialogOpen && selectedUser"
                 :open="isDeleteDialogOpen"
                 :user="selectedUser"
                 @update:open="isDeleteDialogOpen = $event"

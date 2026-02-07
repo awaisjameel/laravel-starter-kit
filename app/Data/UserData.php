@@ -8,7 +8,6 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
-use DateTimeImmutable;
 use Illuminate\Validation\Rules\Enum;
 use Spatie\LaravelData\Attributes\Validation\Rule;
 use Spatie\LaravelData\Attributes\WithCast;
@@ -37,21 +36,22 @@ final class UserData extends Data
         public UserRole $role,
 
         #[Rule(['nullable', 'date'])]
-        #[WithCast(EnumCast::class, type: Carbon::class)]
-        public ?DateTimeImmutable $email_verified_at,
+        public ?CarbonImmutable $email_verified_at = null,
 
         #[Rule(['required', 'string', 'min:8', 'regex:/[A-Z]/', 'regex:/[a-z]/', 'regex:/[0-9]/', 'regex:/[@$!%*#?&]/'])]
-        public ?string $password,
+        public ?string $password = null,
     ) {}
 
     public static function fromModel(User $user): self
     {
+        $emailVerifiedAt = $user->email_verified_at;
+        $emailVerifiedAt = $emailVerifiedAt instanceof Carbon ? $emailVerifiedAt->toImmutable() : null;
+
         $userData = new self(
             name: $user->name,
             email: $user->email,
             role: $user->role,
-            email_verified_at: $user->email_verified_at,
-            password: null, // $user->password is hashed
+            email_verified_at: $emailVerifiedAt,
         );
 
         $userData->id = $user->id;

@@ -1,4 +1,4 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../wayfinder'
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -6,13 +6,13 @@ import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../
  */
 const RedirectController = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: RedirectController.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 RedirectController.definition = {
     methods: ['get', 'head', 'post', 'put', 'patch', 'delete', 'options'],
-    url: '/settings',
-} satisfies RouteDefinition<['get', 'head', 'post', 'put', 'patch', 'delete', 'options']>;
+    url: '/settings'
+} satisfies RouteDefinition<['get', 'head', 'post', 'put', 'patch', 'delete', 'options']>
 
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
@@ -20,8 +20,8 @@ RedirectController.definition = {
  * @route '/settings'
  */
 RedirectController.url = (options?: RouteQueryOptions) => {
-    return RedirectController.definition.url + queryParams(options);
-};
+    return RedirectController.definition.url + queryParams(options)
+}
 
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
@@ -30,8 +30,8 @@ RedirectController.url = (options?: RouteQueryOptions) => {
  */
 RedirectController.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: RedirectController.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -39,8 +39,8 @@ RedirectController.get = (options?: RouteQueryOptions): RouteDefinition<'get'> =
  */
 RedirectController.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: RedirectController.url(options),
-    method: 'head',
-});
+    method: 'head'
+})
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -48,8 +48,8 @@ RedirectController.head = (options?: RouteQueryOptions): RouteDefinition<'head'>
  */
 RedirectController.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: RedirectController.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -57,8 +57,8 @@ RedirectController.post = (options?: RouteQueryOptions): RouteDefinition<'post'>
  */
 RedirectController.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: RedirectController.url(options),
-    method: 'put',
-});
+    method: 'put'
+})
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -66,8 +66,8 @@ RedirectController.put = (options?: RouteQueryOptions): RouteDefinition<'put'> =
  */
 RedirectController.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: RedirectController.url(options),
-    method: 'patch',
-});
+    method: 'patch'
+})
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -75,8 +75,8 @@ RedirectController.patch = (options?: RouteQueryOptions): RouteDefinition<'patch
  */
 RedirectController.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: RedirectController.url(options),
-    method: 'delete',
-});
+    method: 'delete'
+})
 /**
  * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
@@ -84,6 +84,6 @@ RedirectController.delete = (options?: RouteQueryOptions): RouteDefinition<'dele
  */
 RedirectController.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
     url: RedirectController.url(options),
-    method: 'options',
-});
-export default RedirectController;
+    method: 'options'
+})
+export default RedirectController

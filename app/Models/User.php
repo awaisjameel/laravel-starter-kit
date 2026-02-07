@@ -12,10 +12,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property UserRole $role
+ * @property \Carbon\Carbon|null $email_verified_at
+ */
 final class User extends Authenticatable
 {
     use HasApiTokens;
+
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
+
     use Notifiable;
 
     protected $guarded = [];

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-interface BreadcrumbItemType {
-    title: string;
-    href?: string;
-}
+    interface BreadcrumbItemType {
+        title: string
+        href?: string
+    }
 
-defineProps<{
-    breadcrumbs: BreadcrumbItemType[];
-}>();
+    defineProps<{
+        breadcrumbs: BreadcrumbItemType[]
+    }>()
 </script>
 
 <template>

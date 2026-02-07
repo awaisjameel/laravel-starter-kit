@@ -1,11 +1,11 @@
 <script setup lang="ts">
-interface Props {
-    variant?: 'header' | 'sidebar';
-}
+    interface Props {
+        variant?: 'header' | 'sidebar'
+    }
 
-defineProps<Props>();
+    defineProps<Props>()
 
-const isOpen = usePage().props.sidebarOpen;
+    const isOpen = usePage().props.sidebarOpen
 </script>
 
 <template>

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { BreadcrumbItemType } from '@/types';
+    import type { BreadcrumbItemType } from '@/types'
 
-withDefaults(
-    defineProps<{
-        breadcrumbs?: BreadcrumbItemType[];
-    }>(),
-    {
-        breadcrumbs: () => [],
-    },
-);
+    withDefaults(
+        defineProps<{
+            breadcrumbs?: BreadcrumbItemType[]
+        }>(),
+        {
+            breadcrumbs: () => []
+        }
+    )
 </script>
 
 <template>

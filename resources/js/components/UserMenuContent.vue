@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { User } from '@/types';
-import { LogOut, Settings } from 'lucide-vue-next';
+    import type { User } from '@/types'
+    import { LogOut, Settings } from 'lucide-vue-next'
 
-interface Props {
-    user: User;
-}
+    interface Props {
+        user: User
+    }
 
-const handleLogout = () => {
-    router.flushAll();
-};
+    const handleLogout = () => {
+        router.flushAll()
+    }
 
-defineProps<Props>();
+    defineProps<Props>()
 </script>
 
 <template>

@@ -1,10 +1,9 @@
-import prettier from 'eslint-config-prettier';
-import vue from 'eslint-plugin-vue';
+import prettier from 'eslint-config-prettier'
+import vue from 'eslint-plugin-vue'
 
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 
-const autoImportMessage =
-    'Manual import is not needed here. This project auto-imports this symbol; remove the import and rely on auto-import.';
+const autoImportMessage = 'Manual import is not needed here. This project auto-imports this symbol; remove the import and rely on auto-import.'
 
 export default defineConfigWithVueTs(
     vue.configs['flat/essential'],
@@ -22,8 +21,8 @@ export default defineConfigWithVueTs(
             'resources/js/wayfinder/**',
             'resources/js/types/app-data.ts',
             'resources/js/types/auto-imports.d.ts',
-            'resources/js/types/components.d.ts',
-        ],
+            'resources/js/types/components.d.ts'
+        ]
     },
     {
         rules: {
@@ -36,31 +35,31 @@ export default defineConfigWithVueTs(
                         {
                             name: '@inertiajs/vue3',
                             importNames: ['usePage', 'useForm', 'useRemember', 'usePoll', 'router', 'Deferred', 'Head', 'Link'],
-                            message: autoImportMessage,
+                            message: autoImportMessage
                         },
                         {
                             name: 'ziggy-js',
                             importNames: ['Ziggy'],
-                            message: autoImportMessage,
-                        },
+                            message: autoImportMessage
+                        }
                     ],
                     patterns: [
                         {
                             group: ['@/composables/*', '@/composables/**'],
-                            message: autoImportMessage,
+                            message: autoImportMessage
                         },
                         {
                             group: ['@/stores/*', '@/stores/**'],
-                            message: autoImportMessage,
+                            message: autoImportMessage
                         },
                         {
                             group: ['@/components/**/*.vue', '@/layouts/**/*.vue'],
-                            message: autoImportMessage,
-                        },
-                    ],
-                },
-            ],
-        },
+                            message: autoImportMessage
+                        }
+                    ]
+                }
+            ]
+        }
     },
-    prettier,
-);
+    prettier
+)

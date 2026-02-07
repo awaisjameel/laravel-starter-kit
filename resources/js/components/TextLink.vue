@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { Method } from '@inertiajs/core';
+    import { Method } from '@inertiajs/core'
 
-interface Props {
-    href: string;
-    tabindex?: number;
-    method?: Method;
-    as?: string;
-}
+    interface Props {
+        href: string
+        tabindex?: number
+        method?: Method
+        as?: string
+    }
 
-defineProps<Props>();
+    defineProps<Props>()
 </script>
 
 <template>

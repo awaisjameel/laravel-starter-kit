@@ -27,19 +27,25 @@ jobs:
       - name: Install Dependencies
         run: |
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          npm install
+          npm ci
+
+      - name: Generate Types and Routes
+        run: composer generate
+
+      - name: Verify Generated Files Are Committed
+        run: git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts
 
       - name: Run Pint
-        run: vendor/bin/pint
+        run: vendor/bin/pint --test
 
-      - name: Format Frontend
-        run: npm run format
+      - name: Check Frontend Format
+        run: npm run format:check
 
       - name: Lint Frontend
-        run: npm run lint
+        run: npm run lint:check
 
-      # - name: Commit Changes
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: fix code style
-      #     commit_options: '--no-verify'
+      - name: Typecheck Frontend
+        run: npm run typecheck
+
+      - name: Run Static Analysis
+        run: composer analyse

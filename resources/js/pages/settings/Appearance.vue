@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { type BreadcrumbItem } from '@/types';
+    import { type BreadcrumbItem } from '@/types'
 
-const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Appearance settings',
-        href: '/settings/appearance',
-    },
-];
+    const breadcrumbItems: BreadcrumbItem[] = [
+        {
+            title: 'Appearance settings',
+            href: '/settings/appearance'
+        }
+    ]
 </script>
 
 <template>

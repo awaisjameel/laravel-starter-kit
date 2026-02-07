@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\UserRole;
+use App\Models\User;
+use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
 final class AuthServiceProvider extends ServiceProvider
 {
-    protected $policies = [];
+    protected $policies = [
+        User::class => UserPolicy::class,
+    ];
 
     public function boot(): void
     {

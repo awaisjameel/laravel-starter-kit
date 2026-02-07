@@ -267,11 +267,11 @@ Key locations and what they do:
 Examples:
 
 ```typescript
-import { index } from '@/routes/users';
-import { store } from '@/actions/App/Http/Controllers/UserController';
+import { index } from '@/routes/users'
+import { store } from '@/actions/App/Http/Controllers/UserController'
 
-index.url(); // "/users"
-store(); // { url: "/users", method: "post" }
+index.url() // "/users"
+store() // { url: "/users", method: "post" }
 ```
 
 Use named imports for tree-shaking where possible.

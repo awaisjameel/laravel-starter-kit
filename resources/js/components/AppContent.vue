@@ -1,11 +1,11 @@
 <script setup lang="ts">
-interface Props {
-    variant?: 'header' | 'sidebar';
-    class?: string;
-}
+    interface Props {
+        variant?: 'header' | 'sidebar'
+        class?: string
+    }
 
-const props = defineProps<Props>();
-const className = computed(() => props.class);
+    const props = defineProps<Props>()
+    const className = computed(() => props.class)
 </script>
 
 <template>

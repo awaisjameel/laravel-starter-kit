@@ -1,4 +1,4 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder'
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::create
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:21
@@ -6,13 +6,13 @@ import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../
  */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 create.definition = {
     methods: ['get', 'head'],
-    url: '/login',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/login'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::create
@@ -20,8 +20,8 @@ create.definition = {
  * @route '/login'
  */
 create.url = (options?: RouteQueryOptions) => {
-    return create.definition.url + queryParams(options);
-};
+    return create.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::create
@@ -30,8 +30,8 @@ create.url = (options?: RouteQueryOptions) => {
  */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::create
  * @see app/Http/Controllers/Auth/AuthenticatedSessionController.php:21
@@ -39,8 +39,8 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
  */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: create.url(options),
-    method: 'head',
-});
+    method: 'head'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::store
@@ -49,13 +49,13 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 store.definition = {
     methods: ['post'],
-    url: '/login',
-} satisfies RouteDefinition<['post']>;
+    url: '/login'
+} satisfies RouteDefinition<['post']>
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::store
@@ -63,8 +63,8 @@ store.definition = {
  * @route '/login'
  */
 store.url = (options?: RouteQueryOptions) => {
-    return store.definition.url + queryParams(options);
-};
+    return store.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::store
@@ -73,8 +73,8 @@ store.url = (options?: RouteQueryOptions) => {
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::destroy
@@ -83,13 +83,13 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
  */
 export const destroy = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: destroy.url(options),
-    method: 'post',
-});
+    method: 'post'
+})
 
 destroy.definition = {
     methods: ['post'],
-    url: '/logout',
-} satisfies RouteDefinition<['post']>;
+    url: '/logout'
+} satisfies RouteDefinition<['post']>
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::destroy
@@ -97,8 +97,8 @@ destroy.definition = {
  * @route '/logout'
  */
 destroy.url = (options?: RouteQueryOptions) => {
-    return destroy.definition.url + queryParams(options);
-};
+    return destroy.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\AuthenticatedSessionController::destroy
@@ -107,8 +107,8 @@ destroy.url = (options?: RouteQueryOptions) => {
  */
 destroy.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: destroy.url(options),
-    method: 'post',
-});
-const AuthenticatedSessionController = { create, store, destroy };
+    method: 'post'
+})
+const AuthenticatedSessionController = { create, store, destroy }
 
-export default AuthenticatedSessionController;
+export default AuthenticatedSessionController

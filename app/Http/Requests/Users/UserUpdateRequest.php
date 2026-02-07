@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Users;
 
 use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rules\Enum;
 
@@ -13,14 +15,27 @@ final class UserUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->route('user');
+
+        return $user instanceof User && ($this->user()?->can('update', $user) ?? false);
     }
 
+    /**
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
+        $user = $this->route('user');
+
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$this->route('user')->id],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique(User::class, 'email')->ignore($user instanceof User ? $user->id : null),
+            ],
             'role' => ['required', 'string', new Enum(UserRole::class)],
             'password' => ['nullable', 'string', Rules\Password::defaults()],
         ];

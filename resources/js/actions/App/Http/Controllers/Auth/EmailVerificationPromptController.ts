@@ -1,4 +1,4 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder';
+import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder'
 /**
  * @see \App\Http\Controllers\Auth\EmailVerificationPromptController::__invoke
  * @see app/Http/Controllers/Auth/EmailVerificationPromptController.php:18
@@ -6,13 +6,13 @@ import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../
  */
 const EmailVerificationPromptController = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: EmailVerificationPromptController.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 
 EmailVerificationPromptController.definition = {
     methods: ['get', 'head'],
-    url: '/verify-email',
-} satisfies RouteDefinition<['get', 'head']>;
+    url: '/verify-email'
+} satisfies RouteDefinition<['get', 'head']>
 
 /**
  * @see \App\Http\Controllers\Auth\EmailVerificationPromptController::__invoke
@@ -20,8 +20,8 @@ EmailVerificationPromptController.definition = {
  * @route '/verify-email'
  */
 EmailVerificationPromptController.url = (options?: RouteQueryOptions) => {
-    return EmailVerificationPromptController.definition.url + queryParams(options);
-};
+    return EmailVerificationPromptController.definition.url + queryParams(options)
+}
 
 /**
  * @see \App\Http\Controllers\Auth\EmailVerificationPromptController::__invoke
@@ -30,8 +30,8 @@ EmailVerificationPromptController.url = (options?: RouteQueryOptions) => {
  */
 EmailVerificationPromptController.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: EmailVerificationPromptController.url(options),
-    method: 'get',
-});
+    method: 'get'
+})
 /**
  * @see \App\Http\Controllers\Auth\EmailVerificationPromptController::__invoke
  * @see app/Http/Controllers/Auth/EmailVerificationPromptController.php:18
@@ -39,6 +39,6 @@ EmailVerificationPromptController.get = (options?: RouteQueryOptions): RouteDefi
  */
 EmailVerificationPromptController.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: EmailVerificationPromptController.url(options),
-    method: 'head',
-});
-export default EmailVerificationPromptController;
+    method: 'head'
+})
+export default EmailVerificationPromptController

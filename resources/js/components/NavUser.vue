@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { type User } from '@/types';
-import { ChevronsUpDown } from 'lucide-vue-next';
+    import { type User } from '@/types'
+    import { ChevronsUpDown } from 'lucide-vue-next'
 
-const page = usePage();
-const user = page.props.auth.user as User;
-const { isMobile, state } = useSidebar();
+    const page = usePage()
+    const user = page.props.auth.user as User
+    const { isMobile, state } = useSidebar()
 </script>
 
 <template>

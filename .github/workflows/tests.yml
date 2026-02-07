@@ -46,6 +46,15 @@ jobs:
       - name: Publish Ziggy Configuration
         run: php artisan ziggy:generate
 
+      - name: Generate Types and Routes
+        run: composer generate
+
+      - name: Verify Generated Files Are Committed
+        run: git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts
+
+      - name: Typecheck Frontend
+        run: npm run typecheck
+
       - name: Build Assets
         run: npm run build
 
