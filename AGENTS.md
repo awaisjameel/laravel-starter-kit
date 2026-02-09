@@ -86,6 +86,7 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
     - App components: `resources/js/components`
     - UI primitives: `resources/js/components/ui`
     - Auto-registration enabled with namespaces (`directoryAsNamespace: true`)
+    - For components in subdirectories, always use namespace-prefixed tags (example: `components/marketing/PageLayout.vue` => `<MarketingPageLayout />`, not `<PageLayout />`)
 - Type declarations:
     - Shared page props and app types in `resources/js/types`
     - Typed Pinia stores belong in `resources/js/stores`
