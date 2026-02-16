@@ -1,4 +1,5 @@
 <script setup lang="ts">
+    import { useSidebar } from '@/components/ui/sidebar/utils'
     import { type User } from '@/types'
     import { ChevronsUpDown } from 'lucide-vue-next'
 

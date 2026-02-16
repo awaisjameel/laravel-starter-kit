@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class ExampleTest extends TestCase
@@ -16,5 +17,6 @@ final class ExampleTest extends TestCase
         $testResponse = $this->get('/');
 
         $testResponse->assertStatus(200);
+        $testResponse->assertInertia(fn (Assert $page): Assert => $page->component('marketing/Welcome'));
     }
 }

@@ -1,28 +1,7 @@
 <script setup lang="ts">
-    import { type NavItem } from '@/types'
-    import { UserRole } from '@/types/app-data'
-    import { LayoutGrid, Users } from 'lucide-vue-next'
     import AppLogo from './AppLogo.vue'
 
-    const mainNavItems: NavItem[] = [
-        {
-            title: 'Dashboard',
-            href: '/dashboard',
-            icon: LayoutGrid
-        }
-    ]
-
-    const page = usePage()
-
-    if (page.props.auth.user.role === UserRole.Admin) {
-        mainNavItems.push({
-            title: 'Users',
-            href: '/users',
-            icon: Users
-        })
-    }
-
-    const footerNavItems: NavItem[] = []
+    const { dashboardPrimaryItems, dashboardFooterItems } = useNavigation()
 </script>
 
 <template>
@@ -40,11 +19,11 @@
         </UiSidebarHeader>
 
         <UiSidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="dashboardPrimaryItems" />
         </UiSidebarContent>
 
         <UiSidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <NavFooter :items="dashboardFooterItems" />
             <NavUser />
         </UiSidebarFooter>
     </UiSidebar>

@@ -11,7 +11,7 @@
 </script>
 
 <template>
-    <AppHeaderLayout :breadcrumbs="breadcrumbs">
+    <AppSidebarLayout :breadcrumbs="breadcrumbs">
         <slot />
-    </AppHeaderLayout>
+    </AppSidebarLayout>
 </template>

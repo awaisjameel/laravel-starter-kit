@@ -2,6 +2,7 @@
 import type { SidebarProps } from '.'
 import { cn } from '@/lib/utils'
 import { SIDEBAR_WIDTH_MOBILE } from './utils'
+import { useSidebar } from './utils'
 
 defineOptions({
     inheritAttrs: false,

@@ -41,6 +41,8 @@ declare module 'vue' {
     IconMdiPlus: typeof import('~icons/mdi/plus')['default']
     InputError: typeof import('./../components/InputError.vue')['default']
     Link: typeof import('@inertiajs/vue3')['Link']
+    MarketingFooter: typeof import('./../components/marketing/Footer.vue')['default']
+    MarketingHeader: typeof import('./../components/marketing/Header.vue')['default']
     MarketingPageLayout: typeof import('./../layouts/marketing/PageLayout.vue')['default']
     NavFooter: typeof import('./../components/NavFooter.vue')['default']
     NavMain: typeof import('./../components/NavMain.vue')['default']

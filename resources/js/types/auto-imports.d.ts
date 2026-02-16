@@ -224,6 +224,7 @@ declare global {
     const useInitials: typeof import('../composables/useInitials').useInitials
     const useLink: typeof import('vue-router').useLink
     const useModel: typeof import('vue').useModel
+    const useNavigation: typeof import('../composables/useNavigation').useNavigation
     const usePage: typeof import('@inertiajs/vue3').usePage
     const usePoll: typeof import('@inertiajs/vue3').usePoll
     const useRemember: typeof import('@inertiajs/vue3').useRemember
@@ -260,7 +261,13 @@ declare global {
         VNode,
         WritableComputedRef
     } from 'vue'
+    // @ts-ignore
+    export type { Appearance } from '../composables/useAppearance'
+    // @ts-ignore
+    export type { NavigationGroup } from '../composables/useNavigation'
     import('vue')
+    import('../composables/useAppearance')
+    import('../composables/useNavigation')
 }
 
 // for vue template auto import
@@ -338,6 +345,7 @@ declare module 'vue' {
         readonly useInitials: UnwrapRef<(typeof import('../composables/useInitials'))['useInitials']>
         readonly useLink: UnwrapRef<(typeof import('vue-router'))['useLink']>
         readonly useModel: UnwrapRef<(typeof import('vue'))['useModel']>
+        readonly useNavigation: UnwrapRef<(typeof import('../composables/useNavigation'))['useNavigation']>
         readonly usePage: UnwrapRef<(typeof import('@inertiajs/vue3'))['usePage']>
         readonly usePoll: UnwrapRef<(typeof import('@inertiajs/vue3'))['usePoll']>
         readonly useRemember: UnwrapRef<(typeof import('@inertiajs/vue3'))['useRemember']>

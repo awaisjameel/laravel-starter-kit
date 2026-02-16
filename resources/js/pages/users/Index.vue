@@ -38,7 +38,7 @@
 
     const onPageChange = (page: number) => {
         if (page !== currentPage.value && page >= 1 && page <= totalPages.value) {
-            router.get('/users', { page, perPage: itemsPerPage.value }, { preserveState: true })
+            router.get(route('users.index'), { page, perPage: itemsPerPage.value }, { preserveState: true })
         }
     }
 
@@ -96,8 +96,8 @@
                                             <td class="flex flex-row items-center justify-center gap-2 p-4">
                                                 <UserInfo :user="item" />
                                             </td>
-                                            <td class="p-4">{{ item.email }}</td>
                                             <td class="p-4 capitalize">{{ item.role }}</td>
+                                            <td class="p-4">{{ item.email }}</td>
                                             <td class="p-4">{{ new Date(item.created_at).toLocaleDateString() }}</td>
                                             <td class="p-4 text-right">
                                                 <UiDropdownMenu>

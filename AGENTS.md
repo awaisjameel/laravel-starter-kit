@@ -77,19 +77,22 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
     - `resources/js/pages/marketing/**` for public client-facing pages
     - `resources/js/pages/auth/**`, `resources/js/pages/settings/**`, `resources/js/pages/users/**` for authenticated/product flows
 - Layouts:
-    - `AppLayout` (header shell)
-    - `AppFunnelLayout` (sidebar shell)
+    - `AppLayout` (sidebar shell for dashboard/app pages)
+    - `AppFunnelLayout` (alias of sidebar app shell)
     - `AuthLayout` -> `AuthSimpleLayout`
     - `marketing/PageLayout.vue` -> `MarketingPageLayout`
     - `settings/Layout.vue`
 - Navigation and shell components:
-    - `AppHeader`, `AppSidebar`, `AppShell`, `AppContent`, `NavMain`, `NavUser`, `UserMenuContent`
+    - `AppSidebar`, `AppShell`, `AppContent`, `NavMain`, `NavFooter`, `NavUser`, `UserMenuContent`
+    - Marketing shell: `MarketingHeader`, `MarketingFooter`
+    - Shared role-aware nav source: `resources/js/composables/useNavigation.ts`
 - Domain component boundaries:
     - Marketing-only components: `resources/js/components/marketing/**`
     - App/dashboard shell and feature components: `resources/js/components/**` (excluding `marketing/**`)
     - Shared primitives: `resources/js/components/ui/**`
 - Appearance/theming:
     - `useAppearance.ts` stores preference in `localStorage` and `appearance` cookie
+    - Default appearance is light mode when no preference is set
     - Dark mode is class-based (`.dark`), initialized early in `resources/views/app.blade.php`
 - UI component system:
     - App components: `resources/js/components`
@@ -105,9 +108,11 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
 - Marketing/public flow:
     - Route `/` renders `marketing/Welcome` via Inertia and stays outside auth middleware.
     - Marketing pages are public client-facing pages and must use the marketing namespace structure.
+    - Marketing pages use `MarketingPageLayout` with shared sticky header/navigation and shared footer.
 - Auth flows: registration, login, logout, forgot/reset password, confirm password, email verification.
 - Settings flows: profile update, password update, appearance toggle, account deletion.
 - Dashboard page behind `auth` + `verified` middleware.
+- Dashboard/app pages use sidebar layout only (`AppLayout`/`AppFunnelLayout` via `AppSidebarLayout`).
 - User management (`/users`) for admins only:
     - Server-side pagination
     - Create, update, delete via dialogs
@@ -133,6 +138,7 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
     - Avoid one-off inline color systems in templates (raw hex/hsl classes) when tokenized utilities can express the same result.
     - Build reusable sections/components instead of repeating large class blocks across pages.
     - Maintain light/dark parity, semantic landmarks, keyboard/focus accessibility, and mobile-first responsiveness.
+    - Marketing header/navigation must be sticky and shared through `MarketingPageLayout`.
 - Cross-domain separation rules:
     - Marketing code must not depend on dashboard shell components (`AppSidebar`, `AppHeader`, etc.).
     - Dashboard/auth/settings/users code must not depend on marketing-only components/layouts.

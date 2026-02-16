@@ -6,6 +6,8 @@
     }>()
 
     const page = usePage()
+
+    const isActiveItem = (href: string) => page.url === href || page.url.startsWith(`${href}?`)
 </script>
 
 <template>
@@ -13,7 +15,7 @@
         <UiSidebarGroupLabel>Platform</UiSidebarGroupLabel>
         <UiSidebarMenu>
             <UiSidebarMenuItem v-for="item in items" :key="item.title">
-                <UiSidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
+                <UiSidebarMenuButton as-child :is-active="isActiveItem(item.href)" :tooltip="item.title">
                     <Link :href="item.href">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
