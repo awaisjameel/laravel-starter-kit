@@ -13,9 +13,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppContent: typeof import('./../components/AppContent.vue')['default']
     AppearanceTabs: typeof import('./../components/AppearanceTabs.vue')['default']
-    AppFunnelLayout: typeof import('./../layouts/AppFunnelLayout.vue')['default']
-    AppHeader: typeof import('./../components/AppHeader.vue')['default']
-    AppHeaderLayout: typeof import('./../layouts/app/AppHeaderLayout.vue')['default']
     AppLayout: typeof import('./../layouts/AppLayout.vue')['default']
     AppLogo: typeof import('./../components/AppLogo.vue')['default']
     AppLogoIcon: typeof import('./../components/AppLogoIcon.vue')['default']
@@ -23,10 +20,8 @@ declare module 'vue' {
     AppSidebar: typeof import('./../components/AppSidebar.vue')['default']
     AppSidebarHeader: typeof import('./../components/AppSidebarHeader.vue')['default']
     AppSidebarLayout: typeof import('./../layouts/app/AppSidebarLayout.vue')['default']
-    AuthCardLayout: typeof import('./../layouts/auth/AuthCardLayout.vue')['default']
     AuthLayout: typeof import('./../layouts/AuthLayout.vue')['default']
     AuthSimpleLayout: typeof import('./../layouts/auth/AuthSimpleLayout.vue')['default']
-    AuthSplitLayout: typeof import('./../layouts/auth/AuthSplitLayout.vue')['default']
     Breadcrumbs: typeof import('./../components/Breadcrumbs.vue')['default']
     DeleteUser: typeof import('./../components/DeleteUser.vue')['default']
     Head: typeof import('@inertiajs/vue3')['Head']
@@ -175,8 +170,11 @@ declare module 'vue' {
     UiTooltipTrigger: typeof import('./../components/ui/tooltip/TooltipTrigger.vue')['default']
     UserInfo: typeof import('./../components/UserInfo.vue')['default']
     UserMenuContent: typeof import('./../components/UserMenuContent.vue')['default']
+    UsersActionsDropdown: typeof import('./../components/users/ActionsDropdown.vue')['default']
     UsersCreateUserDialog: typeof import('./../components/users/CreateUserDialog.vue')['default']
     UsersDeleteUserDialog: typeof import('./../components/users/DeleteUserDialog.vue')['default']
     UsersEditUserDialog: typeof import('./../components/users/EditUserDialog.vue')['default']
+    UsersPagination: typeof import('./../components/users/Pagination.vue')['default']
+    UsersTable: typeof import('./../components/users/Table.vue')['default']
   }
 }

@@ -26,6 +26,6 @@ final class DashboardTest extends TestCase
 
         $testResponse = $this->get('/dashboard');
         $testResponse->assertStatus(200);
-        $testResponse->assertInertia(fn (Assert $page): Assert => $page->component('Dashboard'));
+        $testResponse->assertInertia(fn (Assert $assert): Assert => $assert->component('Dashboard'));
     }
 }

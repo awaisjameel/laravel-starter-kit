@@ -4,13 +4,13 @@
     const breadcrumbItems: BreadcrumbItem[] = [
         {
             title: 'Appearance settings',
-            href: '/settings/appearance'
+            href: route('appearance')
         }
     ]
 </script>
 
 <template>
-    <AppFunnelLayout :breadcrumbs="breadcrumbItems">
+    <AppLayout :breadcrumbs="breadcrumbItems">
         <Head title="Appearance settings" />
 
         <SettingsLayout>
@@ -19,5 +19,5 @@
                 <AppearanceTabs />
             </div>
         </SettingsLayout>
-    </AppFunnelLayout>
+    </AppLayout>
 </template>

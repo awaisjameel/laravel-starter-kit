@@ -17,6 +17,6 @@ final class ExampleTest extends TestCase
         $testResponse = $this->get('/');
 
         $testResponse->assertStatus(200);
-        $testResponse->assertInertia(fn (Assert $page): Assert => $page->component('marketing/Welcome'));
+        $testResponse->assertInertia(fn (Assert $assert): Assert => $assert->component('marketing/Welcome'));
     }
 }

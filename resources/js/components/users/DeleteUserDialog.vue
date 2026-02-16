@@ -2,7 +2,10 @@
     import users from '@/routes/users'
     import { type User } from '@/types'
 
-    const emit = defineEmits(['update:open', 'deleted'])
+    const emit = defineEmits<{
+        'update:open': [open: boolean]
+        deleted: []
+    }>()
 
     defineProps<{
         open: boolean

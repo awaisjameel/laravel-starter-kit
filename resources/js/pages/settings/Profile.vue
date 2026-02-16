@@ -11,7 +11,7 @@
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Profile settings',
-            href: '/settings/profile'
+            href: route('profile.edit')
         }
     ]
 
@@ -31,7 +31,7 @@
 </script>
 
 <template>
-    <AppFunnelLayout :breadcrumbs="breadcrumbs">
+    <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="Profile settings" />
 
         <SettingsLayout>
@@ -94,5 +94,5 @@
 
             <DeleteUser />
         </SettingsLayout>
-    </AppFunnelLayout>
+    </AppLayout>
 </template>

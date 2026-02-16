@@ -78,8 +78,7 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
     - `resources/js/pages/auth/**`, `resources/js/pages/settings/**`, `resources/js/pages/users/**` for authenticated/product flows
 - Layouts:
     - `AppLayout` (sidebar shell for dashboard/app pages)
-    - `AppFunnelLayout` (alias of sidebar app shell)
-    - `AuthLayout` -> `AuthSimpleLayout`
+    - `AuthLayout` -> `AuthSimpleLayout` (single supported auth shell)
     - `marketing/PageLayout.vue` -> `MarketingPageLayout`
     - `settings/Layout.vue`
 - Navigation and shell components:
@@ -112,7 +111,7 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
 - Auth flows: registration, login, logout, forgot/reset password, confirm password, email verification.
 - Settings flows: profile update, password update, appearance toggle, account deletion.
 - Dashboard page behind `auth` + `verified` middleware.
-- Dashboard/app pages use sidebar layout only (`AppLayout`/`AppFunnelLayout` via `AppSidebarLayout`).
+- Dashboard/app pages use sidebar layout only via `AppLayout` (backed by `AppSidebarLayout`).
 - User management (`/users`) for admins only:
     - Server-side pagination
     - Create, update, delete via dialogs
@@ -140,7 +139,7 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
     - Maintain light/dark parity, semantic landmarks, keyboard/focus accessibility, and mobile-first responsiveness.
     - Marketing header/navigation must be sticky and shared through `MarketingPageLayout`.
 - Cross-domain separation rules:
-    - Marketing code must not depend on dashboard shell components (`AppSidebar`, `AppHeader`, etc.).
+    - Marketing code must not depend on dashboard shell components (`AppShell`, `AppSidebar`, `AppSidebarLayout`, etc.).
     - Dashboard/auth/settings/users code must not depend on marketing-only components/layouts.
     - Shared logic belongs in neutral shared layers (`components/ui`, composables, typed DTO/types, lib helpers).
 - Test expectations:
@@ -184,6 +183,7 @@ After schema/DTO/enum/route changes:
 - Keep strict typings end-to-end from backend DTO/enum -> frontend props/forms.
 - Use Inertia primitives (`useForm`, `router`, `<Link>`) for navigation and form submission.
 - Prefer Wayfinder route/action helpers over hard-coded endpoints.
+- Use named route helpers for `href` values (including breadcrumb/nav objects) instead of hard-coded path strings.
 - Keep pages in `resources/js/pages` and map server renders exactly.
 - All public client-facing pages must be under `resources/js/pages/marketing/**` and use `resources/js/layouts/marketing/**`.
 - Reuse `resources/js/components/ui` primitives before adding new custom base components.
@@ -196,7 +196,7 @@ After schema/DTO/enum/route changes:
 - Treat the design system as mandatory: prefer tokenized utilities (`bg-background`, `text-muted-foreground`, `border-border`, etc.) over one-off hard-coded palette classes.
 - Keep class lists intentional and avoid redundant utility noise.
 - Avoid duplicate UI structures; extract repeated blocks into typed, namespaced components/layouts.
-- Use `gap-*` for spacing in lists/grouped layouts.
+- Prefer `gap-*` for spacing in lists/grouped layouts in all new or modified code; avoid introducing new `space-x-*`/`space-y-*` usage.
 
 ### Performance
 
@@ -225,7 +225,7 @@ Before finalizing code changes:
 
 If the change affects many areas, run full tests:
 
-- `php artisan test --no-interaction`
+- `php artisan test`
 
 ## Laravel Boost MCP Workflow
 
@@ -233,9 +233,100 @@ When Laravel Boost MCP tools are available:
 
 - Use `search-docs` before Laravel/Inertia/Wayfinder/Sanctum/Tailwind ecosystem changes.
 - Use `list-artisan-commands` before running Artisan commands.
-- Always run Artisan with `--no-interaction`.
+- Run Artisan with `--no-interaction` when the specific command supports it.
 - Use MCP equivalents (`tinker`, `database-query`, `browser-logs`) when applicable.
   If MCP tools fail, use equivalent shell commands.
+
+## Service Layer Pattern
+
+- Purpose: Encapsulate business logic and complex operations that span multiple models or require external services.
+- Location: `app/Services/`
+- Naming: `{Entity}Service.php` (e.g., `UserService.php`)
+- Usage: Inject into controllers via constructor dependency injection.
+- When to use: Multi-model operations, external API integrations, complex data transformations, business rules enforcement.
+- Keep controllers thin; delegate business logic to services.
+- Services should be `final class` with explicit method types.
+
+## Events and Listeners
+
+- Events: `app/Events/` - Dispatch for decoupled operations.
+- Listeners: `app/Listeners/` - Handle side effects asynchronously when possible.
+- Register in `AppServiceProvider` or create dedicated `EventServiceProvider`.
+- Use for: Audit logging, notifications, cache management, webhooks, search indexing.
+- Example: `UserManagementEvent` with `LogUserManagementAudit` listener.
+- Dispatch events after database transactions complete to avoid stale state.
+
+## Queue Jobs
+
+- Location: `app/Jobs/`
+- Naming: `{Action}Job.php` (e.g., `SendWelcomeEmailJob.php`)
+- Use for: Email sending, report generation, heavy computations, batch processing.
+- Configure queue connections in `.env` (sync for local, database/redis for production).
+- Dispatch with `dispatch(new SendWelcomeEmailJob($user))`.
+- Jobs should implement `ShouldQueue` for background processing.
+- Handle failures gracefully with `tries` and `backoff` properties.
+
+## API Resources
+
+- Location: `app/Http/Resources/`
+- Use for API endpoint responses requiring transformation or pagination.
+- Extend `Illuminate\Http\Resources\Json\JsonResource`.
+- Keep DTOs for Inertia pages; use Resources for API endpoints.
+- Return via `new UserResource($user)` or `UserResource::collection($users)`.
+- Resources should transform data, not contain business logic.
+
+## Testing Standards
+
+- Location: `tests/Feature/` and `tests/Unit/`
+- Naming: `{Feature}Test.php` using PascalCase.
+- All test files must use `declare(strict_types=1);`.
+- Use `RefreshDatabase` trait for database tests.
+- Test structure per method:
+    - Happy path (success scenarios)
+    - Failure path (validation, authorization)
+    - Edge cases (boundaries, empty states)
+- Use factories: `User::factory()->create(['role' => UserRole::Admin])`.
+- Assert against database state and response content.
+- Feature tests should cover routes, policies, and validation.
+- Unit tests for isolated logic (services, helpers, custom functions).
+
+## Route Helper Conventions
+
+### Backend
+
+- Use `route('name')` helper or `to_route('name')` for redirects.
+- Use named routes exclusively, never hard-code URLs.
+- Route model binding automatically resolves models.
+
+### Frontend
+
+- Import Wayfinder route helpers for form submissions: `import { store } from '@/routes/users'`.
+- Use Ziggy `route()` for navigation links and breadcrumbs.
+- Wayfinder provides type-safe URL generation with parameters.
+- Example form submission: `form.post(store().url)` or `form.submit(users.store())`.
+
+## Form Component Patterns
+
+- Use `UiInput`, `UiLabel`, `UiSelect` from `components/ui/`.
+- Wrap form fields in `<div class="grid gap-2">` containers.
+- Display errors via `<InputError :message="form.errors.field" />`.
+- Use Inertia's `useForm()` for form state management.
+- Common pattern:
+    ```vue
+    <div class="grid gap-2">
+        <UiLabel for="email">Email</UiLabel>
+        <UiInput id="email" type="email" v-model="form.email" />
+        <InputError :message="form.errors.email" />
+    </div>
+    ```
+
+## Flash Messages
+
+- Set via `redirect()->route('name')->with('message', 'Success text')`.
+- Standard keys: `message` (success), `error` (errors), `status` (status updates).
+- Access in Vue via `page.props.message` or passed props.
+- Keep messages concise and user-friendly.
+- Use session flash for one-time notifications across redirects.
 
 ## Known Caveats (Current Starter Kit State)
 

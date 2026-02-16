@@ -63,7 +63,6 @@ export default defineConfig({
                 },
                 IconsResolver({
                     prefix: 'Icon'
-                    // enabledCollections: ['mdi', 'carbon', 'heroicons', 'lucide'],
                 })
             ]
         })

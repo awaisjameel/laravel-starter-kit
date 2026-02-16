@@ -3,11 +3,12 @@
 
     const page = usePage()
     const props = defineProps<UsersPageProps>()
+    const currentUserId = computed(() => page.props.auth.user.id)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Users',
-            href: '/users'
+            href: route('users.index')
         }
     ]
 
@@ -42,7 +43,7 @@
         }
     }
 
-    const onCreateUser = async () => {
+    const onCreateUser = () => {
         isCreateDialogOpen.value = false
     }
 
@@ -51,7 +52,7 @@
         isEditDialogOpen.value = true
     }
 
-    const onUpdateUser = async () => {
+    const onUpdateUser = () => {
         isEditDialogOpen.value = false
     }
 
@@ -60,7 +61,7 @@
         isDeleteDialogOpen.value = true
     }
 
-    const onUserDeleted = async () => {
+    const onUserDeleted = () => {
         isDeleteDialogOpen.value = false
     }
 </script>
@@ -77,90 +78,16 @@
                     </UiButton>
                 </div>
 
-                <UiCard>
-                    <UiCardContent class="p-0">
-                        <div class="relative min-h-[400px]">
-                            <div class="relative">
-                                <table class="w-full">
-                                    <thead class="border-b">
-                                        <tr class="hover:bg-transparent">
-                                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
-                                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Role</th>
-                                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
-                                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Created At</th>
-                                            <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="item in props.users.data" :key="item.id" class="border-b transition-colors hover:bg-muted/50">
-                                            <td class="flex flex-row items-center justify-center gap-2 p-4">
-                                                <UserInfo :user="item" />
-                                            </td>
-                                            <td class="p-4 capitalize">{{ item.role }}</td>
-                                            <td class="p-4">{{ item.email }}</td>
-                                            <td class="p-4">{{ new Date(item.created_at).toLocaleDateString() }}</td>
-                                            <td class="p-4 text-right">
-                                                <UiDropdownMenu>
-                                                    <UiDropdownMenuTrigger as-child>
-                                                        <UiButton variant="ghost" class="h-8 w-8 p-0">
-                                                            <span class="sr-only">Open menu</span>
-                                                            <Icon-mdi-dots-vertical class="h-4 w-4" />
-                                                        </UiButton>
-                                                    </UiDropdownMenuTrigger>
-                                                    <UiDropdownMenuContent align="end">
-                                                        <UiDropdownMenuItem @click="onEditUser(item)"> Edit </UiDropdownMenuItem>
-                                                        <UiDropdownMenuItem
-                                                            v-if="page.props.auth.user.id !== item.id"
-                                                            @click="onDeleteUser(item)"
-                                                            class="text-red-600 focus:text-red-600"
-                                                        >
-                                                            Delete
-                                                        </UiDropdownMenuItem>
-                                                    </UiDropdownMenuContent>
-                                                </UiDropdownMenu>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </UiCardContent>
-                </UiCard>
+                <UsersTable :users="props.users.data" :current-user-id="currentUserId" @edit="onEditUser" @delete="onDeleteUser" />
 
-                <div v-if="totalPages > 1" class="mt-4 flex flex-row items-center justify-between">
-                    <UiPagination
-                        :total="totalItems"
-                        :items-per-page="itemsPerPage"
-                        :page="currentPage"
-                        :sibling-count="2"
-                        show-edges
-                        @update:page="onPageChange"
-                    >
-                        <UiPaginationContent>
-                            <!-- <UiPaginationFirst @click="onPageChange(1)" /> -->
-                            <UiPaginationPrevious @click="onPageChange(currentPage - 1)" :disabled="currentPage === 1">
-                                <Icon-mdi-chevron-left class="h-4 w-4" />
-                            </UiPaginationPrevious>
-                            <template v-for="(item, index) in pageNumbers" :key="index">
-                                <UiPaginationItem :value="item" as-child>
-                                    <UiButton
-                                        class="h-10 w-10 p-0"
-                                        :variant="item === currentPage ? 'outline' : 'ghost'"
-                                        :aria-current="item === currentPage ? 'page' : undefined"
-                                        :disabled="item === currentPage"
-                                        @click="onPageChange(item)"
-                                    >
-                                        {{ item }}
-                                    </UiButton>
-                                </UiPaginationItem>
-                            </template>
-                            <UiPaginationNext @click="onPageChange(currentPage + 1)" :disabled="currentPage === totalPages">
-                                <Icon-mdi-chevron-right class="h-4 w-4" />
-                            </UiPaginationNext>
-                            <!-- <UiPaginationLast @click="onPageChange(totalPages)" /> -->
-                        </UiPaginationContent>
-                    </UiPagination>
-                </div>
+                <UsersPagination
+                    :current-page="currentPage"
+                    :total-pages="totalPages"
+                    :items-per-page="itemsPerPage"
+                    :total-items="totalItems"
+                    :page-numbers="pageNumbers"
+                    @page-change="onPageChange"
+                />
             </div>
 
             <UsersCreateUserDialog

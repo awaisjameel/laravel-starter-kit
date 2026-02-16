@@ -4,7 +4,7 @@
     const breadcrumbItems: BreadcrumbItem[] = [
         {
             title: 'Password settings',
-            href: '/settings/password'
+            href: route('password.edit')
         }
     ]
 
@@ -41,7 +41,7 @@
 </script>
 
 <template>
-    <AppFunnelLayout :breadcrumbs="breadcrumbItems">
+    <AppLayout :breadcrumbs="breadcrumbItems">
         <Head title="Password settings" />
 
         <SettingsLayout>
@@ -105,5 +105,5 @@
                 </form>
             </div>
         </SettingsLayout>
-    </AppFunnelLayout>
+    </AppLayout>
 </template>

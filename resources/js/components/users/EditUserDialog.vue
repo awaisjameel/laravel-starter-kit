@@ -3,7 +3,10 @@
     import { type User } from '@/types'
     import { UserRole } from '@/types/app-data'
 
-    const emit = defineEmits(['update:open', 'updated'])
+    const emit = defineEmits<{
+        'update:open': [open: boolean]
+        updated: []
+    }>()
 
     const props = defineProps<{
         open: boolean
