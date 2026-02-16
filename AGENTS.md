@@ -20,6 +20,8 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
 - Write or modify code only after that understanding is clear, then implement in the most efficient, maintainable, and logically structured way.
 - Match existing conventions before introducing new patterns.
 - Reuse existing components, composables, DTOs, enums, and helpers before creating new ones.
+- Public client-facing UI is the **marketing domain** and must stay structurally separated from authenticated app domains (dashboard/settings/users/auth) except for approved shared primitives/utilities.
+- For any component/layout/page in a subdirectory, use the namespace-prefixed auto-registered tag name (for example `<MarketingPageLayout />`, `<UsersCreateUserDialog />`), never an unscoped alias.
 - Do not change dependencies, core folder structure, or app architecture without explicit approval.
 - Do not add new documentation files unless explicitly requested.
 - No dead code, commented-out code, placeholder TODOs, or magic strings where typed/shared constants exist.
@@ -71,14 +73,21 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
 - Entry points:
     - `resources/js/app.ts` (CSR)
     - `resources/js/ssr.ts` (SSR)
-- Inertia pages: `resources/js/pages` (lowercase directory is intentional)
+- Inertia pages: `resources/js/pages` (lowercase directory is intentional), organized by domain namespaces:
+    - `resources/js/pages/marketing/**` for public client-facing pages
+    - `resources/js/pages/auth/**`, `resources/js/pages/settings/**`, `resources/js/pages/users/**` for authenticated/product flows
 - Layouts:
     - `AppLayout` (header shell)
     - `AppFunnelLayout` (sidebar shell)
     - `AuthLayout` -> `AuthSimpleLayout`
+    - `marketing/PageLayout.vue` -> `MarketingPageLayout`
     - `settings/Layout.vue`
 - Navigation and shell components:
     - `AppHeader`, `AppSidebar`, `AppShell`, `AppContent`, `NavMain`, `NavUser`, `UserMenuContent`
+- Domain component boundaries:
+    - Marketing-only components: `resources/js/components/marketing/**`
+    - App/dashboard shell and feature components: `resources/js/components/**` (excluding `marketing/**`)
+    - Shared primitives: `resources/js/components/ui/**`
 - Appearance/theming:
     - `useAppearance.ts` stores preference in `localStorage` and `appearance` cookie
     - Dark mode is class-based (`.dark`), initialized early in `resources/views/app.blade.php`
@@ -93,6 +102,9 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
 
 ## Existing Features (What Agents Must Know)
 
+- Marketing/public flow:
+    - Route `/` renders `marketing/Welcome` via Inertia and stays outside auth middleware.
+    - Marketing pages are public client-facing pages and must use the marketing namespace structure.
 - Auth flows: registration, login, logout, forgot/reset password, confirm password, email verification.
 - Settings flows: profile update, password update, appearance toggle, account deletion.
 - Dashboard page behind `auth` + `verified` middleware.
@@ -101,6 +113,33 @@ The goal is clean, consistent, end-to-end type-safe, secure, and performant code
     - Create, update, delete via dialogs
     - Role managed via `UserRole` enum
 - API endpoint `/api/user` protected by Sanctum.
+
+## Marketing Pages Standard (Public Client-Facing)
+
+- Purpose:
+    - Marketing pages are public entry points focused on product communication, conversion, and trust.
+    - They must deliver premium, modern, and robust UX while remaining maintainable and type-safe.
+- Required structure:
+    - Pages: `resources/js/pages/marketing/**`
+    - Layouts: `resources/js/layouts/marketing/**`
+    - Components: `resources/js/components/marketing/**`
+    - Route URIs remain public and unprefixed by default (for example `/`, `/about`, `/pricing`), and must not be moved under `/marketing/*` unless the user explicitly requests it.
+    - Internal Inertia page namespace `marketing/*` is allowed and preferred for code organization without changing public URLs.
+- Required namespacing:
+    - Use namespace-prefixed tags for all nested files (for example `<MarketingPageLayout />`, `<MarketingHeroSection />`).
+    - Keep marketing tags/components distinct from dashboard/auth/settings/users tags/components.
+- Design-system enforcement:
+    - Use shared tokens/utilities from `resources/css/app.css` and existing `resources/js/components/ui/**` primitives first.
+    - Avoid one-off inline color systems in templates (raw hex/hsl classes) when tokenized utilities can express the same result.
+    - Build reusable sections/components instead of repeating large class blocks across pages.
+    - Maintain light/dark parity, semantic landmarks, keyboard/focus accessibility, and mobile-first responsiveness.
+- Cross-domain separation rules:
+    - Marketing code must not depend on dashboard shell components (`AppSidebar`, `AppHeader`, etc.).
+    - Dashboard/auth/settings/users code must not depend on marketing-only components/layouts.
+    - Shared logic belongs in neutral shared layers (`components/ui`, composables, typed DTO/types, lib helpers).
+- Test expectations:
+    - New or changed marketing routes must have feature tests for public accessibility and expected response behavior.
+    - Behavior changes on marketing pages should include relevant frontend/feature coverage for edge states when applicable.
 
 ## Generated Files and Codegen
 
@@ -140,6 +179,7 @@ After schema/DTO/enum/route changes:
 - Use Inertia primitives (`useForm`, `router`, `<Link>`) for navigation and form submission.
 - Prefer Wayfinder route/action helpers over hard-coded endpoints.
 - Keep pages in `resources/js/pages` and map server renders exactly.
+- All public client-facing pages must be under `resources/js/pages/marketing/**` and use `resources/js/layouts/marketing/**`.
 - Reuse `resources/js/components/ui` primitives before adding new custom base components.
 - All new UI must support both light and dark themes.
 
@@ -147,7 +187,9 @@ After schema/DTO/enum/route changes:
 
 - Tailwind v4 only (`@import 'tailwindcss';` already configured).
 - Reuse existing tokens and utilities in `resources/css/app.css`.
+- Treat the design system as mandatory: prefer tokenized utilities (`bg-background`, `text-muted-foreground`, `border-border`, etc.) over one-off hard-coded palette classes.
 - Keep class lists intentional and avoid redundant utility noise.
+- Avoid duplicate UI structures; extract repeated blocks into typed, namespaced components/layouts.
 - Use `gap-*` for spacing in lists/grouped layouts.
 
 ### Performance
