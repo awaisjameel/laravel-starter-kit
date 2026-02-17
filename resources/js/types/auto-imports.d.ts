@@ -216,6 +216,7 @@ declare global {
     const useApi: (typeof import('../composables/useApi'))['useApi']
     const useAppearance: typeof import('../composables/useAppearance').useAppearance
     const useAttrs: typeof import('vue').useAttrs
+    const useConfirm: typeof import('../composables/useConfirm').useConfirm
     const useCssModule: typeof import('vue').useCssModule
     const useCssVars: typeof import('vue').useCssVars
     const useForm: typeof import('@inertiajs/vue3').useForm
@@ -265,11 +266,14 @@ declare global {
     // @ts-ignore
     export type { Appearance } from '../composables/useAppearance'
     // @ts-ignore
+    export type { ConfirmOptions } from '../composables/useConfirm'
+    // @ts-ignore
     export type { NavigationGroup } from '../composables/useNavigation'
     // @ts-ignore
     export type { Toast } from '../composables/useToast'
     import('vue')
     import('../composables/useAppearance')
+    import('../composables/useConfirm')
     import('../composables/useNavigation')
     import('../composables/useToast')
 }
@@ -341,6 +345,7 @@ declare module 'vue' {
         readonly updateTheme: UnwrapRef<(typeof import('../composables/useAppearance'))['updateTheme']>
         readonly useAppearance: UnwrapRef<(typeof import('../composables/useAppearance'))['useAppearance']>
         readonly useAttrs: UnwrapRef<(typeof import('vue'))['useAttrs']>
+        readonly useConfirm: UnwrapRef<(typeof import('../composables/useConfirm'))['useConfirm']>
         readonly useCssModule: UnwrapRef<(typeof import('vue'))['useCssModule']>
         readonly useCssVars: UnwrapRef<(typeof import('vue'))['useCssVars']>
         readonly useForm: UnwrapRef<(typeof import('@inertiajs/vue3'))['useForm']>
