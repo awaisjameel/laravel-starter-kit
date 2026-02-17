@@ -233,6 +233,7 @@ declare global {
     const useSidebar: typeof import('../components/ui/sidebar/utils').useSidebar
     const useSlots: typeof import('vue').useSlots
     const useTemplateRef: typeof import('vue').useTemplateRef
+    const useToast: typeof import('../composables/useToast').useToast
     const valueUpdater: typeof import('../components/ui/table/utils').valueUpdater
     const watch: typeof import('vue').watch
     const watchEffect: typeof import('vue').watchEffect
@@ -265,9 +266,12 @@ declare global {
     export type { Appearance } from '../composables/useAppearance'
     // @ts-ignore
     export type { NavigationGroup } from '../composables/useNavigation'
+    // @ts-ignore
+    export type { Toast } from '../composables/useToast'
     import('vue')
     import('../composables/useAppearance')
     import('../composables/useNavigation')
+    import('../composables/useToast')
 }
 
 // for vue template auto import
@@ -353,6 +357,7 @@ declare module 'vue' {
         readonly useRouter: UnwrapRef<(typeof import('vue-router'))['useRouter']>
         readonly useSlots: UnwrapRef<(typeof import('vue'))['useSlots']>
         readonly useTemplateRef: UnwrapRef<(typeof import('vue'))['useTemplateRef']>
+        readonly useToast: UnwrapRef<(typeof import('../composables/useToast'))['useToast']>
         readonly watch: UnwrapRef<(typeof import('vue'))['watch']>
         readonly watchEffect: UnwrapRef<(typeof import('vue'))['watchEffect']>
         readonly watchPostEffect: UnwrapRef<(typeof import('vue'))['watchPostEffect']>

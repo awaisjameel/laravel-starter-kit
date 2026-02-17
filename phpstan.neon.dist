@@ -5,7 +5,6 @@ parameters:
     paths:
         - app
         - bootstrap
-        - config
         - database
         - routes
     level: 6

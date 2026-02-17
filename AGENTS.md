@@ -216,16 +216,34 @@ After schema/DTO/enum/route changes:
 
 ## Validation and Quality Gate
 
-Before finalizing code changes:
+**MANDATORY**: After any code change, run the single unified command:
 
-1. `composer generate-and-cleanup`
-2. `npm run cleanup`
-3. `npm run typecheck`
-4. Run targeted PHPUnit tests for changed behavior
+```bash
+composer generate-and-cleanup
+```
 
-If the change affects many areas, run full tests:
+This command automatically:
 
-- `php artisan test`
+1. Generates TypeScript types from PHP DTOs (`php artisan typescript:transform`)
+2. Generates Wayfinder route helpers (`php artisan wayfinder:generate`)
+3. Fixes PHP code style with Pint (`pint --parallel`)
+4. Refactors PHP with Rector (`rector process`)
+5. Analyzes PHP with PHPStan (`phpstan analyse`)
+6. Formats and lints frontend code (`npm run cleanup` = prettier + eslint --fix)
+
+After running `composer generate-and-cleanup`, also run:
+
+```bash
+npm run typecheck
+```
+
+Then run targeted PHPUnit tests for changed behavior. If the change affects many areas, run full tests:
+
+```bash
+php artisan test
+```
+
+**Agents must NEVER skip running `composer generate-and-cleanup` after making code changes.**
 
 ## Laravel Boost MCP Workflow
 
@@ -290,6 +308,54 @@ When Laravel Boost MCP tools are available:
 - Feature tests should cover routes, policies, and validation.
 - Unit tests for isolated logic (services, helpers, custom functions).
 
+### Minimum Test Requirements
+
+Every new feature or behavior change MUST include tests. Agents must never skip test writing:
+
+1. **New Routes**: Must have feature tests for:
+    - Successful response (happy path)
+    - Authentication requirements (if protected)
+    - Authorization requirements (if role-based)
+    - Validation errors (if accepting input)
+
+2. **New Controllers/Methods**: Must have tests for:
+    - Happy path scenario
+    - Validation failures
+    - Authorization failures (if applicable)
+
+3. **New Services**: Must have unit tests for:
+    - Public method behavior
+    - Edge cases and error handling
+
+4. **New Policies**: Must have feature tests verifying:
+    - Authorized users can access
+    - Unauthorized users cannot access
+
+5. **Bug Fixes**: Must include regression test that:
+    - Reproduces the original bug
+    - Verifies the fix works
+
+### Test Coverage Expectations
+
+- Controllers: Test all public methods
+- Services: Test all public methods with edge cases
+- Policies: Test all ability methods
+- Form Requests: Test validation rules via controller tests
+- Middleware: Test behavior with various conditions
+
+### Running Tests
+
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test file
+php artisan test tests/Feature/Users/UserManagementTest.php
+
+# Run with coverage (if configured)
+php artisan test --coverage
+```
+
 ## Route Helper Conventions
 
 ### Backend
@@ -327,6 +393,294 @@ When Laravel Boost MCP tools are available:
 - Access in Vue via `page.props.message` or passed props.
 - Keep messages concise and user-friendly.
 - Use session flash for one-time notifications across redirects.
+
+## Reusable Component Standards
+
+### Frontend Component Architecture
+
+- **Base Components** (`resources/js/components/ui/`):
+    - Pure, presentational components with no business logic.
+    - Accept props for all configurable values.
+    - Emit events for parent components to handle.
+    - Support both light and dark themes.
+    - Examples: `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`.
+
+- **Form Components** (`resources/js/components/form/`):
+    - Wrap base UI components with label/error handling.
+    - Use consistent `<div class="grid gap-2">` container pattern.
+    - Examples: `FormField`, `FormSelect`, `FormTextarea`, `FormCheckbox`.
+
+- **Feature Components** (`resources/js/components/{domain}/`):
+    - Domain-specific components with business logic.
+    - Use composables for shared behavior.
+    - Examples: `users/CreateUserDialog`, `users/EditUserDialog`.
+
+- **Layout Components** (`resources/js/layouts/`):
+    - Page shell components for consistent structure.
+    - Examples: `AppLayout`, `AuthLayout`, `MarketingPageLayout`.
+
+### When to Create New Components
+
+1. **Extract when duplicated 2+ times**: If similar UI structure appears in 2+ places, create a reusable component.
+2. **Single responsibility**: Each component should do one thing well.
+3. **Prop-driven flexibility**: Use props for variations, not separate components.
+4. **Slot-based composition**: Use slots for content injection points.
+
+### Component Naming Conventions
+
+- **Base UI**: `Ui{Name}` (e.g., `UiButton`, `UiInput`)
+- **Form**: `Form{Field}` (e.g., `FormField`, `FormSelect`)
+- **Feature**: `{Domain}{Action}` (e.g., `UsersCreateDialog`)
+- **Layout**: `{Domain}Layout` (e.g., `AppLayout`, `MarketingPageLayout`)
+
+## Composables Pattern
+
+### Purpose and Location
+
+- Location: `resources/js/composables/`
+- Naming: `use{Feature}.ts` (e.g., `useToast`, `useNavigation`, `useAppearance`)
+- Export as composable function, not object.
+
+### When to Create Composables
+
+1. **Stateful logic reuse**: Same reactive state/logic needed in multiple components.
+2. **Complex operations**: Encapsulate complex calculations or transformations.
+3. **API/data fetching**: Centralize data fetching patterns.
+4. **Cross-cutting concerns**: Toast notifications, modals, loading states.
+
+### Composable Best Practices
+
+```typescript
+// Good: Returns reactive state and methods
+export function useToast() {
+    const toasts = ref<Toast[]>([])
+
+    const show = (message: string, type: ToastType = 'success') => {
+        toasts.value.push({ id: Date.now(), message, type })
+    }
+
+    return { toasts: readonly(toasts), show }
+}
+
+// Bad: Returns only methods, no reactive state
+export function useToast() {
+    return {
+        show: (message: string) => { /* ... */ }
+    }
+}
+```
+
+### Existing Composables
+
+- `useAppearance`: Theme/appearance management (light/dark mode).
+- `useNavigation`: Role-aware navigation items.
+- `useInitials`: Generate user initials from name.
+- `useToast`: Toast notification system.
+- `useHttp`: API HTTP client (for non-Inertia API calls).
+
+## Utility Functions
+
+### Location and Purpose
+
+- Location: `resources/js/lib/`
+- Naming: Descriptive function names, `{domain}Utils.ts` for domain-specific utilities.
+- Main file: `utils.ts` for shared utilities.
+
+### When to Create Utilities
+
+1. **Pure functions**: No side effects, same input = same output.
+2. **Data transformation**: Format dates, parse strings, transform objects.
+3. **Validation helpers**: Client-side validation functions.
+4. **Constants**: Shared configuration values.
+
+### Utility Examples
+
+```typescript
+// resources/js/lib/utils.ts
+export function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs))
+}
+
+export function getEnumOptions<TEnum extends Record<string, string>>(
+    enumType: TEnum
+): Array<{ value: string; label: string }> {
+    return Object.values(enumType).map((value) => ({ value, label: value }))
+}
+
+export function formatDate(date: string | Date, format: string = 'medium'): string {
+    // Date formatting logic
+}
+```
+
+## Backend Service Layer
+
+### Service Standards
+
+- Location: `app/Services/`
+- Naming: `{Entity}Service.php` (e.g., `UserService.php`)
+- Always use `final class` with explicit types.
+- Inject via constructor dependency injection.
+
+### When to Create Services
+
+1. **Multi-model operations**: Operations involving multiple Eloquent models.
+2. **External integrations**: API calls, file storage, third-party services.
+3. **Complex business logic**: Rules that don't belong in models or controllers.
+4. **Reusable operations**: Same logic needed in multiple controllers/commands.
+
+### Service Pattern Example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\User;
+use App\Events\UserManagementEvent;
+use Illuminate\Http\Request;
+
+final class UserService
+{
+    public function createUser(array $data, User $actor, Request $request): User
+    {
+        $user = User::create($data);
+
+        Event::dispatch(new UserManagementEvent(
+            action: 'create',
+            actor: $actor,
+            target: $user,
+            request: $request,
+        ));
+
+        return $user;
+    }
+}
+```
+
+### Controller-Service Relationship
+
+- Controllers handle HTTP: validation, authorization, response.
+- Services handle business: data operations, events, external calls.
+- Keep controllers thin; delegate to services.
+
+## Artisan Commands
+
+### Location and Purpose
+
+- Location: `app/Console/Commands/`
+- Naming: `{Action}{Entity}` (e.g., `ImportUsers`, `GenerateReport`)
+- Register in `routes/console.php`.
+
+### When to Create Commands
+
+1. **Scheduled tasks**: Cron jobs, periodic maintenance.
+2. **Data imports/exports**: Bulk data operations.
+3. **One-time migrations**: Data transformations.
+4. **Administrative tasks**: User management, cache clearing.
+
+### Command Pattern Example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Console\Commands;
+
+use App\Services\UserService;
+use Illuminate\Console\Command;
+
+final class ImportUsers extends Command
+{
+    protected $signature = 'users:import {file}';
+    protected $description = 'Import users from CSV file';
+
+    public function handle(UserService $userService): int
+    {
+        $file = $this->argument('file');
+        // Import logic using service
+
+        return self::SUCCESS;
+    }
+}
+```
+
+## Shared Data Components
+
+### Pagination Component
+
+- Use `PaginationNav` component for server-side pagination.
+- Accepts `Paginated<T>` type from `@/types`.
+- Emits `page-change` event for navigation.
+
+```vue
+<PaginationNav :pagination="users" @page-change="onPageChange" />
+```
+
+### Data Table Component
+
+- Use `DataTable` component for tabular data.
+- Accepts columns definition and data array/paginated data.
+- Supports custom cell slots and row actions.
+
+```vue
+<DataTable :columns="columns" :data="users" :actions="tableActions" @row-click="onRowClick">
+    <template #cell-name="{ row }">
+        <UserInfo :user="row" />
+    </template>
+</DataTable>
+```
+
+## Toast Notification System
+
+### Usage Pattern
+
+```typescript
+import { useToast } from '@/composables/useToast'
+
+const { success, error, info, warning } = useToast()
+
+// In form success callback
+form.post(route('users.store'), {
+    onSuccess: () => {
+        success('User created successfully')
+    },
+    onError: () => {
+        error('Failed to create user')
+    }
+})
+```
+
+### Toast Types
+
+- `success`: Green, checkmark icon - successful operations.
+- `error`: Red, X icon - failures and errors.
+- `info`: Blue, info icon - informational messages.
+- `warning`: Yellow, warning icon - warnings and cautions.
+
+## Code Reusability Checklist
+
+Before creating new code, verify:
+
+### Frontend
+
+- [ ] Check if existing UI component can be extended.
+- [ ] Check if composable exists for shared logic.
+- [ ] Check if utility function exists for transformation.
+- [ ] Use shared form components instead of raw inputs.
+- [ ] Use shared data components for tables/pagination.
+- [ ] Extract repeated patterns into reusable components.
+
+### Backend
+
+- [ ] Check if service exists for business logic.
+- [ ] Check if event/listener pattern applies.
+- [ ] Check if job should be used for background processing.
+- [ ] Use Form Requests for validation.
+- [ ] Use Policies for authorization.
+- [ ] Use DTOs for data transfer.
 
 ## Known Caveats (Current Starter Kit State)
 

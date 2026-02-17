@@ -90,9 +90,10 @@
         "generate-and-cleanup": [
             "@php artisan typescript:transform",
             "@php artisan wayfinder:generate",
-            "npx prettier -w ./",
             "@php vendor/bin/pint --parallel",
-            "@php vendor/bin/rector process"
+            "@php vendor/bin/rector process",
+            "@php vendor/bin/phpstan analyse --ansi",
+            "npm run cleanup"
         ]
     },
     "extra": {

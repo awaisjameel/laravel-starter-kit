@@ -10,14 +10,17 @@ use App\Http\Requests\Users\UserDestroyRequest;
 use App\Http\Requests\Users\UserIndexRequest;
 use App\Http\Requests\Users\UserUpdateRequest;
 use App\Models\User;
-use App\Support\AuditLogger;
-use BackedEnum;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserService $userService,
+    ) {}
+
     public function index(UserIndexRequest $userIndexRequest): Response
     {
         $lengthAwarePaginator = User::query()
@@ -37,19 +40,10 @@ final class UserController extends Controller
     public function store(UserCreateRequest $userCreateRequest): RedirectResponse
     {
         $actor = $userCreateRequest->user();
-        if (! $actor instanceof User) {
-            abort(403);
-        }
 
         $userData = UserData::from($userCreateRequest->validated());
-        $createdUser = User::create($userData->toArray());
 
-        AuditLogger::logUserManagement(
-            action: 'create',
-            actor: $actor,
-            target: $createdUser,
-            request: $userCreateRequest,
-        );
+        $this->userService->createUser($userData, $actor, $userCreateRequest);
 
         return redirect()->route('users.index')
             ->with('message', 'User created successfully');
@@ -58,49 +52,12 @@ final class UserController extends Controller
     public function update(UserUpdateRequest $userUpdateRequest, User $user): RedirectResponse
     {
         $actor = $userUpdateRequest->user();
-        if (! $actor instanceof User) {
-            abort(403);
-        }
 
-        $before = $user->only(['name', 'email', 'role']);
-
-        $validated = $userUpdateRequest->validated();
-
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->role = $validated['role'];
-        if (! empty($validated['password'])) {
-            $user->password = $validated['password'];
-        }
-
-        $user->save();
-
-        $changes = [];
-        foreach (['name', 'email', 'role'] as $key) {
-            $beforeValue = $this->auditValue($before[$key]);
-            $afterValue = $this->auditValue($user->{$key});
-
-            if ($beforeValue !== $afterValue) {
-                $changes[$key] = [
-                    'before' => $beforeValue,
-                    'after' => $afterValue,
-                ];
-            }
-        }
-
-        if (! empty($validated['password'])) {
-            $changes['password'] = [
-                'before' => '[REDACTED]',
-                'after' => '[REDACTED]',
-            ];
-        }
-
-        AuditLogger::logUserManagement(
-            action: 'update',
-            actor: $actor,
-            target: $user,
-            request: $userUpdateRequest,
-            changes: $changes,
+        $this->userService->updateUser(
+            $user,
+            $userUpdateRequest->validated(),
+            $actor,
+            $userUpdateRequest
         );
 
         return redirect()->route('users.index')
@@ -110,29 +67,10 @@ final class UserController extends Controller
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): RedirectResponse
     {
         $actor = $userDestroyRequest->user();
-        if (! $actor instanceof User) {
-            abort(403);
-        }
 
-        AuditLogger::logUserManagement(
-            action: 'delete',
-            actor: $actor,
-            target: $user,
-            request: $userDestroyRequest,
-        );
-
-        $user->delete();
+        $this->userService->deleteUser($user, $actor, $userDestroyRequest);
 
         return redirect()->route('users.index')
             ->with('message', 'User deleted successfully');
-    }
-
-    private function auditValue(mixed $value): mixed
-    {
-        if ($value instanceof BackedEnum) {
-            return $value->value;
-        }
-
-        return $value;
     }
 }

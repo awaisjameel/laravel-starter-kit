@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDestroyRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
-use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,9 +36,6 @@ final class ProfileController extends Controller
     public function update(ProfileUpdateRequest $profileUpdateRequest): RedirectResponse
     {
         $user = $profileUpdateRequest->user();
-        if (! $user instanceof User) {
-            abort(403);
-        }
 
         $user->fill($profileUpdateRequest->validated());
 
@@ -58,9 +54,6 @@ final class ProfileController extends Controller
     public function destroy(ProfileDestroyRequest $profileDestroyRequest): RedirectResponse
     {
         $user = $profileDestroyRequest->user();
-        if (! $user instanceof User) {
-            abort(403);
-        }
 
         Auth::logout();
 

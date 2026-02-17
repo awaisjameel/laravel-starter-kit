@@ -1,7 +1,7 @@
 import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../wayfinder'
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:19
+ * @see app/Http/Controllers/Settings/PasswordController.php:18
  * @route '/settings/password'
  */
 export const edit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ edit.definition = {
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:19
+ * @see app/Http/Controllers/Settings/PasswordController.php:18
  * @route '/settings/password'
  */
 edit.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ edit.url = (options?: RouteQueryOptions) => {
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:19
+ * @see app/Http/Controllers/Settings/PasswordController.php:18
  * @route '/settings/password'
  */
 edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::edit
- * @see app/Http/Controllers/Settings/PasswordController.php:19
+ * @see app/Http/Controllers/Settings/PasswordController.php:18
  * @route '/settings/password'
  */
 edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
- * @see app/Http/Controllers/Settings/PasswordController.php:27
+ * @see app/Http/Controllers/Settings/PasswordController.php:26
  * @route '/settings/password'
  */
 export const update = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -59,7 +59,7 @@ update.definition = {
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
- * @see app/Http/Controllers/Settings/PasswordController.php:27
+ * @see app/Http/Controllers/Settings/PasswordController.php:26
  * @route '/settings/password'
  */
 update.url = (options?: RouteQueryOptions) => {
@@ -68,7 +68,7 @@ update.url = (options?: RouteQueryOptions) => {
 
 /**
  * @see \App\Http\Controllers\Settings\PasswordController::update
- * @see app/Http/Controllers/Settings/PasswordController.php:27
+ * @see app/Http/Controllers/Settings/PasswordController.php:26
  * @route '/settings/password'
  */
 update.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({

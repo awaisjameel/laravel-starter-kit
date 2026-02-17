@@ -43,4 +43,9 @@ export interface UsersPageProps {
     users: Paginated<UserData>
 }
 
+export interface SelectOption {
+    value: string
+    label: string
+}
+
 export type BreadcrumbItemType = BreadcrumbItem
