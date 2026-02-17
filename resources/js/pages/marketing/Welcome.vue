@@ -7,8 +7,8 @@
     <Head title="Welcome" />
 
     <MarketingPageLayout>
-        <section class="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
-            <div class="space-y-8">
+        <section class="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
+            <div class="space-y-6 sm:space-y-8">
                 <span
                     class="inline-flex w-fit items-center rounded-full border border-border/80 bg-card/80 px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground"
                 >
@@ -16,7 +16,7 @@
                 </span>
 
                 <div class="space-y-4">
-                    <h1 class="max-w-2xl text-4xl font-semibold tracking-tight text-balance text-foreground sm:text-5xl lg:text-6xl">
+                    <h1 class="max-w-2xl text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-5xl lg:text-6xl">
                         Ship modern products faster with a coherent, production-ready design system.
                     </h1>
                     <p class="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -25,13 +25,13 @@
                     </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3">
-                    <UiButton class="h-11 px-6" as-child>
+                <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                    <UiButton class="h-11 w-full px-6 sm:w-auto" as-child>
                         <Link :href="marketingPrimaryAction.href">
                             {{ marketingPrimaryAction.title }}
                         </Link>
                     </UiButton>
-                    <UiButton variant="outline" class="h-11 px-6" as-child>
+                    <UiButton variant="outline" class="h-11 w-full px-6 sm:w-auto" as-child>
                         <Link :href="marketingSecondaryAction.href">
                             {{ marketingSecondaryAction.title }}
                         </Link>

@@ -68,11 +68,11 @@
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="mt-4 flex flex-col gap-2">
-                <div class="flex items-center justify-between">
+        <div class="flex h-full min-w-0 flex-1 flex-col gap-4 rounded-xl p-3 sm:p-4">
+            <div class="mt-2 flex flex-col gap-4 sm:mt-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Heading title="Users" description="Manage user accounts" />
-                    <UiButton @click="isCreateDialogOpen = true">
+                    <UiButton class="w-full sm:w-auto" @click="isCreateDialogOpen = true">
                         <Icon-mdi-plus />
                         Add User
                     </UiButton>

@@ -23,7 +23,7 @@
 
 <template>
     <UiDialog :open="open" @update:open="emit('update:open', $event)">
-        <UiDialogContent class="sm:max-w-[425px]">
+        <UiDialogContent class="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-[425px]">
             <UiDialogHeader>
                 <UiDialogTitle>Create User</UiDialogTitle>
                 <UiDialogDescription> Add a new user to the system </UiDialogDescription>
@@ -66,8 +66,8 @@
                     </div>
                 </div>
                 <UiDialogFooter>
-                    <UiButton type="button" variant="ghost" @click="$emit('update:open', false)">Cancel</UiButton>
-                    <UiButton type="submit" :disabled="form.processing">
+                    <UiButton type="button" variant="ghost" class="w-full sm:w-auto" @click="emit('update:open', false)">Cancel</UiButton>
+                    <UiButton type="submit" class="w-full sm:w-auto" :disabled="form.processing">
                         <Icon-mdi-loading v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
                         Create User
                     </UiButton>

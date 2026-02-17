@@ -240,6 +240,9 @@ After schema/DTO/enum/route changes:
 - Keep class lists intentional and avoid redundant utility noise.
 - Avoid duplicate UI structures; extract repeated blocks into typed, namespaced components/layouts.
 - Prefer `gap-*` for spacing in lists/grouped layouts in all new or modified code; avoid introducing new `space-x-*`/`space-y-*` usage.
+- Build mobile-first by default: define base styles for phones first, then layer `sm:`, `md:`, and `lg:` enhancements.
+- Prevent horizontal overflow in page shells and dense UI: use `min-w-0` on flex children and `overflow-x-auto` on wide content areas.
+- For data-heavy views (tables, toolbars, filters), provide an explicit small-screen strategy (stacked cards or horizontal scroll with reachable actions).
 
 ### Performance
 
@@ -1423,6 +1426,9 @@ php artisan test
 - Keep class lists intentional and avoid redundant utility noise.
 - Avoid duplicate UI structures; extract repeated blocks into typed, namespaced components/layouts.
 - Prefer `gap-*` for spacing in lists/grouped layouts in all new or modified code; avoid introducing new `space-x-*`/`space-y-*` usage.
+- Build mobile-first by default: define base styles for phones first, then layer `sm:`, `md:`, and `lg:` enhancements.
+- Prevent horizontal overflow in page shells and dense UI: use `min-w-0` on flex children and `overflow-x-auto` on wide content areas.
+- For data-heavy views (tables, toolbars, filters), provide an explicit small-screen strategy (stacked cards or horizontal scroll with reachable actions).
 
 ### Performance
 

@@ -5,7 +5,9 @@
 
 <template>
     <footer class="border-t border-border/70 bg-background/95">
-        <div class="mx-auto grid w-full max-w-7xl gap-10 px-6 py-12 md:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] lg:px-8">
+        <div
+            class="mx-auto grid w-full max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-12 md:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] lg:px-8"
+        >
             <div class="space-y-4">
                 <Link :href="route('home')" class="inline-flex">
                     <AppLogo />
@@ -29,7 +31,7 @@
 
         <div class="border-t border-border/70">
             <div
-                class="mx-auto flex w-full max-w-7xl flex-col gap-1 px-6 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8"
+                class="mx-auto flex w-full max-w-7xl flex-col gap-1 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
             >
                 <p>&copy; {{ currentYear }} Laravel Starter Kit</p>
                 <p>Built for consistent UX, robust architecture, and faster delivery.</p>

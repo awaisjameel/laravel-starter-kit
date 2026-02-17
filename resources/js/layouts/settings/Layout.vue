@@ -22,12 +22,12 @@
 </script>
 
 <template>
-    <div class="px-4 py-6">
+    <div class="px-4 py-6 sm:px-6">
         <Heading title="Settings" description="Manage your profile and account settings" />
 
-        <div class="flex flex-col space-y-8 md:space-y-0 lg:flex-row lg:space-y-0 lg:space-x-12">
-            <aside class="w-full max-w-xl lg:w-48">
-                <nav class="flex flex-col space-y-1 space-x-0">
+        <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
+            <aside class="w-full lg:w-48">
+                <nav class="grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
                     <UiButton
                         v-for="item in sidebarNavItems"
                         :key="item.href"
@@ -42,10 +42,10 @@
                 </nav>
             </aside>
 
-            <UiSeparator class="my-6 md:hidden" />
+            <UiSeparator class="lg:hidden" />
 
-            <div class="flex-1 md:max-w-2xl">
-                <section class="max-w-xl space-y-12">
+            <div class="flex-1">
+                <section class="grid max-w-xl gap-12">
                     <slot />
                 </section>
             </div>

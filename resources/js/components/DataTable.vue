@@ -60,9 +60,9 @@
 </script>
 
 <template>
-    <div class="relative min-h-[400px]">
-        <div class="relative">
-            <table class="w-full">
+    <div class="relative min-h-[320px]">
+        <div class="relative overflow-x-auto">
+            <table class="w-full min-w-[640px]">
                 <thead class="border-b">
                     <tr class="hover:bg-transparent">
                         <th

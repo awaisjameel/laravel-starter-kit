@@ -13,12 +13,12 @@
 
 <template>
     <header
-        class="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4"
+        class="flex h-16 shrink-0 items-center border-b border-sidebar-border/70 px-3 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sm:px-4"
     >
-        <div class="flex items-center gap-2">
-            <UiSidebarTrigger class="-ml-1" />
+        <div class="flex min-w-0 flex-1 items-center gap-2">
+            <UiSidebarTrigger class="-ml-1 shrink-0" />
             <template v-if="breadcrumbs && breadcrumbs.length > 0">
-                <Breadcrumbs :breadcrumbs="breadcrumbs" />
+                <Breadcrumbs class="hidden min-w-0 sm:block" :breadcrumbs="breadcrumbs" />
             </template>
         </div>
     </header>

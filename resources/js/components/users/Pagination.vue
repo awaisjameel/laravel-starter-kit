@@ -15,8 +15,9 @@
 </script>
 
 <template>
-    <div v-if="totalPages > 1" class="mt-4 flex flex-row items-center justify-between">
+    <div v-if="totalPages > 1" class="mt-2 w-full overflow-x-auto pb-1">
         <UiPagination
+            class="min-w-max"
             :total="totalItems"
             :items-per-page="itemsPerPage"
             :page="currentPage"
@@ -31,7 +32,7 @@
                 <template v-for="(item, index) in pageNumbers" :key="index">
                     <UiPaginationItem :value="item" as-child>
                         <UiButton
-                            class="h-10 w-10 p-0"
+                            class="h-9 w-9 p-0 sm:h-10 sm:w-10"
                             :variant="item === currentPage ? 'outline' : 'ghost'"
                             :aria-current="item === currentPage ? 'page' : undefined"
                             :disabled="item === currentPage"
