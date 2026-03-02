@@ -1,14 +1,13 @@
 <script setup lang="ts">
-    import { LoaderCircle } from 'lucide-vue-next'
-
+    import EmailVerificationNotificationController from '@/actions/App/Modules/Auth/Http/Controllers/EmailVerificationNotificationController'
     defineProps<{
         status?: string
     }>()
 
-    const form = useForm({})
+    const { form, submit } = useResourceForm({})
 
-    const submit = () => {
-        form.post(route('auth.verification.send'))
+    const submitForm = () => {
+        submit(EmailVerificationNotificationController.store())
     }
 </script>
 
@@ -20,13 +19,9 @@
             A new verification link has been sent to the email address you provided during registration.
         </div>
 
-        <form @submit.prevent="submit" class="space-y-6 text-center">
-            <UiButton :disabled="form.processing" variant="secondary">
-                <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                Resend verification email
-            </UiButton>
-
-            <TextLink :href="route('auth.logout')" method="post" as="button" class="mx-auto block text-sm"> Log out </TextLink>
+        <form class="space-y-6 text-center" @submit.prevent="submitForm">
+            <BaseButton type="submit" variant="secondary" :loading="form.processing" label="Resend verification email" />
+            <TextLink :href="route('auth.logout')" method="post" as="button" class="mx-auto block text-sm">Log out</TextLink>
         </form>
     </AuthLayout>
 </template>

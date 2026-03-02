@@ -1,16 +1,54 @@
 <script setup lang="ts">
-    import { LoaderCircle } from 'lucide-vue-next'
+    import RegisteredUserController from '@/actions/App/Modules/Auth/Http/Controllers/RegisteredUserController'
+    import type { FormFieldSchema } from '@/types/base-ui'
 
-    const form = useForm({
+    const { form, submit } = useResourceForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: ''
     })
 
-    const submit = () => {
-        form.post(route('auth.register.store'), {
-            onFinish: () => form.reset('password', 'password_confirmation')
+    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
+        {
+            name: 'name',
+            label: 'Name',
+            type: 'text',
+            required: true,
+            autocomplete: 'name',
+            placeholder: 'Full name'
+        },
+        {
+            name: 'email',
+            label: 'Email address',
+            type: 'email',
+            required: true,
+            autocomplete: 'email',
+            placeholder: 'email@example.com'
+        },
+        {
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            required: true,
+            autocomplete: 'new-password',
+            placeholder: 'Password'
+        },
+        {
+            name: 'password_confirmation',
+            label: 'Confirm password',
+            type: 'password',
+            required: true,
+            autocomplete: 'new-password',
+            placeholder: 'Confirm password'
+        }
+    ]
+
+    const submitForm = () => {
+        submit(RegisteredUserController.store(), {
+            onFinish: () => {
+                form.reset('password', 'password_confirmation')
+            }
         })
     }
 </script>
@@ -19,66 +57,22 @@
     <AuthLayout title="Create an account" description="Enter your details below to create your account">
         <Head title="Register" />
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <UiLabel for="name">Name</UiLabel>
-                    <UiInput id="name" type="text" required autofocus :tabindex="1" autocomplete="name" v-model="form.name" placeholder="Full name" />
-                    <InputError :message="form.errors.name" />
+        <BaseFormsBaseFormRenderer
+            :model="form as unknown as Record<string, unknown>"
+            :fields="fields"
+            :errors="form.errors"
+            :processing="form.processing"
+            @submit="submitForm"
+        >
+            <template #actions>
+                <div class="space-y-4">
+                    <BaseButton type="submit" full-width :loading="form.processing" label="Create account" />
+                    <div class="text-center text-sm text-muted-foreground">
+                        Already have an account?
+                        <TextLink :href="route('auth.login.create')" class="underline underline-offset-4">Log in</TextLink>
+                    </div>
                 </div>
-
-                <div class="grid gap-2">
-                    <UiLabel for="email">Email address</UiLabel>
-                    <UiInput
-                        id="email"
-                        type="email"
-                        required
-                        :tabindex="2"
-                        autocomplete="email"
-                        v-model="form.email"
-                        placeholder="email@example.com"
-                    />
-                    <InputError :message="form.errors.email" />
-                </div>
-
-                <div class="grid gap-2">
-                    <UiLabel for="password">Password</UiLabel>
-                    <UiInput
-                        id="password"
-                        type="password"
-                        required
-                        :tabindex="3"
-                        autocomplete="new-password"
-                        v-model="form.password"
-                        placeholder="Password"
-                    />
-                    <InputError :message="form.errors.password" />
-                </div>
-
-                <div class="grid gap-2">
-                    <UiLabel for="password_confirmation">Confirm password</UiLabel>
-                    <UiInput
-                        id="password_confirmation"
-                        type="password"
-                        required
-                        :tabindex="4"
-                        autocomplete="new-password"
-                        v-model="form.password_confirmation"
-                        placeholder="Confirm password"
-                    />
-                    <InputError :message="form.errors.password_confirmation" />
-                </div>
-
-                <UiButton type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
-                    <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                    Create account
-                </UiButton>
-            </div>
-
-            <div class="text-center text-sm text-muted-foreground">
-                Already have an account?
-                <TextLink :href="route('auth.login.create')" class="underline underline-offset-4" :tabindex="6">Log in</TextLink>
-            </div>
-        </form>
+            </template>
+        </BaseFormsBaseFormRenderer>
     </AuthLayout>
 </template>

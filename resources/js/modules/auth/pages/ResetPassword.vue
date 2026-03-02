@@ -1,4 +1,7 @@
 <script setup lang="ts">
+    import NewPasswordController from '@/actions/App/Modules/Auth/Http/Controllers/NewPasswordController'
+    import type { FormFieldSchema } from '@/types/base-ui'
+
     interface Props {
         token: string
         email: string
@@ -6,15 +9,40 @@
 
     const props = defineProps<Props>()
 
-    const form = useForm({
+    const { form, submit } = useResourceForm({
         token: props.token,
         email: props.email,
         password: '',
         password_confirmation: ''
     })
 
-    const submit = () => {
-        form.post(route('auth.password.store'), {
+    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
+        {
+            name: 'email',
+            label: 'Email',
+            type: 'email',
+            readonly: true
+        },
+        {
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            required: true,
+            autocomplete: 'new-password',
+            placeholder: 'Password'
+        },
+        {
+            name: 'password_confirmation',
+            label: 'Confirm Password',
+            type: 'password',
+            required: true,
+            autocomplete: 'new-password',
+            placeholder: 'Confirm password'
+        }
+    ]
+
+    const submitForm = () => {
+        submit(NewPasswordController.store(), {
             onFinish: () => {
                 form.reset('password', 'password_confirmation')
             }
@@ -26,48 +54,17 @@
     <AuthLayout title="Reset password" description="Please enter your new password below">
         <Head title="Reset password" />
 
-        <form @submit.prevent="submit">
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <UiLabel for="email">Email</UiLabel>
-                    <UiInput id="email" type="email" name="email" autocomplete="email" v-model="form.email" class="mt-1 block w-full" readonly />
-                    <InputError :message="form.errors.email" class="mt-2" />
-                </div>
-
-                <div class="grid gap-2">
-                    <UiLabel for="password">Password</UiLabel>
-                    <UiInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        autocomplete="new-password"
-                        v-model="form.password"
-                        class="mt-1 block w-full"
-                        autofocus
-                        placeholder="Password"
-                    />
-                    <InputError :message="form.errors.password" />
-                </div>
-
-                <div class="grid gap-2">
-                    <UiLabel for="password_confirmation"> Confirm Password </UiLabel>
-                    <UiInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        autocomplete="new-password"
-                        v-model="form.password_confirmation"
-                        class="mt-1 block w-full"
-                        placeholder="Confirm password"
-                    />
-                    <InputError :message="form.errors.password_confirmation" />
-                </div>
-
-                <UiButton type="submit" class="mt-4 w-full" :disabled="form.processing">
-                    <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                    Reset password
-                </UiButton>
-            </div>
-        </form>
+        <BaseFormsBaseFormRenderer
+            :model="form as unknown as Record<string, unknown>"
+            :fields="fields"
+            :errors="form.errors"
+            :processing="form.processing"
+            submit-label="Reset password"
+            @submit="submitForm"
+        >
+            <template #actions>
+                <BaseButton type="submit" full-width :loading="form.processing" label="Reset password" />
+            </template>
+        </BaseFormsBaseFormRenderer>
     </AuthLayout>
 </template>

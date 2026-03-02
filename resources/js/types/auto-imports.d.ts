@@ -206,6 +206,7 @@ declare global {
     const shallowRef: typeof import('vue').shallowRef
     const sidebarMenuButtonVariants: typeof import('../components/ui/sidebar/index').sidebarMenuButtonVariants
     const storeToRefs: (typeof import('pinia'))['storeToRefs']
+    const toInertiaRouteDefinition: typeof import('../utils/route').toInertiaRouteDefinition
     const toRaw: typeof import('vue').toRaw
     const toRef: typeof import('vue').toRef
     const toRefs: typeof import('vue').toRefs
@@ -219,6 +220,7 @@ declare global {
     const useConfirm: typeof import('../composables/useConfirm').useConfirm
     const useCssModule: typeof import('vue').useCssModule
     const useCssVars: typeof import('vue').useCssVars
+    const useFlashToasts: typeof import('../composables/useFlashToasts').useFlashToasts
     const useForm: typeof import('@inertiajs/vue3').useForm
     const useHttp: typeof import('../stores/useHttp').useHttp
     const useId: typeof import('vue').useId
@@ -229,8 +231,10 @@ declare global {
     const usePage: typeof import('@inertiajs/vue3').usePage
     const usePoll: typeof import('@inertiajs/vue3').usePoll
     const useRemember: typeof import('@inertiajs/vue3').useRemember
+    const useResourceForm: typeof import('../composables/useResourceForm').useResourceForm
     const useRoute: typeof import('vue-router').useRoute
     const useRouter: typeof import('vue-router').useRouter
+    const useServerDataTable: typeof import('../composables/useServerDataTable').useServerDataTable
     const useSidebar: typeof import('../components/ui/sidebar/utils').useSidebar
     const useSlots: typeof import('vue').useSlots
     const useTemplateRef: typeof import('vue').useTemplateRef
@@ -267,9 +271,15 @@ declare global {
     export type { Appearance } from '../composables/useAppearance'
     // @ts-ignore
     export type { NavigationGroup } from '../composables/useNavigation'
+    // @ts-ignore
+    export type { ResourceSubmitOptions } from '../composables/useResourceForm'
+    // @ts-ignore
+    export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
     import('vue')
     import('../composables/useAppearance')
     import('../composables/useNavigation')
+    import('../composables/useResourceForm')
+    import('../utils/route')
 }
 
 // for vue template auto import
@@ -330,6 +340,7 @@ declare module 'vue' {
         readonly shallowReactive: UnwrapRef<(typeof import('vue'))['shallowReactive']>
         readonly shallowReadonly: UnwrapRef<(typeof import('vue'))['shallowReadonly']>
         readonly shallowRef: UnwrapRef<(typeof import('vue'))['shallowRef']>
+        readonly toInertiaRouteDefinition: UnwrapRef<(typeof import('../utils/route'))['toInertiaRouteDefinition']>
         readonly toRaw: UnwrapRef<(typeof import('vue'))['toRaw']>
         readonly toRef: UnwrapRef<(typeof import('vue'))['toRef']>
         readonly toRefs: UnwrapRef<(typeof import('vue'))['toRefs']>
@@ -341,6 +352,7 @@ declare module 'vue' {
         readonly useAttrs: UnwrapRef<(typeof import('vue'))['useAttrs']>
         readonly useCssModule: UnwrapRef<(typeof import('vue'))['useCssModule']>
         readonly useCssVars: UnwrapRef<(typeof import('vue'))['useCssVars']>
+        readonly useFlashToasts: UnwrapRef<(typeof import('../composables/useFlashToasts'))['useFlashToasts']>
         readonly useForm: UnwrapRef<(typeof import('@inertiajs/vue3'))['useForm']>
         readonly useId: UnwrapRef<(typeof import('vue'))['useId']>
         readonly useInitials: UnwrapRef<(typeof import('../composables/useInitials'))['useInitials']>
@@ -350,10 +362,13 @@ declare module 'vue' {
         readonly usePage: UnwrapRef<(typeof import('@inertiajs/vue3'))['usePage']>
         readonly usePoll: UnwrapRef<(typeof import('@inertiajs/vue3'))['usePoll']>
         readonly useRemember: UnwrapRef<(typeof import('@inertiajs/vue3'))['useRemember']>
+        readonly useResourceForm: UnwrapRef<(typeof import('../composables/useResourceForm'))['useResourceForm']>
         readonly useRoute: UnwrapRef<(typeof import('vue-router'))['useRoute']>
         readonly useRouter: UnwrapRef<(typeof import('vue-router'))['useRouter']>
+        readonly useServerDataTable: UnwrapRef<(typeof import('../composables/useServerDataTable'))['useServerDataTable']>
         readonly useSlots: UnwrapRef<(typeof import('vue'))['useSlots']>
         readonly useTemplateRef: UnwrapRef<(typeof import('vue'))['useTemplateRef']>
+        readonly useToast: UnwrapRef<(typeof import('../composables/useToast'))['useToast']>
         readonly watch: UnwrapRef<(typeof import('vue'))['watch']>
         readonly watchEffect: UnwrapRef<(typeof import('vue'))['watchEffect']>
         readonly watchPostEffect: UnwrapRef<(typeof import('vue'))['watchPostEffect']>

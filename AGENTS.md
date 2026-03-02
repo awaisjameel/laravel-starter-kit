@@ -10,9 +10,8 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 2. Reuse existing module services, requests, DTOs, and shared UI primitives before creating new abstractions.
 3. Implement focused, typed changes with no duplication.
 4. Run mandatory quality checks after every change:
-   - `composer generate-and-cleanup`
-   - `npm run typecheck`
-   - targeted PHPUnit tests (or full `php artisan test` for broad changes)
+    - `composer generate-and-cleanup`
+    - targeted PHPUnit tests (or full `php artisan test` for broad changes)
 5. Update this file when architecture, contracts, workflows, or enforcement rules change.
 
 ## Stack Snapshot
@@ -30,56 +29,60 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 ### Backend
 
 - Entry points:
-  - `routes/web.php` aggregates module web routes.
-  - `routes/api.php` aggregates module API routes.
+    - `routes/web.php` aggregates module web routes.
+    - `routes/api.php` aggregates module API routes.
 - Module root: `app/Modules`
-  - `Marketing`
-  - `Auth`
-  - `Dashboard`
-  - `Settings`
-  - `Users`
-  - `Api/V1`
-  - `Shared`
+    - `Marketing`
+    - `Auth`
+    - `Dashboard`
+    - `Settings`
+    - `Users`
+    - `Api/V1`
+    - `Shared`
 - Shared domain model remains in:
-  - `app/Models/User.php`
-  - `app/Enums/UserRole.php`
+    - `app/Models/User.php`
+    - `app/Enums/UserRole.php`
 - Shared middleware:
-  - `HandleAppearance`
-  - `HandleInertiaRequests`
-  - `SecurityHeaders`
+    - `HandleAppearance`
+    - `HandleInertiaRequests`
+    - `SecurityHeaders`
 
 ### Frontend
 
 - Inertia pages live in `resources/js/modules/**/pages`.
 - Shared app/layout primitives remain in:
-  - `resources/js/components/**`
-  - `resources/js/layouts/**`
+    - `resources/js/components/**`
+    - `resources/js/layouts/**`
+- UI layering contract:
+    - `resources/js/components/ui/**` = low-level primitive wrappers only.
+    - `resources/js/components/base/**` = reusable app-level building blocks (`Base*`).
+    - Feature-specific screens should compose `Base*` components instead of hand-rolling repeated structures.
 - App entry points:
-  - `resources/js/app.ts`
-  - `resources/js/ssr.ts`
+    - `resources/js/app.ts`
+    - `resources/js/ssr.ts`
 
 ## Routing Contract
 
 ### Web
 
 - Marketing:
-  - `GET /` => `marketing.home`
+    - `GET /` => `marketing.home`
 - Auth:
-  - `/auth/*` => `auth.*`
+    - `/auth/*` => `auth.*`
 - App shell:
-  - `GET /app/dashboard` => `app.dashboard`
+    - `GET /app/dashboard` => `app.dashboard`
 - Settings:
-  - `/app/settings/*` => `app.settings.*`
+    - `/app/settings/*` => `app.settings.*`
 - Admin users:
-  - `/app/admin/users/*` => `app.admin.users.*`
+    - `/app/admin/users/*` => `app.admin.users.*`
 
 ### API
 
 - Versioned API under `/api/v1/*`
 - Authenticated current user:
-  - `GET /api/v1/me` => `api.v1.me.show`
+    - `GET /api/v1/me` => `api.v1.me.show`
 - Admin users API:
-  - `/api/v1/admin/users/*` => `api.v1.admin.users.*`
+    - `/api/v1/admin/users/*` => `api.v1.admin.users.*`
 
 ## Type-Safety Rules
 
@@ -96,6 +99,32 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Keep strict TS (`noImplicitAny`, `strictNullChecks`, `exactOptionalPropertyTypes`).
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 - Prefer named routes and generated helpers over hardcoded URIs.
+- New forms should use schema-driven rendering via shared form contracts/components in `resources/js/components/base/forms/**`.
+- Server-driven listing pages should use shared server table composables/components in `resources/js/components/base/table/**`.
+- Use Wayfinder action helpers for submits/navigation in reusable composables and feature pages.
+
+## Server Table Query Contract
+
+Standard query contract for server-driven data tables:
+
+- `page: number`
+- `perPage: number`
+- `search?: string`
+- `sortBy?: string`
+- `sortDirection?: 'asc' | 'desc'`
+
+For users listing, allowed `sortBy` values are:
+
+- `name`
+- `email`
+- `role`
+- `created_at`
+
+## Notifications Standard
+
+- Global toasts are handled via `useToast` + `AppToaster`.
+- Inertia flash props (`message`, `error`, `status`) are bridged to toasts through `useFlashToasts`.
+- Use inline messages only for persistent instructional content that should not be transient.
 
 ## Security Rules
 
@@ -146,7 +175,6 @@ Always run after changes:
 
 ```bash
 composer generate-and-cleanup
-npm run typecheck
 php artisan test
 ```
 

@@ -44,7 +44,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::store
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:37
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:31
  * @route '/api/v1/admin/users'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -59,7 +59,7 @@ store.definition = {
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::store
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:37
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:31
  * @route '/api/v1/admin/users'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -68,7 +68,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::store
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:37
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:31
  * @route '/api/v1/admin/users'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -78,7 +78,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::update
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:50
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:44
  * @route '/api/v1/admin/users/{user}'
  */
 export const update = (
@@ -96,7 +96,7 @@ update.definition = {
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::update
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:50
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:44
  * @route '/api/v1/admin/users/{user}'
  */
 update.url = (args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -125,7 +125,7 @@ update.url = (args: { user: number | { id: number } } | [user: number | { id: nu
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::update
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:50
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:44
  * @route '/api/v1/admin/users/{user}'
  */
 update.put = (
@@ -138,7 +138,7 @@ update.put = (
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::destroy
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:63
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:57
  * @route '/api/v1/admin/users/{user}'
  */
 export const destroy = (
@@ -156,7 +156,7 @@ destroy.definition = {
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::destroy
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:63
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:57
  * @route '/api/v1/admin/users/{user}'
  */
 destroy.url = (args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -185,7 +185,7 @@ destroy.url = (args: { user: number | { id: number } } | [user: number | { id: n
 
 /**
  * @see \App\Modules\Api\V1\Http\Controllers\AdminUserController::destroy
- * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:63
+ * @see app/Modules/Api/V1/Http/Controllers/AdminUserController.php:57
  * @route '/api/v1/admin/users/{user}'
  */
 destroy.delete = (

@@ -1,20 +1,48 @@
 <script setup lang="ts">
-    import { LoaderCircle } from 'lucide-vue-next'
+    import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
+    import type { FormFieldSchema } from '@/types/base-ui'
 
     defineProps<{
         status?: string
         canResetPassword: boolean
     }>()
 
-    const form = useForm({
+    const { form, submit } = useResourceForm({
         email: '',
         password: '',
         remember: false
     })
 
-    const submit = () => {
-        form.post(route('auth.login.store'), {
-            onFinish: () => form.reset('password')
+    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
+        {
+            name: 'email',
+            label: 'Email address',
+            type: 'email',
+            required: true,
+            autocomplete: 'email',
+            placeholder: 'email@example.com'
+        },
+        {
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            required: true,
+            autocomplete: 'current-password',
+            placeholder: 'Password'
+        },
+        {
+            name: 'remember',
+            label: 'Remember me',
+            type: 'checkbox',
+            placeholder: 'Remember me'
+        }
+    ]
+
+    const submitForm = () => {
+        submit(AuthenticatedSessionController.store(), {
+            onFinish: () => {
+                form.reset('password')
+            }
         })
     }
 </script>
@@ -27,54 +55,22 @@
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit" class="flex flex-col gap-6">
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <UiLabel for="email">Email address</UiLabel>
-                    <UiInput
-                        id="email"
-                        type="email"
-                        required
-                        autofocus
-                        :tabindex="1"
-                        autocomplete="email"
-                        v-model="form.email"
-                        placeholder="email@example.com"
-                    />
-                    <InputError :message="form.errors.email" />
-                </div>
-
-                <div class="grid gap-2">
+        <BaseFormsBaseFormRenderer
+            :model="form as unknown as Record<string, unknown>"
+            :fields="fields"
+            :errors="form.errors"
+            :processing="form.processing"
+            submit-label="Log in"
+            @submit="submitForm"
+        >
+            <template #actions>
+                <div class="space-y-4">
+                    <BaseButton type="submit" full-width :loading="form.processing" label="Log in" />
                     <div class="flex items-center justify-between">
-                        <UiLabel for="password">Password</UiLabel>
-                        <TextLink v-if="canResetPassword" :href="route('auth.password.request')" class="text-sm" :tabindex="5">
-                            Forgot password?
-                        </TextLink>
+                        <TextLink v-if="canResetPassword" :href="route('auth.password.request')" class="text-sm">Forgot password?</TextLink>
                     </div>
-                    <UiInput
-                        id="password"
-                        type="password"
-                        required
-                        :tabindex="2"
-                        autocomplete="current-password"
-                        v-model="form.password"
-                        placeholder="Password"
-                    />
-                    <InputError :message="form.errors.password" />
                 </div>
-
-                <div class="flex items-center justify-between">
-                    <UiLabel for="remember" class="flex items-center space-x-3">
-                        <UiCheckbox id="remember" v-model="form.remember" :tabindex="3" />
-                        <span>Remember me</span>
-                    </UiLabel>
-                </div>
-
-                <UiButton type="submit" class="mt-4 w-full" :tabindex="4" :disabled="form.processing">
-                    <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                    Log in
-                </UiButton>
-            </div>
-        </form>
+            </template>
+        </BaseFormsBaseFormRenderer>
     </AuthLayout>
 </template>

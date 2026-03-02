@@ -23,13 +23,7 @@ final class AdminUserController extends Controller
 
     public function index(UserIndexRequest $userIndexRequest): AnonymousResourceCollection
     {
-        $lengthAwarePaginator = User::query()
-            ->latest()
-            ->paginate(
-                perPage: $userIndexRequest->perPage(),
-                page: $userIndexRequest->pageNumber(),
-            )
-            ->withQueryString();
+        $lengthAwarePaginator = $this->userService->paginateUsers($userIndexRequest->toDto());
 
         return UserResource::collection($lengthAwarePaginator);
     }

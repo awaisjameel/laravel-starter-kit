@@ -3,25 +3,35 @@
 
     const { appearance, updateAppearance } = useAppearance()
 
-    const tabs = [
-        { value: 'light', Icon: Sun, label: 'Light' },
-        { value: 'dark', Icon: Moon, label: 'Dark' }
-    ] as const
+    const isDarkMode = computed({
+        get: () => appearance.value === 'dark',
+        set: (value: boolean) => {
+            updateAppearance(value ? 'dark' : 'light')
+        }
+    })
 </script>
 
 <template>
-    <div class="inline-flex gap-1 rounded-lg border border-border/70 bg-muted/50 p-1">
-        <button
-            v-for="{ value, Icon, label } in tabs"
-            :key="value"
-            @click="updateAppearance(value)"
-            :class="[
-                'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
-                appearance === value ? 'bg-background text-foreground shadow-xs' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-            ]"
-        >
-            <component :is="Icon" class="-ml-1 h-4 w-4" />
-            <span class="ml-1.5 text-sm">{{ label }}</span>
-        </button>
+    <div class="space-y-4">
+        <UiTabs :model-value="appearance" @update:model-value="(value) => updateAppearance(value as 'light' | 'dark')" class="space-y-3">
+            <UiTabsList class="w-full sm:w-auto">
+                <UiTabsTrigger value="light" class="min-w-28">
+                    <Sun class="mr-2 size-4" />
+                    Light
+                </UiTabsTrigger>
+                <UiTabsTrigger value="dark" class="min-w-28">
+                    <Moon class="mr-2 size-4" />
+                    Dark
+                </UiTabsTrigger>
+            </UiTabsList>
+        </UiTabs>
+
+        <div class="flex items-center justify-between rounded-lg border p-3">
+            <div>
+                <p class="text-sm font-medium">Dark mode toggle</p>
+                <p class="text-xs text-muted-foreground">Switch instantly between light and dark appearance.</p>
+            </div>
+            <UiSwitch v-model="isDarkMode" />
+        </div>
     </div>
 </template>

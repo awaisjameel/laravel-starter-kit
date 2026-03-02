@@ -1,5 +1,9 @@
 <script setup lang="ts">
+    import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import { UsersPageProps, type BreadcrumbItem, type User } from '@/types'
+    import { Plus } from 'lucide-vue-next'
+
+    type UserSortColumn = 'name' | 'email' | 'role' | 'created_at'
 
     const page = usePage()
     const props = defineProps<UsersPageProps>()
@@ -17,31 +21,29 @@
     const isDeleteDialogOpen = ref(false)
     const selectedUser = ref<User | null>(props.users.data[0] ?? null)
 
-    const currentPage = computed(() => Number(props.users.current_page) || 1)
-    const totalPages = computed(() => Number(props.users.last_page) || 1)
-    const itemsPerPage = computed(() => Number(props.users.per_page) || 10)
-    const totalItems = computed(() => Number(props.users.total) || 0)
-
-    const pageNumbers = computed(() => {
-        const pages: number[] = []
-        const siblingCount = 2
-        const validTotalPages = Math.max(1, totalPages.value)
-        const validCurrentPage = Math.max(1, Math.min(currentPage.value, validTotalPages))
-        const start = Math.max(1, validCurrentPage - siblingCount)
-        const end = Math.min(validTotalPages, validCurrentPage + siblingCount)
-
-        for (let i = start; i <= end; i++) {
-            pages.push(i)
+    const getQueryValue = (key: string): string | undefined => {
+        if (typeof window === 'undefined') {
+            return undefined
         }
 
-        return pages.length > 0 ? pages : [1]
-    })
-
-    const onPageChange = (page: number) => {
-        if (page !== currentPage.value && page >= 1 && page <= totalPages.value) {
-            router.get(route('app.admin.users.index'), { page, perPage: itemsPerPage.value }, { preserveState: true })
-        }
+        const params = new URLSearchParams(window.location.search)
+        const value = params.get(key)
+        return value === null || value === '' ? undefined : value
     }
+
+    const initialQuery = {
+        page: Number(getQueryValue('page') ?? props.users.current_page) || 1,
+        perPage: Number(getQueryValue('perPage') ?? props.users.per_page) || 10,
+        search: getQueryValue('search'),
+        sortBy: (getQueryValue('sortBy') as UserSortColumn | undefined) ?? 'created_at',
+        sortDirection: (getQueryValue('sortDirection') as 'asc' | 'desc' | undefined) ?? 'desc'
+    }
+
+    const { query, searchValue, setPage, setPerPage, setSort } = useServerDataTable<UserSortColumn>({
+        endpoint: UserController.index,
+        initialQuery,
+        debounceMs: 300
+    })
 
     const onCreateUser = () => {
         isCreateDialogOpen.value = false
@@ -72,21 +74,33 @@
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Heading title="Users" description="Manage user accounts" />
-                    <UiButton class="w-full sm:w-auto" @click="isCreateDialogOpen = true">
-                        <Icon-mdi-plus />
-                        Add User
-                    </UiButton>
+                    <BaseButton class="w-full sm:w-auto" label="Add User" :icon-left="Plus" @click="isCreateDialogOpen = true" />
                 </div>
 
-                <UsersTable :users="props.users.data" :current-user-id="currentUserId" @edit="onEditUser" @delete="onDeleteUser" />
+                <BaseTableBaseDataTableToolbar
+                    :search-value="searchValue"
+                    :per-page="query.perPage"
+                    search-placeholder="Search users..."
+                    @update:search-value="searchValue = $event"
+                    @update:per-page="setPerPage($event)"
+                />
+
+                <UsersTable
+                    :users="props.users.data"
+                    :current-user-id="currentUserId"
+                    :sort-by="query.sortBy"
+                    :sort-direction="query.sortDirection"
+                    @edit="onEditUser"
+                    @delete="onDeleteUser"
+                    @sort="setSort($event as UserSortColumn)"
+                />
 
                 <UsersPagination
-                    :current-page="currentPage"
-                    :total-pages="totalPages"
-                    :items-per-page="itemsPerPage"
-                    :total-items="totalItems"
-                    :page-numbers="pageNumbers"
-                    @page-change="onPageChange"
+                    :current-page="props.users.current_page"
+                    :total-pages="props.users.last_page"
+                    :items-per-page="props.users.per_page"
+                    :total-items="props.users.total"
+                    @page-change="setPage($event)"
                 />
             </div>
 

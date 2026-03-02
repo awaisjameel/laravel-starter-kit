@@ -7,6 +7,7 @@ namespace Tests\Feature\Users;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class UserManagementTest extends TestCase
@@ -117,9 +118,64 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->from('/app/admin/users')->get('/app/admin/users?perPage=1000&page=0');
+        $testResponse = $this->actingAs($admin)->from('/app/admin/users')->get(
+            '/app/admin/users?perPage=1000&page=0&sortBy=invalid&sortDirection=sideways&search='.str_repeat('x', 101)
+        );
 
         $testResponse->assertRedirect('/app/admin/users');
-        $testResponse->assertSessionHasErrors(['perPage', 'page']);
+        $testResponse->assertSessionHasErrors(['perPage', 'page', 'sortBy', 'sortDirection', 'search']);
+    }
+
+    public function test_admin_users_can_search_users_by_name_email_and_role(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        User::factory()->create([
+            'name' => 'Alice Search',
+            'email' => 'alice@example.com',
+            'role' => UserRole::User,
+        ]);
+        User::factory()->create([
+            'name' => 'Bob Search',
+            'email' => 'bob@example.com',
+            'role' => UserRole::Admin,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=alice')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->has('users.data', 1)
+                ->where('users.data.0.email', 'alice@example.com')
+            );
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=bob@example.com')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->has('users.data', 1)
+                ->where('users.data.0.name', 'Bob Search')
+            );
+
+        $testResponse = $this->actingAs($admin)->get('/app/admin/users?search=admin');
+        $testResponse->assertOk();
+        $testResponse->assertSee('Bob Search');
+        $testResponse->assertDontSee('Alice Search');
+    }
+
+    public function test_admin_users_can_sort_users_by_allowed_fields(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        User::factory()->create(['name' => 'Alpha Sort', 'email' => 'alpha@example.com', 'role' => UserRole::User]);
+        User::factory()->create(['name' => 'Zulu Sort', 'email' => 'zulu@example.com', 'role' => UserRole::Admin]);
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=Sort&sortBy=name&sortDirection=asc')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('users.data.0.name', 'Alpha Sort')
+            );
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=Sort&sortBy=email&sortDirection=desc')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('users.data.0.email', 'zulu@example.com')
+            );
     }
 }

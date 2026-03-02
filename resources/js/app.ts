@@ -4,8 +4,9 @@ import { createInertiaApp } from '@inertiajs/vue3'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { createPinia } from 'pinia'
 import type { DefineComponent } from 'vue'
-import { createApp, h } from 'vue'
+import { createApp, Fragment, h } from 'vue'
 import { route as ziggyRoute, ZiggyVue } from 'ziggy-js'
+import AppToaster from './components/base/toast/AppToaster.vue'
 import { initializeTheme } from './composables/useAppearance'
 import type { AppPageProps } from './types'
 
@@ -33,7 +34,7 @@ createInertiaApp({
 
         ;(globalThis as typeof globalThis & { route: typeof ziggyRoute }).route = routeHelper
 
-        createApp({ render: () => h(App, props) })
+        createApp({ render: () => h(Fragment, [h(App, props), h(AppToaster)]) })
             .use(plugin)
             .use(ZiggyVue, {
                 ...ziggy,

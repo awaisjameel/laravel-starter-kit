@@ -8,8 +8,11 @@ use App\Events\UserManagementEvent;
 use App\Models\User;
 use App\Modules\Users\Data\CreateUserData;
 use App\Modules\Users\Data\UpdateUserData;
+use App\Modules\Users\Data\UserIndexData;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Event;
 use Stringable;
 
@@ -19,6 +22,27 @@ use Stringable;
  */
 final class UserService
 {
+    /**
+     * Get paginated users with optional filtering and sorting.
+     *
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function paginateUsers(UserIndexData $userIndexData): LengthAwarePaginator
+    {
+        /** @var Builder<User> $query */
+        $query = User::query();
+
+        $this->applySearch($query, $userIndexData->search);
+
+        return $query
+            ->orderBy($userIndexData->sortBy, $userIndexData->sortDirection)
+            ->paginate(
+                perPage: $userIndexData->perPage,
+                page: $userIndexData->page,
+            )
+            ->withQueryString();
+    }
+
     /**
      * Create a new user.
      */
@@ -151,5 +175,24 @@ final class UserService
         $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         return is_string($encoded) ? $encoded : '[unserializable array]';
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     */
+    private function applySearch(Builder $query, ?string $search): void
+    {
+        if ($search === null || $search === '') {
+            return;
+        }
+
+        $searchTerm = '%'.$search.'%';
+
+        $query->where(function (Builder $builder) use ($searchTerm): void {
+            $builder
+                ->where('name', 'like', $searchTerm)
+                ->orWhere('email', 'like', $searchTerm)
+                ->orWhere('role', 'like', $searchTerm);
+        });
     }
 }

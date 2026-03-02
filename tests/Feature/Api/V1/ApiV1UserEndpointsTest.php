@@ -87,4 +87,40 @@ final class ApiV1UserEndpointsTest extends TestCase
             'role' => 'invalid-role',
         ])->assertUnprocessable()->assertJsonValidationErrors(['name', 'email', 'password', 'role']);
     }
+
+    public function test_admin_users_can_search_and_sort_via_api(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        Sanctum::actingAs($admin);
+
+        User::factory()->create([
+            'name' => 'Api Alpha',
+            'email' => 'api-alpha@example.com',
+            'role' => UserRole::User,
+        ]);
+        User::factory()->create([
+            'name' => 'Api Zulu',
+            'email' => 'api-zulu@example.com',
+            'role' => UserRole::Admin,
+        ]);
+
+        $this->getJson('/api/v1/admin/users?search=alpha')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.email', 'api-alpha@example.com');
+
+        $this->getJson('/api/v1/admin/users?search=Api&sortBy=name&sortDirection=desc')
+            ->assertOk()
+            ->assertJsonPath('data.0.name', 'Api Zulu');
+    }
+
+    public function test_admin_users_api_query_validation_errors_are_returned(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        Sanctum::actingAs($admin);
+
+        $this->getJson('/api/v1/admin/users?sortBy=invalid&sortDirection=sideways&search='.str_repeat('x', 101))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['sortBy', 'sortDirection', 'search']);
+    }
 }

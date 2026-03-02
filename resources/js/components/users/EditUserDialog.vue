@@ -1,6 +1,7 @@
 <script setup lang="ts">
+    import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import { type User } from '@/types'
-    import { UserRole } from '@/types/app-data'
+    import { buildUserFormFields } from './user-form-schema'
 
     const emit = defineEmits<{
         'update:open': [open: boolean]
@@ -12,69 +13,57 @@
         user: User
     }>()
 
-    const rolesList = getEnumOptions(UserRole)
-
-    const form = useForm({
+    const { form, submit } = useResourceForm({
         name: props.user?.name || '',
         email: props.user?.email || '',
         role: props.user?.role || '',
         password: ''
     })
+
+    const fields = buildUserFormFields(true)
+
+    watch(
+        () => props.user,
+        (user) => {
+            form.name = user.name
+            form.email = user.email
+            form.role = user.role
+            form.password = ''
+        },
+        { immediate: true }
+    )
+
+    const submitForm = () => {
+        submit(UserController.update({ user: props.user.id }), {
+            onSuccess: () => {
+                emit('updated')
+                emit('update:open', false)
+            }
+        })
+    }
 </script>
 
 <template>
-    <UiDialog :open="open" @update:open="emit('update:open', $event)">
-        <UiDialogContent class="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-[425px]">
-            <UiDialogHeader>
-                <UiDialogTitle>Edit User</UiDialogTitle>
-                <UiDialogDescription> Make changes to the user's information </UiDialogDescription>
-            </UiDialogHeader>
-
-            <form @submit.prevent="form.put(route('app.admin.users.update', { user: props.user.id }), { onSuccess: () => emit('updated') })">
-                <div class="grid gap-4 py-4">
-                    <div class="grid gap-2">
-                        <UiLabel for="name">Name</UiLabel>
-                        <UiInput id="name" v-model="form.name" placeholder="Enter name" />
-                        <InputError :message="form.errors.name" />
-                    </div>
-
-                    <div class="grid gap-2">
-                        <UiLabel for="email">Email</UiLabel>
-                        <UiInput id="email" type="email" v-model="form.email" placeholder="Enter email" />
-                        <InputError :message="form.errors.email" />
-                    </div>
-
-                    <div class="relative grid gap-2">
-                        <UiLabel for="role">Role</UiLabel>
-                        <UiSelect id="role" v-model="form.role">
-                            <UiSelectTrigger class="w-full">
-                                <UiSelectValue placeholder="Select a role" />
-                            </UiSelectTrigger>
-                            <UiSelectContent>
-                                <UiSelectGroup>
-                                    <UiSelectLabel>Roles</UiSelectLabel>
-                                    <UiSelectItem v-for="(role, index) in rolesList" :key="index" :value="role.value">{{ role.label }}</UiSelectItem>
-                                </UiSelectGroup>
-                            </UiSelectContent>
-                        </UiSelect>
-                        <InputError :message="form.errors.role" />
-                    </div>
-
-                    <div class="grid gap-2">
-                        <UiLabel for="password">Password</UiLabel>
-                        <UiInput id="password" type="password" v-model="form.password" placeholder="Enter password" />
-                        <InputError :message="form.errors.password" />
-                    </div>
-                </div>
-
-                <UiDialogFooter>
-                    <UiButton type="button" variant="ghost" class="w-full sm:w-auto" @click="emit('update:open', false)">Cancel</UiButton>
-                    <UiButton type="submit" class="w-full sm:w-auto" :disabled="form.processing">
-                        <Icon-mdi-loading v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
-                        Save Changes
-                    </UiButton>
-                </UiDialogFooter>
-            </form>
-        </UiDialogContent>
-    </UiDialog>
+    <BaseDialog
+        :open="open"
+        title="Edit User"
+        description="Make changes to the user's information"
+        :processing="form.processing"
+        :show-footer="false"
+        :show-cancel="false"
+        max-width-class="sm:max-w-[425px]"
+        @update:open="emit('update:open', $event)"
+    >
+        <BaseFormsBaseFormRenderer
+            :model="form as unknown as Record<string, unknown>"
+            :fields="fields"
+            :errors="form.errors"
+            :processing="form.processing"
+            submit-label="Save Changes"
+            cancel-label="Cancel"
+            :show-cancel="true"
+            @submit="submitForm"
+            @cancel="emit('update:open', false)"
+        />
+    </BaseDialog>
 </template>

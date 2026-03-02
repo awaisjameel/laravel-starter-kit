@@ -1,24 +1,43 @@
 <script setup lang="ts">
-    const passwordInput = ref<HTMLInputElement | null>(null)
+    import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
+    import type { FormFieldSchema } from '@/types/base-ui'
 
-    const form = useForm({
+    const isOpen = ref(false)
+
+    const { form, submit } = useResourceForm({
         password: ''
     })
 
-    const deleteUser = (e: Event) => {
-        e.preventDefault()
-
-        form.delete(route('app.settings.profile.destroy'), {
-            preserveScroll: true,
-            onSuccess: () => closeModal(),
-            onError: () => passwordInput.value?.focus(),
-            onFinish: () => form.reset()
-        })
-    }
+    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
+        {
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            required: true,
+            placeholder: 'Password',
+            autocomplete: 'current-password'
+        }
+    ]
 
     const closeModal = () => {
         form.clearErrors()
         form.reset()
+        isOpen.value = false
+    }
+
+    const deleteUser = () => {
+        submit(ProfileController.destroy(), {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeModal()
+            },
+            onError: () => {
+                form.reset('password')
+            },
+            onFinish: () => {
+                form.reset('password')
+            }
+        })
     }
 </script>
 
@@ -30,43 +49,32 @@
                 <p class="font-medium">Warning</p>
                 <p class="text-sm">Please proceed with caution, this cannot be undone.</p>
             </div>
-            <UiDialog>
-                <UiDialogTrigger as-child>
-                    <UiButton variant="destructive">Delete account</UiButton>
-                </UiDialogTrigger>
-                <UiDialogContent>
-                    <form class="space-y-6" @submit="deleteUser">
-                        <UiDialogHeader class="space-y-3">
-                            <UiDialogTitle>Are you sure you want to delete your account?</UiDialogTitle>
-                            <UiDialogDescription>
-                                Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your
-                                password to confirm you would like to permanently delete your account.
-                            </UiDialogDescription>
-                        </UiDialogHeader>
+            <BaseButton variant="destructive" label="Delete account" @click="isOpen = true" />
 
-                        <div class="grid gap-2">
-                            <UiLabel for="password" class="sr-only">Password</UiLabel>
-                            <UiInput
-                                id="password"
-                                type="password"
-                                name="password"
-                                ref="passwordInput"
-                                v-model="form.password"
-                                placeholder="Password"
-                            />
-                            <InputError :message="form.errors.password" />
-                        </div>
-
-                        <UiDialogFooter class="gap-2">
-                            <UiDialogClose as-child>
-                                <UiButton variant="secondary" @click="closeModal"> Cancel </UiButton>
-                            </UiDialogClose>
-
-                            <UiButton type="submit" variant="destructive" :disabled="form.processing"> Delete account </UiButton>
-                        </UiDialogFooter>
-                    </form>
-                </UiDialogContent>
-            </UiDialog>
+            <BaseDialogBaseConfirmDialog
+                :open="isOpen"
+                title="Are you sure you want to delete your account?"
+                description="Once your account is deleted, all resources and data will be permanently deleted. Please enter your password to confirm."
+                confirm-label="Delete account"
+                :processing="form.processing"
+                :show-footer="false"
+                @update:open="isOpen = $event"
+                @confirm="deleteUser"
+            >
+                <div class="pt-4">
+                    <BaseFormsBaseFormRenderer
+                        :model="form as unknown as Record<string, unknown>"
+                        :fields="fields"
+                        :errors="form.errors"
+                        :processing="form.processing"
+                        submit-label="Delete account"
+                        :show-cancel="true"
+                        cancel-label="Cancel"
+                        @submit="deleteUser"
+                        @cancel="closeModal"
+                    />
+                </div>
+            </BaseDialogBaseConfirmDialog>
         </div>
     </div>
 </template>

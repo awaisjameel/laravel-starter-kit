@@ -24,12 +24,8 @@ final class UserController extends Controller
 
     public function index(UserIndexRequest $userIndexRequest): Response
     {
-        $lengthAwarePaginator = User::query()
-            ->latest()
-            ->paginate(
-                perPage: $userIndexRequest->perPage(),
-                page: $userIndexRequest->pageNumber(),
-            )
+        $lengthAwarePaginator = $this->userService
+            ->paginateUsers($userIndexRequest->toDto())
             ->withQueryString()
             ->through(fn (User $user): UserViewData => $user->toViewData());
 
