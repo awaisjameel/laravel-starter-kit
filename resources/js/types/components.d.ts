@@ -198,10 +198,9 @@ declare module 'vue' {
     UserInfo: typeof import('./../components/UserInfo.vue')['default']
     UserMenuContent: typeof import('./../components/UserMenuContent.vue')['default']
     UsersActionsDropdown: typeof import('./../components/users/ActionsDropdown.vue')['default']
-    UsersCreateUserDialog: typeof import('./../components/users/CreateUserDialog.vue')['default']
     UsersDeleteUserDialog: typeof import('./../components/users/DeleteUserDialog.vue')['default']
-    UsersEditUserDialog: typeof import('./../components/users/EditUserDialog.vue')['default']
     UsersPagination: typeof import('./../components/users/Pagination.vue')['default']
     UsersTable: typeof import('./../components/users/Table.vue')['default']
+    UsersUserFormDialog: typeof import('./../components/users/UserFormDialog.vue')['default']
   }
 }

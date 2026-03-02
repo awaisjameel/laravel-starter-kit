@@ -16,10 +16,10 @@
         }
     ]
 
-    const isCreateDialogOpen = ref(false)
-    const isEditDialogOpen = ref(false)
+    const isUserDialogOpen = ref(false)
     const isDeleteDialogOpen = ref(false)
-    const selectedUser = ref<User | null>(props.users.data[0] ?? null)
+    const selectedUser = ref<User | null>(null)
+    const userDialogMode = ref<'create' | 'edit'>('create')
 
     const getQueryValue = (key: string): string | undefined => {
         if (typeof window === 'undefined') {
@@ -45,25 +45,28 @@
         debounceMs: 300
     })
 
-    const onCreateUser = () => {
-        isCreateDialogOpen.value = false
+    const openCreateUserDialog = (): void => {
+        userDialogMode.value = 'create'
+        selectedUser.value = null
+        isUserDialogOpen.value = true
     }
 
-    const onEditUser = (user: User) => {
+    const onEditUser = (user: User): void => {
         selectedUser.value = user
-        isEditDialogOpen.value = true
+        userDialogMode.value = 'edit'
+        isUserDialogOpen.value = true
     }
 
-    const onUpdateUser = () => {
-        isEditDialogOpen.value = false
+    const onUserSaved = (): void => {
+        isUserDialogOpen.value = false
     }
 
-    const onDeleteUser = (user: User) => {
+    const onDeleteUser = (user: User): void => {
         selectedUser.value = user
         isDeleteDialogOpen.value = true
     }
 
-    const onUserDeleted = () => {
+    const onUserDeleted = (): void => {
         isDeleteDialogOpen.value = false
     }
 </script>
@@ -74,7 +77,7 @@
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Heading title="Users" description="Manage user accounts" />
-                    <BaseButton class="w-full sm:w-auto" label="Add User" :icon-left="Plus" @click="isCreateDialogOpen = true" />
+                    <BaseButton class="w-full sm:w-auto" label="Add User" :icon-left="Plus" @click="openCreateUserDialog" />
                 </div>
 
                 <BaseTableBaseDataTableToolbar
@@ -104,19 +107,14 @@
                 />
             </div>
 
-            <UsersCreateUserDialog
-                v-if="isCreateDialogOpen"
-                :open="isCreateDialogOpen"
-                @update:open="isCreateDialogOpen = $event"
-                @created="onCreateUser"
-            />
-
-            <UsersEditUserDialog
-                v-if="isEditDialogOpen && selectedUser"
-                :open="isEditDialogOpen"
+            <UsersUserFormDialog
+                v-if="isUserDialogOpen"
+                :open="isUserDialogOpen"
+                :mode="userDialogMode"
                 :user="selectedUser"
-                @update:open="isEditDialogOpen = $event"
-                @updated="onUpdateUser"
+                @update:open="isUserDialogOpen = $event"
+                @created="onUserSaved"
+                @updated="onUserSaved"
             />
 
             <UsersDeleteUserDialog
