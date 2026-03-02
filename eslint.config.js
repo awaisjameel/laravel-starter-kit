@@ -29,7 +29,7 @@ export default defineConfigWithVueTs(
             'vue/multi-word-component-names': 'off',
             // '@typescript-eslint/no-explicit-any': 'off',
             'no-restricted-imports': [
-                'warn',
+                'error',
                 {
                     paths: [
                         {

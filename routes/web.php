@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\File;
 
-Route::get('/', fn () => Inertia::render('marketing/Welcome'))->name('home');
+$moduleRouteFiles = [
+    base_path('app/Modules/Marketing/Routes/web.php'),
+    base_path('app/Modules/Auth/Routes/web.php'),
+    base_path('app/Modules/Dashboard/Routes/web.php'),
+    base_path('app/Modules/Settings/Routes/web.php'),
+    base_path('app/Modules/Users/Routes/web.php'),
+];
 
-Route::get('dashboard', fn () => Inertia::render('Dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
-
-// User management routes
-Route::middleware(['auth'])
-    ->group(function (): void {
-        Route::resource('users', UserController::class)
-            ->except(['create', 'edit', 'show']);
-    });
-
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+foreach ($moduleRouteFiles as $moduleRouteFile) {
+    if (File::exists($moduleRouteFile)) {
+        require $moduleRouteFile;
+    }
+}

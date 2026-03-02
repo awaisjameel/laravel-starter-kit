@@ -2,7 +2,14 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 
-Route::get('/user', fn (Request $request) => $request->user())->middleware('auth:sanctum');
+$moduleRouteFiles = [
+    base_path('app/Modules/Api/V1/Routes/api.php'),
+];
+
+foreach ($moduleRouteFiles as $moduleRouteFile) {
+    if (File::exists($moduleRouteFile)) {
+        require $moduleRouteFile;
+    }
+}

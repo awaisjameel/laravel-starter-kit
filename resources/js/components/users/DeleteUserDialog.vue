@@ -1,5 +1,4 @@
 <script setup lang="ts">
-    import users from '@/routes/users'
     import { type User } from '@/types'
 
     const emit = defineEmits<{
@@ -34,7 +33,7 @@
                 <UiButton
                     variant="destructive"
                     class="w-full sm:w-auto"
-                    @click="form.submit(users.destroy({ user: user.id }), { onSuccess: () => emit('deleted') })"
+                    @click="form.delete(route('app.admin.users.destroy', { user: user.id }), { onSuccess: () => emit('deleted') })"
                     :disabled="form.processing"
                 >
                     <Icon-mdi-loading v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />

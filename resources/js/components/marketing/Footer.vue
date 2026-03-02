@@ -9,7 +9,7 @@
             class="mx-auto grid w-full max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-12 md:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] lg:px-8"
         >
             <div class="space-y-4">
-                <Link :href="route('home')" class="inline-flex">
+                <Link :href="route('marketing.home')" class="inline-flex">
                     <AppLogo />
                 </Link>
                 <p class="max-w-sm text-sm leading-relaxed text-muted-foreground">

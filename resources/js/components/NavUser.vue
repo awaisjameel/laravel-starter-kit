@@ -1,10 +1,14 @@
 <script setup lang="ts">
     import { useSidebar } from '@/components/ui/sidebar/utils'
-    import { type User } from '@/types'
     import { ChevronsUpDown } from 'lucide-vue-next'
 
     const page = usePage()
-    const user = page.props.auth.user as User
+    const user = page.props.auth.user
+
+    if (user === null) {
+        throw new Error('Authenticated user is required for NavUser.')
+    }
+
     const { isMobile, state } = useSidebar()
 </script>
 

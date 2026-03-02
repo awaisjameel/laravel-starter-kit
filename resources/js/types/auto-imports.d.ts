@@ -266,16 +266,10 @@ declare global {
     // @ts-ignore
     export type { Appearance } from '../composables/useAppearance'
     // @ts-ignore
-    export type { ConfirmOptions } from '../composables/useConfirm'
-    // @ts-ignore
     export type { NavigationGroup } from '../composables/useNavigation'
-    // @ts-ignore
-    export type { Toast } from '../composables/useToast'
     import('vue')
     import('../composables/useAppearance')
-    import('../composables/useConfirm')
     import('../composables/useNavigation')
-    import('../composables/useToast')
 }
 
 // for vue template auto import
@@ -345,11 +339,9 @@ declare module 'vue' {
         readonly updateTheme: UnwrapRef<(typeof import('../composables/useAppearance'))['updateTheme']>
         readonly useAppearance: UnwrapRef<(typeof import('../composables/useAppearance'))['useAppearance']>
         readonly useAttrs: UnwrapRef<(typeof import('vue'))['useAttrs']>
-        readonly useConfirm: UnwrapRef<(typeof import('../composables/useConfirm'))['useConfirm']>
         readonly useCssModule: UnwrapRef<(typeof import('vue'))['useCssModule']>
         readonly useCssVars: UnwrapRef<(typeof import('vue'))['useCssVars']>
         readonly useForm: UnwrapRef<(typeof import('@inertiajs/vue3'))['useForm']>
-        readonly useHttp: UnwrapRef<(typeof import('../stores/useHttp'))['useHttp']>
         readonly useId: UnwrapRef<(typeof import('vue'))['useId']>
         readonly useInitials: UnwrapRef<(typeof import('../composables/useInitials'))['useInitials']>
         readonly useLink: UnwrapRef<(typeof import('vue-router'))['useLink']>
@@ -362,7 +354,6 @@ declare module 'vue' {
         readonly useRouter: UnwrapRef<(typeof import('vue-router'))['useRouter']>
         readonly useSlots: UnwrapRef<(typeof import('vue'))['useSlots']>
         readonly useTemplateRef: UnwrapRef<(typeof import('vue'))['useTemplateRef']>
-        readonly useToast: UnwrapRef<(typeof import('../composables/useToast'))['useToast']>
         readonly watch: UnwrapRef<(typeof import('vue'))['watch']>
         readonly watchEffect: UnwrapRef<(typeof import('vue'))['watchEffect']>
         readonly watchPostEffect: UnwrapRef<(typeof import('vue'))['watchPostEffect']>

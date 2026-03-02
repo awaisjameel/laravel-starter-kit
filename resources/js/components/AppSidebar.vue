@@ -10,7 +10,7 @@
             <UiSidebarMenu>
                 <UiSidebarMenuItem>
                     <UiSidebarMenuButton size="lg" as-child>
-                        <Link :href="route('dashboard')">
+                        <Link :href="route('app.dashboard')">
                             <AppLogo />
                         </Link>
                     </UiSidebarMenuButton>

@@ -15,7 +15,10 @@ final class SecurityHeadersTest extends TestCase
     {
         $testResponse = $this->get('/');
 
-        $testResponse->assertHeader('Content-Security-Policy');
+        $contentSecurityPolicy = (string) $testResponse->headers->get('Content-Security-Policy');
+
+        $this->assertNotSame('', $contentSecurityPolicy);
+        $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-[^']+'/", $contentSecurityPolicy);
         $testResponse->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
         $testResponse->assertHeader('X-Content-Type-Options', 'nosniff');
         $testResponse->assertHeader('X-Frame-Options', 'DENY');

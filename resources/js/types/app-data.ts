@@ -1,4 +1,8 @@
-export type UserData = {
+export enum UserRole {
+    Admin = 'admin',
+    User = 'user'
+}
+export type UserViewData = {
     id: number
     created_at: string
     updated_at: string
@@ -6,9 +10,4 @@ export type UserData = {
     email: string
     role: UserRole
     email_verified_at?: string
-    password?: string
-}
-export enum UserRole {
-    Admin = 'admin',
-    User = 'user'
 }

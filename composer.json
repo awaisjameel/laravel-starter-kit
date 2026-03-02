@@ -1,4 +1,5 @@
 {
+    "version": "2.0.0",
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/vue-starter-kit",
     "type": "project",
@@ -82,6 +83,15 @@
         ],
         "analyse": [
             "@php vendor/bin/phpstan analyse --ansi"
+        ],
+        "qa:check": [
+            "@php artisan typescript:transform",
+            "@php artisan wayfinder:generate",
+            "@php vendor/bin/pint --test",
+            "@php vendor/bin/phpstan analyse --ansi",
+            "npm run format:check",
+            "npm run lint:check",
+            "npm run typecheck"
         ],
         "generate": [
             "@php artisan typescript:transform",

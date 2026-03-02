@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Data\UserData;
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Modules\Users\Data\CreateUserData;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,18 +19,16 @@ return new class extends Migration
         }
 
         $usersDataList = [
-            new UserData(
+            new CreateUserData(
                 name: 'Admin',
                 email: 'admin@app.com',
                 role: UserRole::Admin,
-                email_verified_at: CarbonImmutable::now(),
                 password: 'Admin123!@#',
             ),
-            new UserData(
+            new CreateUserData(
                 name: 'User',
                 email: 'user@app.com',
                 role: UserRole::User,
-                email_verified_at: null,
                 password: 'User123!@#',
             ),
         ];
@@ -38,7 +36,10 @@ return new class extends Migration
         foreach ($usersDataList as $userDataList) {
             User::updateOrCreate(
                 ['email' => $userDataList->email],
-                $userDataList->toArray()
+                [
+                    ...$userDataList->toArray(),
+                    'email_verified_at' => $userDataList->role === UserRole::Admin ? CarbonImmutable::now() : null,
+                ]
             );
         }
     }

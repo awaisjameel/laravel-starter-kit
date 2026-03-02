@@ -1,5 +1,4 @@
 <script setup lang="ts">
-    import users from '@/routes/users'
     import { type User } from '@/types'
     import { UserRole } from '@/types/app-data'
 
@@ -31,7 +30,7 @@
                 <UiDialogDescription> Make changes to the user's information </UiDialogDescription>
             </UiDialogHeader>
 
-            <form @submit.prevent="form.submit(users.update({ user: props.user.id }), { onSuccess: () => emit('updated') })">
+            <form @submit.prevent="form.put(route('app.admin.users.update', { user: props.user.id }), { onSuccess: () => emit('updated') })">
                 <div class="grid gap-4 py-4">
                     <div class="grid gap-2">
                         <UiLabel for="name">Name</UiLabel>

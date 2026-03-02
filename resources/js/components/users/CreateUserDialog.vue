@@ -1,5 +1,4 @@
 <script setup lang="ts">
-    import users from '@/routes/users'
     import { UserRole } from '@/types/app-data'
 
     const emit = defineEmits<{
@@ -29,7 +28,7 @@
                 <UiDialogDescription> Add a new user to the system </UiDialogDescription>
             </UiDialogHeader>
 
-            <form @submit.prevent="form.submit(users.store(), { onSuccess: () => emit('created') })">
+            <form @submit.prevent="form.post(route('app.admin.users.store'), { onSuccess: () => emit('created') })">
                 <div class="grid gap-4 py-4">
                     <div class="grid gap-2">
                         <UiLabel for="name">Name</UiLabel>

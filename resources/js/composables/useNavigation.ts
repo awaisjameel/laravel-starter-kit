@@ -18,7 +18,7 @@ export function useNavigation() {
         const items: NavItem[] = [
             {
                 title: 'Dashboard',
-                href: route('dashboard'),
+                href: route('app.dashboard'),
                 icon: LayoutGrid
             }
         ]
@@ -26,7 +26,7 @@ export function useNavigation() {
         if (isAdmin.value) {
             items.push({
                 title: 'Users',
-                href: route('users.index'),
+                href: route('app.admin.users.index'),
                 icon: Users
             })
         }
@@ -37,12 +37,12 @@ export function useNavigation() {
     const dashboardFooterItems = computed<NavItem[]>(() => [
         {
             title: 'Settings',
-            href: route('profile.edit'),
+            href: route('app.settings.profile.edit'),
             icon: Settings
         },
         {
             title: 'Security',
-            href: route('password.edit'),
+            href: route('app.settings.password.edit'),
             icon: LockKeyhole
         }
     ])
@@ -51,20 +51,20 @@ export function useNavigation() {
         const items: NavItem[] = [
             {
                 title: 'Home',
-                href: route('home')
+                href: route('marketing.home')
             }
         ]
 
         if (isAuthenticated.value) {
             items.push({
                 title: 'Dashboard',
-                href: route('dashboard')
+                href: route('app.dashboard')
             })
 
             if (isAdmin.value) {
                 items.push({
                     title: 'Users',
-                    href: route('users.index')
+                    href: route('app.admin.users.index')
                 })
             }
         }
@@ -76,14 +76,14 @@ export function useNavigation() {
         if (isAuthenticated.value) {
             return {
                 title: 'Open dashboard',
-                href: route('dashboard'),
+                href: route('app.dashboard'),
                 icon: LayoutGrid
             }
         }
 
         return {
             title: 'Get started',
-            href: route('register'),
+            href: route('auth.register.create'),
             icon: UserPlus
         }
     })
@@ -92,14 +92,14 @@ export function useNavigation() {
         if (isAuthenticated.value) {
             return {
                 title: 'Settings',
-                href: route('profile.edit'),
+                href: route('app.settings.profile.edit'),
                 icon: Settings
             }
         }
 
         return {
             title: 'Log in',
-            href: route('login'),
+            href: route('auth.login.create'),
             icon: LogIn
         }
     })
@@ -108,14 +108,14 @@ export function useNavigation() {
         const platformItems: NavItem[] = [
             {
                 title: 'Home',
-                href: route('home')
+                href: route('marketing.home')
             }
         ]
 
         if (isAuthenticated.value) {
             platformItems.push({
                 title: 'Dashboard',
-                href: route('dashboard')
+                href: route('app.dashboard')
             })
         }
 
@@ -123,21 +123,21 @@ export function useNavigation() {
             ? [
                   {
                       title: 'Profile settings',
-                      href: route('profile.edit')
+                      href: route('app.settings.profile.edit')
                   },
                   {
                       title: 'Password settings',
-                      href: route('password.edit')
+                      href: route('app.settings.password.edit')
                   }
               ]
             : [
                   {
                       title: 'Log in',
-                      href: route('login')
+                      href: route('auth.login.create')
                   },
                   {
                       title: 'Create account',
-                      href: route('register')
+                      href: route('auth.register.create')
                   }
               ]
 
@@ -158,7 +158,7 @@ export function useNavigation() {
                 items: [
                     {
                         title: 'User management',
-                        href: route('users.index')
+                        href: route('app.admin.users.index')
                     }
                 ]
             })

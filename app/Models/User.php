@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Data\UserData;
 use App\Enums\UserRole;
+use App\Modules\Shared\Data\UserViewData;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,9 +30,9 @@ final class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
-    public function toData(): UserData
+    public function toViewData(): UserViewData
     {
-        return UserData::fromModel($this);
+        return UserViewData::fromModel($this);
     }
 
     /**

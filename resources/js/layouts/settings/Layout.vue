@@ -4,15 +4,15 @@
     const sidebarNavItems: NavItem[] = [
         {
             title: 'Profile',
-            href: route('profile.edit')
+            href: route('app.settings.profile.edit')
         },
         {
             title: 'Password',
-            href: route('password.edit')
+            href: route('app.settings.password.edit')
         },
         {
             title: 'Appearance',
-            href: route('appearance')
+            href: route('app.settings.appearance')
         }
     ]
 

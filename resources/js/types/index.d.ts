@@ -1,9 +1,9 @@
 import type { LucideIcon } from 'lucide-vue-next'
 import type { Config } from 'ziggy-js'
-import { UserData } from './app-data'
+import { UserViewData } from './app-data'
 
 export interface Auth {
-    user: UserData
+    user: UserViewData | null
 }
 
 export interface BreadcrumbItem {
@@ -23,11 +23,16 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
     name: string
     quote: { message: string; author: string }
     auth: Auth
+    flash: {
+        message?: string
+        error?: string
+        status?: string
+    }
     ziggy: Config & { location: string }
     sidebarOpen: boolean
 }
 
-export type User = UserData
+export type User = UserViewData
 
 export interface Paginated<T> {
     data: T[]
@@ -40,7 +45,7 @@ export interface Paginated<T> {
 }
 
 export interface UsersPageProps {
-    users: Paginated<UserData>
+    users: Paginated<UserViewData>
 }
 
 export interface SelectOption {
