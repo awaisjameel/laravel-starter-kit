@@ -32,7 +32,7 @@ final class ConfirmablePasswordController extends Controller
         $validated = $confirmPasswordRequest->validated();
 
         if (
-            ! Auth::guard('web')->validate([
+            $user === null || ! Auth::guard('web')->validate([
                 'email' => $user->email,
                 'password' => $validated['password'],
             ])

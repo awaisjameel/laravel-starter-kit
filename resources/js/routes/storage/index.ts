@@ -1,4 +1,5 @@
 import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../wayfinder'
+import localA91488 from './local'
 /**
  * @see vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvider.php:98
  * @route '/storage/{path}'
@@ -57,7 +58,7 @@ local.head = (args: { path: string | number } | [path: string | number] | string
     method: 'head'
 })
 const storage = {
-    local: Object.assign(local, local)
+    local: Object.assign(local, localA91488)
 }
 
 export default storage

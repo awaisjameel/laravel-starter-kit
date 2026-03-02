@@ -41,6 +41,10 @@ final class UserController extends Controller
     {
         $actor = $userCreateRequest->user();
 
+        if ($actor === null) {
+            return redirect()->route('login');
+        }
+
         $userData = UserData::from($userCreateRequest->validated());
 
         $this->userService->createUser($userData, $actor, $userCreateRequest);
@@ -53,9 +57,15 @@ final class UserController extends Controller
     {
         $actor = $userUpdateRequest->user();
 
+        if ($actor === null) {
+            return redirect()->route('login');
+        }
+
+        $userData = UserData::from($userUpdateRequest->validated());
+
         $this->userService->updateUser(
             $user,
-            $userUpdateRequest->validated(),
+            $userData,
             $actor,
             $userUpdateRequest
         );
@@ -67,6 +77,10 @@ final class UserController extends Controller
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): RedirectResponse
     {
         $actor = $userDestroyRequest->user();
+
+        if ($actor === null) {
+            return redirect()->route('login');
+        }
 
         $this->userService->deleteUser($user, $actor, $userDestroyRequest);
 

@@ -46,21 +46,23 @@ final class NewPasswordController extends Controller
                 'token' => $validated['token'],
             ],
             function ($user) use ($resetPasswordRequest): void {
+                /** @var string $password */
+                $password = $resetPasswordRequest->validated('password');
                 $user->forceFill([
-                    'password' => Hash::make($resetPasswordRequest->validated('password')),
+                    'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));
             }
         );
-
+        /** @var string $status */
         if ($status === Password::PasswordReset) {
             return to_route('login')->with('status', __($status));
         }
 
         throw ValidationException::withMessages([
-            'email' => [__($status)],
+            'email' => [__((string) $status)],
         ]);
     }
 }

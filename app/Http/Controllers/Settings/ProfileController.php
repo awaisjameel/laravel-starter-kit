@@ -37,6 +37,10 @@ final class ProfileController extends Controller
     {
         $user = $profileUpdateRequest->user();
 
+        if ($user === null) {
+            return redirect()->route('login');
+        }
+
         $user->fill($profileUpdateRequest->validated());
 
         if ($user->isDirty('email')) {
@@ -57,7 +61,7 @@ final class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        $user?->delete();
 
         $profileDestroyRequest->session()->invalidate();
         $profileDestroyRequest->session()->regenerateToken();

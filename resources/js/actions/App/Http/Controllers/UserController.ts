@@ -78,7 +78,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
  * @see \App\Http\Controllers\UserController::update
- * @see app/Http/Controllers/UserController.php:52
+ * @see app/Http/Controllers/UserController.php:56
  * @route '/users/{user}'
  */
 export const update = (
@@ -96,7 +96,7 @@ update.definition = {
 
 /**
  * @see \App\Http\Controllers\UserController::update
- * @see app/Http/Controllers/UserController.php:52
+ * @see app/Http/Controllers/UserController.php:56
  * @route '/users/{user}'
  */
 update.url = (args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -125,7 +125,7 @@ update.url = (args: { user: number | { id: number } } | [user: number | { id: nu
 
 /**
  * @see \App\Http\Controllers\UserController::update
- * @see app/Http/Controllers/UserController.php:52
+ * @see app/Http/Controllers/UserController.php:56
  * @route '/users/{user}'
  */
 update.put = (
@@ -137,7 +137,7 @@ update.put = (
 })
 /**
  * @see \App\Http\Controllers\UserController::update
- * @see app/Http/Controllers/UserController.php:52
+ * @see app/Http/Controllers/UserController.php:56
  * @route '/users/{user}'
  */
 update.patch = (
@@ -150,7 +150,7 @@ update.patch = (
 
 /**
  * @see \App\Http\Controllers\UserController::destroy
- * @see app/Http/Controllers/UserController.php:67
+ * @see app/Http/Controllers/UserController.php:77
  * @route '/users/{user}'
  */
 export const destroy = (
@@ -168,7 +168,7 @@ destroy.definition = {
 
 /**
  * @see \App\Http\Controllers\UserController::destroy
- * @see app/Http/Controllers/UserController.php:67
+ * @see app/Http/Controllers/UserController.php:77
  * @route '/users/{user}'
  */
 destroy.url = (args: { user: number | { id: number } } | [user: number | { id: number }] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -197,7 +197,7 @@ destroy.url = (args: { user: number | { id: number } } | [user: number | { id: n
 
 /**
  * @see \App\Http\Controllers\UserController::destroy
- * @see app/Http/Controllers/UserController.php:67
+ * @see app/Http/Controllers/UserController.php:77
  * @route '/users/{user}'
  */
 destroy.delete = (

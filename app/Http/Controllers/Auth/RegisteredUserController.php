@@ -26,6 +26,7 @@ final class RegisteredUserController extends Controller
 
     public function store(RegisterUserRequest $registerUserRequest): RedirectResponse
     {
+        /** @var array{name: string, email: string, password: string} $validated */
         $validated = $registerUserRequest->validated();
 
         $user = User::create([

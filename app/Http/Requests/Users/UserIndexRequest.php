@@ -28,11 +28,17 @@ final class UserIndexRequest extends FormRequest
 
     public function pageNumber(): int
     {
-        return (int) $this->validated('page', 1);
+        /** @var int|string|null $page */
+        $page = $this->validated('page', 1);
+
+        return (int) $page;
     }
 
     public function perPage(): int
     {
-        return (int) $this->validated('perPage', 10);
+        /** @var int|string|null $perPage */
+        $perPage = $this->validated('perPage', 10);
+
+        return (int) $perPage;
     }
 }

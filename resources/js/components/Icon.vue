@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import * as icons from 'lucide-vue-next'
+    import type { Component } from 'vue'
 
     interface Props {
         name: string
@@ -16,10 +17,14 @@
     })
 
     const className = computed(() => cn('h-4 w-4', props.class))
+    const iconRegistry = icons as unknown as Record<string, unknown>
+    const isVueComponent = (value: unknown): value is Component => typeof value === 'function' || (typeof value === 'object' && value !== null)
 
-    const icon = computed(() => {
+    const icon = computed<Component | null>(() => {
         const iconName = props.name.charAt(0).toUpperCase() + props.name.slice(1)
-        return (icons as Record<string, any>)[iconName]
+        const candidate = iconRegistry[iconName]
+
+        return isVueComponent(candidate) ? candidate : null
     })
 </script>
 

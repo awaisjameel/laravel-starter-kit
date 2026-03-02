@@ -10,6 +10,7 @@ use App\Models\User;
 use BackedEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Stringable;
 
 /**
  * Service for user management operations.
@@ -36,24 +37,22 @@ final class UserService
 
     /**
      * Update an existing user.
-     *
-     * @param  array<string, mixed>  $data
      */
-    public function updateUser(User $user, array $data, User $actor, Request $request): User
+    public function updateUser(User $user, UserData $userData, User $actor, Request $request): User
     {
         $before = $user->only(['name', 'email', 'role']);
 
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->role = $data['role'];
+        $user->name = $userData->name;
+        $user->email = $userData->email;
+        $user->role = $userData->role;
 
-        if (! empty($data['password'])) {
-            $user->password = $data['password'];
+        if ($userData->password !== null && $userData->password !== '') {
+            $user->password = $userData->password;
         }
 
         $user->save();
 
-        $changes = $this->computeChanges($before, $user, ! empty($data['password']));
+        $changes = $this->computeChanges($before, $user, $userData->password !== null && $userData->password !== '');
 
         Event::dispatch(new UserManagementEvent(
             action: 'update',
@@ -119,9 +118,32 @@ final class UserService
     private function auditValue(mixed $value): string
     {
         if ($value instanceof BackedEnum) {
-            return $value->value;
+            return (string) $value->value;
         }
 
-        return (string) $value;
+        if ($value instanceof Stringable) {
+            return $value->__toString();
+        }
+
+        return match (true) {
+            is_string($value) => $value,
+            is_int($value), is_float($value) => (string) $value,
+            is_bool($value) => $value ? 'true' : 'false',
+            $value === null => '',
+            is_array($value) => $this->encodeAuditArray($value),
+            is_object($value) => '[object '.$value::class.']',
+            is_resource($value) => '[resource '.get_resource_type($value).']',
+            default => '[unknown]',
+        };
+    }
+
+    /**
+     * @param  array<mixed>  $value
+     */
+    private function encodeAuditArray(array $value): string
+    {
+        $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        return is_string($encoded) ? $encoded : '[unserializable array]';
     }
 }
