@@ -1,21 +1,12 @@
 <script setup lang="ts">
     import ConfirmablePasswordController from '@/actions/App/Modules/Auth/Http/Controllers/ConfirmablePasswordController'
-    import type { FormFieldSchema } from '@/types/base-ui'
+    import { buildConfirmPasswordFormFields, type ConfirmPasswordFormValues } from '@/modules/auth/forms/confirm-password-form-schema'
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<ConfirmPasswordFormValues>({
         password: ''
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'password',
-            label: 'Password',
-            type: 'password',
-            required: true,
-            autocomplete: 'current-password',
-            placeholder: 'Password'
-        }
-    ]
+    const fields = buildConfirmPasswordFormFields()
 
     const submitForm = () => {
         submit(ConfirmablePasswordController.store(), {
@@ -31,7 +22,7 @@
         <Head title="Confirm password" />
 
         <BaseFormsBaseFormRenderer
-            :model="form as unknown as Record<string, unknown>"
+            :model="form"
             :fields="fields"
             :errors="form.errors"
             :processing="form.processing"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import NewPasswordController from '@/actions/App/Modules/Auth/Http/Controllers/NewPasswordController'
-    import type { FormFieldSchema } from '@/types/base-ui'
+    import { buildResetPasswordFormFields } from '@/modules/auth/forms/reset-password-form-schema'
 
     interface Props {
         token: string
@@ -16,30 +16,7 @@
         password_confirmation: ''
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'email',
-            label: 'Email',
-            type: 'email',
-            readonly: true
-        },
-        {
-            name: 'password',
-            label: 'Password',
-            type: 'password',
-            required: true,
-            autocomplete: 'new-password',
-            placeholder: 'Password'
-        },
-        {
-            name: 'password_confirmation',
-            label: 'Confirm Password',
-            type: 'password',
-            required: true,
-            autocomplete: 'new-password',
-            placeholder: 'Confirm password'
-        }
-    ]
+    const fields = buildResetPasswordFormFields()
 
     const submitForm = () => {
         submit(NewPasswordController.store(), {
@@ -55,7 +32,7 @@
         <Head title="Reset password" />
 
         <BaseFormsBaseFormRenderer
-            :model="form as unknown as Record<string, unknown>"
+            :model="form"
             :fields="fields"
             :errors="form.errors"
             :processing="form.processing"

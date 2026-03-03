@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TData">
     import type { DataTableRowAction, MobileCardField } from '@/types/base-ui'
 
     interface Props {
-        rows: unknown[]
-        rowKey: (row: unknown) => string | number
-        fields: Array<MobileCardField<unknown>>
-        actions?: Array<DataTableRowAction<unknown>>
+        rows: TData[]
+        rowKey: (row: TData) => string | number
+        fields: Array<MobileCardField<TData>>
+        actions?: Array<DataTableRowAction<TData>>
         emptyMessage?: string
     }
 

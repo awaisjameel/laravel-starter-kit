@@ -1,42 +1,19 @@
 <script setup lang="ts">
     import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
-    import type { FormFieldSchema } from '@/types/base-ui'
+    import { buildLoginFormFields, type LoginFormValues } from '@/modules/auth/forms/login-form-schema'
 
     defineProps<{
         status?: string
         canResetPassword: boolean
     }>()
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<LoginFormValues>({
         email: '',
         password: '',
         remember: false
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'email',
-            label: 'Email address',
-            type: 'email',
-            required: true,
-            autocomplete: 'email',
-            placeholder: 'email@example.com'
-        },
-        {
-            name: 'password',
-            label: 'Password',
-            type: 'password',
-            required: true,
-            autocomplete: 'current-password',
-            placeholder: 'Password'
-        },
-        {
-            name: 'remember',
-            label: 'Remember me',
-            type: 'checkbox',
-            placeholder: 'Remember me'
-        }
-    ]
+    const fields = buildLoginFormFields()
 
     const submitForm = () => {
         submit(AuthenticatedSessionController.store(), {
@@ -56,7 +33,7 @@
         </div>
 
         <BaseFormsBaseFormRenderer
-            :model="form as unknown as Record<string, unknown>"
+            :model="form"
             :fields="fields"
             :errors="form.errors"
             :processing="form.processing"

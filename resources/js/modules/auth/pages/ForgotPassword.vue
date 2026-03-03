@@ -1,24 +1,16 @@
 <script setup lang="ts">
     import PasswordResetLinkController from '@/actions/App/Modules/Auth/Http/Controllers/PasswordResetLinkController'
-    import type { FormFieldSchema } from '@/types/base-ui'
+    import { buildForgotPasswordFormFields, type ForgotPasswordFormValues } from '@/modules/auth/forms/forgot-password-form-schema'
 
     defineProps<{
         status?: string
     }>()
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<ForgotPasswordFormValues>({
         email: ''
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'email',
-            label: 'Email address',
-            type: 'email',
-            required: true,
-            placeholder: 'email@example.com'
-        }
-    ]
+    const fields = buildForgotPasswordFormFields()
 
     const submitForm = () => {
         submit(PasswordResetLinkController.store())
@@ -35,7 +27,7 @@
 
         <div class="space-y-6">
             <BaseFormsBaseFormRenderer
-                :model="form as unknown as Record<string, unknown>"
+                :model="form"
                 :fields="fields"
                 :errors="form.errors"
                 :processing="form.processing"

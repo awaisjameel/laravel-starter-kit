@@ -198,6 +198,7 @@ declare global {
     const readonly: typeof import('vue').readonly
     const ref: typeof import('vue').ref
     const resolveComponent: typeof import('vue').resolveComponent
+    const resolveServerTableInitialQuery: typeof import('../composables/useServerDataTable').resolveServerTableInitialQuery
     const router: typeof import('@inertiajs/vue3').router
     const setActivePinia: (typeof import('pinia'))['setActivePinia']
     const setMapStoreSuffix: (typeof import('pinia'))['setMapStoreSuffix']
@@ -270,14 +271,11 @@ declare global {
     // @ts-ignore
     export type { Appearance } from '../composables/useAppearance'
     // @ts-ignore
-    export type { NavigationGroup } from '../composables/useNavigation'
-    // @ts-ignore
     export type { ResourceSubmitOptions } from '../composables/useResourceForm'
     // @ts-ignore
     export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
     import('vue')
     import('../composables/useAppearance')
-    import('../composables/useNavigation')
     import('../composables/useResourceForm')
     import('../utils/route')
 }
@@ -336,6 +334,7 @@ declare module 'vue' {
         readonly readonly: UnwrapRef<(typeof import('vue'))['readonly']>
         readonly ref: UnwrapRef<(typeof import('vue'))['ref']>
         readonly resolveComponent: UnwrapRef<(typeof import('vue'))['resolveComponent']>
+        readonly resolveServerTableInitialQuery: UnwrapRef<(typeof import('../composables/useServerDataTable'))['resolveServerTableInitialQuery']>
         readonly router: UnwrapRef<(typeof import('@inertiajs/vue3'))['router']>
         readonly shallowReactive: UnwrapRef<(typeof import('vue'))['shallowReactive']>
         readonly shallowReadonly: UnwrapRef<(typeof import('vue'))['shallowReadonly']>

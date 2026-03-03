@@ -3,6 +3,7 @@
     import { UsersPageProps, type BreadcrumbItem, type User } from '@/types'
     import { Plus } from 'lucide-vue-next'
 
+    const userSortColumns = ['name', 'email', 'role', 'created_at'] as const
     type UserSortColumn = 'name' | 'email' | 'role' | 'created_at'
 
     const page = usePage()
@@ -21,23 +22,27 @@
     const selectedUser = ref<User | null>(null)
     const userDialogMode = ref<'create' | 'edit'>('create')
 
-    const getQueryValue = (key: string): string | undefined => {
-        if (typeof window === 'undefined') {
-            return undefined
+    const locationSearch = (() => {
+        try {
+            return new URL(page.props.ziggy.location).search
+        } catch {
+            return ''
         }
+    })()
 
-        const params = new URLSearchParams(window.location.search)
-        const value = params.get(key)
-        return value === null || value === '' ? undefined : value
-    }
-
-    const initialQuery = {
-        page: Number(getQueryValue('page') ?? props.users.current_page) || 1,
-        perPage: Number(getQueryValue('perPage') ?? props.users.per_page) || 10,
-        search: getQueryValue('search'),
-        sortBy: (getQueryValue('sortBy') as UserSortColumn | undefined) ?? 'created_at',
-        sortDirection: (getQueryValue('sortDirection') as 'asc' | 'desc' | undefined) ?? 'desc'
-    }
+    const initialQuery = resolveServerTableInitialQuery<UserSortColumn>({
+        locationSearch,
+        fallback: {
+            page: props.users.current_page,
+            perPage: props.users.per_page,
+            search: undefined,
+            sortBy: 'created_at',
+            sortDirection: 'desc'
+        },
+        allowedSortBy: userSortColumns,
+        defaultSortBy: 'created_at',
+        defaultSortDirection: 'desc'
+    })
 
     const { query, searchValue, setPage, setPerPage, setSort } = useServerDataTable<UserSortColumn>({
         endpoint: UserController.index,
@@ -95,10 +100,10 @@
                     :sort-direction="query.sortDirection"
                     @edit="onEditUser"
                     @delete="onDeleteUser"
-                    @sort="setSort($event as UserSortColumn)"
+                    @sort="setSort($event)"
                 />
 
-                <UsersPagination
+                <BaseTableBaseDataTablePagination
                     :current-page="props.users.current_page"
                     :total-pages="props.users.last_page"
                     :items-per-page="props.users.per_page"

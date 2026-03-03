@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import PasswordController from '@/actions/App/Modules/Settings/Http/Controllers/PasswordController'
+    import { buildPasswordFormFields, type PasswordFormValues } from '@/modules/settings/forms/password-form-schema'
     import { type BreadcrumbItem } from '@/types'
-    import type { FormFieldSchema } from '@/types/base-ui'
 
     const breadcrumbItems: BreadcrumbItem[] = [
         {
@@ -10,35 +10,13 @@
         }
     ]
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<PasswordFormValues>({
         current_password: '',
         password: '',
         password_confirmation: ''
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'current_password',
-            label: 'Current password',
-            type: 'password',
-            autocomplete: 'current-password',
-            placeholder: 'Current password'
-        },
-        {
-            name: 'password',
-            label: 'New password',
-            type: 'password',
-            autocomplete: 'new-password',
-            placeholder: 'New password'
-        },
-        {
-            name: 'password_confirmation',
-            label: 'Confirm password',
-            type: 'password',
-            autocomplete: 'new-password',
-            placeholder: 'Confirm password'
-        }
-    ]
+    const fields = buildPasswordFormFields()
 
     const updatePassword = () => {
         submit(PasswordController.update(), {
@@ -68,7 +46,7 @@
                 <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
 
                 <BaseFormsBaseFormRenderer
-                    :model="form as unknown as Record<string, unknown>"
+                    :model="form"
                     :fields="fields"
                     :errors="form.errors"
                     :processing="form.processing"

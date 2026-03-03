@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import { type User } from '@/types'
-    import { buildUserFormFields } from './user-form-schema'
+    import { buildUserFormFields, type UserFormValues } from './user-form-schema'
 
     type UserFormMode = 'create' | 'edit'
 
@@ -21,7 +21,7 @@
         updated: []
     }>()
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<UserFormValues>({
         name: '',
         email: '',
         role: '',
@@ -97,7 +97,7 @@
         @update:open="emit('update:open', $event)"
     >
         <BaseFormsBaseFormRenderer
-            :model="form as unknown as Record<string, unknown>"
+            :model="form"
             :fields="fields"
             :errors="form.errors"
             :processing="form.processing"

@@ -50,6 +50,8 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 ### Frontend
 
 - Inertia pages live in `resources/js/modules/**/pages`.
+- Feature form schemas live in `resources/js/modules/**/forms`.
+- Frontend config contracts live in `resources/js/config/**`.
 - Shared app/layout primitives remain in:
     - `resources/js/components/**`
     - `resources/js/layouts/**`
@@ -60,6 +62,9 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - App entry points:
     - `resources/js/app.ts`
     - `resources/js/ssr.ts`
+- Navigation contract:
+    - Centralized in `resources/js/config/navigation.ts`.
+    - `useNavigation` and settings layout must consume shared navigation builders, not duplicate route/label arrays.
 
 ## Routing Contract
 
@@ -100,8 +105,14 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 - Prefer named routes and generated helpers over hardcoded URIs.
 - New forms should use schema-driven rendering via shared form contracts/components in `resources/js/components/base/forms/**`.
+- Feature forms must define typed field schemas via `defineFormFields` in module schema files (`resources/js/modules/**/forms/*-form-schema.ts`) and reuse them in pages/components.
 - Server-driven listing pages should use shared server table composables/components in `resources/js/components/base/table/**`.
+- Server-driven listing pages must derive initial query state via `resolveServerTableInitialQuery` from `useServerDataTable`.
 - Use Wayfinder action helpers for submits/navigation in reusable composables and feature pages.
+- Avoid `as unknown as Record<string, unknown>`; `BaseFormsBaseFormRenderer` accepts form objects directly.
+- Do not define inline form schema arrays (`const fields = [...]`) in pages/components; keep form schemas in `resources/js/modules/**/forms`.
+- Do not duplicate navigation arrays in pages/layouts/composables; centralize navigation definitions in `resources/js/config/navigation.ts`.
+- Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
 
 ## Server Table Query Contract
 
@@ -162,6 +173,7 @@ Minimum expectations:
 - Route changes: feature tests for accessibility + auth + authorization + validation.
 - Service changes: unit tests for public methods and edge cases.
 - Bug fixes: regression tests proving bug and fix.
+- Frontend composable/contract changes: add or update `vitest` coverage in `resources/js/**/__tests__/**`.
 
 ## Reusability and Duplication Rules
 
@@ -178,8 +190,15 @@ composer generate-and-cleanup
 php artisan test
 ```
 
+For frontend behavior/composable changes, also run:
+
+```bash
+npm run test:unit
+```
+
 ## CI Compatibility
 
 Local changes must remain compatible with existing CI checks:
 
 - Pint / PHPStan / frontend format / frontend lint / TS typecheck / PHPUnit.
+- Frontend unit tests (`vitest`) for frontend logic changes.

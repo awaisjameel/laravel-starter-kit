@@ -1,23 +1,14 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
-    import type { FormFieldSchema } from '@/types/base-ui'
+    import { buildDeleteAccountFormFields, type DeleteAccountFormValues } from '@/modules/settings/forms/delete-account-form-schema'
 
     const isOpen = ref(false)
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<DeleteAccountFormValues>({
         password: ''
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'password',
-            label: 'Password',
-            type: 'password',
-            required: true,
-            placeholder: 'Password',
-            autocomplete: 'current-password'
-        }
-    ]
+    const fields = buildDeleteAccountFormFields()
 
     const closeModal = () => {
         form.clearErrors()
@@ -63,7 +54,7 @@
             >
                 <div class="pt-4">
                     <BaseFormsBaseFormRenderer
-                        :model="form as unknown as Record<string, unknown>"
+                        :model="form"
                         :fields="fields"
                         :errors="form.errors"
                         :processing="form.processing"

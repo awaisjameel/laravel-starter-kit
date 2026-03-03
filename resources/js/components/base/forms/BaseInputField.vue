@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TForm extends object">
     import type { FormFieldSchema, FormOption } from '@/types/base-ui'
 
     interface Props {
         id: string
-        field: FormFieldSchema<Record<string, unknown>>
+        field: FormFieldSchema<TForm>
         modelValue: unknown
         error?: string
     }

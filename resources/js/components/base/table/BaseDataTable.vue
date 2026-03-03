@@ -1,31 +1,33 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TData, TSort extends string = string">
     import type { DataTableColumn, DataTableRowAction, SortDirection } from '@/types/base-ui'
     import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next'
 
     interface Props {
-        rows: unknown[]
-        columns: Array<DataTableColumn<unknown, string>>
-        rowKey: (row: unknown) => string | number
-        actions?: Array<DataTableRowAction<unknown>>
-        sortBy?: string
+        rows: TData[]
+        columns: Array<DataTableColumn<TData, TSort>>
+        rowKey: (row: TData) => string | number
+        actions?: Array<DataTableRowAction<TData>>
+        sortBy?: TSort
         sortDirection?: SortDirection
         emptyMessage?: string
+        tableLabel?: string
     }
 
     const props = withDefaults(defineProps<Props>(), {
         actions: () => [],
         sortBy: undefined,
         sortDirection: undefined,
-        emptyMessage: 'No records found.'
+        emptyMessage: 'No records found.',
+        tableLabel: 'Data table'
     })
 
     const emit = defineEmits<{
-        sort: [sortKey: string]
+        sort: [sortKey: TSort]
     }>()
 
-    const isSortable = (column: DataTableColumn<unknown, string>): boolean => column.sortable === true && column.sortKey !== undefined
+    const isSortable = (column: DataTableColumn<TData, TSort>): boolean => column.sortable === true && column.sortKey !== undefined
 
-    const resolveSortIcon = (column: DataTableColumn<unknown, string>) => {
+    const resolveSortIcon = (column: DataTableColumn<TData, TSort>) => {
         if (!isSortable(column)) {
             return null
         }
@@ -36,6 +38,18 @@
 
         return props.sortDirection === 'asc' ? ArrowUp : ArrowDown
     }
+
+    const resolveAriaSort = (column: DataTableColumn<TData, TSort>): 'ascending' | 'descending' | 'none' => {
+        if (!isSortable(column)) {
+            return 'none'
+        }
+
+        if (props.sortBy !== column.sortKey) {
+            return 'none'
+        }
+
+        return props.sortDirection === 'asc' ? 'ascending' : 'descending'
+    }
 </script>
 
 <template>
@@ -43,7 +57,7 @@
         <UiCardContent class="p-0">
             <div class="hidden md:block">
                 <div class="relative overflow-x-auto">
-                    <table class="w-full min-w-[700px]">
+                    <table class="w-full min-w-[700px]" :aria-label="props.tableLabel">
                         <thead class="border-b">
                             <tr class="hover:bg-transparent">
                                 <th
@@ -51,12 +65,13 @@
                                     :key="column.key"
                                     class="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
                                     :class="column.headerClass"
+                                    :aria-sort="resolveAriaSort(column)"
                                 >
                                     <button
                                         v-if="isSortable(column)"
                                         type="button"
-                                        class="inline-flex items-center gap-1"
-                                        @click="emit('sort', column.sortKey ?? column.key)"
+                                        class="inline-flex items-center gap-1 rounded-sm focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+                                        @click="emit('sort', column.sortKey as TSort)"
                                     >
                                         {{ column.label }}
                                         <component :is="resolveSortIcon(column)" class="size-4" />

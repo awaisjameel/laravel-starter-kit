@@ -1,24 +1,30 @@
 <script setup lang="ts">
-    import { type NavItem } from '@/types'
+    import { buildSettingsNavItems } from '@/config/navigation'
 
-    const sidebarNavItems: NavItem[] = [
-        {
-            title: 'Profile',
-            href: route('app.settings.profile.edit')
-        },
-        {
-            title: 'Password',
-            href: route('app.settings.password.edit')
-        },
-        {
-            title: 'Appearance',
-            href: route('app.settings.appearance')
-        }
-    ]
+    const sidebarNavItems = buildSettingsNavItems()
 
     const page = usePage()
 
-    const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : ''
+    const normalizePath = (value: string): string => {
+        const trimmed = value.replace(/\/+$/, '')
+        return trimmed === '' ? '/' : trimmed
+    }
+
+    const currentPath = computed(() => {
+        const location = page.props.ziggy?.location
+
+        if (location === undefined || location === '') {
+            return ''
+        }
+
+        return normalizePath(new URL(location).pathname)
+    })
+
+    const isActive = (href: string): boolean => {
+        const baseLocation = page.props.ziggy?.location ?? 'http://localhost'
+        const hrefPath = normalizePath(new URL(href, baseLocation).pathname)
+        return currentPath.value === hrefPath
+    }
 </script>
 
 <template>
@@ -32,10 +38,10 @@
                         v-for="item in sidebarNavItems"
                         :key="item.href"
                         variant="ghost"
-                        :class="['w-full justify-start', { 'bg-muted': currentPath === item.href }]"
+                        :class="['w-full justify-start', { 'bg-muted font-medium text-foreground': isActive(item.href) }]"
                         as-child
                     >
-                        <Link :href="item.href">
+                        <Link :href="item.href" :aria-current="isActive(item.href) ? 'page' : undefined">
                             {{ item.title }}
                         </Link>
                     </UiButton>

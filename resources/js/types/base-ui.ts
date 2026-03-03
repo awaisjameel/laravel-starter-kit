@@ -1,6 +1,7 @@
 import type { Component } from 'vue'
 
 export type FormFieldType = 'text' | 'email' | 'password' | 'textarea' | 'select' | 'multiselect' | 'file' | 'checkbox' | 'radio' | 'toggle' | 'tabs'
+export type FormValues = object
 
 export interface FormOption {
     label: string
@@ -9,8 +10,8 @@ export interface FormOption {
     disabled?: boolean
 }
 
-export interface FormFieldSchema<TForm extends Record<string, unknown>> {
-    name: keyof TForm & string
+export interface FormFieldSchema<TForm extends FormValues = Record<string, unknown>> {
+    name: Extract<keyof TForm, string>
     label: string
     type: FormFieldType
     placeholder?: string
@@ -24,12 +25,14 @@ export interface FormFieldSchema<TForm extends Record<string, unknown>> {
     accept?: string
 }
 
-export interface FormSectionSchema<TForm extends Record<string, unknown>> {
+export interface FormSectionSchema<TForm extends FormValues = Record<string, unknown>> {
     key: string
     title?: string
     description?: string
     fields: Array<FormFieldSchema<TForm>>
 }
+
+export const defineFormFields = <TForm extends FormValues>(fields: Array<FormFieldSchema<TForm>>): Array<FormFieldSchema<TForm>> => fields
 
 export type SortDirection = 'asc' | 'desc'
 

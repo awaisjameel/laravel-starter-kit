@@ -1,43 +1,51 @@
 import { getEnumOptions } from '@/lib/utils'
 import { UserRole } from '@/types/app-data'
-import type { FormFieldSchema } from '@/types/base-ui'
+import { defineFormFields } from '@/types/base-ui'
+
+export interface UserFormValues {
+    name: string
+    email: string
+    role: string
+    password: string
+}
 
 const roleOptions = getEnumOptions(UserRole).map((role) => ({
     value: role.value,
     label: role.label.charAt(0).toUpperCase() + role.label.slice(1)
 }))
 
-export const buildUserFormFields = (isEdit: boolean): Array<FormFieldSchema<Record<string, unknown>>> => [
-    {
-        name: 'name',
-        label: 'Name',
-        type: 'text',
-        placeholder: 'Enter name',
-        required: true,
-        autocomplete: 'name'
-    },
-    {
-        name: 'email',
-        label: 'Email',
-        type: 'email',
-        placeholder: 'Enter email',
-        required: true,
-        autocomplete: 'email'
-    },
-    {
-        name: 'role',
-        label: 'Role',
-        type: 'select',
-        placeholder: 'Select a role',
-        required: true,
-        options: roleOptions
-    },
-    {
-        name: 'password',
-        label: 'Password',
-        type: 'password',
-        placeholder: isEdit ? 'Leave empty to keep current password' : 'Enter password',
-        required: !isEdit,
-        autocomplete: isEdit ? 'new-password' : 'current-password'
-    }
-]
+export const buildUserFormFields = (isEdit: boolean) =>
+    defineFormFields<UserFormValues>([
+        {
+            name: 'name',
+            label: 'Name',
+            type: 'text',
+            placeholder: 'Enter name',
+            required: true,
+            autocomplete: 'name'
+        },
+        {
+            name: 'email',
+            label: 'Email',
+            type: 'email',
+            placeholder: 'Enter email',
+            required: true,
+            autocomplete: 'email'
+        },
+        {
+            name: 'role',
+            label: 'Role',
+            type: 'select',
+            placeholder: 'Select a role',
+            required: true,
+            options: roleOptions
+        },
+        {
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            placeholder: isEdit ? 'Leave empty to keep current password' : 'Enter password',
+            required: !isEdit,
+            autocomplete: isEdit ? 'new-password' : 'current-password'
+        }
+    ])

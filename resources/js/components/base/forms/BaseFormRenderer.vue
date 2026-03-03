@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TForm extends object">
     import type { FormFieldSchema, FormSectionSchema } from '@/types/base-ui'
 
     interface Props {
-        model: Record<string, unknown>
-        fields?: Array<FormFieldSchema<Record<string, unknown>>>
-        sections?: Array<FormSectionSchema<Record<string, unknown>>>
-        errors?: Record<string, string | undefined>
+        model: object
+        fields?: Array<FormFieldSchema<TForm>>
+        sections?: Array<FormSectionSchema<TForm>>
+        errors?: Partial<Record<Extract<keyof TForm, string>, string | undefined>>
         processing?: boolean
         submitLabel?: string
         cancelLabel?: string
@@ -27,7 +27,7 @@
         cancel: []
     }>()
 
-    const normalizedSections = computed<Array<FormSectionSchema<Record<string, unknown>>>>(() => {
+    const normalizedSections = computed<Array<FormSectionSchema<TForm>>>(() => {
         if (props.sections.length > 0) {
             return props.sections
         }
@@ -44,8 +44,12 @@
         return []
     })
 
-    const setModelFieldValue = (model: Record<string, unknown>, fieldName: string, value: unknown): void => {
-        model[fieldName] = value
+    const getModelFieldValue = (model: object, fieldName: string): unknown => {
+        return Reflect.get(model, fieldName)
+    }
+
+    const setModelFieldValue = (model: object, fieldName: string, value: unknown): void => {
+        Reflect.set(model, fieldName, value)
     }
 
     const setValue = (fieldName: string, value: unknown): void => {
@@ -68,7 +72,7 @@
                         :id="field.name"
                         :key="field.name"
                         :field="field"
-                        :model-value="props.model[field.name]"
+                        :model-value="getModelFieldValue(props.model, field.name)"
                         :error="props.errors[field.name]"
                         @update:model-value="setValue(field.name, $event)"
                     />

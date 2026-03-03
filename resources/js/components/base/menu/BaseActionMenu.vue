@@ -1,9 +1,9 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TRow">
     import type { DataTableRowAction } from '@/types/base-ui'
 
     interface Props {
-        actions: Array<DataTableRowAction<unknown>>
-        row: unknown
+        actions: Array<DataTableRowAction<TRow>>
+        row: TRow
         triggerLabel?: string
     }
 
@@ -11,7 +11,7 @@
         triggerLabel: 'Open actions'
     })
 
-    const isVisible = (action: DataTableRowAction<unknown>): boolean => {
+    const isVisible = (action: DataTableRowAction<TRow>): boolean => {
         if (typeof action.visible === 'function') {
             return action.visible(props.row)
         }
@@ -19,7 +19,7 @@
         return action.visible ?? true
     }
 
-    const isDisabled = (action: DataTableRowAction<unknown>): boolean => {
+    const isDisabled = (action: DataTableRowAction<TRow>): boolean => {
         if (typeof action.disabled === 'function') {
             return action.disabled(props.row)
         }
@@ -27,7 +27,7 @@
         return action.disabled ?? false
     }
 
-    const handleAction = (action: DataTableRowAction<unknown>): void => {
+    const handleAction = (action: DataTableRowAction<TRow>): void => {
         if (isDisabled(action)) {
             return
         }
@@ -39,7 +39,13 @@
 <template>
     <UiDropdownMenu>
         <UiDropdownMenuTrigger as-child>
-            <BaseButton variant="ghost" size="icon" class="h-8 w-8 p-0">
+            <BaseButton
+                variant="ghost"
+                size="icon"
+                class="h-8 w-8 p-0 focus-visible:ring-2 focus-visible:ring-ring/70"
+                :aria-label="props.triggerLabel"
+                :title="props.triggerLabel"
+            >
                 <span class="sr-only">{{ props.triggerLabel }}</span>
                 <Icon-mdi-dots-vertical class="h-4 w-4" />
             </BaseButton>
@@ -49,7 +55,7 @@
                 v-for="action in props.actions"
                 v-show="isVisible(action)"
                 :key="action.key"
-                :class="action.destructive ? 'text-destructive focus:text-destructive' : undefined"
+                :class="action.destructive ? 'text-destructive focus:bg-destructive/10 focus:text-destructive' : undefined"
                 :disabled="isDisabled(action)"
                 @click="handleAction(action)"
             >

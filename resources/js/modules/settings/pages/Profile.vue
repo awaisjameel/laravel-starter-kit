@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
+    import { buildProfileFormFields, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
     import { type BreadcrumbItem } from '@/types'
-    import type { FormFieldSchema } from '@/types/base-ui'
 
     interface Props {
         mustVerifyEmail: boolean
@@ -24,29 +24,12 @@
         throw new Error('Authenticated user is required for profile settings page.')
     }
 
-    const { form, submit } = useResourceForm({
+    const { form, submit } = useResourceForm<ProfileFormValues>({
         name: user.name,
         email: user.email
     })
 
-    const fields: Array<FormFieldSchema<Record<string, unknown>>> = [
-        {
-            name: 'name',
-            label: 'Name',
-            type: 'text',
-            required: true,
-            autocomplete: 'name',
-            placeholder: 'Full name'
-        },
-        {
-            name: 'email',
-            label: 'Email address',
-            type: 'email',
-            required: true,
-            autocomplete: 'username',
-            placeholder: 'Email address'
-        }
-    ]
+    const fields = buildProfileFormFields()
 
     const submitForm = () => {
         submit(ProfileController.update(), {
@@ -64,7 +47,7 @@
                 <HeadingSmall title="Profile information" description="Update your name and email address" />
 
                 <BaseFormsBaseFormRenderer
-                    :model="form as unknown as Record<string, unknown>"
+                    :model="form"
                     :fields="fields"
                     :errors="form.errors"
                     :processing="form.processing"

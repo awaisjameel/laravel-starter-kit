@@ -2,14 +2,18 @@
     interface Props {
         searchValue: string
         searchPlaceholder?: string
+        searchLabel?: string
         perPage?: number
         perPageOptions?: number[]
+        perPageLabel?: string
     }
 
     const props = withDefaults(defineProps<Props>(), {
         searchPlaceholder: 'Search...',
+        searchLabel: 'Search records',
         perPage: undefined,
-        perPageOptions: () => [10, 25, 50, 100]
+        perPageOptions: () => [10, 25, 50, 100],
+        perPageLabel: 'Rows per page'
     })
 
     const emit = defineEmits<{
@@ -26,6 +30,7 @@
                 class="w-full sm:w-72"
                 type="search"
                 :placeholder="props.searchPlaceholder"
+                :aria-label="props.searchLabel"
                 @update:model-value="emit('update:searchValue', String($event))"
             />
             <UiSelect
@@ -33,7 +38,7 @@
                 :model-value="String(props.perPage)"
                 @update:model-value="emit('update:perPage', Number($event))"
             >
-                <UiSelectTrigger class="w-full sm:w-40">
+                <UiSelectTrigger class="w-full sm:w-40" :aria-label="props.perPageLabel">
                     <UiSelectValue />
                 </UiSelectTrigger>
                 <UiSelectContent>

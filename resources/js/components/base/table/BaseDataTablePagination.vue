@@ -37,11 +37,17 @@
             :page="props.currentPage"
             :sibling-count="2"
             show-edges
+            aria-label="Table pagination"
             @update:page="emit('pageChange', $event)"
         >
             <UiPaginationContent>
-                <UiPaginationPrevious @click="emit('pageChange', props.currentPage - 1)" :disabled="props.currentPage === 1">
+                <UiPaginationPrevious
+                    @click="emit('pageChange', props.currentPage - 1)"
+                    :disabled="props.currentPage === 1"
+                    aria-label="Go to previous page"
+                >
                     <Icon-mdi-chevron-left class="size-4" />
+                    <span class="sr-only">Previous page</span>
                 </UiPaginationPrevious>
 
                 <template v-for="page in pageNumbers" :key="page">
@@ -58,8 +64,13 @@
                     </UiPaginationItem>
                 </template>
 
-                <UiPaginationNext @click="emit('pageChange', props.currentPage + 1)" :disabled="props.currentPage === props.totalPages">
+                <UiPaginationNext
+                    @click="emit('pageChange', props.currentPage + 1)"
+                    :disabled="props.currentPage === props.totalPages"
+                    aria-label="Go to next page"
+                >
                     <Icon-mdi-chevron-right class="size-4" />
+                    <span class="sr-only">Next page</span>
                 </UiPaginationNext>
             </UiPaginationContent>
         </UiPagination>

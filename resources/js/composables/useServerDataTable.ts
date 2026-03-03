@@ -8,7 +8,76 @@ interface ServerDataTableOptions<TSort extends string> {
     debounceMs?: number
 }
 
+interface ResolveServerTableInitialQueryOptions<TSort extends string> {
+    locationSearch?: string
+    fallback: ServerTableQuery<TSort>
+    allowedSortBy?: readonly TSort[]
+    defaultSortBy?: TSort
+    defaultSortDirection?: SortDirection
+}
+
 const DEFAULT_DEBOUNCE = 300
+
+const parsePositiveInt = (rawValue: string | null): number | undefined => {
+    if (rawValue === null || rawValue.trim() === '') {
+        return undefined
+    }
+
+    const parsed = Number(rawValue)
+
+    if (!Number.isInteger(parsed) || parsed < 1) {
+        return undefined
+    }
+
+    return parsed
+}
+
+const parseSearchValue = (rawValue: string | null): string | undefined => {
+    if (rawValue === null) {
+        return undefined
+    }
+
+    const trimmed = rawValue.trim()
+    return trimmed === '' ? undefined : trimmed
+}
+
+const parseSortDirection = (rawValue: string | null): SortDirection | undefined => {
+    if (rawValue === 'asc' || rawValue === 'desc') {
+        return rawValue
+    }
+
+    return undefined
+}
+
+export const resolveServerTableInitialQuery = <TSort extends string>(
+    options: ResolveServerTableInitialQueryOptions<TSort>
+): ServerTableQuery<TSort> => {
+    const defaultSortDirection = options.defaultSortDirection ?? 'desc'
+
+    if (options.locationSearch === undefined || options.locationSearch.trim() === '') {
+        return {
+            page: Math.max(1, options.fallback.page),
+            perPage: Math.max(1, options.fallback.perPage),
+            search: options.fallback.search,
+            sortBy: options.fallback.sortBy ?? options.defaultSortBy,
+            sortDirection: options.fallback.sortDirection ?? defaultSortDirection
+        }
+    }
+
+    const searchString = options.locationSearch.startsWith('?') ? options.locationSearch.slice(1) : options.locationSearch
+    const params = new URLSearchParams(searchString)
+    const parsedSortBy = params.get('sortBy')
+    const isAllowedSortBy =
+        parsedSortBy !== null && parsedSortBy !== '' && (options.allowedSortBy === undefined || options.allowedSortBy.includes(parsedSortBy as TSort))
+
+    return {
+        page: parsePositiveInt(params.get('page')) ?? Math.max(1, options.fallback.page),
+        perPage: parsePositiveInt(params.get('perPage')) ?? Math.max(1, options.fallback.perPage),
+        search: parseSearchValue(params.get('search')) ?? options.fallback.search,
+        sortBy: isAllowedSortBy ? (parsedSortBy as TSort) : (options.fallback.sortBy ?? options.defaultSortBy),
+        sortDirection: parseSortDirection(params.get('sortDirection')) ?? options.fallback.sortDirection ?? defaultSortDirection
+    }
+}
 
 const sanitizeQuery = <TSort extends string>(query: ServerTableQuery<TSort>): QueryParams => {
     const sanitized: QueryParams = {
