@@ -1,13 +1,12 @@
 <script setup lang="ts">
-    import type { User } from '@/types'
-    import type { UserSortBy } from '@/types/app-data'
+    import type { UserSortBy, UserViewData } from '@/types/app-data'
     import type { DataTableColumn, DataTableRowAction, MobileCardField } from '@/types/base-ui'
 
     type UserSortColumn = `${UserSortBy}`
 
     interface Props {
         currentUserId: number
-        users: User[]
+        users: UserViewData[]
         sortBy?: UserSortColumn
         sortDirection?: 'asc' | 'desc'
     }
@@ -18,15 +17,15 @@
     })
 
     const emit = defineEmits<{
-        delete: [user: User]
-        edit: [user: User]
+        delete: [user: UserViewData]
+        edit: [user: UserViewData]
         sort: [column: UserSortColumn]
     }>()
 
     const formatDate = (value: string): string => new Date(value).toLocaleDateString()
     const formatRole = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1)
 
-    const columns: Array<DataTableColumn<User, UserSortColumn>> = [
+    const columns: Array<DataTableColumn<UserViewData, UserSortColumn>> = [
         {
             key: 'name',
             label: 'Name',
@@ -58,7 +57,7 @@
         }
     ]
 
-    const mobileFields: Array<MobileCardField<User>> = [
+    const mobileFields: Array<MobileCardField<UserViewData>> = [
         {
             key: 'role',
             label: 'Role',
@@ -77,7 +76,7 @@
         }
     ]
 
-    const actions = computed<Array<DataTableRowAction<User>>>(() => [
+    const actions = computed<Array<DataTableRowAction<UserViewData>>>(() => [
         {
             key: 'edit',
             label: 'Edit',

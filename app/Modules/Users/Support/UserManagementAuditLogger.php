@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace App\Modules\Users\Support;
 
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-final class AuditLogger
+final class UserManagementAuditLogger
 {
     /**
      * @param  array<string, mixed>  $changes
      */
-    public static function logUserManagement(
+    public static function log(
         string $action,
         User $actor,
         ?User $target,

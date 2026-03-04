@@ -26,15 +26,14 @@ final class PasswordController extends Controller
     public function update(PasswordUpdateRequest $passwordUpdateRequest): RedirectResponse
     {
         $user = $passwordUpdateRequest->user();
+        $passwordUpdateData = $passwordUpdateRequest->toDto();
 
         if ($user === null) {
             return redirect()->route('auth.login.create');
         }
 
-        $validated = $passwordUpdateRequest->validated();
-
         $user->update([
-            'password' => $validated['password'],
+            'password' => $passwordUpdateData->password,
         ]);
 
         return back();

@@ -53,7 +53,7 @@ export type UsersIndexPageData = {
     users: UsersPaginationData
 }
 export type UsersPaginationData = {
-    data: any
+    data: Array<UserViewData>
     per_page: number
     current_page: number
     from?: number

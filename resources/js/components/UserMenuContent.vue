@@ -1,9 +1,9 @@
 <script setup lang="ts">
-    import type { User } from '@/types'
+    import type { UserViewData } from '@/types/app-data'
     import { LogOut, Settings } from 'lucide-vue-next'
 
     interface Props {
-        user: User
+        user: UserViewData
     }
 
     const settingsProfileHref = appRoutes.settings.profile.edit.url()

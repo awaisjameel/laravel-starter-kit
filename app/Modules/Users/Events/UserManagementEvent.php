@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Events;
+namespace App\Modules\Users\Events;
 
 use App\Models\User;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -19,8 +19,6 @@ final readonly class UserManagementEvent
     use SerializesModels;
 
     /**
-     * Create a new event instance.
-     *
      * @param  array<string, mixed>  $changes
      */
     public function __construct(

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Auth\Http\Requests;
 
+use App\Modules\Auth\Data\LoginData;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,6 +33,7 @@ final class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'remember' => ['nullable', 'boolean'],
         ];
     }
 
@@ -44,7 +46,12 @@ final class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $loginData = $this->toDto();
+
+        if (! Auth::attempt([
+            'email' => $loginData->email,
+            'password' => $loginData->password,
+        ], $loginData->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -53,6 +60,18 @@ final class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    public function toDto(): LoginData
+    {
+        /** @var array{email: string, password: string} $validated */
+        $validated = $this->validated();
+
+        return new LoginData(
+            email: $validated['email'],
+            password: $validated['password'],
+            remember: $this->boolean('remember'),
+        );
     }
 
     /**

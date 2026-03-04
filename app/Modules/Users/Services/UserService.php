@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Users\Services;
 
-use App\Events\UserManagementEvent;
 use App\Models\User;
 use App\Modules\Users\Data\CreateUserData;
 use App\Modules\Users\Data\UpdateUserData;
 use App\Modules\Users\Data\UserIndexData;
+use App\Modules\Users\Events\UserManagementEvent;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;

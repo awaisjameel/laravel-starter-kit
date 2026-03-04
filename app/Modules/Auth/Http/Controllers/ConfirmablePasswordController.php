@@ -28,13 +28,12 @@ final class ConfirmablePasswordController extends Controller
     public function store(ConfirmPasswordRequest $confirmPasswordRequest): RedirectResponse
     {
         $user = $confirmPasswordRequest->user();
-
-        $validated = $confirmPasswordRequest->validated();
+        $confirmPasswordData = $confirmPasswordRequest->toDto();
 
         if (
             $user === null || ! Auth::guard('web')->validate([
                 'email' => $user->email,
-                'password' => $validated['password'],
+                'password' => $confirmPasswordData->password,
             ])
         ) {
             throw ValidationException::withMessages([

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Events\UserManagementEvent;
-use App\Listeners\LogUserManagementAudit;
 use App\Models\User;
+use App\Modules\Users\Events\UserManagementEvent;
+use App\Modules\Users\Listeners\LogUserManagementAudit;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;

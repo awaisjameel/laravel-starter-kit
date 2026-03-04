@@ -35,8 +35,6 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
     sidebarOpen: boolean
 }
 
-export type User = UserViewData
-
 export interface SelectOption {
     value: string
     label: string

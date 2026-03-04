@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Listeners;
+namespace App\Modules\Users\Listeners;
 
-use App\Events\UserManagementEvent;
-use App\Support\AuditLogger;
+use App\Modules\Users\Events\UserManagementEvent;
+use App\Modules\Users\Support\UserManagementAuditLogger;
 
 /**
  * Listener that handles audit logging for user management events.
@@ -17,7 +17,7 @@ final class LogUserManagementAudit
      */
     public function handle(UserManagementEvent $userManagementEvent): void
     {
-        AuditLogger::logUserManagement(
+        UserManagementAuditLogger::log(
             action: $userManagementEvent->action,
             actor: $userManagementEvent->actor,
             target: $userManagementEvent->target,

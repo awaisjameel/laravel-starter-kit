@@ -36,20 +36,18 @@ final class NewPasswordController extends Controller
      */
     public function store(ResetPasswordRequest $resetPasswordRequest): RedirectResponse
     {
-        $validated = $resetPasswordRequest->validated();
+        $resetPasswordData = $resetPasswordRequest->toDto();
 
         $status = Password::reset(
             [
-                'email' => $validated['email'],
-                'password' => $validated['password'],
-                'password_confirmation' => $resetPasswordRequest->input('password_confirmation'),
-                'token' => $validated['token'],
+                'email' => $resetPasswordData->email,
+                'password' => $resetPasswordData->password,
+                'password_confirmation' => $resetPasswordData->passwordConfirmation,
+                'token' => $resetPasswordData->token,
             ],
-            function ($user) use ($resetPasswordRequest): void {
-                /** @var string $password */
-                $password = $resetPasswordRequest->validated('password');
+            function ($user) use ($resetPasswordData): void {
                 $user->forceFill([
-                    'password' => Hash::make($password),
+                    'password' => Hash::make($resetPasswordData->password),
                     'remember_token' => Str::random(60),
                 ])->save();
 

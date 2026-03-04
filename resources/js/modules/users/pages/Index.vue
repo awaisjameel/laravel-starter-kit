@@ -3,28 +3,22 @@
     import UsersDeleteUserDialog from '@/modules/users/components/DeleteUserDialog.vue'
     import UsersTable from '@/modules/users/components/Table.vue'
     import UsersUserFormDialog from '@/modules/users/components/UserFormDialog.vue'
-    import { type User } from '@/types'
-    import { SortDirection, UserSortBy, type UsersIndexPageData } from '@/types/app-data'
+    import { SortDirection, UserSortBy, type UsersIndexPageData, type UserViewData } from '@/types/app-data'
     import { Plus } from 'lucide-vue-next'
 
     type UserSortColumn = `${UserSortBy}`
-    type UsersIndexPageProps = Omit<UsersIndexPageData, 'users'> & {
-        users: Omit<UsersIndexPageData['users'], 'data'> & {
-            data: User[]
-        }
-    }
 
     const userSortColumns = [UserSortBy.Name, UserSortBy.Email, UserSortBy.Role, UserSortBy.CreatedAt] as const
 
     const page = useAppPage()
-    const props = defineProps<UsersIndexPageProps>()
+    const props = defineProps<UsersIndexPageData>()
     const currentUserId = computed(() => page.props.auth.user?.id ?? 0)
 
     const breadcrumbs = buildUsersBreadcrumbs()
 
     const isUserDialogOpen = ref(false)
     const isDeleteDialogOpen = ref(false)
-    const selectedUser = ref<User | null>(null)
+    const selectedUser = ref<UserViewData | null>(null)
     const userDialogMode = ref<'create' | 'edit'>('create')
 
     const locationSearch = (() => {
@@ -61,7 +55,7 @@
         isUserDialogOpen.value = true
     }
 
-    const onEditUser = (user: User): void => {
+    const onEditUser = (user: UserViewData): void => {
         selectedUser.value = user
         userDialogMode.value = 'edit'
         isUserDialogOpen.value = true
@@ -71,7 +65,7 @@
         isUserDialogOpen.value = false
     }
 
-    const onDeleteUser = (user: User): void => {
+    const onDeleteUser = (user: UserViewData): void => {
         selectedUser.value = user
         isDeleteDialogOpen.value = true
     }

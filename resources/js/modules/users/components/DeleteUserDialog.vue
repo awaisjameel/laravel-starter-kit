@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
-    import { type User } from '@/types'
+    import type { UserViewData } from '@/types/app-data'
 
     const emit = defineEmits<{
         'update:open': [open: boolean]
@@ -9,7 +9,7 @@
 
     const props = defineProps<{
         open: boolean
-        user: User
+        user: UserViewData
     }>()
 
     const { form, submit } = useResourceForm({})

@@ -9,18 +9,19 @@ use App\Modules\Shared\Data\UserViewData;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+use Spatie\TypeScriptTransformer\Attributes\TypeScriptType;
 
 #[TypeScript]
 final class UsersPaginationData extends Data
 {
     /**
-     * @param  DataCollection<int, UserViewData>  $data
+     * @param  array<int, UserViewData>  $data
      */
     public function __construct(
         #[DataCollectionOf(UserViewData::class)]
-        public DataCollection $data,
+        #[TypeScriptType('array<\App\Modules\Shared\Data\UserViewData>')]
+        public array $data,
         public int $per_page,
         public int $current_page,
         public ?int $from,
@@ -41,7 +42,7 @@ final class UsersPaginationData extends Data
         ));
 
         return new self(
-            data: new DataCollection(UserViewData::class, $data),
+            data: $data,
             per_page: $lengthAwarePaginator->perPage(),
             current_page: $lengthAwarePaginator->currentPage(),
             from: $lengthAwarePaginator->firstItem(),

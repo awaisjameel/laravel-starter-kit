@@ -26,9 +26,11 @@ final class PasswordResetLinkController extends Controller
 
     public function store(PasswordResetLinkRequest $passwordResetLinkRequest): RedirectResponse
     {
-        $validated = $passwordResetLinkRequest->validated();
+        $passwordResetLinkData = $passwordResetLinkRequest->toDto();
 
-        Password::sendResetLink($validated);
+        Password::sendResetLink([
+            'email' => $passwordResetLinkData->email,
+        ]);
 
         return back()->with('status', __('A reset link will be sent if the account exists.'));
     }

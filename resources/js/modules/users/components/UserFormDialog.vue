@@ -1,14 +1,14 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import { buildUserFormFields, createUserFormDefaults, type UserFormValues } from '@/modules/users/forms/user-form-schema'
-    import { type User } from '@/types'
+    import type { UserViewData } from '@/types/app-data'
 
     type UserFormMode = 'create' | 'edit'
 
     interface Props {
         open: boolean
         mode: UserFormMode
-        user?: User | null
+        user?: UserViewData | null
     }
 
     const props = withDefaults(defineProps<Props>(), {
