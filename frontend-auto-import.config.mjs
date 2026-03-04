@@ -1,7 +1,16 @@
 export const autoImportMessage =
     'Manual import is not needed here. This project auto-imports this symbol; remove the import and rely on auto-import.'
 
-export const autoImportDirs = ['resources/js/composables/**', 'resources/js/stores/**', 'resources/js/lib/**', 'resources/js/utils/**']
+export const autoImportDirs = [
+    'resources/js/composables/**',
+    'resources/js/stores/**',
+    'resources/js/lib/**',
+    'resources/js/utils/**',
+    'resources/js/modules/**/forms/**',
+    'resources/js/modules/**/composables/**',
+    'resources/js/modules/**/contracts/**',
+    'resources/js/modules/**/helpers/**'
+]
 
 export const autoImportImports = [
     'vue',
@@ -78,6 +87,26 @@ export const autoImportRestrictedPatterns = [
     },
     {
         group: ['@/components/**/*.vue', '@/layouts/**/*.vue'],
+        message: autoImportMessage
+    },
+    {
+        group: ['@/modules/**/forms/*', '@/modules/**/forms/**'],
+        message: autoImportMessage
+    },
+    {
+        group: ['@/modules/**/composables/*', '@/modules/**/composables/**'],
+        message: autoImportMessage
+    },
+    {
+        group: ['@/modules/**/contracts/*', '@/modules/**/contracts/**'],
+        message: autoImportMessage
+    },
+    {
+        group: ['@/modules/**/helpers/*', '@/modules/**/helpers/**'],
+        message: autoImportMessage
+    },
+    {
+        group: ['@/modules/**/components/*.vue', '@/modules/**/components/**/*.vue'],
         message: autoImportMessage
     }
 ]

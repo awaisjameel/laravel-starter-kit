@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import PasswordResetLinkController from '@/actions/App/Modules/Auth/Http/Controllers/PasswordResetLinkController'
-    import { forgotPasswordFormContract, type ForgotPasswordFormValues } from '@/modules/auth/forms/forgot-password-form-schema'
 
     defineProps<{
         status?: string

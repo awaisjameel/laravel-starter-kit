@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
-    import { deleteAccountFormContract, type DeleteAccountFormValues } from '@/modules/settings/forms/delete-account-form-schema'
 
     const isOpen = ref(false)
 

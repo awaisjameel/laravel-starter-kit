@@ -1,8 +1,3 @@
-<script setup lang="ts">
-    import MarketingFooter from '@/modules/marketing/components/Footer.vue'
-    import MarketingHeader from '@/modules/marketing/components/Header.vue'
-</script>
-
 <template>
     <div class="relative min-h-svh overflow-hidden bg-background text-foreground">
         <div

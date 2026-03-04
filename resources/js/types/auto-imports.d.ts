@@ -146,23 +146,45 @@ declare global {
     const appRoutes: typeof import('@/routes/app').default
     const authRoutes: typeof import('@/routes/auth').default
     const bindGlobalRouteHelper: typeof import('../utils/ziggy').bindGlobalRouteHelper
+    const buildConfirmPasswordFormFields: typeof import('../modules/auth/forms/confirm-password-form-schema').buildConfirmPasswordFormFields
     const buildDashboardBreadcrumbs: typeof import('@/config/breadcrumbs').buildDashboardBreadcrumbs
+    const buildDeleteAccountFormFields: typeof import('../modules/settings/forms/delete-account-form-schema').buildDeleteAccountFormFields
+    const buildForgotPasswordFormFields: typeof import('../modules/auth/forms/forgot-password-form-schema').buildForgotPasswordFormFields
+    const buildLoginFormFields: typeof import('../modules/auth/forms/login-form-schema').buildLoginFormFields
+    const buildPasswordFormFields: typeof import('../modules/settings/forms/password-form-schema').buildPasswordFormFields
+    const buildProfileFormFields: typeof import('../modules/settings/forms/profile-form-schema').buildProfileFormFields
+    const buildRegisterFormFields: typeof import('../modules/auth/forms/register-form-schema').buildRegisterFormFields
+    const buildResetPasswordFormFields: typeof import('../modules/auth/forms/reset-password-form-schema').buildResetPasswordFormFields
     const buildSettingsAppearanceBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsAppearanceBreadcrumbs
     const buildSettingsPasswordBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsPasswordBreadcrumbs
     const buildSettingsProfileBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsProfileBreadcrumbs
+    const buildUserFormFields: typeof import('../modules/users/forms/user-form-schema').buildUserFormFields
     const buildUsersBreadcrumbs: typeof import('@/config/breadcrumbs').buildUsersBreadcrumbs
     const buttonVariants: typeof import('../components/ui/button/index').buttonVariants
     const clearApiQueryCache: typeof import('../composables/useApiQuery').clearApiQueryCache
     const cn: typeof import('../lib/utils').cn
     const computed: typeof import('vue').computed
+    const confirmPasswordFormContract: typeof import('../modules/auth/forms/confirm-password-form-schema').confirmPasswordFormContract
     const createApp: typeof import('vue').createApp
+    const createConfirmPasswordFormDefaults: typeof import('../modules/auth/forms/confirm-password-form-schema').createConfirmPasswordFormDefaults
+    const createDeleteAccountFormDefaults: typeof import('../modules/settings/forms/delete-account-form-schema').createDeleteAccountFormDefaults
+    const createForgotPasswordFormDefaults: typeof import('../modules/auth/forms/forgot-password-form-schema').createForgotPasswordFormDefaults
+    const createLoginFormDefaults: typeof import('../modules/auth/forms/login-form-schema').createLoginFormDefaults
+    const createPasswordFormDefaults: typeof import('../modules/settings/forms/password-form-schema').createPasswordFormDefaults
     const createPinia: (typeof import('pinia'))['createPinia']
+    const createProfileFormDefaults: typeof import('../modules/settings/forms/profile-form-schema').createProfileFormDefaults
+    const createRegisterFormDefaults: typeof import('../modules/auth/forms/register-form-schema').createRegisterFormDefaults
+    const createResetPasswordFormDefaults: typeof import('../modules/auth/forms/reset-password-form-schema').createResetPasswordFormDefaults
+    const createUserFormDefaults: typeof import('../modules/users/forms/user-form-schema').createUserFormDefaults
     const customRef: typeof import('vue').customRef
     const defineAsyncComponent: typeof import('vue').defineAsyncComponent
     const defineComponent: typeof import('vue').defineComponent
     const defineFormContract: typeof import('../lib/forms').defineFormContract
     const defineStore: (typeof import('pinia'))['defineStore']
+    const deleteAccountFormContract: typeof import('../modules/settings/forms/delete-account-form-schema').deleteAccountFormContract
     const effectScope: typeof import('vue').effectScope
+    const email: typeof import('../modules/auth/forms/reset-password-form-schema').email
+    const forgotPasswordFormContract: typeof import('../modules/auth/forms/forgot-password-form-schema').forgotPasswordFormContract
     const getActivePinia: (typeof import('pinia'))['getActivePinia']
     const getApiQueryCacheData: typeof import('../composables/useApiQuery').getApiQueryCacheData
     const getCurrentInstance: typeof import('vue').getCurrentInstance
@@ -181,6 +203,7 @@ declare global {
     const isReadonly: typeof import('vue').isReadonly
     const isRef: typeof import('vue').isRef
     const isShallow: typeof import('vue').isShallow
+    const loginFormContract: typeof import('../modules/auth/forms/login-form-schema').loginFormContract
     const mapActions: (typeof import('pinia'))['mapActions']
     const mapGetters: (typeof import('pinia'))['mapGetters']
     const mapInertiaFormErrors: typeof import('../lib/forms').mapInertiaFormErrors
@@ -208,11 +231,15 @@ declare global {
     const onUnmounted: typeof import('vue').onUnmounted
     const onUpdated: typeof import('vue').onUpdated
     const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+    const passwordFormContract: typeof import('../modules/settings/forms/password-form-schema').passwordFormContract
+    const profileFormContract: typeof import('../modules/settings/forms/profile-form-schema').profileFormContract
     const provide: typeof import('vue').provide
     const provideSidebarContext: typeof import('../components/ui/sidebar/utils').provideSidebarContext
     const reactive: typeof import('vue').reactive
     const readonly: typeof import('vue').readonly
     const ref: typeof import('vue').ref
+    const registerFormContract: typeof import('../modules/auth/forms/register-form-schema').registerFormContract
+    const resetPasswordFormContract: typeof import('../modules/auth/forms/reset-password-form-schema').resetPasswordFormContract
     const resolveComponent: typeof import('vue').resolveComponent
     const resolveServerTableInitialQuery: typeof import('../composables/useServerDataTable').resolveServerTableInitialQuery
     const router: typeof import('@inertiajs/vue3').router
@@ -263,6 +290,7 @@ declare global {
     const useSlots: typeof import('vue').useSlots
     const useTemplateRef: typeof import('vue').useTemplateRef
     const useToast: typeof import('../composables/useToast').useToast
+    const userFormContract: typeof import('../modules/users/forms/user-form-schema').userFormContract
     const valueUpdater: typeof import('../components/ui/table/utils').valueUpdater
     const watch: typeof import('vue').watch
     const watchEffect: typeof import('vue').watchEffect
@@ -302,6 +330,24 @@ declare global {
     // @ts-ignore
     export type { FormContract, FormErrorMap } from '../lib/forms'
     // @ts-ignore
+    export type { ConfirmPasswordFormValues } from '../modules/auth/forms/confirm-password-form-schema'
+    // @ts-ignore
+    export type { ForgotPasswordFormValues } from '../modules/auth/forms/forgot-password-form-schema'
+    // @ts-ignore
+    export type { LoginFormValues } from '../modules/auth/forms/login-form-schema'
+    // @ts-ignore
+    export type { RegisterFormValues } from '../modules/auth/forms/register-form-schema'
+    // @ts-ignore
+    export type { ResetPasswordFormValues } from '../modules/auth/forms/reset-password-form-schema'
+    // @ts-ignore
+    export type { DeleteAccountFormValues } from '../modules/settings/forms/delete-account-form-schema'
+    // @ts-ignore
+    export type { PasswordFormValues } from '../modules/settings/forms/password-form-schema'
+    // @ts-ignore
+    export type { ProfileFormValues } from '../modules/settings/forms/profile-form-schema'
+    // @ts-ignore
+    export type { UserFormValues } from '../modules/users/forms/user-form-schema'
+    // @ts-ignore
     export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
     import('vue')
     import('../composables/useApiClient')
@@ -310,6 +356,15 @@ declare global {
     import('../composables/useResourceForm')
     import('../lib/forms')
     import('../utils/route')
+    import('../modules/auth/forms/confirm-password-form-schema')
+    import('../modules/auth/forms/forgot-password-form-schema')
+    import('../modules/auth/forms/login-form-schema')
+    import('../modules/auth/forms/register-form-schema')
+    import('../modules/auth/forms/reset-password-form-schema')
+    import('../modules/settings/forms/delete-account-form-schema')
+    import('../modules/settings/forms/password-form-schema')
+    import('../modules/settings/forms/profile-form-schema')
+    import('../modules/users/forms/user-form-schema')
 }
 
 // for vue template auto import
@@ -325,20 +380,66 @@ declare module 'vue' {
         readonly appRoutes: UnwrapRef<(typeof import('@/routes/app'))['default']>
         readonly authRoutes: UnwrapRef<(typeof import('@/routes/auth'))['default']>
         readonly bindGlobalRouteHelper: UnwrapRef<(typeof import('../utils/ziggy'))['bindGlobalRouteHelper']>
+        readonly buildConfirmPasswordFormFields: UnwrapRef<
+            (typeof import('../modules/auth/forms/confirm-password-form-schema'))['buildConfirmPasswordFormFields']
+        >
         readonly buildDashboardBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildDashboardBreadcrumbs']>
+        readonly buildDeleteAccountFormFields: UnwrapRef<
+            (typeof import('../modules/settings/forms/delete-account-form-schema'))['buildDeleteAccountFormFields']
+        >
+        readonly buildForgotPasswordFormFields: UnwrapRef<
+            (typeof import('../modules/auth/forms/forgot-password-form-schema'))['buildForgotPasswordFormFields']
+        >
+        readonly buildLoginFormFields: UnwrapRef<(typeof import('../modules/auth/forms/login-form-schema'))['buildLoginFormFields']>
+        readonly buildPasswordFormFields: UnwrapRef<(typeof import('../modules/settings/forms/password-form-schema'))['buildPasswordFormFields']>
+        readonly buildProfileFormFields: UnwrapRef<(typeof import('../modules/settings/forms/profile-form-schema'))['buildProfileFormFields']>
+        readonly buildRegisterFormFields: UnwrapRef<(typeof import('../modules/auth/forms/register-form-schema'))['buildRegisterFormFields']>
+        readonly buildResetPasswordFormFields: UnwrapRef<
+            (typeof import('../modules/auth/forms/reset-password-form-schema'))['buildResetPasswordFormFields']
+        >
         readonly buildSettingsAppearanceBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsAppearanceBreadcrumbs']>
         readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsPasswordBreadcrumbs']>
         readonly buildSettingsProfileBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsProfileBreadcrumbs']>
+        readonly buildUserFormFields: UnwrapRef<(typeof import('../modules/users/forms/user-form-schema'))['buildUserFormFields']>
         readonly buildUsersBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildUsersBreadcrumbs']>
         readonly clearApiQueryCache: UnwrapRef<(typeof import('../composables/useApiQuery'))['clearApiQueryCache']>
         readonly cn: UnwrapRef<(typeof import('../lib/utils'))['cn']>
         readonly computed: UnwrapRef<(typeof import('vue'))['computed']>
+        readonly confirmPasswordFormContract: UnwrapRef<
+            (typeof import('../modules/auth/forms/confirm-password-form-schema'))['confirmPasswordFormContract']
+        >
         readonly createApp: UnwrapRef<(typeof import('vue'))['createApp']>
+        readonly createConfirmPasswordFormDefaults: UnwrapRef<
+            (typeof import('../modules/auth/forms/confirm-password-form-schema'))['createConfirmPasswordFormDefaults']
+        >
+        readonly createDeleteAccountFormDefaults: UnwrapRef<
+            (typeof import('../modules/settings/forms/delete-account-form-schema'))['createDeleteAccountFormDefaults']
+        >
+        readonly createForgotPasswordFormDefaults: UnwrapRef<
+            (typeof import('../modules/auth/forms/forgot-password-form-schema'))['createForgotPasswordFormDefaults']
+        >
+        readonly createLoginFormDefaults: UnwrapRef<(typeof import('../modules/auth/forms/login-form-schema'))['createLoginFormDefaults']>
+        readonly createPasswordFormDefaults: UnwrapRef<
+            (typeof import('../modules/settings/forms/password-form-schema'))['createPasswordFormDefaults']
+        >
+        readonly createProfileFormDefaults: UnwrapRef<(typeof import('../modules/settings/forms/profile-form-schema'))['createProfileFormDefaults']>
+        readonly createRegisterFormDefaults: UnwrapRef<(typeof import('../modules/auth/forms/register-form-schema'))['createRegisterFormDefaults']>
+        readonly createResetPasswordFormDefaults: UnwrapRef<
+            (typeof import('../modules/auth/forms/reset-password-form-schema'))['createResetPasswordFormDefaults']
+        >
+        readonly createUserFormDefaults: UnwrapRef<(typeof import('../modules/users/forms/user-form-schema'))['createUserFormDefaults']>
         readonly customRef: UnwrapRef<(typeof import('vue'))['customRef']>
         readonly defineAsyncComponent: UnwrapRef<(typeof import('vue'))['defineAsyncComponent']>
         readonly defineComponent: UnwrapRef<(typeof import('vue'))['defineComponent']>
         readonly defineFormContract: UnwrapRef<(typeof import('../lib/forms'))['defineFormContract']>
+        readonly deleteAccountFormContract: UnwrapRef<
+            (typeof import('../modules/settings/forms/delete-account-form-schema'))['deleteAccountFormContract']
+        >
         readonly effectScope: UnwrapRef<(typeof import('vue'))['effectScope']>
+        readonly email: UnwrapRef<(typeof import('../modules/auth/forms/reset-password-form-schema'))['email']>
+        readonly forgotPasswordFormContract: UnwrapRef<
+            (typeof import('../modules/auth/forms/forgot-password-form-schema'))['forgotPasswordFormContract']
+        >
         readonly getApiQueryCacheData: UnwrapRef<(typeof import('../composables/useApiQuery'))['getApiQueryCacheData']>
         readonly getCurrentInstance: UnwrapRef<(typeof import('vue'))['getCurrentInstance']>
         readonly getCurrentScope: UnwrapRef<(typeof import('vue'))['getCurrentScope']>
@@ -356,6 +457,7 @@ declare module 'vue' {
         readonly isReadonly: UnwrapRef<(typeof import('vue'))['isReadonly']>
         readonly isRef: UnwrapRef<(typeof import('vue'))['isRef']>
         readonly isShallow: UnwrapRef<(typeof import('vue'))['isShallow']>
+        readonly loginFormContract: UnwrapRef<(typeof import('../modules/auth/forms/login-form-schema'))['loginFormContract']>
         readonly mapInertiaFormErrors: UnwrapRef<(typeof import('../lib/forms'))['mapInertiaFormErrors']>
         readonly markRaw: UnwrapRef<(typeof import('vue'))['markRaw']>
         readonly marketingRoutes: UnwrapRef<(typeof import('@/routes/marketing'))['default']>
@@ -377,10 +479,16 @@ declare module 'vue' {
         readonly onUnmounted: UnwrapRef<(typeof import('vue'))['onUnmounted']>
         readonly onUpdated: UnwrapRef<(typeof import('vue'))['onUpdated']>
         readonly onWatcherCleanup: UnwrapRef<(typeof import('vue'))['onWatcherCleanup']>
+        readonly passwordFormContract: UnwrapRef<(typeof import('../modules/settings/forms/password-form-schema'))['passwordFormContract']>
+        readonly profileFormContract: UnwrapRef<(typeof import('../modules/settings/forms/profile-form-schema'))['profileFormContract']>
         readonly provide: UnwrapRef<(typeof import('vue'))['provide']>
         readonly reactive: UnwrapRef<(typeof import('vue'))['reactive']>
         readonly readonly: UnwrapRef<(typeof import('vue'))['readonly']>
         readonly ref: UnwrapRef<(typeof import('vue'))['ref']>
+        readonly registerFormContract: UnwrapRef<(typeof import('../modules/auth/forms/register-form-schema'))['registerFormContract']>
+        readonly resetPasswordFormContract: UnwrapRef<
+            (typeof import('../modules/auth/forms/reset-password-form-schema'))['resetPasswordFormContract']
+        >
         readonly resolveComponent: UnwrapRef<(typeof import('vue'))['resolveComponent']>
         readonly resolveServerTableInitialQuery: UnwrapRef<(typeof import('../composables/useServerDataTable'))['resolveServerTableInitialQuery']>
         readonly router: UnwrapRef<(typeof import('@inertiajs/vue3'))['router']>
@@ -423,6 +531,7 @@ declare module 'vue' {
         readonly useSlots: UnwrapRef<(typeof import('vue'))['useSlots']>
         readonly useTemplateRef: UnwrapRef<(typeof import('vue'))['useTemplateRef']>
         readonly useToast: UnwrapRef<(typeof import('../composables/useToast'))['useToast']>
+        readonly userFormContract: UnwrapRef<(typeof import('../modules/users/forms/user-form-schema'))['userFormContract']>
         readonly watch: UnwrapRef<(typeof import('vue'))['watch']>
         readonly watchEffect: UnwrapRef<(typeof import('vue'))['watchEffect']>
         readonly watchPostEffect: UnwrapRef<(typeof import('vue'))['watchPostEffect']>

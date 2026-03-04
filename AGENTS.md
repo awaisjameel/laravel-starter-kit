@@ -83,6 +83,8 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Auto-import contract:
     - Canonical source is `frontend-auto-import.config.mjs`.
     - `vite.config.ts`, `vitest.config.ts`, and `eslint.config.js` must consume this shared config; do not duplicate symbol lists.
+    - Module `forms/**`, `composables/**`, `contracts/**`, and `helpers/**` exports are auto-imported; do not manually import these paths in frontend files.
+    - Module Vue components are auto-registered from `resources/js/modules/**` using namespace-style names (`<Module><Component>`), e.g. `UsersTable`, `SettingsDeleteUser`; do not manually import module components.
 - Navigation contract:
     - Centralized in `resources/js/config/navigation.ts`.
     - `useNavigation` and settings layout must consume shared navigation builders, not duplicate route/label arrays.

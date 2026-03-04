@@ -1,6 +1,4 @@
 <script setup lang="ts">
-    import AppearanceTabs from '@/modules/settings/components/AppearanceTabs.vue'
-
     const breadcrumbItems = buildSettingsAppearanceBreadcrumbs()
 </script>
 
@@ -11,7 +9,7 @@
         <SettingsLayout>
             <div class="space-y-6">
                 <HeadingSmall title="Appearance settings" description="Update your account's appearance settings" />
-                <AppearanceTabs />
+                <SettingsAppearanceTabs />
             </div>
         </SettingsLayout>
     </AppLayout>

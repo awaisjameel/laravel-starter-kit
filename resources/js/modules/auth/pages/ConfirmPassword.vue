@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import ConfirmablePasswordController from '@/actions/App/Modules/Auth/Http/Controllers/ConfirmablePasswordController'
-    import { confirmPasswordFormContract, type ConfirmPasswordFormValues } from '@/modules/auth/forms/confirm-password-form-schema'
 
     const { form, fields, submit } = useSchemaResourceForm<ConfirmPasswordFormValues>(confirmPasswordFormContract)
 

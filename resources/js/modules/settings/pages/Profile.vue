@@ -1,7 +1,5 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
-    import DeleteUser from '@/modules/settings/components/DeleteUser.vue'
-    import { createProfileFormDefaults, profileFormContract, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
 
     interface Props {
         mustVerifyEmail: boolean
@@ -75,7 +73,7 @@
                 </Transition>
             </div>
 
-            <DeleteUser />
+            <SettingsDeleteUser />
         </SettingsLayout>
     </AppLayout>
 </template>

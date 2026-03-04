@@ -46,8 +46,9 @@ export default defineConfig({
             extensions: ['vue'],
             collapseSamePrefixes: true,
             directoryAsNamespace: true,
+            globalNamespaces: ['components'],
             dts: 'resources/js/types/components.d.ts',
-            dirs: ['resources/js/components', 'resources/js/layouts'],
+            dirs: ['resources/js/components', 'resources/js/layouts', 'resources/js/modules'],
             resolvers: [
                 (componentName) => {
                     if (['Link', 'Head'].includes(componentName)) {

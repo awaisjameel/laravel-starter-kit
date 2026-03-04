@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
-    import { loginFormContract, type LoginFormValues } from '@/modules/auth/forms/login-form-schema'
 
     defineProps<{
         status?: string
