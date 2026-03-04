@@ -6,7 +6,7 @@ namespace App\Modules\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Modules\Shared\Data\UserViewData;
+use App\Modules\Users\Data\UsersIndexPageData;
 use App\Modules\Users\Http\Requests\UserCreateRequest;
 use App\Modules\Users\Http\Requests\UserDestroyRequest;
 use App\Modules\Users\Http\Requests\UserIndexRequest;
@@ -24,14 +24,12 @@ final class UserController extends Controller
 
     public function index(UserIndexRequest $userIndexRequest): Response
     {
-        $lengthAwarePaginator = $this->userService
-            ->paginateUsers($userIndexRequest->toDto())
-            ->withQueryString()
-            ->through(fn (User $user): UserViewData => $user->toViewData());
+        $lengthAwarePaginator = $this->userService->paginateUsers($userIndexRequest->toDto())->withQueryString();
 
-        return Inertia::render('modules/users/pages/Index', [
-            'users' => $lengthAwarePaginator,
-        ]);
+        return Inertia::render(
+            'modules/users/pages/Index',
+            UsersIndexPageData::fromPaginator($lengthAwarePaginator)->toArray()
+        );
     }
 
     public function store(UserCreateRequest $userCreateRequest): RedirectResponse

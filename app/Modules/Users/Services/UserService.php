@@ -35,7 +35,7 @@ final class UserService
         $this->applySearch($query, $userIndexData->search);
 
         return $query
-            ->orderBy($userIndexData->sortBy, $userIndexData->sortDirection)
+            ->orderBy($userIndexData->sortBy->value, $userIndexData->sortDirection->value)
             ->paginate(
                 perPage: $userIndexData->perPage,
                 page: $userIndexData->page,

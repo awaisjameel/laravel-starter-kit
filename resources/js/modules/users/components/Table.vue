@@ -1,8 +1,9 @@
 <script setup lang="ts">
     import type { User } from '@/types'
+    import type { UserSortBy } from '@/types/app-data'
     import type { DataTableColumn, DataTableRowAction, MobileCardField } from '@/types/base-ui'
 
-    type UserSortColumn = 'name' | 'email' | 'role' | 'created_at'
+    type UserSortColumn = `${UserSortBy}`
 
     interface Props {
         currentUserId: number

@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Users\Data;
+
+use App\Models\User;
+use App\Modules\Shared\Data\UserViewData;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
+final class UsersPaginationData extends Data
+{
+    /**
+     * @param  DataCollection<int, UserViewData>  $data
+     */
+    public function __construct(
+        #[DataCollectionOf(UserViewData::class)]
+        public DataCollection $data,
+        public int $per_page,
+        public int $current_page,
+        public ?int $from,
+        public ?int $to,
+        public int $last_page,
+        public int $total
+    ) {}
+
+    /**
+     * @param  LengthAwarePaginator<int, User>  $lengthAwarePaginator
+     */
+    public static function fromPaginator(LengthAwarePaginator $lengthAwarePaginator): self
+    {
+        /** @var list<UserViewData> $data */
+        $data = array_values(array_map(
+            static fn (User $user): UserViewData => $user->toViewData(),
+            $lengthAwarePaginator->items(),
+        ));
+
+        return new self(
+            data: new DataCollection(UserViewData::class, $data),
+            per_page: $lengthAwarePaginator->perPage(),
+            current_page: $lengthAwarePaginator->currentPage(),
+            from: $lengthAwarePaginator->firstItem(),
+            to: $lengthAwarePaginator->lastItem(),
+            last_page: $lengthAwarePaginator->lastPage(),
+            total: $lengthAwarePaginator->total(),
+        );
+    }
+}

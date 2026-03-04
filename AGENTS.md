@@ -3,6 +3,7 @@
 ## Intent
 
 This repository is a modular Laravel + Inertia + Vue starter kit optimized for strict type safety, security, and reusability.
+The architecture is backend-contract-driven: backend DTOs/enums are the source of truth and frontend types must be derived from generated artifacts.
 
 ## Mandatory Workflow
 
@@ -13,6 +14,9 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
     - `composer generate-and-cleanup`
     - targeted PHPUnit tests (or full `php artisan test` for broad changes)
 5. Update this file when architecture, contracts, workflows, or enforcement rules change.
+6. Keep module integrity strict:
+    - module-specific code stays inside its module on both backend and frontend.
+    - only genuinely cross-cutting code belongs in shared/global layers.
 
 ## Stack Snapshot
 
@@ -47,6 +51,20 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
     - `HandleInertiaRequests`
     - `SecurityHeaders`
 
+### Backend Module Ownership Contract (Strict)
+
+- Module-specific backend code must live under its module namespace/path (`app/Modules/<Module>/**`):
+    - Controllers
+    - Requests
+    - Data DTOs
+    - Services
+    - Policies/Gates
+    - Resources/Transformers
+    - Events/Listeners
+- Keep `app/Models/**` and `app/Enums/**` for truly shared domain primitives only.
+- If a class is used by multiple modules, move it to `app/Modules/Shared/**` (or existing global shared location) instead of duplicating.
+- Do not place module-only classes under shared/global directories.
+
 ### Frontend
 
 - Inertia pages live in `resources/js/modules/**/pages`.
@@ -72,6 +90,27 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Breadcrumb contract:
     - Centralized in `resources/js/config/breadcrumbs.ts`.
     - Feature pages should consume shared breadcrumb builders, not duplicate breadcrumb arrays inline.
+
+### Frontend Module Ownership Contract (Strict)
+
+- Module-specific frontend code must live under `resources/js/modules/<module>/**`:
+    - `pages/**`
+    - `components/**`
+    - `forms/**`
+    - module-local composables/contracts/helpers
+- Do not keep feature-specific components in `resources/js/components/**`.
+- `resources/js/components/ui/**` is primitive-only.
+- `resources/js/components/base/**` is reusable app-level building blocks only.
+- `resources/js/config/**`, `resources/js/layouts/**`, and `resources/js/composables/**` are shared layers; do not move module-specific logic there.
+- Frontend module files under `resources/js/modules/**` must not import other feature modules directly; promote shared code instead.
+
+### Shared Placement Rules
+
+- Promote to shared only when at least one condition is true:
+    - reused by 1+ modules
+    - forms a stable cross-cutting contract
+    - belongs to app shell/infrastructure concerns (layout, navigation, global composables, base UI, transport)
+- If reuse is uncertain, keep code inside the owning module first and extract later when duplication appears.
 
 ## Routing Contract
 
@@ -104,12 +143,20 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Form Requests must expose typed `toDto()` methods where business input is consumed.
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
+- Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:
+    - prefer Spatie Data classes (`extends Data`) for payload/query/page contracts.
+    - annotate exported contracts with `#[TypeScript]`.
+- Replace bounded string query values with enums in backend contracts (e.g., sort fields/directions), then consume generated enums in frontend.
 
 ### Frontend
 
 - Use `<script setup lang="ts">`.
 - Keep strict TS (`noImplicitAny`, `strictNullChecks`, `exactOptionalPropertyTypes`).
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
+- Frontend must consume backend-generated contracts from `resources/js/types/app-data.ts` for domain entities/DTOs/enums.
+- Do not redefine backend-owned entity/DTO/enum types in manual frontend files.
+- `resources/js/types/index.d.ts` should contain app-shell/shared UI types only, not duplicated backend domain contracts.
+- Inertia page props should prefer generated backend page DTO contracts when available.
 - Prefer named routes and generated helpers over hardcoded URIs.
 - New forms should use schema-driven rendering via shared form contracts/components in `resources/js/components/base/forms/**`.
 - Feature forms must define typed form contracts via `defineFormContract` + `defineFormFields` in module schema files (`resources/js/modules/**/forms/*-form-schema.ts`) and reuse them in pages/components.
@@ -124,6 +171,14 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Do not duplicate navigation arrays in pages/layouts/composables; centralize navigation definitions in `resources/js/config/navigation.ts`.
 - Feature module files under `resources/js/modules/**` must not import other feature modules directly; move shared code to shared/base/config layers.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
+
+### Backend-Driven Type Pipeline (Non-Negotiable)
+
+1. Define/adjust backend enum or Spatie Data DTO.
+2. Annotate with `#[TypeScript]` if the contract is used on frontend.
+3. Use the DTO/enum in Request `toDto()`, Services, and Controllers/Resources.
+4. Run generation commands.
+5. Consume generated types in frontend (`@/types/app-data`) instead of hand-written duplicates.
 
 ## Server Table Query Contract
 
@@ -165,6 +220,8 @@ Do not hand-edit generated artifacts:
 - `resources/js/types/app-data.ts`
 - `resources/js/types/auto-imports.d.ts`
 - `resources/js/types/components.d.ts`
+
+Generated artifacts are the canonical frontend contract output of backend types. Do not shadow them with manual duplicates.
 
 After route/DTO/enum changes run:
 

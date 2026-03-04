@@ -37,20 +37,6 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
 
 export type User = UserViewData
 
-export interface Paginated<T> {
-    data: T[]
-    per_page: number
-    current_page: number
-    from: number
-    to: number
-    last_page: number
-    total: number
-}
-
-export interface UsersPageProps {
-    users: Paginated<UserViewData>
-}
-
 export interface SelectOption {
     value: string
     label: string

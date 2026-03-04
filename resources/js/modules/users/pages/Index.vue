@@ -3,14 +3,21 @@
     import UsersDeleteUserDialog from '@/modules/users/components/DeleteUserDialog.vue'
     import UsersTable from '@/modules/users/components/Table.vue'
     import UsersUserFormDialog from '@/modules/users/components/UserFormDialog.vue'
-    import { UsersPageProps, type User } from '@/types'
+    import { type User } from '@/types'
+    import { SortDirection, UserSortBy, type UsersIndexPageData } from '@/types/app-data'
     import { Plus } from 'lucide-vue-next'
 
-    const userSortColumns = ['name', 'email', 'role', 'created_at'] as const
-    type UserSortColumn = 'name' | 'email' | 'role' | 'created_at'
+    type UserSortColumn = `${UserSortBy}`
+    type UsersIndexPageProps = Omit<UsersIndexPageData, 'users'> & {
+        users: Omit<UsersIndexPageData['users'], 'data'> & {
+            data: User[]
+        }
+    }
+
+    const userSortColumns = [UserSortBy.Name, UserSortBy.Email, UserSortBy.Role, UserSortBy.CreatedAt] as const
 
     const page = useAppPage()
-    const props = defineProps<UsersPageProps>()
+    const props = defineProps<UsersIndexPageProps>()
     const currentUserId = computed(() => page.props.auth.user?.id ?? 0)
 
     const breadcrumbs = buildUsersBreadcrumbs()
@@ -34,12 +41,12 @@
             page: props.users.current_page,
             perPage: props.users.per_page,
             search: undefined,
-            sortBy: 'created_at',
-            sortDirection: 'desc'
+            sortBy: UserSortBy.CreatedAt,
+            sortDirection: SortDirection.Desc
         },
         allowedSortBy: userSortColumns,
-        defaultSortBy: 'created_at',
-        defaultSortDirection: 'desc'
+        defaultSortBy: UserSortBy.CreatedAt,
+        defaultSortDirection: SortDirection.Desc
     })
 
     const { query, searchValue, setPage, setPerPage, setSort } = useServerDataTable<UserSortColumn>({

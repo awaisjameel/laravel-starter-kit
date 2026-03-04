@@ -6,7 +6,9 @@ namespace App\Modules\Users\Data;
 
 use App\Enums\UserRole;
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 final class UpdateUserData extends Data
 {
     public function __construct(

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Users\Http\Requests;
 
 use App\Models\User;
+use App\Modules\Shared\Enums\SortDirection;
 use App\Modules\Users\Data\UserIndexData;
+use App\Modules\Users\Enums\UserSortBy;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 final class UserIndexRequest extends FormRequest
 {
@@ -26,8 +28,8 @@ final class UserIndexRequest extends FormRequest
             'perPage' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
             'search' => ['nullable', 'string', 'max:100'],
-            'sortBy' => ['nullable', 'string', Rule::in(['name', 'email', 'role', 'created_at'])],
-            'sortDirection' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
+            'sortBy' => ['nullable', 'string', new Enum(UserSortBy::class)],
+            'sortDirection' => ['nullable', 'string', new Enum(SortDirection::class)],
         ];
     }
 
@@ -61,20 +63,36 @@ final class UserIndexRequest extends FormRequest
         return $trimmed !== '' ? $trimmed : null;
     }
 
-    public function sortBy(): string
+    public function sortBy(): UserSortBy
     {
-        /** @var string|null $sortBy */
+        /** @var UserSortBy|string|null $sortBy */
         $sortBy = $this->validated('sortBy');
 
-        return $sortBy ?? 'created_at';
+        if ($sortBy instanceof UserSortBy) {
+            return $sortBy;
+        }
+
+        if ($sortBy !== null) {
+            return UserSortBy::from((string) $sortBy);
+        }
+
+        return UserSortBy::CreatedAt;
     }
 
-    public function sortDirection(): string
+    public function sortDirection(): SortDirection
     {
-        /** @var string|null $sortDirection */
+        /** @var SortDirection|string|null $sortDirection */
         $sortDirection = $this->validated('sortDirection');
 
-        return $sortDirection ?? 'desc';
+        if ($sortDirection instanceof SortDirection) {
+            return $sortDirection;
+        }
+
+        if ($sortDirection !== null) {
+            return SortDirection::from((string) $sortDirection);
+        }
+
+        return SortDirection::Desc;
     }
 
     public function toDto(): UserIndexData
