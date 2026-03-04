@@ -1,0 +1,129 @@
+import type { AppPageProps } from '@/types'
+import { UserRole } from '@/types/app-data'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { computed } from 'vue'
+import { useNavigation } from '../useNavigation'
+
+type MockPage = {
+    url: string
+    props: AppPageProps
+}
+
+const routeMap: Record<string, string> = {
+    'marketing.home': '/',
+    'app.dashboard': '/app/dashboard',
+    'app.admin.users.index': '/app/admin/users',
+    'app.settings.profile.edit': '/app/settings/profile',
+    'app.settings.password.edit': '/app/settings/password',
+    'app.settings.appearance': '/app/settings/appearance',
+    'auth.register.create': '/auth/register',
+    'auth.login.create': '/auth/login'
+}
+
+const routeMock = vi.fn((name: string): string => {
+    const resolved = routeMap[name]
+
+    if (resolved === undefined) {
+        throw new Error(`Missing mocked route: ${name}`)
+    }
+
+    return resolved
+})
+
+let mockPage = createMockPage({ url: '/', role: null })
+
+const usePageMock = vi.fn(() => mockPage)
+
+const globalScope = globalThis as typeof globalThis & {
+    computed: typeof computed
+    route: (name: string) => string
+    usePage: () => MockPage
+}
+
+beforeAll(() => {
+    globalScope.computed = computed
+    globalScope.route = routeMock
+    globalScope.usePage = usePageMock
+})
+
+beforeEach(() => {
+    routeMock.mockClear()
+    usePageMock.mockClear()
+})
+
+describe('useNavigation', () => {
+    it('marks settings links active using centralized item state', () => {
+        mockPage = createMockPage({
+            url: '/app/settings/password?source=sidebar',
+            role: UserRole.User
+        })
+
+        const { settingsNavItems, dashboardFooterItems } = useNavigation()
+        const settingsByTitle = new Map(settingsNavItems.value.map((item) => [item.title, item]))
+        const footerByTitle = new Map(dashboardFooterItems.value.map((item) => [item.title, item]))
+
+        expect(settingsByTitle.get('Profile')?.isActive).toBe(false)
+        expect(settingsByTitle.get('Password')?.isActive).toBe(true)
+        expect(settingsByTitle.get('Appearance')?.isActive).toBe(false)
+        expect(footerByTitle.get('Security')?.isActive).toBe(true)
+    })
+
+    it('marks parent admin users link active for nested users paths', () => {
+        mockPage = createMockPage({
+            url: '/app/admin/users/42/edit?tab=details',
+            role: UserRole.Admin
+        })
+
+        const { dashboardPrimaryItems } = useNavigation()
+        const itemsByTitle = new Map(dashboardPrimaryItems.value.map((item) => [item.title, item]))
+
+        expect(itemsByTitle.get('Dashboard')?.isActive).toBe(false)
+        expect(itemsByTitle.get('Users')?.isActive).toBe(true)
+    })
+
+    it('keeps home inactive off root and hides admin links for non-admin users', () => {
+        mockPage = createMockPage({
+            url: '/app/dashboard',
+            role: UserRole.User
+        })
+
+        const { dashboardPrimaryItems, marketingPrimaryItems } = useNavigation()
+        const marketingByTitle = new Map(marketingPrimaryItems.value.map((item) => [item.title, item]))
+
+        expect(marketingByTitle.get('Home')?.isActive).toBe(false)
+        expect(marketingByTitle.get('Dashboard')?.isActive).toBe(true)
+        expect(dashboardPrimaryItems.value.some((item) => item.title === 'Users')).toBe(false)
+    })
+})
+
+function createMockPage({ url, role }: { url: string; role: UserRole | null }): MockPage {
+    return {
+        url,
+        props: {
+            name: 'Test Page',
+            quote: {
+                message: '',
+                author: ''
+            },
+            auth: {
+                user: role === null ? null : createUser(role)
+            },
+            flash: {},
+            ziggy: {
+                location: `http://localhost${url}`
+            } as AppPageProps['ziggy'],
+            sidebarOpen: true
+        }
+    }
+}
+
+function createUser(role: UserRole): NonNullable<AppPageProps['auth']['user']> {
+    return {
+        id: 1,
+        name: 'Test User',
+        email: 'test@example.com',
+        role,
+        created_at: '2026-01-01T00:00:00+00:00',
+        updated_at: '2026-01-01T00:00:00+00:00'
+    }
+}

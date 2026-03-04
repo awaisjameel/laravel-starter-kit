@@ -1,10 +1,8 @@
 <script setup lang="ts">
     import { Menu } from 'lucide-vue-next'
 
-    const page = usePage()
     const { isAuthenticated, marketingPrimaryAction, marketingPrimaryItems, marketingSecondaryAction } = useNavigation()
 
-    const isActiveRoute = (href: string) => page.url === href || page.url.startsWith(`${href}?`)
     const hasPrimaryNavigation = computed(() => marketingPrimaryItems.value.length > 1)
 </script>
 
@@ -28,7 +26,7 @@
                         variant="ghost"
                         class="h-9 rounded-lg px-3.5"
                         :class="
-                            isActiveRoute(item.href)
+                            item.isActive
                                 ? 'bg-primary/10 text-primary hover:bg-primary/15'
                                 : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                         "
@@ -74,7 +72,7 @@
                                         :key="item.title"
                                         variant="ghost"
                                         class="h-10 justify-start px-3"
-                                        :class="isActiveRoute(item.href) ? 'bg-muted text-foreground' : 'text-muted-foreground'"
+                                        :class="item.isActive ? 'bg-muted text-foreground' : 'text-muted-foreground'"
                                         as-child
                                     >
                                         <Link :href="item.href">

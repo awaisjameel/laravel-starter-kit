@@ -1,30 +1,5 @@
 <script setup lang="ts">
-    import { buildSettingsNavItems } from '@/config/navigation'
-
-    const sidebarNavItems = buildSettingsNavItems()
-
-    const page = usePage()
-
-    const normalizePath = (value: string): string => {
-        const trimmed = value.replace(/\/+$/, '')
-        return trimmed === '' ? '/' : trimmed
-    }
-
-    const currentPath = computed(() => {
-        const location = page.props.ziggy?.location
-
-        if (location === undefined || location === '') {
-            return ''
-        }
-
-        return normalizePath(new URL(location).pathname)
-    })
-
-    const isActive = (href: string): boolean => {
-        const baseLocation = page.props.ziggy?.location ?? 'http://localhost'
-        const hrefPath = normalizePath(new URL(href, baseLocation).pathname)
-        return currentPath.value === hrefPath
-    }
+    const { settingsNavItems } = useNavigation()
 </script>
 
 <template>
@@ -35,13 +10,13 @@
             <aside class="w-full lg:w-48">
                 <nav class="grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
                     <UiButton
-                        v-for="item in sidebarNavItems"
+                        v-for="item in settingsNavItems"
                         :key="item.href"
                         variant="ghost"
-                        :class="['w-full justify-start', { 'bg-muted font-medium text-foreground': isActive(item.href) }]"
+                        :class="['w-full justify-start', { 'bg-muted font-medium text-foreground': item.isActive }]"
                         as-child
                     >
-                        <Link :href="item.href" :aria-current="isActive(item.href) ? 'page' : undefined">
+                        <Link :href="item.href" :aria-current="item.isActive ? 'page' : undefined">
                             {{ item.title }}
                         </Link>
                     </UiButton>

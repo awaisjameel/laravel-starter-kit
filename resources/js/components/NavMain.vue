@@ -4,10 +4,6 @@
     defineProps<{
         items: NavItem[]
     }>()
-
-    const page = usePage()
-
-    const isActiveItem = (href: string) => page.url === href || page.url.startsWith(`${href}?`)
 </script>
 
 <template>
@@ -15,8 +11,8 @@
         <UiSidebarGroupLabel>Platform</UiSidebarGroupLabel>
         <UiSidebarMenu>
             <UiSidebarMenuItem v-for="item in items" :key="item.title">
-                <UiSidebarMenuButton as-child :is-active="isActiveItem(item.href)" :tooltip="item.title">
-                    <Link :href="item.href">
+                <UiSidebarMenuButton as-child :is-active="item.isActive" :tooltip="item.title">
+                    <Link :href="item.href" :aria-current="item.isActive ? 'page' : undefined">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                     </Link>

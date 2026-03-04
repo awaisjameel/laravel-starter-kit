@@ -5,10 +5,19 @@ import {
     buildMarketingPrimaryAction,
     buildMarketingPrimaryItems,
     buildMarketingSecondaryAction,
+    buildSettingsNavItems,
     type NavigationGroup
 } from '@/config/navigation'
 import type { AppPageProps, NavItem } from '@/types'
 import { UserRole } from '@/types/app-data'
+
+type ActiveNavItem = NavItem & { isActive: boolean }
+type ActiveNavigationGroup = Omit<NavigationGroup, 'items'> & { items: ActiveNavItem[] }
+
+const normalizePath = (value: string): string => {
+    const trimmed = value.replace(/\/+$/, '')
+    return trimmed === '' ? '/' : trimmed
+}
 
 export function useNavigation() {
     const page = usePage<AppPageProps>()
@@ -16,22 +25,48 @@ export function useNavigation() {
     const user = computed(() => page.props.auth?.user ?? null)
     const isAuthenticated = computed(() => Boolean(user.value?.id))
     const isAdmin = computed(() => user.value?.role === UserRole.Admin)
+    const baseLocation = computed(() => page.props.ziggy?.location ?? 'http://localhost')
+    const currentPath = computed(() => normalizePath(new URL(page.url, baseLocation.value).pathname))
 
     const context = computed(() => ({
         isAuthenticated: isAuthenticated.value,
         isAdmin: isAdmin.value
     }))
 
-    const dashboardPrimaryItems = computed<NavItem[]>(() => buildDashboardPrimaryItems(context.value))
-    const dashboardFooterItems = computed<NavItem[]>(() => buildDashboardFooterItems())
-    const marketingPrimaryItems = computed<NavItem[]>(() => buildMarketingPrimaryItems(context.value))
-    const marketingPrimaryAction = computed<NavItem>(() => buildMarketingPrimaryAction(context.value))
-    const marketingSecondaryAction = computed<NavItem>(() => buildMarketingSecondaryAction(context.value))
-    const marketingFooterGroups = computed<NavigationGroup[]>(() => buildMarketingFooterGroups(context.value))
+    const isActiveHref = (href: string): boolean => {
+        const hrefPath = normalizePath(new URL(href, baseLocation.value).pathname)
+
+        if (hrefPath === '/') {
+            return currentPath.value === '/'
+        }
+
+        return currentPath.value === hrefPath || currentPath.value.startsWith(`${hrefPath}/`)
+    }
+
+    const withActiveItem = (item: NavItem): ActiveNavItem => ({
+        ...item,
+        isActive: isActiveHref(item.href)
+    })
+
+    const withActiveItems = (items: NavItem[]): ActiveNavItem[] => items.map((item) => withActiveItem(item))
+
+    const settingsNavItems = computed<ActiveNavItem[]>(() => withActiveItems(buildSettingsNavItems()))
+    const dashboardPrimaryItems = computed<ActiveNavItem[]>(() => withActiveItems(buildDashboardPrimaryItems(context.value)))
+    const dashboardFooterItems = computed<ActiveNavItem[]>(() => withActiveItems(buildDashboardFooterItems()))
+    const marketingPrimaryItems = computed<ActiveNavItem[]>(() => withActiveItems(buildMarketingPrimaryItems(context.value)))
+    const marketingPrimaryAction = computed<ActiveNavItem>(() => withActiveItem(buildMarketingPrimaryAction(context.value)))
+    const marketingSecondaryAction = computed<ActiveNavItem>(() => withActiveItem(buildMarketingSecondaryAction(context.value)))
+    const marketingFooterGroups = computed<ActiveNavigationGroup[]>(() =>
+        buildMarketingFooterGroups(context.value).map((group) => ({
+            ...group,
+            items: withActiveItems(group.items)
+        }))
+    )
 
     return {
         isAuthenticated,
         isAdmin,
+        settingsNavItems,
         dashboardPrimaryItems,
         dashboardFooterItems,
         marketingPrimaryItems,
