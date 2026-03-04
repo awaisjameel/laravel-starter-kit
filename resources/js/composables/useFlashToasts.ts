@@ -1,7 +1,7 @@
-import type { AppPageProps } from '@/types'
+import { useAppPage } from './useAppPage'
 
 export function useFlashToasts() {
-    const page = usePage<AppPageProps>()
+    const page = useAppPage()
     const { success, error, info } = useToast()
 
     const lastSeen = ref({

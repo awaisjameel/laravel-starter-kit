@@ -5,10 +5,11 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { createPinia } from 'pinia'
 import type { DefineComponent } from 'vue'
 import { createApp, Fragment, h } from 'vue'
-import { route as ziggyRoute, ZiggyVue } from 'ziggy-js'
+import { ZiggyVue } from 'ziggy-js'
 import AppToaster from './components/base/toast/AppToaster.vue'
 import { initializeTheme } from './composables/useAppearance'
 import type { AppPageProps } from './types'
+import { bindGlobalRouteHelper, toZiggyVueConfig } from './utils/ziggy'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
@@ -19,27 +20,11 @@ createInertiaApp({
     resolve: (name) => resolvePageComponent(`./${name}.vue`, import.meta.glob<DefineComponent>('./modules/**/*.vue')),
     setup({ el, App, props, plugin }) {
         const ziggy = props.initialPage.props.ziggy as AppPageProps['ziggy']
-        const routeHelper = ((...args: unknown[]) => {
-            if (args.length === 0) {
-                return ziggyRoute()
-            }
-
-            return ziggyRoute(
-                args[0] as Parameters<typeof ziggyRoute>[0],
-                args[1] as Parameters<typeof ziggyRoute>[1],
-                args[2] as Parameters<typeof ziggyRoute>[2],
-                (args[3] as Parameters<typeof ziggyRoute>[3] | undefined) ?? ziggy
-            )
-        }) as unknown as typeof ziggyRoute
-
-        ;(globalThis as typeof globalThis & { route: typeof ziggyRoute }).route = routeHelper
+        bindGlobalRouteHelper(ziggy)
 
         createApp({ render: () => h(Fragment, [h(App, props), h(AppToaster)]) })
             .use(plugin)
-            .use(ZiggyVue, {
-                ...ziggy,
-                location: new URL(ziggy.location)
-            })
+            .use(ZiggyVue, toZiggyVueConfig(ziggy))
             .use(pinia)
             .mount(el)
     },

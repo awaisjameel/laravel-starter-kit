@@ -1,10 +1,11 @@
 <script setup lang="ts">
+    import appRoutes from '@/routes/app'
     import { type BreadcrumbItem } from '@/types'
 
     const breadcrumbItems: BreadcrumbItem[] = [
         {
             title: 'Appearance settings',
-            href: route('app.settings.appearance')
+            href: appRoutes.settings.appearance.url()
         }
     ]
 </script>

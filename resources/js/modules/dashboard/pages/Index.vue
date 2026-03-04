@@ -1,10 +1,11 @@
 <script setup lang="ts">
+    import appRoutes from '@/routes/app'
     import { type BreadcrumbItem } from '@/types'
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
-            href: route('app.dashboard')
+            href: appRoutes.dashboard.url()
         }
     ]
 </script>

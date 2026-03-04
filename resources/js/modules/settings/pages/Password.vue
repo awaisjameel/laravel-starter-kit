@@ -1,12 +1,13 @@
 <script setup lang="ts">
     import PasswordController from '@/actions/App/Modules/Settings/Http/Controllers/PasswordController'
     import { buildPasswordFormFields, type PasswordFormValues } from '@/modules/settings/forms/password-form-schema'
+    import appRoutes from '@/routes/app'
     import { type BreadcrumbItem } from '@/types'
 
     const breadcrumbItems: BreadcrumbItem[] = [
         {
             title: 'Password settings',
-            href: route('app.settings.password.edit')
+            href: appRoutes.settings.password.edit.url()
         }
     ]
 

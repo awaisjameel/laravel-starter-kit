@@ -1,19 +1,21 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
+    import appRoutes from '@/routes/app'
     import { UsersPageProps, type BreadcrumbItem, type User } from '@/types'
     import { Plus } from 'lucide-vue-next'
+    import { useAppPage } from '../../../composables/useAppPage'
 
     const userSortColumns = ['name', 'email', 'role', 'created_at'] as const
     type UserSortColumn = 'name' | 'email' | 'role' | 'created_at'
 
-    const page = usePage()
+    const page = useAppPage()
     const props = defineProps<UsersPageProps>()
     const currentUserId = computed(() => page.props.auth.user?.id ?? 0)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Users',
-            href: route('app.admin.users.index')
+            href: appRoutes.admin.users.index.url()
         }
     ]
 

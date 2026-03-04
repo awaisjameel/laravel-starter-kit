@@ -1,11 +1,14 @@
 <script setup lang="ts">
+    import { useAppPage } from '../composables/useAppPage'
+
     interface Props {
         variant?: 'header' | 'sidebar'
     }
 
     defineProps<Props>()
 
-    const isOpen = usePage().props.sidebarOpen
+    const page = useAppPage()
+    const isOpen = computed(() => page.props.sidebarOpen)
 </script>
 
 <template>

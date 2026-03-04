@@ -1,3 +1,6 @@
+import appRoutes from '@/routes/app'
+import authRoutes from '@/routes/auth'
+import marketingRoutes from '@/routes/marketing'
 import type { NavItem } from '@/types'
 import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from 'lucide-vue-next'
 
@@ -12,13 +15,14 @@ export interface NavigationGroup {
 }
 
 const navRoutes = {
-    marketingHome: () => route('marketing.home'),
-    appDashboard: () => route('app.dashboard'),
-    adminUsers: () => route('app.admin.users.index'),
-    settingsProfile: () => route('app.settings.profile.edit'),
-    settingsPassword: () => route('app.settings.password.edit'),
-    authRegister: () => route('auth.register.create'),
-    authLogin: () => route('auth.login.create')
+    marketingHome: () => marketingRoutes.home.url(),
+    appDashboard: () => appRoutes.dashboard.url(),
+    adminUsers: () => appRoutes.admin.users.index.url(),
+    settingsProfile: () => appRoutes.settings.profile.edit.url(),
+    settingsPassword: () => appRoutes.settings.password.edit.url(),
+    settingsAppearance: () => appRoutes.settings.appearance.url(),
+    authRegister: () => authRoutes.register.create.url(),
+    authLogin: () => authRoutes.login.create.url()
 }
 
 export const buildSettingsNavItems = (): NavItem[] => [
@@ -32,7 +36,7 @@ export const buildSettingsNavItems = (): NavItem[] => [
     },
     {
         title: 'Appearance',
-        href: route('app.settings.appearance')
+        href: navRoutes.settingsAppearance()
     }
 ]
 

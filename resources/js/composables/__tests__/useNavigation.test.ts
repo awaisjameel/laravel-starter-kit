@@ -9,45 +9,21 @@ type MockPage = {
     props: AppPageProps
 }
 
-const routeMap: Record<string, string> = {
-    'marketing.home': '/',
-    'app.dashboard': '/app/dashboard',
-    'app.admin.users.index': '/app/admin/users',
-    'app.settings.profile.edit': '/app/settings/profile',
-    'app.settings.password.edit': '/app/settings/password',
-    'app.settings.appearance': '/app/settings/appearance',
-    'auth.register.create': '/auth/register',
-    'auth.login.create': '/auth/login'
-}
-
-const routeMock = vi.fn((name: string): string => {
-    const resolved = routeMap[name]
-
-    if (resolved === undefined) {
-        throw new Error(`Missing mocked route: ${name}`)
-    }
-
-    return resolved
-})
-
 let mockPage = createMockPage({ url: '/', role: null })
 
 const usePageMock = vi.fn(() => mockPage)
 
 const globalScope = globalThis as typeof globalThis & {
     computed: typeof computed
-    route: (name: string) => string
     usePage: () => MockPage
 }
 
 beforeAll(() => {
     globalScope.computed = computed
-    globalScope.route = routeMock
     globalScope.usePage = usePageMock
 })
 
 beforeEach(() => {
-    routeMock.mockClear()
     usePageMock.mockClear()
 })
 

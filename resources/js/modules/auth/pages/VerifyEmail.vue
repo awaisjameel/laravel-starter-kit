@@ -1,5 +1,7 @@
 <script setup lang="ts">
     import EmailVerificationNotificationController from '@/actions/App/Modules/Auth/Http/Controllers/EmailVerificationNotificationController'
+    import authRoutes from '@/routes/auth'
+
     defineProps<{
         status?: string
     }>()
@@ -21,7 +23,7 @@
 
         <form class="space-y-6 text-center" @submit.prevent="submitForm">
             <BaseButton type="submit" variant="secondary" :loading="form.processing" label="Resend verification email" />
-            <TextLink :href="route('auth.logout')" method="post" as="button" class="mx-auto block text-sm">Log out</TextLink>
+            <TextLink :href="authRoutes.logout.url()" method="post" as="button" class="mx-auto block text-sm">Log out</TextLink>
         </form>
     </AuthLayout>
 </template>

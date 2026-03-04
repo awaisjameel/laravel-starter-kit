@@ -1,7 +1,10 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
     import { buildProfileFormFields, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
+    import appRoutes from '@/routes/app'
+    import authRoutes from '@/routes/auth'
     import { type BreadcrumbItem } from '@/types'
+    import { useAuthUser } from '../../../composables/useAppPage'
 
     interface Props {
         mustVerifyEmail: boolean
@@ -13,20 +16,15 @@
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Profile settings',
-            href: route('app.settings.profile.edit')
+            href: appRoutes.settings.profile.edit.url()
         }
     ]
 
-    const page = usePage()
-    const user = page.props.auth.user
-
-    if (user === null) {
-        throw new Error('Authenticated user is required for profile settings page.')
-    }
+    const user = useAuthUser({ required: true, context: 'profile settings page' })
 
     const { form, submit } = useResourceForm<ProfileFormValues>({
-        name: user.name,
-        email: user.email
+        name: user.value.name,
+        email: user.value.email
     })
 
     const fields = buildProfileFormFields()
@@ -59,7 +57,7 @@
                     <p class="-mt-4 text-sm text-muted-foreground">
                         Your email address is unverified.
                         <Link
-                            :href="route('auth.verification.send')"
+                            :href="authRoutes.verification.send.url()"
                             method="post"
                             as="button"
                             class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

@@ -8,8 +8,9 @@ import {
     buildSettingsNavItems,
     type NavigationGroup
 } from '@/config/navigation'
-import type { AppPageProps, NavItem } from '@/types'
+import type { NavItem } from '@/types'
 import { UserRole } from '@/types/app-data'
+import { useAppPage, useAuthUser } from './useAppPage'
 
 type ActiveNavItem = NavItem & { isActive: boolean }
 type ActiveNavigationGroup = Omit<NavigationGroup, 'items'> & { items: ActiveNavItem[] }
@@ -20,9 +21,8 @@ const normalizePath = (value: string): string => {
 }
 
 export function useNavigation() {
-    const page = usePage<AppPageProps>()
-
-    const user = computed(() => page.props.auth?.user ?? null)
+    const page = useAppPage()
+    const user = useAuthUser()
     const isAuthenticated = computed(() => Boolean(user.value?.id))
     const isAdmin = computed(() => user.value?.role === UserRole.Admin)
     const baseLocation = computed(() => page.props.ziggy?.location ?? 'http://localhost')

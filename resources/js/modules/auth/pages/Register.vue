@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import RegisteredUserController from '@/actions/App/Modules/Auth/Http/Controllers/RegisteredUserController'
     import { buildRegisterFormFields, type RegisterFormValues } from '@/modules/auth/forms/register-form-schema'
+    import authRoutes from '@/routes/auth'
 
     const { form, submit } = useResourceForm<RegisterFormValues>({
         name: '',
@@ -30,7 +31,7 @@
                     <BaseButton type="submit" full-width :loading="form.processing" label="Create account" />
                     <div class="text-center text-sm text-muted-foreground">
                         Already have an account?
-                        <TextLink :href="route('auth.login.create')" class="underline underline-offset-4">Log in</TextLink>
+                        <TextLink :href="authRoutes.login.create.url()" class="underline underline-offset-4">Log in</TextLink>
                     </div>
                 </div>
             </template>
