@@ -11,8 +11,9 @@
     const userSortColumns = [UserSortBy.Name, UserSortBy.Email, UserSortBy.Role, UserSortBy.CreatedAt] as const
 
     const page = useAppPage()
+    const authenticatedUser = useAuthUser({ required: true, context: 'UsersIndexPage' })
     const props = defineProps<UsersIndexPageData>()
-    const currentUserId = computed(() => page.props.auth.user?.id ?? 0)
+    const currentUserId = computed(() => authenticatedUser.value.id)
 
     const breadcrumbs = buildUsersBreadcrumbs()
 
