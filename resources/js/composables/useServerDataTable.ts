@@ -1,6 +1,7 @@
 import type { ServerTableQuery, SortDirection } from '@/types/base-ui'
 import type { QueryParams, RouteDefinition } from '@/wayfinder'
 import { useDebounceFn } from '@vueuse/core'
+import type { UnwrapRef } from 'vue'
 
 interface ServerDataTableOptions<TSort extends string> {
     endpoint: (options?: { query?: QueryParams }) => RouteDefinition<'get'>
@@ -105,7 +106,7 @@ export function useServerDataTable<TSort extends string>(options: ServerDataTabl
         page: options.initialQuery.page,
         perPage: options.initialQuery.perPage,
         search: options.initialQuery.search,
-        sortBy: options.initialQuery.sortBy as TSort | undefined,
+        sortBy: options.initialQuery.sortBy,
         sortDirection: options.initialQuery.sortDirection
     })
 
@@ -156,7 +157,7 @@ export function useServerDataTable<TSort extends string>(options: ServerDataTabl
         if (query.value.sortBy === sortBy) {
             query.value.sortDirection = query.value.sortDirection === 'asc' ? 'desc' : 'asc'
         } else {
-            query.value.sortBy = sortBy as never
+            query.value.sortBy = sortBy as UnwrapRef<TSort>
             query.value.sortDirection = 'asc'
         }
 

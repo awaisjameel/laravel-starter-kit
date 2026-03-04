@@ -45,6 +45,7 @@ export const buildDashboardPrimaryItems = (context: NavigationContext): NavItem[
         {
             title: 'Dashboard',
             href: navRoutes.appDashboard(),
+            activeMatch: 'prefix',
             icon: LayoutGrid
         }
     ]
@@ -53,6 +54,7 @@ export const buildDashboardPrimaryItems = (context: NavigationContext): NavItem[
         items.push({
             title: 'Users',
             href: navRoutes.adminUsers(),
+            activeMatch: 'prefix',
             icon: Users
         })
     }
@@ -84,13 +86,15 @@ export const buildMarketingPrimaryItems = (context: NavigationContext): NavItem[
     if (context.isAuthenticated) {
         items.push({
             title: 'Dashboard',
-            href: navRoutes.appDashboard()
+            href: navRoutes.appDashboard(),
+            activeMatch: 'prefix'
         })
 
         if (context.isAdmin) {
             items.push({
                 title: 'Users',
-                href: navRoutes.adminUsers()
+                href: navRoutes.adminUsers(),
+                activeMatch: 'prefix'
             })
         }
     }
@@ -103,6 +107,7 @@ export const buildMarketingPrimaryAction = (context: NavigationContext): NavItem
         return {
             title: 'Open dashboard',
             href: navRoutes.appDashboard(),
+            activeMatch: 'prefix',
             icon: LayoutGrid
         }
     }
@@ -141,7 +146,8 @@ export const buildMarketingFooterGroups = (context: NavigationContext): Navigati
     if (context.isAuthenticated) {
         platformItems.push({
             title: 'Dashboard',
-            href: navRoutes.appDashboard()
+            href: navRoutes.appDashboard(),
+            activeMatch: 'prefix'
         })
     }
 
@@ -184,7 +190,8 @@ export const buildMarketingFooterGroups = (context: NavigationContext): Navigati
             items: [
                 {
                     title: 'User management',
-                    href: navRoutes.adminUsers()
+                    href: navRoutes.adminUsers(),
+                    activeMatch: 'prefix'
                 }
             ]
         })

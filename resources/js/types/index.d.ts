@@ -11,11 +11,14 @@ export interface BreadcrumbItem {
     href: string
 }
 
+export type NavItemActiveMatch = 'exact' | 'prefix'
+
 export interface NavItem {
     title: string
     href: string
     icon?: LucideIcon
     isActive?: boolean
+    activeMatch?: NavItemActiveMatch
     external?: boolean
 }
 

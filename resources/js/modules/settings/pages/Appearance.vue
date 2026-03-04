@@ -1,13 +1,7 @@
 <script setup lang="ts">
-    import appRoutes from '@/routes/app'
-    import { type BreadcrumbItem } from '@/types'
+    import { buildSettingsAppearanceBreadcrumbs } from '@/config/breadcrumbs'
 
-    const breadcrumbItems: BreadcrumbItem[] = [
-        {
-            title: 'Appearance settings',
-            href: appRoutes.settings.appearance.url()
-        }
-    ]
+    const breadcrumbItems = buildSettingsAppearanceBreadcrumbs()
 </script>
 
 <template>

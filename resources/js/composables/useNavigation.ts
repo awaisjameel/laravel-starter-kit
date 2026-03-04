@@ -8,7 +8,7 @@ import {
     buildSettingsNavItems,
     type NavigationGroup
 } from '@/config/navigation'
-import type { NavItem } from '@/types'
+import type { NavItem, NavItemActiveMatch } from '@/types'
 import { UserRole } from '@/types/app-data'
 import { useAppPage, useAuthUser } from './useAppPage'
 
@@ -33,11 +33,11 @@ export function useNavigation() {
         isAdmin: isAdmin.value
     }))
 
-    const isActiveHref = (href: string): boolean => {
+    const isActiveHref = (href: string, activeMatch: NavItemActiveMatch = 'exact'): boolean => {
         const hrefPath = normalizePath(new URL(href, baseLocation.value).pathname)
 
-        if (hrefPath === '/') {
-            return currentPath.value === '/'
+        if (activeMatch === 'exact' || hrefPath === '/') {
+            return currentPath.value === hrefPath
         }
 
         return currentPath.value === hrefPath || currentPath.value.startsWith(`${hrefPath}/`)
@@ -45,7 +45,7 @@ export function useNavigation() {
 
     const withActiveItem = (item: NavItem): ActiveNavItem => ({
         ...item,
-        isActive: isActiveHref(item.href)
+        isActive: isActiveHref(item.href, item.activeMatch)
     })
 
     const withActiveItems = (items: NavItem[]): ActiveNavItem[] => items.map((item) => withActiveItem(item))

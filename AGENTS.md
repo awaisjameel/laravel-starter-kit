@@ -65,6 +65,10 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Navigation contract:
     - Centralized in `resources/js/config/navigation.ts`.
     - `useNavigation` and settings layout must consume shared navigation builders, not duplicate route/label arrays.
+    - Navigation items may declare `activeMatch` (`exact` or `prefix`) to control active-state behavior.
+- Breadcrumb contract:
+    - Centralized in `resources/js/config/breadcrumbs.ts`.
+    - Feature pages should consume shared breadcrumb builders, not duplicate breadcrumb arrays inline.
 
 ## Routing Contract
 

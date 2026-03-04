@@ -4,37 +4,25 @@ export function useFlashToasts() {
     const page = useAppPage()
     const { success, error, info } = useToast()
 
-    const lastSeen = ref({
-        message: '',
-        error: '',
-        status: ''
-    })
-
     watch(
-        () => page.props.flash,
-        (flash) => {
-            const message = flash.message ?? ''
-            const messageError = flash.error ?? ''
-            const status = flash.status ?? ''
+        () => [page.props.flash.message ?? '', page.props.flash.error ?? '', page.props.flash.status ?? ''] as const,
+        ([message, messageError, status], previousValues) => {
+            const previousMessage = previousValues?.[0] ?? ''
+            const previousError = previousValues?.[1] ?? ''
+            const previousStatus = previousValues?.[2] ?? ''
 
-            if (message !== '' && message !== lastSeen.value.message) {
+            if (message !== '' && message !== previousMessage) {
                 success({ title: message })
             }
 
-            if (messageError !== '' && messageError !== lastSeen.value.error) {
+            if (messageError !== '' && messageError !== previousError) {
                 error({ title: messageError })
             }
 
-            if (status !== '' && status !== lastSeen.value.status) {
+            if (status !== '' && status !== previousStatus) {
                 info({ title: status })
             }
-
-            lastSeen.value = {
-                message,
-                error: messageError,
-                status
-            }
         },
-        { deep: true, immediate: true }
+        { immediate: true }
     )
 }

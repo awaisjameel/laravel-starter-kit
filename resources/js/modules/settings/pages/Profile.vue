@@ -1,9 +1,8 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
+    import { buildSettingsProfileBreadcrumbs } from '@/config/breadcrumbs'
     import { buildProfileFormFields, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
-    import appRoutes from '@/routes/app'
     import authRoutes from '@/routes/auth'
-    import { type BreadcrumbItem } from '@/types'
     import { useAuthUser } from '../../../composables/useAppPage'
 
     interface Props {
@@ -13,12 +12,7 @@
 
     defineProps<Props>()
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Profile settings',
-            href: appRoutes.settings.profile.edit.url()
-        }
-    ]
+    const breadcrumbs = buildSettingsProfileBreadcrumbs()
 
     const user = useAuthUser({ required: true, context: 'profile settings page' })
 
