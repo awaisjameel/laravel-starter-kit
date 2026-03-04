@@ -62,6 +62,9 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - App entry points:
     - `resources/js/app.ts`
     - `resources/js/ssr.ts`
+- Auto-import contract:
+    - Canonical source is `frontend-auto-import.config.mjs`.
+    - `vite.config.ts`, `vitest.config.ts`, and `eslint.config.js` must consume this shared config; do not duplicate symbol lists.
 - Navigation contract:
     - Centralized in `resources/js/config/navigation.ts`.
     - `useNavigation` and settings layout must consume shared navigation builders, not duplicate route/label arrays.
@@ -109,13 +112,17 @@ This repository is a modular Laravel + Inertia + Vue starter kit optimized for s
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 - Prefer named routes and generated helpers over hardcoded URIs.
 - New forms should use schema-driven rendering via shared form contracts/components in `resources/js/components/base/forms/**`.
-- Feature forms must define typed field schemas via `defineFormFields` in module schema files (`resources/js/modules/**/forms/*-form-schema.ts`) and reuse them in pages/components.
+- Feature forms must define typed form contracts via `defineFormContract` + `defineFormFields` in module schema files (`resources/js/modules/**/forms/*-form-schema.ts`) and reuse them in pages/components.
+- Feature pages should consume schema contracts with `useSchemaResourceForm` instead of duplicating `initialValues` and field wiring inline.
 - Server-driven listing pages should use shared server table composables/components in `resources/js/components/base/table/**`.
 - Server-driven listing pages must derive initial query state via `resolveServerTableInitialQuery` from `useServerDataTable`.
+- API-driven state must use shared query contracts (`useApiQuery`, `useApiMutation`, `apiRequest`) with typed cache keys, retry policy, mapped errors, and optional optimistic updates.
+- Do not call `fetch` directly inside feature page components; route data access through shared query/API composables.
 - Use Wayfinder action helpers for submits/navigation in reusable composables and feature pages.
 - Avoid `as unknown as Record<string, unknown>`; `BaseFormsBaseFormRenderer` accepts form objects directly.
 - Do not define inline form schema arrays (`const fields = [...]`) in pages/components; keep form schemas in `resources/js/modules/**/forms`.
 - Do not duplicate navigation arrays in pages/layouts/composables; centralize navigation definitions in `resources/js/config/navigation.ts`.
+- Feature module files under `resources/js/modules/**` must not import other feature modules directly; move shared code to shared/base/config layers.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
 
 ## Server Table Query Contract
@@ -184,6 +191,14 @@ Minimum expectations:
 - No duplicated business logic across modules.
 - No duplicated large UI structures; extract shared components when repeated.
 - No dead code, commented-out code, placeholder TODOs, or unused scaffolding.
+
+## Developer Automation
+
+- Use `npm run generate:frontend-page -- --module=<module-name> --page=<page-name>` to scaffold a typed frontend page contract:
+    - page component
+    - form schema contract
+    - route contract
+    - unit test scaffold
 
 ## Quality Gate (Non-Negotiable)
 

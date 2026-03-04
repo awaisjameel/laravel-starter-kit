@@ -7,28 +7,40 @@ export interface ResetPasswordFormValues {
     password_confirmation: string
 }
 
-export const buildResetPasswordFormFields = () =>
-    defineFormFields<ResetPasswordFormValues>([
-        {
-            name: 'email',
-            label: 'Email',
-            type: 'email',
-            readonly: true
-        },
-        {
-            name: 'password',
-            label: 'Password',
-            type: 'password',
-            required: true,
-            autocomplete: 'new-password',
-            placeholder: 'Password'
-        },
-        {
-            name: 'password_confirmation',
-            label: 'Confirm Password',
-            type: 'password',
-            required: true,
-            autocomplete: 'new-password',
-            placeholder: 'Confirm password'
-        }
-    ])
+export const createResetPasswordFormDefaults = (token: string, email: string): ResetPasswordFormValues => ({
+    token,
+    email,
+    password: '',
+    password_confirmation: ''
+})
+
+export const resetPasswordFormContract = defineFormContract<ResetPasswordFormValues>({
+    defaults: () => createResetPasswordFormDefaults('', ''),
+    fields: () =>
+        defineFormFields<ResetPasswordFormValues>([
+            {
+                name: 'email',
+                label: 'Email',
+                type: 'email',
+                readonly: true
+            },
+            {
+                name: 'password',
+                label: 'Password',
+                type: 'password',
+                required: true,
+                autocomplete: 'new-password',
+                placeholder: 'Password'
+            },
+            {
+                name: 'password_confirmation',
+                label: 'Confirm Password',
+                type: 'password',
+                required: true,
+                autocomplete: 'new-password',
+                placeholder: 'Confirm password'
+            }
+        ])
+})
+
+export const buildResetPasswordFormFields = resetPasswordFormContract.fields

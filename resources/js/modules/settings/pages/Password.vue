@@ -1,16 +1,10 @@
 <script setup lang="ts">
     import PasswordController from '@/actions/App/Modules/Settings/Http/Controllers/PasswordController'
-    import { buildPasswordFormFields, type PasswordFormValues } from '@/modules/settings/forms/password-form-schema'
+    import { passwordFormContract, type PasswordFormValues } from '@/modules/settings/forms/password-form-schema'
 
     const breadcrumbItems = buildSettingsPasswordBreadcrumbs()
 
-    const { form, submit } = useResourceForm<PasswordFormValues>({
-        current_password: '',
-        password: '',
-        password_confirmation: ''
-    })
-
-    const fields = buildPasswordFormFields()
+    const { form, fields, submit } = useSchemaResourceForm<PasswordFormValues>(passwordFormContract)
 
     const updatePassword = () => {
         submit(PasswordController.update(), {

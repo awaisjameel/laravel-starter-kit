@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import NewPasswordController from '@/actions/App/Modules/Auth/Http/Controllers/NewPasswordController'
-    import { buildResetPasswordFormFields } from '@/modules/auth/forms/reset-password-form-schema'
+    import { createResetPasswordFormDefaults, resetPasswordFormContract } from '@/modules/auth/forms/reset-password-form-schema'
 
     interface Props {
         token: string
@@ -9,14 +9,7 @@
 
     const props = defineProps<Props>()
 
-    const { form, submit } = useResourceForm({
-        token: props.token,
-        email: props.email,
-        password: '',
-        password_confirmation: ''
-    })
-
-    const fields = buildResetPasswordFormFields()
+    const { form, fields, submit } = useSchemaResourceForm(resetPasswordFormContract, createResetPasswordFormDefaults(props.token, props.email))
 
     const submitForm = () => {
         submit(NewPasswordController.store(), {

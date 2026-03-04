@@ -12,7 +12,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppContent: typeof import('./../components/AppContent.vue')['default']
-    AppearanceTabs: typeof import('./../components/AppearanceTabs.vue')['default']
     AppLayout: typeof import('./../layouts/AppLayout.vue')['default']
     AppLogo: typeof import('./../components/AppLogo.vue')['default']
     AppLogoIcon: typeof import('./../components/AppLogoIcon.vue')['default']
@@ -36,7 +35,6 @@ declare module 'vue' {
     BaseTableBaseDataTableToolbar: typeof import('./../components/base/table/BaseDataTableToolbar.vue')['default']
     BaseToastAppToaster: typeof import('./../components/base/toast/AppToaster.vue')['default']
     Breadcrumbs: typeof import('./../components/Breadcrumbs.vue')['default']
-    DeleteUser: typeof import('./../components/DeleteUser.vue')['default']
     EmptyState: typeof import('./../components/EmptyState.vue')['default']
     Head: typeof import('@inertiajs/vue3')['Head']
     Heading: typeof import('./../components/Heading.vue')['default']
@@ -49,8 +47,6 @@ declare module 'vue' {
     Link: typeof import('@inertiajs/vue3')['Link']
     LoadingOverlay: typeof import('./../components/LoadingOverlay.vue')['default']
     LoadingSpinner: typeof import('./../components/LoadingSpinner.vue')['default']
-    MarketingFooter: typeof import('./../components/marketing/Footer.vue')['default']
-    MarketingHeader: typeof import('./../components/marketing/Header.vue')['default']
     MarketingPageLayout: typeof import('./../layouts/marketing/PageLayout.vue')['default']
     NavFooter: typeof import('./../components/NavFooter.vue')['default']
     NavMain: typeof import('./../components/NavMain.vue')['default']
@@ -197,8 +193,5 @@ declare module 'vue' {
     UiTooltipTrigger: typeof import('./../components/ui/tooltip/TooltipTrigger.vue')['default']
     UserInfo: typeof import('./../components/UserInfo.vue')['default']
     UserMenuContent: typeof import('./../components/UserMenuContent.vue')['default']
-    UsersDeleteUserDialog: typeof import('./../components/users/DeleteUserDialog.vue')['default']
-    UsersTable: typeof import('./../components/users/Table.vue')['default']
-    UsersUserFormDialog: typeof import('./../components/users/UserFormDialog.vue')['default']
   }
 }

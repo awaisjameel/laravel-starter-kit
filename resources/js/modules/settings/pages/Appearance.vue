@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    import AppearanceTabs from '@/modules/settings/components/AppearanceTabs.vue'
+
     const breadcrumbItems = buildSettingsAppearanceBreadcrumbs()
 </script>
 

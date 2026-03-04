@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
+    import { buildUserFormFields, createUserFormDefaults, type UserFormValues } from '@/modules/users/forms/user-form-schema'
     import { type User } from '@/types'
-    import { buildUserFormFields, type UserFormValues } from './user-form-schema'
 
     type UserFormMode = 'create' | 'edit'
 
@@ -21,12 +21,7 @@
         updated: []
     }>()
 
-    const { form, submit } = useResourceForm<UserFormValues>({
-        name: '',
-        email: '',
-        role: '',
-        password: ''
-    })
+    const { form, submit } = useResourceForm<UserFormValues>(createUserFormDefaults())
 
     const isEditMode = computed(() => props.mode === 'edit')
     const fields = computed(() => buildUserFormFields(isEditMode.value))

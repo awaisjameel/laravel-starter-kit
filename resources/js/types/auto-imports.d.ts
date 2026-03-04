@@ -142,6 +142,7 @@ declare global {
     const TooltipTrigger: typeof import('../components/ui/tooltip/index').TooltipTrigger
     const Ziggy: typeof import('ziggy-js').Ziggy
     const acceptHMRUpdate: (typeof import('pinia'))['acceptHMRUpdate']
+    const apiRequest: typeof import('../composables/useApiClient').apiRequest
     const appRoutes: typeof import('@/routes/app').default
     const authRoutes: typeof import('@/routes/auth').default
     const bindGlobalRouteHelper: typeof import('../utils/ziggy').bindGlobalRouteHelper
@@ -151,6 +152,7 @@ declare global {
     const buildSettingsProfileBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsProfileBreadcrumbs
     const buildUsersBreadcrumbs: typeof import('@/config/breadcrumbs').buildUsersBreadcrumbs
     const buttonVariants: typeof import('../components/ui/button/index').buttonVariants
+    const clearApiQueryCache: typeof import('../composables/useApiQuery').clearApiQueryCache
     const cn: typeof import('../lib/utils').cn
     const computed: typeof import('vue').computed
     const createApp: typeof import('vue').createApp
@@ -158,9 +160,11 @@ declare global {
     const customRef: typeof import('vue').customRef
     const defineAsyncComponent: typeof import('vue').defineAsyncComponent
     const defineComponent: typeof import('vue').defineComponent
+    const defineFormContract: typeof import('../lib/forms').defineFormContract
     const defineStore: (typeof import('pinia'))['defineStore']
     const effectScope: typeof import('vue').effectScope
     const getActivePinia: (typeof import('pinia'))['getActivePinia']
+    const getApiQueryCacheData: typeof import('../composables/useApiQuery').getApiQueryCacheData
     const getCurrentInstance: typeof import('vue').getCurrentInstance
     const getCurrentScope: typeof import('vue').getCurrentScope
     const getCurrentWatcher: typeof import('vue').getCurrentWatcher
@@ -171,6 +175,7 @@ declare global {
     const h: typeof import('vue').h
     const initializeTheme: typeof import('../composables/useAppearance').initializeTheme
     const inject: typeof import('vue').inject
+    const invalidateApiQueryCache: typeof import('../composables/useApiQuery').invalidateApiQueryCache
     const isProxy: typeof import('vue').isProxy
     const isReactive: typeof import('vue').isReactive
     const isReadonly: typeof import('vue').isReadonly
@@ -178,6 +183,7 @@ declare global {
     const isShallow: typeof import('vue').isShallow
     const mapActions: (typeof import('pinia'))['mapActions']
     const mapGetters: (typeof import('pinia'))['mapGetters']
+    const mapInertiaFormErrors: typeof import('../lib/forms').mapInertiaFormErrors
     const mapState: (typeof import('pinia'))['mapState']
     const mapStores: (typeof import('pinia'))['mapStores']
     const mapWritableState: (typeof import('pinia'))['mapWritableState']
@@ -185,6 +191,7 @@ declare global {
     const marketingRoutes: typeof import('@/routes/marketing').default
     const navigationMenuTriggerStyle: typeof import('../components/ui/navigation-menu/index').navigationMenuTriggerStyle
     const nextTick: typeof import('vue').nextTick
+    const normalizeApiError: typeof import('../composables/useApiClient').normalizeApiError
     const onActivated: typeof import('vue').onActivated
     const onBeforeMount: typeof import('vue').onBeforeMount
     const onBeforeRouteLeave: typeof import('vue-router').onBeforeRouteLeave
@@ -210,6 +217,7 @@ declare global {
     const resolveServerTableInitialQuery: typeof import('../composables/useServerDataTable').resolveServerTableInitialQuery
     const router: typeof import('@inertiajs/vue3').router
     const setActivePinia: (typeof import('pinia'))['setActivePinia']
+    const setApiQueryCacheData: typeof import('../composables/useApiQuery').setApiQueryCacheData
     const setMapStoreSuffix: (typeof import('pinia'))['setMapStoreSuffix']
     const shallowReactive: typeof import('vue').shallowReactive
     const shallowReadonly: typeof import('vue').shallowReadonly
@@ -226,6 +234,8 @@ declare global {
     const unref: typeof import('vue').unref
     const updateTheme: typeof import('../composables/useAppearance').updateTheme
     const useApi: (typeof import('../composables/useApi'))['useApi']
+    const useApiMutation: typeof import('../composables/useApiQuery').useApiMutation
+    const useApiQuery: typeof import('../composables/useApiQuery').useApiQuery
     const useAppPage: typeof import('../composables/useAppPage').useAppPage
     const useAppearance: typeof import('../composables/useAppearance').useAppearance
     const useAttrs: typeof import('vue').useAttrs
@@ -247,6 +257,7 @@ declare global {
     const useResourceForm: typeof import('../composables/useResourceForm').useResourceForm
     const useRoute: typeof import('vue-router').useRoute
     const useRouter: typeof import('vue-router').useRouter
+    const useSchemaResourceForm: typeof import('../composables/useSchemaResourceForm').useSchemaResourceForm
     const useServerDataTable: typeof import('../composables/useServerDataTable').useServerDataTable
     const useSidebar: typeof import('../components/ui/sidebar/utils').useSidebar
     const useSlots: typeof import('vue').useSlots
@@ -281,14 +292,23 @@ declare global {
         WritableComputedRef
     } from 'vue'
     // @ts-ignore
+    export type { ApiError, ApiRequestMethod, ApiRequestOptions } from '../composables/useApiClient'
+    // @ts-ignore
+    export type { ApiCacheKey } from '../composables/useApiQuery'
+    // @ts-ignore
     export type { Appearance } from '../composables/useAppearance'
     // @ts-ignore
     export type { ResourceSubmitOptions } from '../composables/useResourceForm'
     // @ts-ignore
+    export type { FormContract, FormErrorMap } from '../lib/forms'
+    // @ts-ignore
     export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
     import('vue')
+    import('../composables/useApiClient')
+    import('../composables/useApiQuery')
     import('../composables/useAppearance')
     import('../composables/useResourceForm')
+    import('../lib/forms')
     import('../utils/route')
 }
 
@@ -301,6 +321,7 @@ declare module 'vue' {
         readonly EffectScope: UnwrapRef<(typeof import('vue'))['EffectScope']>
         readonly Method: UnwrapRef<(typeof import('@inertiajs/core'))['Method']>
         readonly Ziggy: UnwrapRef<(typeof import('ziggy-js'))['Ziggy']>
+        readonly apiRequest: UnwrapRef<(typeof import('../composables/useApiClient'))['apiRequest']>
         readonly appRoutes: UnwrapRef<(typeof import('@/routes/app'))['default']>
         readonly authRoutes: UnwrapRef<(typeof import('@/routes/auth'))['default']>
         readonly bindGlobalRouteHelper: UnwrapRef<(typeof import('../utils/ziggy'))['bindGlobalRouteHelper']>
@@ -309,13 +330,16 @@ declare module 'vue' {
         readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsPasswordBreadcrumbs']>
         readonly buildSettingsProfileBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsProfileBreadcrumbs']>
         readonly buildUsersBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildUsersBreadcrumbs']>
+        readonly clearApiQueryCache: UnwrapRef<(typeof import('../composables/useApiQuery'))['clearApiQueryCache']>
         readonly cn: UnwrapRef<(typeof import('../lib/utils'))['cn']>
         readonly computed: UnwrapRef<(typeof import('vue'))['computed']>
         readonly createApp: UnwrapRef<(typeof import('vue'))['createApp']>
         readonly customRef: UnwrapRef<(typeof import('vue'))['customRef']>
         readonly defineAsyncComponent: UnwrapRef<(typeof import('vue'))['defineAsyncComponent']>
         readonly defineComponent: UnwrapRef<(typeof import('vue'))['defineComponent']>
+        readonly defineFormContract: UnwrapRef<(typeof import('../lib/forms'))['defineFormContract']>
         readonly effectScope: UnwrapRef<(typeof import('vue'))['effectScope']>
+        readonly getApiQueryCacheData: UnwrapRef<(typeof import('../composables/useApiQuery'))['getApiQueryCacheData']>
         readonly getCurrentInstance: UnwrapRef<(typeof import('vue'))['getCurrentInstance']>
         readonly getCurrentScope: UnwrapRef<(typeof import('vue'))['getCurrentScope']>
         readonly getCurrentWatcher: UnwrapRef<(typeof import('vue'))['getCurrentWatcher']>
@@ -326,14 +350,17 @@ declare module 'vue' {
         readonly h: UnwrapRef<(typeof import('vue'))['h']>
         readonly initializeTheme: UnwrapRef<(typeof import('../composables/useAppearance'))['initializeTheme']>
         readonly inject: UnwrapRef<(typeof import('vue'))['inject']>
+        readonly invalidateApiQueryCache: UnwrapRef<(typeof import('../composables/useApiQuery'))['invalidateApiQueryCache']>
         readonly isProxy: UnwrapRef<(typeof import('vue'))['isProxy']>
         readonly isReactive: UnwrapRef<(typeof import('vue'))['isReactive']>
         readonly isReadonly: UnwrapRef<(typeof import('vue'))['isReadonly']>
         readonly isRef: UnwrapRef<(typeof import('vue'))['isRef']>
         readonly isShallow: UnwrapRef<(typeof import('vue'))['isShallow']>
+        readonly mapInertiaFormErrors: UnwrapRef<(typeof import('../lib/forms'))['mapInertiaFormErrors']>
         readonly markRaw: UnwrapRef<(typeof import('vue'))['markRaw']>
         readonly marketingRoutes: UnwrapRef<(typeof import('@/routes/marketing'))['default']>
         readonly nextTick: UnwrapRef<(typeof import('vue'))['nextTick']>
+        readonly normalizeApiError: UnwrapRef<(typeof import('../composables/useApiClient'))['normalizeApiError']>
         readonly onActivated: UnwrapRef<(typeof import('vue'))['onActivated']>
         readonly onBeforeMount: UnwrapRef<(typeof import('vue'))['onBeforeMount']>
         readonly onBeforeRouteLeave: UnwrapRef<(typeof import('vue-router'))['onBeforeRouteLeave']>
@@ -357,6 +384,7 @@ declare module 'vue' {
         readonly resolveComponent: UnwrapRef<(typeof import('vue'))['resolveComponent']>
         readonly resolveServerTableInitialQuery: UnwrapRef<(typeof import('../composables/useServerDataTable'))['resolveServerTableInitialQuery']>
         readonly router: UnwrapRef<(typeof import('@inertiajs/vue3'))['router']>
+        readonly setApiQueryCacheData: UnwrapRef<(typeof import('../composables/useApiQuery'))['setApiQueryCacheData']>
         readonly shallowReactive: UnwrapRef<(typeof import('vue'))['shallowReactive']>
         readonly shallowReadonly: UnwrapRef<(typeof import('vue'))['shallowReadonly']>
         readonly shallowRef: UnwrapRef<(typeof import('vue'))['shallowRef']>
@@ -369,6 +397,8 @@ declare module 'vue' {
         readonly triggerRef: UnwrapRef<(typeof import('vue'))['triggerRef']>
         readonly unref: UnwrapRef<(typeof import('vue'))['unref']>
         readonly updateTheme: UnwrapRef<(typeof import('../composables/useAppearance'))['updateTheme']>
+        readonly useApiMutation: UnwrapRef<(typeof import('../composables/useApiQuery'))['useApiMutation']>
+        readonly useApiQuery: UnwrapRef<(typeof import('../composables/useApiQuery'))['useApiQuery']>
         readonly useAppPage: UnwrapRef<(typeof import('../composables/useAppPage'))['useAppPage']>
         readonly useAppearance: UnwrapRef<(typeof import('../composables/useAppearance'))['useAppearance']>
         readonly useAttrs: UnwrapRef<(typeof import('vue'))['useAttrs']>
@@ -388,6 +418,7 @@ declare module 'vue' {
         readonly useResourceForm: UnwrapRef<(typeof import('../composables/useResourceForm'))['useResourceForm']>
         readonly useRoute: UnwrapRef<(typeof import('vue-router'))['useRoute']>
         readonly useRouter: UnwrapRef<(typeof import('vue-router'))['useRouter']>
+        readonly useSchemaResourceForm: UnwrapRef<(typeof import('../composables/useSchemaResourceForm'))['useSchemaResourceForm']>
         readonly useServerDataTable: UnwrapRef<(typeof import('../composables/useServerDataTable'))['useServerDataTable']>
         readonly useSlots: UnwrapRef<(typeof import('vue'))['useSlots']>
         readonly useTemplateRef: UnwrapRef<(typeof import('vue'))['useTemplateRef']>

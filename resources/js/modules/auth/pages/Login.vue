@@ -1,19 +1,13 @@
 <script setup lang="ts">
     import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
-    import { buildLoginFormFields, type LoginFormValues } from '@/modules/auth/forms/login-form-schema'
+    import { loginFormContract, type LoginFormValues } from '@/modules/auth/forms/login-form-schema'
 
     defineProps<{
         status?: string
         canResetPassword: boolean
     }>()
 
-    const { form, submit } = useResourceForm<LoginFormValues>({
-        email: '',
-        password: '',
-        remember: false
-    })
-
-    const fields = buildLoginFormFields()
+    const { form, fields, submit } = useSchemaResourceForm<LoginFormValues>(loginFormContract)
     const passwordRequestHref = authRoutes.password.request.url()
 
     const submitForm = () => {

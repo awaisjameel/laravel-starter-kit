@@ -1,5 +1,8 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
+    import UsersDeleteUserDialog from '@/modules/users/components/DeleteUserDialog.vue'
+    import UsersTable from '@/modules/users/components/Table.vue'
+    import UsersUserFormDialog from '@/modules/users/components/UserFormDialog.vue'
     import { UsersPageProps, type User } from '@/types'
     import { Plus } from 'lucide-vue-next'
 

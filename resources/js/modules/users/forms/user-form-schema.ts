@@ -14,6 +14,18 @@ const roleOptions = getEnumOptions(UserRole).map((role) => ({
     label: role.label.charAt(0).toUpperCase() + role.label.slice(1)
 }))
 
+export const createUserFormDefaults = (): UserFormValues => ({
+    name: '',
+    email: '',
+    role: '',
+    password: ''
+})
+
+export const userFormContract = defineFormContract<UserFormValues>({
+    defaults: createUserFormDefaults,
+    fields: () => buildUserFormFields(false)
+})
+
 export const buildUserFormFields = (isEdit: boolean) =>
     defineFormFields<UserFormValues>([
         {

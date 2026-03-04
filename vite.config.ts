@@ -5,6 +5,7 @@ import path from 'path'
 import { defineConfig } from 'vite'
 
 import { wayfinder } from '@laravel/vite-plugin-wayfinder'
+import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
 import AutoImport from 'unplugin-auto-import/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
@@ -33,26 +34,8 @@ export default defineConfig({
             vueTemplate: true,
             viteOptimizeDeps: true,
             dts: 'resources/js/types/auto-imports.d.ts',
-            imports: [
-                'vue',
-                'vue-router',
-                {
-                    '@inertiajs/vue3': ['usePage', 'useForm', 'useRemember', 'usePoll', 'router', 'Deferred'],
-                    '@inertiajs/core': ['Method'],
-                    'ziggy-js': ['Ziggy'],
-                    '@/routes/app': [['default', 'appRoutes']],
-                    '@/routes/auth': [['default', 'authRoutes']],
-                    '@/routes/marketing': [['default', 'marketingRoutes']],
-                    '@/config/breadcrumbs': [
-                        'buildDashboardBreadcrumbs',
-                        'buildUsersBreadcrumbs',
-                        'buildSettingsProfileBreadcrumbs',
-                        'buildSettingsPasswordBreadcrumbs',
-                        'buildSettingsAppearanceBreadcrumbs'
-                    ]
-                }
-            ],
-            dirs: ['resources/js/composables/**', 'resources/js/stores/**', 'resources/js/lib/**', 'resources/js/utils/**']
+            imports: autoImportImports,
+            dirs: autoImportDirs
         }),
         Icons({
             compiler: 'vue3',

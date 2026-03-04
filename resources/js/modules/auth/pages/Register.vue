@@ -1,15 +1,8 @@
 <script setup lang="ts">
     import RegisteredUserController from '@/actions/App/Modules/Auth/Http/Controllers/RegisteredUserController'
-    import { buildRegisterFormFields, type RegisterFormValues } from '@/modules/auth/forms/register-form-schema'
+    import { registerFormContract, type RegisterFormValues } from '@/modules/auth/forms/register-form-schema'
 
-    const { form, submit } = useResourceForm<RegisterFormValues>({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: ''
-    })
-
-    const fields = buildRegisterFormFields()
+    const { form, fields, submit } = useSchemaResourceForm<RegisterFormValues>(registerFormContract)
     const loginHref = authRoutes.login.create.url()
 
     const submitForm = () => {

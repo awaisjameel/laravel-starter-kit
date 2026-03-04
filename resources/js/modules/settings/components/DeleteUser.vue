@@ -1,14 +1,10 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
-    import { buildDeleteAccountFormFields, type DeleteAccountFormValues } from '@/modules/settings/forms/delete-account-form-schema'
+    import { deleteAccountFormContract, type DeleteAccountFormValues } from '@/modules/settings/forms/delete-account-form-schema'
 
     const isOpen = ref(false)
 
-    const { form, submit } = useResourceForm<DeleteAccountFormValues>({
-        password: ''
-    })
-
-    const fields = buildDeleteAccountFormFields()
+    const { form, fields, submit } = useSchemaResourceForm<DeleteAccountFormValues>(deleteAccountFormContract)
 
     const closeModal = () => {
         form.clearErrors()

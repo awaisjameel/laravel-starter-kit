@@ -1,9 +1,63 @@
 import prettier from 'eslint-config-prettier'
 import vue from 'eslint-plugin-vue'
 
+import { autoImportRestrictedPaths, autoImportRestrictedPatterns } from './frontend-auto-import.config.mjs'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 
-const autoImportMessage = 'Manual import is not needed here. This project auto-imports this symbol; remove the import and rely on auto-import.'
+const frontendModuleNames = ['auth', 'dashboard', 'marketing', 'settings', 'users']
+
+const baseRestrictedSyntaxSelectors = [
+    {
+        selector:
+            "TSAsExpression[typeAnnotation.type='TSTypeReference'][typeAnnotation.typeName.name='Record'][expression.type='TSAsExpression'][expression.typeAnnotation.type='TSUnknownKeyword']",
+        message: 'Avoid `as unknown as Record<string, unknown>`. Refactor the receiving type to accept the source type directly.'
+    },
+    {
+        selector: "VariableDeclarator[id.name='fields'][init.type='ArrayExpression']",
+        message:
+            'Do not define inline form schema arrays in page/components. Move form schemas to `resources/js/modules/**/forms/*-form-schema.ts` and consume via builder functions.'
+    },
+    {
+        selector:
+            "VariableDeclarator[id.name=/^(sidebarNavItems|dashboardPrimaryItems|dashboardFooterItems|marketingPrimaryItems|marketingFooterGroups)$/][init.type='ArrayExpression']",
+        message: 'Do not duplicate navigation arrays. Centralize navigation contracts in `resources/js/config/navigation.ts`.'
+    }
+]
+
+const buildRestrictedSyntaxRule = (extraSelectors = []) => ['error', ...baseRestrictedSyntaxSelectors, ...extraSelectors]
+
+const buildNoRestrictedImportsRule = (extraPatterns = []) => [
+    'error',
+    {
+        paths: autoImportRestrictedPaths,
+        patterns: [...autoImportRestrictedPatterns, ...extraPatterns]
+    }
+]
+
+const moduleBoundaryConfigs = frontendModuleNames.map((moduleName) => ({
+    files: [`resources/js/modules/${moduleName}/**/*.{ts,vue}`],
+    rules: {
+        'no-restricted-imports': buildNoRestrictedImportsRule([
+            {
+                group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
+                message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`
+            }
+        ])
+    }
+}))
+
+const pageDataAccessGuardConfig = {
+    files: ['resources/js/modules/**/pages/**/*.{ts,vue}'],
+    rules: {
+        'no-restricted-syntax': buildRestrictedSyntaxRule([
+            {
+                selector: "CallExpression[callee.name='fetch']",
+                message:
+                    'Do not call fetch directly in page files. Use shared API/query composables (`useApiQuery`, `useApiMutation`) via module contracts.'
+            }
+        ])
+    }
+}
 
 export default defineConfigWithVueTs(
     vue.configs['flat/essential'],
@@ -28,87 +82,11 @@ export default defineConfigWithVueTs(
         rules: {
             'vue/multi-word-component-names': 'off',
             '@typescript-eslint/no-explicit-any': 'error',
-            'no-restricted-syntax': [
-                'error',
-                {
-                    selector:
-                        "TSAsExpression[typeAnnotation.type='TSTypeReference'][typeAnnotation.typeName.name='Record'][expression.type='TSAsExpression'][expression.typeAnnotation.type='TSUnknownKeyword']",
-                    message: 'Avoid `as unknown as Record<string, unknown>`. Refactor the receiving type to accept the source type directly.'
-                },
-                {
-                    selector: "VariableDeclarator[id.name='fields'][init.type='ArrayExpression']",
-                    message:
-                        'Do not define inline form schema arrays in page/components. Move form schemas to `resources/js/modules/**/forms/*-form-schema.ts` and consume via builder functions.'
-                },
-                {
-                    selector:
-                        "VariableDeclarator[id.name=/^(sidebarNavItems|dashboardPrimaryItems|dashboardFooterItems|marketingPrimaryItems|marketingFooterGroups)$/][init.type='ArrayExpression']",
-                    message: 'Do not duplicate navigation arrays. Centralize navigation contracts in `resources/js/config/navigation.ts`.'
-                }
-            ],
-            'no-restricted-imports': [
-                'error',
-                {
-                    paths: [
-                        {
-                            name: '@inertiajs/vue3',
-                            importNames: ['usePage', 'useForm', 'useRemember', 'usePoll', 'router', 'Deferred', 'Head', 'Link'],
-                            message: autoImportMessage
-                        },
-                        {
-                            name: 'ziggy-js',
-                            importNames: ['Ziggy'],
-                            message: autoImportMessage
-                        },
-                        {
-                            name: '@/composables/useAppPage',
-                            importNames: ['useAppPage', 'useAuthUser'],
-                            message: autoImportMessage
-                        },
-                        {
-                            name: '@/routes/app',
-                            importNames: ['default'],
-                            message: autoImportMessage
-                        },
-                        {
-                            name: '@/routes/auth',
-                            importNames: ['default'],
-                            message: autoImportMessage
-                        },
-                        {
-                            name: '@/routes/marketing',
-                            importNames: ['default'],
-                            message: autoImportMessage
-                        },
-                        {
-                            name: '@/config/breadcrumbs',
-                            importNames: [
-                                'buildDashboardBreadcrumbs',
-                                'buildUsersBreadcrumbs',
-                                'buildSettingsProfileBreadcrumbs',
-                                'buildSettingsPasswordBreadcrumbs',
-                                'buildSettingsAppearanceBreadcrumbs'
-                            ],
-                            message: autoImportMessage
-                        }
-                    ],
-                    patterns: [
-                        {
-                            group: ['@/composables/*', '@/composables/**'],
-                            message: autoImportMessage
-                        },
-                        {
-                            group: ['@/stores/*', '@/stores/**'],
-                            message: autoImportMessage
-                        },
-                        {
-                            group: ['@/components/**/*.vue', '@/layouts/**/*.vue'],
-                            message: autoImportMessage
-                        }
-                    ]
-                }
-            ]
+            'no-restricted-syntax': buildRestrictedSyntaxRule(),
+            'no-restricted-imports': buildNoRestrictedImportsRule()
         }
     },
+    ...moduleBoundaryConfigs,
+    pageDataAccessGuardConfig,
     prettier
 )

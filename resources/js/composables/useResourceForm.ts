@@ -1,3 +1,5 @@
+import type { FormErrorMap } from '@/lib/forms'
+import { mapInertiaFormErrors } from '@/lib/forms'
 import type { InertiaRouteDefinition } from '@/utils/route'
 import type { RouteDefinition } from '@/wayfinder'
 import type { FormDataType } from '@inertiajs/core'
@@ -9,8 +11,9 @@ export interface ResourceSubmitOptions<TForm extends object> {
     preserveState?: boolean
     resetOnSuccess?: true | Array<keyof TForm & string>
     onSuccess?: () => void
-    onError?: (errors: Partial<Record<keyof TForm & string, string>>) => void
+    onError?: (errors: FormErrorMap<TForm>) => void
     onFinish?: () => void
+    mapErrors?: (errors: unknown) => FormErrorMap<TForm>
 }
 
 export function useResourceForm<TForm extends FormValues<TForm>>(initialValues: TForm) {
@@ -43,7 +46,8 @@ export function useResourceForm<TForm extends FormValues<TForm>>(initialValues: 
                 options.onSuccess?.()
             },
             onError: (errors) => {
-                options.onError?.(errors as Partial<Record<keyof TForm & string, string>>)
+                const mappedErrors = options.mapErrors !== undefined ? options.mapErrors(errors) : mapInertiaFormErrors<TForm>(errors)
+                options.onError?.(mappedErrors)
             },
             onFinish: () => {
                 options.onFinish?.()

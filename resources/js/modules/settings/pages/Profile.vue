@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
-    import { buildProfileFormFields, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
+    import DeleteUser from '@/modules/settings/components/DeleteUser.vue'
+    import { createProfileFormDefaults, profileFormContract, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
 
     interface Props {
         mustVerifyEmail: boolean
@@ -14,12 +15,13 @@
 
     const user = useAuthUser({ required: true, context: 'profile settings page' })
 
-    const { form, submit } = useResourceForm<ProfileFormValues>({
-        name: user.value.name,
-        email: user.value.email
-    })
-
-    const fields = buildProfileFormFields()
+    const { form, fields, submit } = useSchemaResourceForm<ProfileFormValues>(
+        profileFormContract,
+        createProfileFormDefaults({
+            name: user.value.name,
+            email: user.value.email
+        })
+    )
 
     const submitForm = () => {
         submit(ProfileController.update(), {
