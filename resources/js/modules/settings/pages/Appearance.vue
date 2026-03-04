@@ -1,6 +1,4 @@
 <script setup lang="ts">
-    import { buildSettingsAppearanceBreadcrumbs } from '@/config/breadcrumbs'
-
     const breadcrumbItems = buildSettingsAppearanceBreadcrumbs()
 </script>
 

@@ -1,6 +1,3 @@
-import appRoutes from '@/routes/app'
-import authRoutes from '@/routes/auth'
-import marketingRoutes from '@/routes/marketing'
 import type { NavItem } from '@/types'
 import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from 'lucide-vue-next'
 

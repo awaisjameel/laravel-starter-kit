@@ -1,7 +1,6 @@
 <script setup lang="ts">
     import { useSidebar } from '@/components/ui/sidebar/utils'
     import { ChevronsUpDown } from 'lucide-vue-next'
-    import { useAuthUser } from '../composables/useAppPage'
 
     const user = useAuthUser({ required: true, context: 'NavUser' })
 

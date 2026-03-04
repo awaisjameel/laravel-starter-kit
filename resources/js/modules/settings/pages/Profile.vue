@@ -1,9 +1,6 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
-    import { buildSettingsProfileBreadcrumbs } from '@/config/breadcrumbs'
     import { buildProfileFormFields, type ProfileFormValues } from '@/modules/settings/forms/profile-form-schema'
-    import authRoutes from '@/routes/auth'
-    import { useAuthUser } from '../../../composables/useAppPage'
 
     interface Props {
         mustVerifyEmail: boolean
@@ -13,6 +10,7 @@
     defineProps<Props>()
 
     const breadcrumbs = buildSettingsProfileBreadcrumbs()
+    const resendVerificationHref = authRoutes.verification.send.url()
 
     const user = useAuthUser({ required: true, context: 'profile settings page' })
 
@@ -51,7 +49,7 @@
                     <p class="-mt-4 text-sm text-muted-foreground">
                         Your email address is unverified.
                         <Link
-                            :href="authRoutes.verification.send.url()"
+                            :href="resendVerificationHref"
                             method="post"
                             as="button"
                             class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

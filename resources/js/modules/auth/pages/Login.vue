@@ -1,7 +1,6 @@
 <script setup lang="ts">
     import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
     import { buildLoginFormFields, type LoginFormValues } from '@/modules/auth/forms/login-form-schema'
-    import authRoutes from '@/routes/auth'
 
     defineProps<{
         status?: string
@@ -15,6 +14,7 @@
     })
 
     const fields = buildLoginFormFields()
+    const passwordRequestHref = authRoutes.password.request.url()
 
     const submitForm = () => {
         submit(AuthenticatedSessionController.store(), {
@@ -45,7 +45,7 @@
                 <div class="space-y-4">
                     <BaseButton type="submit" full-width :loading="form.processing" label="Log in" />
                     <div class="flex items-center justify-between">
-                        <TextLink v-if="canResetPassword" :href="authRoutes.password.request.url()" class="text-sm">Forgot password?</TextLink>
+                        <TextLink v-if="canResetPassword" :href="passwordRequestHref" class="text-sm">Forgot password?</TextLink>
                     </div>
                 </div>
             </template>

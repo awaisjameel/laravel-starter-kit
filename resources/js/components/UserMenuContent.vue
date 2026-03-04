@@ -1,12 +1,13 @@
 <script setup lang="ts">
-    import appRoutes from '@/routes/app'
-    import authRoutes from '@/routes/auth'
     import type { User } from '@/types'
     import { LogOut, Settings } from 'lucide-vue-next'
 
     interface Props {
         user: User
     }
+
+    const settingsProfileHref = appRoutes.settings.profile.edit.url()
+    const logoutHref = authRoutes.logout.url()
 
     const handleLogout = () => {
         router.flushAll()
@@ -24,7 +25,7 @@
     <UiDropdownMenuSeparator />
     <UiDropdownMenuGroup>
         <UiDropdownMenuItem :as-child="true">
-            <Link class="block w-full" :href="appRoutes.settings.profile.edit.url()" prefetch as="button">
+            <Link class="block w-full" :href="settingsProfileHref" prefetch as="button">
                 <Settings class="mr-2 h-4 w-4" />
                 Settings
             </Link>
@@ -32,7 +33,7 @@
     </UiDropdownMenuGroup>
     <UiDropdownMenuSeparator />
     <UiDropdownMenuItem :as-child="true">
-        <Link class="block w-full" method="post" :href="authRoutes.logout.url()" @click="handleLogout" as="button">
+        <Link class="block w-full" method="post" :href="logoutHref" @click="handleLogout" as="button">
             <LogOut class="mr-2 h-4 w-4" />
             Log out
         </Link>

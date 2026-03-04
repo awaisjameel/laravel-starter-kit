@@ -39,7 +39,17 @@ export default defineConfig({
                 {
                     '@inertiajs/vue3': ['usePage', 'useForm', 'useRemember', 'usePoll', 'router', 'Deferred'],
                     '@inertiajs/core': ['Method'],
-                    'ziggy-js': ['Ziggy']
+                    'ziggy-js': ['Ziggy'],
+                    '@/routes/app': [['default', 'appRoutes']],
+                    '@/routes/auth': [['default', 'authRoutes']],
+                    '@/routes/marketing': [['default', 'marketingRoutes']],
+                    '@/config/breadcrumbs': [
+                        'buildDashboardBreadcrumbs',
+                        'buildUsersBreadcrumbs',
+                        'buildSettingsProfileBreadcrumbs',
+                        'buildSettingsPasswordBreadcrumbs',
+                        'buildSettingsAppearanceBreadcrumbs'
+                    ]
                 }
             ],
             dirs: ['resources/js/composables/**', 'resources/js/stores/**', 'resources/js/lib/**', 'resources/js/utils/**']

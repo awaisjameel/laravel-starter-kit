@@ -1,9 +1,7 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
-    import { buildUsersBreadcrumbs } from '@/config/breadcrumbs'
     import { UsersPageProps, type User } from '@/types'
     import { Plus } from 'lucide-vue-next'
-    import { useAppPage } from '../../../composables/useAppPage'
 
     const userSortColumns = ['name', 'email', 'role', 'created_at'] as const
     type UserSortColumn = 'name' | 'email' | 'role' | 'created_at'

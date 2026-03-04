@@ -1,6 +1,4 @@
 <script setup lang="ts">
-    import { buildDashboardBreadcrumbs } from '@/config/breadcrumbs'
-
     const breadcrumbs = buildDashboardBreadcrumbs()
 </script>
 

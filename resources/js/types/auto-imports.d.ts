@@ -142,6 +142,14 @@ declare global {
     const TooltipTrigger: typeof import('../components/ui/tooltip/index').TooltipTrigger
     const Ziggy: typeof import('ziggy-js').Ziggy
     const acceptHMRUpdate: (typeof import('pinia'))['acceptHMRUpdate']
+    const appRoutes: typeof import('@/routes/app').default
+    const authRoutes: typeof import('@/routes/auth').default
+    const bindGlobalRouteHelper: typeof import('../utils/ziggy').bindGlobalRouteHelper
+    const buildDashboardBreadcrumbs: typeof import('@/config/breadcrumbs').buildDashboardBreadcrumbs
+    const buildSettingsAppearanceBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsAppearanceBreadcrumbs
+    const buildSettingsPasswordBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsPasswordBreadcrumbs
+    const buildSettingsProfileBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsProfileBreadcrumbs
+    const buildUsersBreadcrumbs: typeof import('@/config/breadcrumbs').buildUsersBreadcrumbs
     const buttonVariants: typeof import('../components/ui/button/index').buttonVariants
     const cn: typeof import('../lib/utils').cn
     const computed: typeof import('vue').computed
@@ -174,6 +182,7 @@ declare global {
     const mapStores: (typeof import('pinia'))['mapStores']
     const mapWritableState: (typeof import('pinia'))['mapWritableState']
     const markRaw: typeof import('vue').markRaw
+    const marketingRoutes: typeof import('@/routes/marketing').default
     const navigationMenuTriggerStyle: typeof import('../components/ui/navigation-menu/index').navigationMenuTriggerStyle
     const nextTick: typeof import('vue').nextTick
     const onActivated: typeof import('vue').onActivated
@@ -212,12 +221,15 @@ declare global {
     const toRef: typeof import('vue').toRef
     const toRefs: typeof import('vue').toRefs
     const toValue: typeof import('vue').toValue
+    const toZiggyVueConfig: typeof import('../utils/ziggy').toZiggyVueConfig
     const triggerRef: typeof import('vue').triggerRef
     const unref: typeof import('vue').unref
     const updateTheme: typeof import('../composables/useAppearance').updateTheme
     const useApi: (typeof import('../composables/useApi'))['useApi']
+    const useAppPage: typeof import('../composables/useAppPage').useAppPage
     const useAppearance: typeof import('../composables/useAppearance').useAppearance
     const useAttrs: typeof import('vue').useAttrs
+    const useAuthUser: typeof import('../composables/useAppPage').useAuthUser
     const useConfirm: typeof import('../composables/useConfirm').useConfirm
     const useCssModule: typeof import('vue').useCssModule
     const useCssVars: typeof import('vue').useCssVars
@@ -289,6 +301,14 @@ declare module 'vue' {
         readonly EffectScope: UnwrapRef<(typeof import('vue'))['EffectScope']>
         readonly Method: UnwrapRef<(typeof import('@inertiajs/core'))['Method']>
         readonly Ziggy: UnwrapRef<(typeof import('ziggy-js'))['Ziggy']>
+        readonly appRoutes: UnwrapRef<(typeof import('@/routes/app'))['default']>
+        readonly authRoutes: UnwrapRef<(typeof import('@/routes/auth'))['default']>
+        readonly bindGlobalRouteHelper: UnwrapRef<(typeof import('../utils/ziggy'))['bindGlobalRouteHelper']>
+        readonly buildDashboardBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildDashboardBreadcrumbs']>
+        readonly buildSettingsAppearanceBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsAppearanceBreadcrumbs']>
+        readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsPasswordBreadcrumbs']>
+        readonly buildSettingsProfileBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildSettingsProfileBreadcrumbs']>
+        readonly buildUsersBreadcrumbs: UnwrapRef<(typeof import('@/config/breadcrumbs'))['buildUsersBreadcrumbs']>
         readonly cn: UnwrapRef<(typeof import('../lib/utils'))['cn']>
         readonly computed: UnwrapRef<(typeof import('vue'))['computed']>
         readonly createApp: UnwrapRef<(typeof import('vue'))['createApp']>
@@ -312,6 +332,7 @@ declare module 'vue' {
         readonly isRef: UnwrapRef<(typeof import('vue'))['isRef']>
         readonly isShallow: UnwrapRef<(typeof import('vue'))['isShallow']>
         readonly markRaw: UnwrapRef<(typeof import('vue'))['markRaw']>
+        readonly marketingRoutes: UnwrapRef<(typeof import('@/routes/marketing'))['default']>
         readonly nextTick: UnwrapRef<(typeof import('vue'))['nextTick']>
         readonly onActivated: UnwrapRef<(typeof import('vue'))['onActivated']>
         readonly onBeforeMount: UnwrapRef<(typeof import('vue'))['onBeforeMount']>
@@ -344,11 +365,14 @@ declare module 'vue' {
         readonly toRef: UnwrapRef<(typeof import('vue'))['toRef']>
         readonly toRefs: UnwrapRef<(typeof import('vue'))['toRefs']>
         readonly toValue: UnwrapRef<(typeof import('vue'))['toValue']>
+        readonly toZiggyVueConfig: UnwrapRef<(typeof import('../utils/ziggy'))['toZiggyVueConfig']>
         readonly triggerRef: UnwrapRef<(typeof import('vue'))['triggerRef']>
         readonly unref: UnwrapRef<(typeof import('vue'))['unref']>
         readonly updateTheme: UnwrapRef<(typeof import('../composables/useAppearance'))['updateTheme']>
+        readonly useAppPage: UnwrapRef<(typeof import('../composables/useAppPage'))['useAppPage']>
         readonly useAppearance: UnwrapRef<(typeof import('../composables/useAppearance'))['useAppearance']>
         readonly useAttrs: UnwrapRef<(typeof import('vue'))['useAttrs']>
+        readonly useAuthUser: UnwrapRef<(typeof import('../composables/useAppPage'))['useAuthUser']>
         readonly useCssModule: UnwrapRef<(typeof import('vue'))['useCssModule']>
         readonly useCssVars: UnwrapRef<(typeof import('vue'))['useCssVars']>
         readonly useFlashToasts: UnwrapRef<(typeof import('../composables/useFlashToasts'))['useFlashToasts']>

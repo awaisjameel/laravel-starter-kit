@@ -1,5 +1,4 @@
 import type { InertiaRouteDefinition } from '@/utils/route'
-import { toInertiaRouteDefinition } from '@/utils/route'
 import type { RouteDefinition } from '@/wayfinder'
 import type { FormDataType } from '@inertiajs/core'
 

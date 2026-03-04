@@ -1,6 +1,6 @@
 import type { AppPageProps } from '@/types'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick, reactive, ref, watch } from 'vue'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick, reactive } from 'vue'
 import { useFlashToasts } from '../useFlashToasts'
 
 type ToastInput = {
@@ -13,43 +13,37 @@ type MockPage = {
     props: Pick<AppPageProps, 'flash'>
 }
 
-const success = vi.fn<(input: ToastInput) => void>()
-const error = vi.fn<(input: ToastInput) => void>()
-const info = vi.fn<(input: ToastInput) => void>()
+const { success, error, info, usePageMock, useToastMock } = vi.hoisted(() => {
+    const success = vi.fn<(input: ToastInput) => void>()
+    const error = vi.fn<(input: ToastInput) => void>()
+    const info = vi.fn<(input: ToastInput) => void>()
 
-let mockPage = createMockPage()
+    return {
+        success,
+        error,
+        info,
+        usePageMock: vi.fn(),
+        useToastMock: vi.fn(() => ({ success, error, info }))
+    }
+})
 
-const usePageMock = vi.fn(() => mockPage)
-const useToastMock = vi.fn(() => ({
-    success,
-    error,
-    info
+vi.mock('@inertiajs/vue3', () => ({
+    usePage: usePageMock
 }))
 
-const globalScope = globalThis as typeof globalThis & {
-    ref: typeof ref
-    watch: typeof watch
-    usePage: () => MockPage
-    useToast: () => {
-        success: (input: ToastInput) => void
-        error: (input: ToastInput) => void
-        info: (input: ToastInput) => void
-    }
-}
+vi.mock('@/composables/useToast', () => ({
+    useToast: useToastMock
+}))
 
-beforeAll(() => {
-    globalScope.ref = ref
-    globalScope.watch = watch
-    globalScope.usePage = usePageMock
-    globalScope.useToast = useToastMock
-})
+let mockPage = createMockPage()
 
 beforeEach(() => {
     mockPage = createMockPage()
 
     usePageMock.mockClear()
     useToastMock.mockClear()
-    usePageMock.mockImplementation(() => mockPage)
+    usePageMock.mockReturnValue(mockPage)
+    useToastMock.mockReturnValue({ success, error, info })
 
     success.mockReset()
     error.mockReset()

@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import PasswordController from '@/actions/App/Modules/Settings/Http/Controllers/PasswordController'
-    import { buildSettingsPasswordBreadcrumbs } from '@/config/breadcrumbs'
     import { buildPasswordFormFields, type PasswordFormValues } from '@/modules/settings/forms/password-form-schema'
 
     const breadcrumbItems = buildSettingsPasswordBreadcrumbs()

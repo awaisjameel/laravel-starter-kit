@@ -1,5 +1,3 @@
-import { useAppPage } from './useAppPage'
-
 export function useFlashToasts() {
     const page = useAppPage()
     const { success, error, info } = useToast()

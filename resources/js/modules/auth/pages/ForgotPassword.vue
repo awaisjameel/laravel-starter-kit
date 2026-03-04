@@ -1,7 +1,6 @@
 <script setup lang="ts">
     import PasswordResetLinkController from '@/actions/App/Modules/Auth/Http/Controllers/PasswordResetLinkController'
     import { buildForgotPasswordFormFields, type ForgotPasswordFormValues } from '@/modules/auth/forms/forgot-password-form-schema'
-    import authRoutes from '@/routes/auth'
 
     defineProps<{
         status?: string
@@ -12,6 +11,7 @@
     })
 
     const fields = buildForgotPasswordFormFields()
+    const loginHref = authRoutes.login.create.url()
 
     const submitForm = () => {
         submit(PasswordResetLinkController.store())
@@ -42,7 +42,7 @@
 
             <div class="space-x-1 text-center text-sm text-muted-foreground">
                 <span>Or, return to</span>
-                <TextLink :href="authRoutes.login.create.url()">log in</TextLink>
+                <TextLink :href="loginHref">log in</TextLink>
             </div>
         </div>
     </AuthLayout>

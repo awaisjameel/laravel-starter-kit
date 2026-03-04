@@ -59,6 +59,37 @@ export default defineConfigWithVueTs(
                             name: 'ziggy-js',
                             importNames: ['Ziggy'],
                             message: autoImportMessage
+                        },
+                        {
+                            name: '@/composables/useAppPage',
+                            importNames: ['useAppPage', 'useAuthUser'],
+                            message: autoImportMessage
+                        },
+                        {
+                            name: '@/routes/app',
+                            importNames: ['default'],
+                            message: autoImportMessage
+                        },
+                        {
+                            name: '@/routes/auth',
+                            importNames: ['default'],
+                            message: autoImportMessage
+                        },
+                        {
+                            name: '@/routes/marketing',
+                            importNames: ['default'],
+                            message: autoImportMessage
+                        },
+                        {
+                            name: '@/config/breadcrumbs',
+                            importNames: [
+                                'buildDashboardBreadcrumbs',
+                                'buildUsersBreadcrumbs',
+                                'buildSettingsProfileBreadcrumbs',
+                                'buildSettingsPasswordBreadcrumbs',
+                                'buildSettingsAppearanceBreadcrumbs'
+                            ],
+                            message: autoImportMessage
                         }
                     ],
                     patterns: [

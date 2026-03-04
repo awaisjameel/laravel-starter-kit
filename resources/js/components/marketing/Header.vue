@@ -1,10 +1,10 @@
 <script setup lang="ts">
-    import marketingRoutes from '@/routes/marketing'
     import { Menu } from 'lucide-vue-next'
 
     const { isAuthenticated, marketingPrimaryAction, marketingPrimaryItems, marketingSecondaryAction } = useNavigation()
 
     const hasPrimaryNavigation = computed(() => marketingPrimaryItems.value.length > 1)
+    const marketingHomeHref = marketingRoutes.home.url()
 </script>
 
 <template>
@@ -13,10 +13,7 @@
             <div
                 class="flex h-16 items-center gap-3 rounded-2xl border border-border/80 bg-background/90 px-4 shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 sm:px-5 dark:shadow-[0_14px_34px_-24px_rgba(2,6,23,0.8)]"
             >
-                <Link
-                    :href="marketingRoutes.home.url()"
-                    class="inline-flex shrink-0 items-center rounded-xl px-2 py-1.5 transition-colors hover:bg-muted/70"
-                >
+                <Link :href="marketingHomeHref" class="inline-flex shrink-0 items-center rounded-xl px-2 py-1.5 transition-colors hover:bg-muted/70">
                     <AppLogo />
                 </Link>
 
@@ -63,7 +60,7 @@
                         <UiSheetContent side="right" class="w-full max-w-[20rem] px-5 py-7 sm:px-6 sm:py-8">
                             <UiSheetTitle class="sr-only">Marketing navigation</UiSheetTitle>
                             <div class="flex flex-col gap-6">
-                                <Link :href="marketingRoutes.home.url()" class="inline-flex w-fit">
+                                <Link :href="marketingHomeHref" class="inline-flex w-fit">
                                     <AppLogo />
                                 </Link>
 

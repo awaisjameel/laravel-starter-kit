@@ -1,7 +1,6 @@
 import type { AppPageProps } from '@/types'
 import { UserRole } from '@/types/app-data'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { computed } from 'vue'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useNavigation } from '../useNavigation'
 
 type MockPage = {
@@ -11,20 +10,17 @@ type MockPage = {
 
 let mockPage = createMockPage({ url: '/', role: null })
 
-const usePageMock = vi.fn(() => mockPage)
+const { usePageMock } = vi.hoisted(() => ({
+    usePageMock: vi.fn()
+}))
 
-const globalScope = globalThis as typeof globalThis & {
-    computed: typeof computed
-    usePage: () => MockPage
-}
-
-beforeAll(() => {
-    globalScope.computed = computed
-    globalScope.usePage = usePageMock
-})
+vi.mock('@inertiajs/vue3', () => ({
+    usePage: usePageMock
+}))
 
 beforeEach(() => {
     usePageMock.mockClear()
+    usePageMock.mockReturnValue(mockPage)
 })
 
 describe('useNavigation', () => {
@@ -33,6 +29,7 @@ describe('useNavigation', () => {
             url: '/app/settings/password?source=sidebar',
             role: UserRole.User
         })
+        usePageMock.mockReturnValue(mockPage)
 
         const { settingsNavItems, dashboardFooterItems } = useNavigation()
         const settingsByTitle = new Map(settingsNavItems.value.map((item) => [item.title, item]))
@@ -49,6 +46,7 @@ describe('useNavigation', () => {
             url: '/app/admin/users/42/edit?tab=details',
             role: UserRole.Admin
         })
+        usePageMock.mockReturnValue(mockPage)
 
         const { dashboardPrimaryItems } = useNavigation()
         const itemsByTitle = new Map(dashboardPrimaryItems.value.map((item) => [item.title, item]))
@@ -62,6 +60,7 @@ describe('useNavigation', () => {
             url: '/app/dashboard',
             role: UserRole.User
         })
+        usePageMock.mockReturnValue(mockPage)
 
         const { dashboardPrimaryItems, marketingPrimaryItems } = useNavigation()
         const marketingByTitle = new Map(marketingPrimaryItems.value.map((item) => [item.title, item]))

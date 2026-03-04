@@ -1,6 +1,4 @@
 <script setup lang="ts">
-    import { useAppPage } from '../composables/useAppPage'
-
     interface Props {
         variant?: 'header' | 'sidebar'
     }

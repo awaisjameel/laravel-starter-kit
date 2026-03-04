@@ -10,7 +10,6 @@ import {
 } from '@/config/navigation'
 import type { NavItem, NavItemActiveMatch } from '@/types'
 import { UserRole } from '@/types/app-data'
-import { useAppPage, useAuthUser } from './useAppPage'
 
 type ActiveNavItem = NavItem & { isActive: boolean }
 type ActiveNavigationGroup = Omit<NavigationGroup, 'items'> & { items: ActiveNavItem[] }

@@ -1,4 +1,3 @@
-import appRoutes from '@/routes/app'
 import type { BreadcrumbItem } from '@/types'
 
 const toSingleBreadcrumb = (title: string, href: string): BreadcrumbItem[] => [
