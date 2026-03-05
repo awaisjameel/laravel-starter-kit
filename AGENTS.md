@@ -166,6 +166,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Server-driven listing pages should use shared server table composables/components in `resources/js/components/base/table/**`.
 - Server-driven listing pages must derive initial query state via `resolveServerTableInitialQuery` from `useServerDataTable`.
 - API-driven state must use shared query contracts (`useApiQuery`, `useApiMutation`, `apiRequest`) with typed cache keys, retry policy, mapped errors, and optional optimistic updates.
+- `apiRequest` callers must validate response payloads at runtime via `parseResponse`; do not rely on blind generic casts.
 - Do not call `fetch` directly inside feature page components; route data access through shared query/API composables.
 - Use Wayfinder action helpers for submits/navigation in reusable composables and feature pages.
 - Avoid `as unknown as Record<string, unknown>`; `BaseFormsBaseFormRenderer` accepts form objects directly.

@@ -34,9 +34,10 @@ php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageNa
 
 1. Create schema file under `resources/js/modules/<module>/forms/*-form-schema.ts`.
 2. Define typed form values interface and fields via `defineFormFields`.
-3. Use `useResourceForm<TForm>()` in page/component.
+3. Use `useSchemaResourceForm<TForm>()` in page/component so defaults + fields come from the schema contract.
 4. Render with `BaseFormsBaseFormRenderer` directly (`:model="form"`).
 5. Do not use `as unknown as Record<string, unknown>`.
+6. Reserve `useResourceForm()` for non-schema actions with no typed field contract (for example, empty confirm/re-send forms).
 
 ## 4. Server tables (if page lists server data)
 

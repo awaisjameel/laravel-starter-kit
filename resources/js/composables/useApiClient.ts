@@ -16,6 +16,11 @@ export interface ApiRequestOptions {
     signal?: AbortSignal
 }
 
+export type ApiResponseParser<TResponse> = (payload: unknown) => TResponse
+type ApiRequestResult<TParser extends ApiResponseParser<unknown> | undefined> = [TParser] extends [ApiResponseParser<infer TResponse>]
+    ? TResponse
+    : unknown
+
 const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 const isMutatingMethod = (method: ApiRequestMethod): boolean => method !== 'GET'
 
@@ -144,7 +149,20 @@ export const normalizeApiError = (error: unknown): ApiError => {
     }
 }
 
-export async function apiRequest<TResponse>(options: ApiRequestOptions): Promise<TResponse> {
+const buildResponseValidationError = (error: unknown, status: number): ApiError => {
+    const parsedMessage =
+        error instanceof Error ? error.message : typeof error === 'string' && error.trim() !== '' ? error : 'Response payload validation failed.'
+
+    return {
+        message: parsedMessage,
+        status,
+        code: 'invalid_response_payload'
+    }
+}
+
+export async function apiRequest<TParser extends ApiResponseParser<unknown> | undefined>(
+    options: ApiRequestOptions & { parseResponse?: TParser }
+): Promise<ApiRequestResult<TParser>> {
     const requestUrl = `${options.url}${options.query !== undefined ? toQueryString(options.query) : ''}`
     const hasBody = options.body !== undefined
     const method = options.method ?? 'GET'
@@ -171,17 +189,33 @@ export async function apiRequest<TResponse>(options: ApiRequestOptions): Promise
 
     const response = await fetch(requestUrl, requestInit)
 
-    if (response.status === 204) {
-        return undefined as TResponse
-    }
+    const payload =
+        response.status === 204
+            ? undefined
+            : (() => {
+                  const contentType = response.headers.get('content-type')
+                  const isJson = contentType !== null && contentType.includes('application/json')
 
-    const contentType = response.headers.get('content-type')
-    const isJson = contentType !== null && contentType.includes('application/json')
-    const payload = isJson ? ((await response.json()) as unknown) : ((await response.text()) as unknown)
+                  if (isJson) {
+                      return response.json()
+                  }
+
+                  return response.text()
+              })()
 
     if (!response.ok) {
-        throw buildApiError(payload, response.status)
+        throw buildApiError(await payload, response.status)
     }
 
-    return payload as TResponse
+    const resolvedPayload = await payload
+
+    if (options.parseResponse === undefined) {
+        return resolvedPayload as ApiRequestResult<TParser>
+    }
+
+    try {
+        return options.parseResponse(resolvedPayload) as ApiRequestResult<TParser>
+    } catch (error) {
+        throw buildResponseValidationError(error, response.status)
+    }
 }
