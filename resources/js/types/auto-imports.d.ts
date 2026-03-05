@@ -215,6 +215,7 @@ declare global {
     const navigationMenuTriggerStyle: typeof import('../components/ui/navigation-menu/index').navigationMenuTriggerStyle
     const nextTick: typeof import('vue').nextTick
     const normalizeApiError: typeof import('../composables/useApiClient').normalizeApiError
+    const omitUndefinedProps: typeof import('../lib/utils').omitUndefinedProps
     const onActivated: typeof import('vue').onActivated
     const onBeforeMount: typeof import('vue').onBeforeMount
     const onBeforeRouteLeave: typeof import('vue-router').onBeforeRouteLeave
@@ -320,7 +321,7 @@ declare global {
         WritableComputedRef
     } from 'vue'
     // @ts-ignore
-    export type { ApiError, ApiRequestMethod, ApiRequestOptions } from '../composables/useApiClient'
+    export type { ApiError, ApiRequestMethod, ApiRequestOptions, ApiResponseParser } from '../composables/useApiClient'
     // @ts-ignore
     export type { ApiCacheKey } from '../composables/useApiQuery'
     // @ts-ignore
@@ -463,6 +464,7 @@ declare module 'vue' {
         readonly marketingRoutes: UnwrapRef<(typeof import('@/routes/marketing'))['default']>
         readonly nextTick: UnwrapRef<(typeof import('vue'))['nextTick']>
         readonly normalizeApiError: UnwrapRef<(typeof import('../composables/useApiClient'))['normalizeApiError']>
+        readonly omitUndefinedProps: UnwrapRef<(typeof import('../lib/utils'))['omitUndefinedProps']>
         readonly onActivated: UnwrapRef<(typeof import('vue'))['onActivated']>
         readonly onBeforeMount: UnwrapRef<(typeof import('vue'))['onBeforeMount']>
         readonly onBeforeRouteLeave: UnwrapRef<(typeof import('vue-router'))['onBeforeRouteLeave']>
