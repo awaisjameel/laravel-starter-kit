@@ -1,0 +1,24 @@
+import { defineFormFields } from '@/types/base-ui'
+
+export interface {{ pagePascalName }}FormValues {
+    name: string
+}
+
+export const {{ pageCamelName }}FormContract = defineFormContract<{{ pagePascalName }}FormValues>({
+    defaults: () => ({
+        name: ''
+    }),
+    fields: () =>
+        defineFormFields<{{ pagePascalName }}FormValues>([
+            {
+                name: 'name',
+                label: 'Name',
+                type: 'text',
+                required: true,
+                placeholder: 'Enter name'
+            }
+        ])
+})
+
+export const create{{ pagePascalName }}FormDefaults = {{ pageCamelName }}FormContract.defaults
+export const build{{ pagePascalName }}FormFields = {{ pageCamelName }}FormContract.fields

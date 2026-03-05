@@ -2,6 +2,20 @@
 
 Use this checklist when adding a new frontend page to keep it reusable, typed, and consistent with project DX standards.
 
+## 0. Prefer scaffold automation
+
+For a brand-new module:
+
+```bash
+php artisan generate:module <ModuleName> --scaffold=crud --page=<PageName>
+```
+
+For an existing module:
+
+```bash
+php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageName>
+```
+
 ## 1. Backend entrypoint
 
 1. Add/extend controller in `app/Modules/<Module>/Http/Controllers`.

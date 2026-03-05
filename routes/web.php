@@ -2,18 +2,20 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\File;
+use App\Modules\Shared\Support\ModuleRouteDiscovery;
 
-$moduleRouteFiles = [
-    base_path('app/Modules/Marketing/Routes/web.php'),
-    base_path('app/Modules/Auth/Routes/web.php'),
-    base_path('app/Modules/Dashboard/Routes/web.php'),
-    base_path('app/Modules/Settings/Routes/web.php'),
-    base_path('app/Modules/Users/Routes/web.php'),
-];
+$moduleRouteFiles = ModuleRouteDiscovery::discover(
+    basePath: base_path(),
+    routeType: 'web',
+    priorityModules: [
+        'Marketing',
+        'Auth',
+        'Dashboard',
+        'Settings',
+        'Users',
+    ],
+);
 
 foreach ($moduleRouteFiles as $moduleRouteFile) {
-    if (File::exists($moduleRouteFile)) {
-        require $moduleRouteFile;
-    }
+    require $moduleRouteFile;
 }

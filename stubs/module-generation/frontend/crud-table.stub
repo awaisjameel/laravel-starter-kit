@@ -1,0 +1,92 @@
+<script setup lang="ts">
+    import type { DataTableColumn, DataTableRowAction, MobileCardField } from '@/types/base-ui'
+
+    interface Props {
+        items: {{ pagePascalName }}ListItem[]
+    }
+
+    const props = defineProps<Props>()
+
+    const emit = defineEmits<{
+        delete: [item: {{ pagePascalName }}ListItem]
+        edit: [item: {{ pagePascalName }}ListItem]
+        view: [item: {{ pagePascalName }}ListItem]
+    }>()
+
+    const formatDate = (value: string | null): string => {
+        if (value === null) {
+            return 'N/A'
+        }
+
+        return new Date(value).toLocaleDateString()
+    }
+
+    const columns: Array<DataTableColumn<{{ pagePascalName }}ListItem>> = [
+        {
+            key: 'name',
+            label: 'Name',
+            sortable: false,
+            value: (row) => row.name
+        },
+        {
+            key: 'created_at',
+            label: 'Created At',
+            sortable: false,
+            value: (row) => formatDate(row.created_at)
+        },
+        {
+            key: 'updated_at',
+            label: 'Updated At',
+            sortable: false,
+            value: (row) => formatDate(row.updated_at)
+        }
+    ]
+
+    const mobileFields: Array<MobileCardField<{{ pagePascalName }}ListItem>> = [
+        {
+            key: 'created_at',
+            label: 'Created',
+            value: (row) => formatDate(row.created_at)
+        },
+        {
+            key: 'updated_at',
+            label: 'Updated',
+            value: (row) => formatDate(row.updated_at)
+        }
+    ]
+
+    const actions: Array<DataTableRowAction<{{ pagePascalName }}ListItem>> = [
+        {
+            key: 'view',
+            label: 'Details',
+            onClick: (row) => emit('view', row)
+        },
+        {
+            key: 'edit',
+            label: 'Edit',
+            onClick: (row) => emit('edit', row)
+        },
+        {
+            key: 'delete',
+            label: 'Delete',
+            destructive: true,
+            onClick: (row) => emit('delete', row)
+        }
+    ]
+</script>
+
+<template>
+    <BaseTableBaseDataTableMobileCards :rows="props.items" :row-key="(row) => row.id" :fields="mobileFields" :actions="actions">
+        <template #mobile-header="{ row }">
+            <p class="font-medium">{{ row.name }}</p>
+        </template>
+    </BaseTableBaseDataTableMobileCards>
+
+    <BaseTableBaseDataTable
+        :rows="props.items"
+        :columns="columns"
+        :row-key="(row) => row.id"
+        :actions="actions"
+        empty-message="No records found."
+    />
+</template>

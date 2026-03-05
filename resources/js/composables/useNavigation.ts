@@ -29,7 +29,8 @@ export function useNavigation() {
 
     const context = computed(() => ({
         isAuthenticated: isAuthenticated.value,
-        isAdmin: isAdmin.value
+        isAdmin: isAdmin.value,
+        role: user.value?.role ?? null
     }))
 
     const isActiveHref = (href: string, activeMatch: NavItemActiveMatch = 'exact'): boolean => {

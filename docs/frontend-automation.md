@@ -1,25 +1,66 @@
 # Frontend Automation
 
-## Frontend page scaffolding
+## Module and page scaffolding
 
-Use the generator to scaffold a new module page with schema, route contract, and test:
+Use the Artisan generator to scaffold a module with backend + frontend contracts:
 
 ```bash
-npm run generate:frontend-page -- --module=<module-name> --page=<page-name>
+php artisan generate:module <ModuleName> --scaffold=crud --page=<PageName>
 ```
 
 Example:
 
 ```bash
-npm run generate:frontend-page -- --module=users --page=InviteUser
+php artisan generate:module Billing --scaffold=crud --page=Index
 ```
 
-Generated files:
+Available scaffold targets:
 
-- `resources/js/modules/<module>/forms/<page>-form-schema.ts`
-- `resources/js/modules/<module>/pages/<Page>.vue`
-- `resources/js/modules/<module>/routes/<page>-route-contract.ts`
-- `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
+- `page`: frontend form/page/test contracts only
+- `crud`: web CRUD scaffold (+ optional frontend page contracts)
+- `api`: API CRUD scaffold
+- `crud-api`: both web CRUD and API CRUD
+
+For existing modules, use extend mode with page scaffold to add frontend contracts only:
+
+```bash
+php artisan generate:module Users --extend --scaffold=page --page=InviteUser
+```
+
+In interactive shells, the command first asks scaffold/profile questions, then asks for confirmation per generated file.
+Use `--no-file-prompts` to skip per-file confirmations and generate all planned files directly.
+
+Generated frontend files:
+
+- `--scaffold=page`:
+  - `resources/js/modules/<module>/forms/<page>-form-schema.ts`
+  - `resources/js/modules/<module>/pages/<Page>.vue`
+  - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
+- `--scaffold=crud` (when page generation is enabled):
+  - `resources/js/modules/<module>/contracts/<page>-crud.ts`
+  - `resources/js/modules/<module>/forms/<page>-form-schema.ts`
+  - `resources/js/modules/<module>/components/Table.vue`
+  - `resources/js/modules/<module>/components/<Page>FormDialog.vue`
+  - `resources/js/modules/<module>/components/<Page>DeleteDialog.vue`
+  - `resources/js/modules/<module>/components/<Page>DetailsDialog.vue`
+  - `resources/js/modules/<module>/pages/<Page>.vue`
+  - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
+
+Generated backend additions (fresh module mode):
+
+- `app/Modules/<Module>/Http/Controllers/<Page>Controller.php` (`crud`)
+- `app/Modules/<Module>/Http/Controllers/<Page>ApiController.php` (`api`)
+- `app/Modules/<Module>/Http/Requests/<Page>StoreRequest.php`
+- `app/Modules/<Module>/Http/Requests/<Page>UpdateRequest.php`
+- `app/Modules/<Module>/Data/<Page>StoreData.php`
+- `app/Modules/<Module>/Services/<Page>Service.php`
+- `app/Modules/<Module>/Routes/web.php` (`crud`)
+- `app/Modules/<Module>/Routes/api.php` (`api`)
+- `app/Modules/<Module>/Http/Resources/<Page>Resource.php` (`api`, optional)
+- `app/Models/<Model>.php`
+- `database/migrations/*_create_<table>_table.php`
+- `tests/Feature/<Module>/<Page>PageTest.php` (`crud`)
+- `tests/Feature/<Module>/<Page>ApiTest.php` (`api`)
 
 ## Auto-import source of truth
 

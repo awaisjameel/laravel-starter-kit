@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Services;
+
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}StoreData;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+final class {{ pagePascalName }}Service
+{
+    public function paginate(int $perPage = 15): LengthAwarePaginator
+    {
+        return {{ modelClass }}::query()->latest()->paginate($perPage);
+    }
+
+    public function create({{ pagePascalName }}StoreData $storeData): {{ modelClass }}
+    {
+        return {{ modelClass }}::createFromData($storeData);
+    }
+
+    public function update({{ modelClass }} $model, {{ pagePascalName }}StoreData $storeData): {{ modelClass }}
+    {
+        $model->updateFromData($storeData);
+
+        return $model->refresh();
+    }
+
+    public function delete({{ modelClass }} $model): void
+    {
+        $model->delete();
+    }
+}

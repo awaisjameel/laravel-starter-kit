@@ -1,10 +1,20 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import prettier from 'eslint-config-prettier'
 import vue from 'eslint-plugin-vue'
 
 import { autoImportRestrictedPaths, autoImportRestrictedPatterns } from './frontend-auto-import.config.mjs'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 
-const frontendModuleNames = ['auth', 'dashboard', 'marketing', 'settings', 'users']
+const modulesRoot = path.resolve(process.cwd(), 'resources/js/modules')
+
+const frontendModuleNames = fs.existsSync(modulesRoot)
+    ? fs
+          .readdirSync(modulesRoot, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name)
+          .sort((left, right) => left.localeCompare(right))
+    : []
 
 const baseRestrictedSyntaxSelectors = [
     {

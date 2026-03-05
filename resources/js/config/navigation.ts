@@ -1,9 +1,12 @@
+import { resolveDashboardCrudNavigationItems } from '@/config/dashboard-crud-navigation'
 import type { NavItem } from '@/types'
+import type { UserRole } from '@/types/app-data'
 import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from 'lucide-vue-next'
 
 export interface NavigationContext {
     isAuthenticated: boolean
     isAdmin: boolean
+    role: UserRole | null
 }
 
 export interface NavigationGroup {
@@ -55,6 +58,8 @@ export const buildDashboardPrimaryItems = (context: NavigationContext): NavItem[
             icon: Users
         })
     }
+
+    items.push(...resolveDashboardCrudNavigationItems(context.role))
 
     return items
 }

@@ -2,14 +2,16 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\File;
+use App\Modules\Shared\Support\ModuleRouteDiscovery;
 
-$moduleRouteFiles = [
-    base_path('app/Modules/Api/V1/Routes/api.php'),
-];
+$moduleRouteFiles = ModuleRouteDiscovery::discover(
+    basePath: base_path(),
+    routeType: 'api',
+    priorityModules: [
+        'Api/V1',
+    ],
+);
 
 foreach ($moduleRouteFiles as $moduleRouteFile) {
-    if (File::exists($moduleRouteFile)) {
-        require $moduleRouteFile;
-    }
+    require $moduleRouteFile;
 }

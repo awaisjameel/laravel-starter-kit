@@ -1,0 +1,16 @@
+import {{ pagePascalName }}Controller from '{{ controllerActionImportPath }}'
+import type { DashboardCrudNavigationContract } from '@/config/dashboard-crud-navigation'
+{{ dashboardNavRoleImportLine }}import { Shapes } from 'lucide-vue-next'
+
+const dashboardNavigation: DashboardCrudNavigationContract = {
+    key: '{{ moduleKebab }}',
+    item: {
+        title: '{{ moduleNavigationTitle }}',
+        href: {{ pagePascalName }}Controller.index().url,
+        activeMatch: 'prefix',
+        icon: Shapes
+    },
+    roles: {{ dashboardNavRoles }}
+}
+
+export default dashboardNavigation

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Enums\UserRole;
 use App\Models\User;
+use App\Modules\Shared\Support\ModuleGateDiscovery;
 use App\Modules\Users\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 
 final class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +20,13 @@ final class AuthServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Gate::define('manage-users', fn (User $user): bool => $user->role === UserRole::Admin);
+        $gateFiles = ModuleGateDiscovery::discover(
+            basePath: base_path(),
+            priorityModules: ['Users'],
+        );
+
+        foreach ($gateFiles as $gateFile) {
+            require $gateFile;
+        }
     }
 }

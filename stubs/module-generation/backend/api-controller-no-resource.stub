@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use App\Modules\{{ moduleNamespace }}\Services\{{ pagePascalName }}Service;
+use Illuminate\Http\JsonResponse;
+
+final class {{ pagePascalName }}ApiController extends Controller
+{
+    public function __construct(
+        private readonly {{ pagePascalName }}Service ${{ pageCamelName }}Service,
+    ) {}
+
+    public function index(): JsonResponse
+    {
+        $paginator = $this->{{ pageCamelName }}Service->paginate();
+
+        return response()->json([
+            'data' => array_map(fn ({{ modelClass }} $model): array => $this->serializeModel($model), $paginator->items()),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
+        ]);
+    }
+
+    public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
+    {
+        $model = $this->{{ pageCamelName }}Service->create($request->toDto());
+
+        return response()->json(['data' => $this->serializeModel($model)], 201);
+    }
+
+    public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        return response()->json(['data' => $this->serializeModel(${{ modelVariable }})]);
+    }
+
+    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        $model = $this->{{ pageCamelName }}Service->update(${{ modelVariable }}, $request->toDto());
+
+        return response()->json(['data' => $this->serializeModel($model)]);
+    }
+
+    public function destroy({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        $this->{{ pageCamelName }}Service->delete(${{ modelVariable }});
+
+        return response()->json([], 204);
+    }
+
+    /**
+     * @return array{id: int, name: string, created_at: string|null, updated_at: string|null}
+     */
+    private function serializeModel({{ modelClass }} $model): array
+    {
+        return [
+            'id' => $model->id,
+            'name' => $model->name,
+            'created_at' => $model->created_at?->toISOString(),
+            'updated_at' => $model->updated_at?->toISOString(),
+        ];
+    }
+}
