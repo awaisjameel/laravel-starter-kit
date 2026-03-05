@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { CollapsibleRootEmits, CollapsibleRootProps } from 'reka-ui'
+import { omitUndefinedProps } from '@/lib/utils'
 import { CollapsibleRoot, useForwardPropsEmits } from 'reka-ui'
+import { computed } from 'vue'
 
 const props = defineProps<CollapsibleRootProps>()
 const emits = defineEmits<CollapsibleRootEmits>()
 
-const forwarded = useForwardPropsEmits(props, emits) as unknown as Record<string, unknown>
+const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(props)), emits)
 </script>
 
 <template>

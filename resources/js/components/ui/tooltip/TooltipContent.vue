@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
+import { computed, type HTMLAttributes } from 'vue'
+import { cn, omitUndefinedProps } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
 import { TooltipArrow, TooltipContent, type TooltipContentEmits, type TooltipContentProps, TooltipPortal, useForwardPropsEmits } from 'reka-ui'
 
@@ -14,8 +14,8 @@ const props = withDefaults(defineProps<TooltipContentProps & { class?: HTMLAttri
 
 const emits = defineEmits<TooltipContentEmits>()
 
-const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
-const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
+const delegatedProps = reactiveOmit(props, 'class')
+const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(delegatedProps)), emits)
 </script>
 
 <template>

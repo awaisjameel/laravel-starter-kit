@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { PaginationPrevProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+import { computed, type HTMLAttributes } from "vue"
 import type { ButtonVariants } from '@/components/ui/button'
 import { reactiveOmit } from "@vueuse/core"
 import { ChevronLeftIcon } from "lucide-vue-next"
 import { PaginationPrev, useForwardProps } from "reka-ui"
-import { cn } from "@/lib/utils"
+import { cn, omitUndefinedProps } from "@/lib/utils"
 import { buttonVariants } from '@/components/ui/button'
 
 const props = withDefaults(defineProps<PaginationPrevProps & {
@@ -15,8 +15,8 @@ const props = withDefaults(defineProps<PaginationPrevProps & {
   size: "default",
 })
 
-const delegatedProps = reactiveOmit(props, "class", "size") as Record<string, unknown>
-const forwarded = useForwardProps(delegatedProps) as unknown as Record<string, unknown>
+const delegatedProps = reactiveOmit(props, "class", "size")
+const forwarded = useForwardProps(computed(() => omitUndefinedProps(delegatedProps)))
 </script>
 
 <template>

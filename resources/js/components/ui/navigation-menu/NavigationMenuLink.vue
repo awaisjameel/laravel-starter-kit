@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
+import { computed, type HTMLAttributes } from 'vue'
+import { cn, omitUndefinedProps } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
 import {
   NavigationMenuLink,
@@ -12,8 +12,8 @@ import {
 const props = defineProps<NavigationMenuLinkProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<NavigationMenuLinkEmits>()
 
-const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
-const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
+const delegatedProps = reactiveOmit(props, 'class')
+const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(delegatedProps)), emits)
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils'
+import { cn, omitUndefinedProps } from '@/lib/utils'
 import { Circle } from 'lucide-vue-next'
 import {
   DropdownMenuItemIndicator,
@@ -17,10 +17,10 @@ const emits = defineEmits<DropdownMenuRadioItemEmits>()
 const delegatedProps = computed(() => {
   const { class: _, value: __, ...delegated } = props
 
-  return delegated as Record<string, unknown>
+  return omitUndefinedProps(delegated)
 })
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

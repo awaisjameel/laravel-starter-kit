@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
+import { computed, type HTMLAttributes } from 'vue'
+import { cn, omitUndefinedProps } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
 import { ChevronRight } from 'lucide-vue-next'
 import {
@@ -11,8 +11,8 @@ import {
 
 const props = defineProps<DropdownMenuSubTriggerProps & { class?: HTMLAttributes['class'], inset?: boolean }>()
 
-const delegatedProps = reactiveOmit(props, 'class', 'inset') as Record<string, unknown>
-const forwardedProps = useForwardProps(delegatedProps) as unknown as Record<string, unknown>
+const delegatedProps = reactiveOmit(props, 'class', 'inset')
+const forwardedProps = useForwardProps(computed(() => omitUndefinedProps(delegatedProps)))
 </script>
 
 <template>
