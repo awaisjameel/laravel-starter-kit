@@ -7,16 +7,16 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 
 ## Mandatory Workflow
 
-1. Understand current implementation and affected modules before writing code.
+1. Understand all the requirements and currently existing implementations and affected modules before writing code.
 2. Reuse existing module services, requests, DTOs, and shared UI primitives before creating new abstractions.
 3. Implement focused, typed changes with no duplication.
 4. Run mandatory quality checks after every change:
-   - `composer generate-and-cleanup`
-   - targeted PHPUnit tests (or full `php artisan test` for broad changes)
+    - `composer generate-and-cleanup`
+    - targeted PHPUnit tests (or full `php artisan test` for broad changes)
 5. Update this file when architecture, contracts, workflows, or enforcement rules change.
 6. Keep module integrity strict:
-   - module-specific code stays inside its module on both backend and frontend.
-   - only genuinely cross-cutting code belongs in shared/global layers.
+    - module-specific code stays inside its module on both backend and frontend.
+    - only genuinely cross-cutting code belongs in shared/global layers.
 
 ## Stack Snapshot
 
@@ -33,34 +33,34 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 ### Backend
 
 - Entry points:
-  - `routes/web.php` auto-discovers module web routes from `app/Modules/**/Routes/web.php` (canonical modules are loaded first for deterministic order).
-  - `routes/api.php` auto-discovers module API routes from `app/Modules/**/Routes/api.php` (canonical modules are loaded first for deterministic order).
+    - `routes/web.php` auto-discovers module web routes from `app/Modules/**/Routes/web.php` (canonical modules are loaded first for deterministic order).
+    - `routes/api.php` auto-discovers module API routes from `app/Modules/**/Routes/api.php` (canonical modules are loaded first for deterministic order).
 - Module root: `app/Modules`
-  - `Marketing`
-  - `Auth`
-  - `Dashboard`
-  - `Settings`
-  - `Users`
-  - `Api/V1`
-  - `Shared`
+    - `Marketing`
+    - `Auth`
+    - `Dashboard`
+    - `Settings`
+    - `Users`
+    - `Api/V1`
+    - `Shared`
 - Shared domain model remains in:
-  - `app/Models/User.php`
-  - `app/Enums/UserRole.php`
+    - `app/Models/User.php`
+    - `app/Enums/UserRole.php`
 - Shared middleware:
-  - `HandleAppearance`
-  - `HandleInertiaRequests`
-  - `SecurityHeaders`
+    - `HandleAppearance`
+    - `HandleInertiaRequests`
+    - `SecurityHeaders`
 
 ### Backend Module Ownership Contract (Strict)
 
 - Module-specific backend code must live under its module namespace/path (`app/Modules/<Module>/**`):
-  - Controllers
-  - Requests
-  - Data DTOs
-  - Services
-  - Policies/Gates
-  - Resources/Transformers
-  - Events/Listeners
+    - Controllers
+    - Requests
+    - Data DTOs
+    - Services
+    - Policies/Gates
+    - Resources/Transformers
+    - Events/Listeners
 - Keep `app/Models/**` and `app/Enums/**` for truly shared domain primitives only.
 - If a class is used by multiple modules, move it to `app/Modules/Shared/**` (or existing global shared location) instead of duplicating.
 - Do not place module-only classes under shared/global directories.
@@ -71,35 +71,35 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Feature form schemas live in `resources/js/modules/**/forms`.
 - Frontend config contracts live in `resources/js/config/**`.
 - Shared app/layout primitives remain in:
-  - `resources/js/components/**`
-  - `resources/js/layouts/**`
+    - `resources/js/components/**`
+    - `resources/js/layouts/**`
 - UI layering contract:
-  - `resources/js/components/ui/**` = low-level primitive wrappers only.
-  - `resources/js/components/base/**` = reusable app-level building blocks (`Base*`).
-  - Feature-specific screens should compose `Base*` components instead of hand-rolling repeated structures.
+    - `resources/js/components/ui/**` = low-level primitive wrappers only.
+    - `resources/js/components/base/**` = reusable app-level building blocks (`Base*`).
+    - Feature-specific screens should compose `Base*` components instead of hand-rolling repeated structures.
 - App entry points:
-  - `resources/js/app.ts`
-  - `resources/js/ssr.ts`
+    - `resources/js/app.ts`
+    - `resources/js/ssr.ts`
 - Auto-import contract:
-  - Canonical source is `frontend-auto-import.config.mjs`.
-  - `vite.config.ts`, `vitest.config.ts`, and `eslint.config.js` must consume this shared config; do not duplicate symbol lists.
-  - Module `forms/**`, `composables/**`, `contracts/**`, and `helpers/**` exports are auto-imported; do not manually import these paths in frontend files.
-  - Module Vue components are auto-registered from `resources/js/modules/**` using namespace-style names (`<Module><Component>`), e.g. `UsersTable`, `SettingsDeleteUser`; do not manually import module components.
+    - Canonical source is `frontend-auto-import.config.mjs`.
+    - `vite.config.ts`, `vitest.config.ts`, and `eslint.config.js` must consume this shared config; do not duplicate symbol lists.
+    - Module `forms/**`, `composables/**`, `contracts/**`, and `helpers/**` exports are auto-imported; do not manually import these paths in frontend files.
+    - Module Vue components are auto-registered from `resources/js/modules/**` using namespace-style names (`<Module><Component>`), e.g. `UsersTable`, `SettingsDeleteUser`; do not manually import module components.
 - Navigation contract:
-  - Centralized in `resources/js/config/navigation.ts`.
-  - `useNavigation` and settings layout must consume shared navigation builders, not duplicate route/label arrays.
-  - Navigation items may declare `activeMatch` (`exact` or `prefix`) to control active-state behavior.
+    - Centralized in `resources/js/config/navigation.ts`.
+    - `useNavigation` and settings layout must consume shared navigation builders, not duplicate route/label arrays.
+    - Navigation items may declare `activeMatch` (`exact` or `prefix`) to control active-state behavior.
 - Breadcrumb contract:
-  - Centralized in `resources/js/config/breadcrumbs.ts`.
-  - Feature pages should consume shared breadcrumb builders, not duplicate breadcrumb arrays inline.
+    - Centralized in `resources/js/config/breadcrumbs.ts`.
+    - Feature pages should consume shared breadcrumb builders, not duplicate breadcrumb arrays inline.
 
 ### Frontend Module Ownership Contract (Strict)
 
 - Module-specific frontend code must live under `resources/js/modules/<module>/**`:
-  - `pages/**`
-  - `components/**`
-  - `forms/**`
-  - module-local composables/contracts/helpers
+    - `pages/**`
+    - `components/**`
+    - `forms/**`
+    - module-local composables/contracts/helpers
 - Do not keep feature-specific components in `resources/js/components/**`.
 - `resources/js/components/ui/**` is primitive-only.
 - `resources/js/components/base/**` is reusable app-level building blocks only.
@@ -109,9 +109,9 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 ### Shared Placement Rules
 
 - Promote to shared only when at least one condition is true:
-  - reused by 1+ modules
-  - forms a stable cross-cutting contract
-  - belongs to app shell/infrastructure concerns (layout, navigation, global composables, base UI, transport)
+    - reused by 1+ modules
+    - forms a stable cross-cutting contract
+    - belongs to app shell/infrastructure concerns (layout, navigation, global composables, base UI, transport)
 - If reuse is uncertain, keep code inside the owning module first and extract later when duplication appears.
 
 ## Routing Contract
@@ -119,23 +119,23 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 ### Web
 
 - Marketing:
-  - `GET /` => `marketing.home`
+    - `GET /` => `marketing.home`
 - Auth:
-  - `/auth/*` => `auth.*`
+    - `/auth/*` => `auth.*`
 - App shell:
-  - `GET /app/dashboard` => `app.dashboard`
+    - `GET /app/dashboard` => `app.dashboard`
 - Settings:
-  - `/app/settings/*` => `app.settings.*`
+    - `/app/settings/*` => `app.settings.*`
 - Admin users:
-  - `/app/admin/users/*` => `app.admin.users.*`
+    - `/app/admin/users/*` => `app.admin.users.*`
 
 ### API
 
 - Versioned API under `/api/v1/*`
 - Authenticated current user:
-  - `GET /api/v1/me` => `api.v1.me.show`
+    - `GET /api/v1/me` => `api.v1.me.show`
 - Admin users API:
-  - `/api/v1/admin/users/*` => `api.v1.admin.users.*`
+    - `/api/v1/admin/users/*` => `api.v1.admin.users.*`
 
 ## Type-Safety Rules
 
@@ -146,8 +146,8 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
 - Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:
-  - prefer Spatie Data classes (`extends Data`) for payload/query/page contracts.
-  - annotate exported contracts with `#[TypeScript]`.
+    - prefer Spatie Data classes (`extends Data`) for payload/query/page contracts.
+    - annotate exported contracts with `#[TypeScript]`.
 - Replace bounded string query values with enums in backend contracts (e.g., sort fields/directions), then consume generated enums in frontend.
 
 ### Frontend
@@ -256,37 +256,37 @@ Minimum expectations:
 ## Developer Automation
 
 - Use `php artisan generate:module <ModuleName> --scaffold=crud --page=<PageName>` to scaffold a typed module shell (backend + frontend + feature test), including:
-  - module-local controller/request/data/routes under `app/Modules/<Module>/**`
-  - Eloquent model in default location `app/Models/<Model>.php`
-  - migration in default location `database/migrations/*_create_<table>_table.php`
-  - frontend CRUD module assets under `resources/js/modules/<module>/**` (table, create/update dialog, delete dialog, details dialog, page, form schema, frontend test)
+    - module-local controller/request/data/routes under `app/Modules/<Module>/**`
+    - Eloquent model in default location `app/Models/<Model>.php`
+    - migration in default location `database/migrations/*_create_<table>_table.php`
+    - frontend CRUD module assets under `resources/js/modules/<module>/**` (table, create/update dialog, delete dialog, details dialog, page, form schema, frontend test)
 - Use `php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageName>` to scaffold page-level frontend contracts for an existing module.
 - Command options contract:
-  - `--scaffold=page|crud|api|crud-api` (interactive prompt when omitted; defaults to `crud` for fresh mode and `page` for extend mode)
-  - `--route-profile=app|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `app`)
-  - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
-  - `--route-prefix=...`
-  - `--route-name-prefix=...`
-  - `--middleware=auth,verified`
-  - `--api-route-profile=protected|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `protected`)
-  - `--api-route-prefix=...`
-  - `--api-route-name-prefix=...`
-  - `--api-middleware=auth:sanctum`
-  - `--no-api-resource`
-  - `--no-api-test`
-  - `--no-model`
-  - `--no-page`
-  - Interactive shells prompt per generated file by default; use `--no-file-prompts` to generate all planned files without per-file confirmations.
-  - `--no-file-prompts`
-  - `--force`
-  - `--dry-run`
-  - `--base-path=...` (testing only)
+    - `--scaffold=page|crud|api|crud-api` (interactive prompt when omitted; defaults to `crud` for fresh mode and `page` for extend mode)
+    - `--route-profile=app|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `app`)
+    - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
+    - `--route-prefix=...`
+    - `--route-name-prefix=...`
+    - `--middleware=auth,verified`
+    - `--api-route-profile=protected|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `protected`)
+    - `--api-route-prefix=...`
+    - `--api-route-name-prefix=...`
+    - `--api-middleware=auth:sanctum`
+    - `--no-api-resource`
+    - `--no-api-test`
+    - `--no-model`
+    - `--no-page`
+    - Interactive shells prompt per generated file by default; use `--no-file-prompts` to generate all planned files without per-file confirmations.
+    - `--no-file-prompts`
+    - `--force`
+    - `--dry-run`
+    - `--base-path=...` (testing only)
 - App CRUD scaffolds (`--scaffold=crud|crud-api` with `--route-profile=app`) must define role scope via `--roles`:
-  - `all` keeps default `auth` + `verified` middleware and does not generate module gate files.
-  - specific roles generate module-local gate file at `app/Modules/<Module>/Routes/gates.php` and append `can:manage-<module-kebab>` middleware.
+    - `all` keeps default `auth` + `verified` middleware and does not generate module gate files.
+    - specific roles generate module-local gate file at `app/Modules/<Module>/Routes/gates.php` and append `can:manage-<module-kebab>` middleware.
 - CRUD page scaffolds with app route profile generate module-local dashboard navigation contract:
-  - `resources/js/modules/<module>/contracts/dashboard-nav.ts`
-  - shared dashboard navigation discovery consumes these contracts from `resources/js/config/dashboard-crud-navigation.ts`.
+    - `resources/js/modules/<module>/contracts/dashboard-nav.ts`
+    - shared dashboard navigation discovery consumes these contracts from `resources/js/config/dashboard-crud-navigation.ts`.
 
 ## Quality Gate (Non-Negotiable)
 
