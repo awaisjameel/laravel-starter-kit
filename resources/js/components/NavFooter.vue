@@ -16,7 +16,7 @@
                 <UiSidebarMenuItem v-for="item in items" :key="item.title">
                     <UiSidebarMenuButton
                         class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
-                        :is-active="item.isActive"
+                        :is-active="item.isActive === true"
                         as-child
                     >
                         <a v-if="item.external" :href="item.href" target="_blank" rel="noopener noreferrer">

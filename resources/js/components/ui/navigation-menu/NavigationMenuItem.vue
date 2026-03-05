@@ -6,7 +6,7 @@ import { NavigationMenuItem, type NavigationMenuItemProps } from 'reka-ui'
 
 const props = defineProps<NavigationMenuItemProps & { class?: HTMLAttributes['class'] }>()
 
-const delegatedProps = reactiveOmit(props, 'class')
+const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
 </script>
 
 <template>

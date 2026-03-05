@@ -6,8 +6,8 @@ import { DropdownMenuLabel, type DropdownMenuLabelProps, useForwardProps } from 
 
 const props = defineProps<DropdownMenuLabelProps & { class?: HTMLAttributes['class'], inset?: boolean }>()
 
-const delegatedProps = reactiveOmit(props, 'class', 'inset')
-const forwardedProps = useForwardProps(delegatedProps)
+const delegatedProps = reactiveOmit(props, 'class', 'inset') as Record<string, unknown>
+const forwardedProps = useForwardProps(delegatedProps) as unknown as Record<string, unknown>
 </script>
 
 <template>

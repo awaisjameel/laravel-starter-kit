@@ -13,7 +13,7 @@
 
 <template>
     <div class="space-y-4">
-        <UiTabs :model-value="appearance" @update:model-value="(value) => updateAppearance(value as 'light' | 'dark')" class="space-y-3">
+        <UiTabs :model-value="appearance" @update:model-value="(value: 'light' | 'dark') => updateAppearance(value)" class="space-y-3">
             <UiTabsList class="w-full sm:w-auto">
                 <UiTabsTrigger value="light" class="min-w-28">
                     <Sun class="mr-2 size-4" />

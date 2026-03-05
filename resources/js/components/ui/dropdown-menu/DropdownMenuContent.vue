@@ -20,7 +20,7 @@ const emits = defineEmits<DropdownMenuContentEmits>()
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props
 
-    return delegated
+    return delegated as Partial<DropdownMenuContentProps>
 })
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)

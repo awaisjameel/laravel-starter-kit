@@ -1,21 +1,21 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../../../wayfinder'
 /**
- * @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
+* @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
  * @see app/Modules/Marketing/Http/Controllers/HomeController.php:13
  * @route '/'
  */
 const HomeController = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: HomeController.url(options),
-    method: 'get'
+    method: 'get',
 })
 
 HomeController.definition = {
-    methods: ['get', 'head'],
-    url: '/'
-} satisfies RouteDefinition<['get', 'head']>
+    methods: ["get","head"],
+    url: '/',
+} satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
+* @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
  * @see app/Modules/Marketing/Http/Controllers/HomeController.php:13
  * @route '/'
  */
@@ -24,21 +24,21 @@ HomeController.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
+* @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
  * @see app/Modules/Marketing/Http/Controllers/HomeController.php:13
  * @route '/'
  */
 HomeController.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: HomeController.url(options),
-    method: 'get'
+    method: 'get',
 })
 /**
- * @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
+* @see \App\Modules\Marketing\Http\Controllers\HomeController::__invoke
  * @see app/Modules/Marketing/Http/Controllers/HomeController.php:13
  * @route '/'
  */
 HomeController.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: HomeController.url(options),
-    method: 'head'
+    method: 'head',
 })
 export default HomeController

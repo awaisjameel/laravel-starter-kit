@@ -18,8 +18,8 @@ const props = withDefaults(defineProps<NavigationMenuRootProps & {
 })
 const emits = defineEmits<NavigationMenuRootEmits>()
 
-const delegatedProps = reactiveOmit(props, 'class', 'viewport')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const delegatedProps = reactiveOmit(props, 'class', 'viewport') as Record<string, unknown>
+const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
 </script>
 
 <template>

@@ -11,10 +11,10 @@ const emits = defineEmits<CheckboxRootEmits>()
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return delegated as Record<string, unknown>
 })
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
 </script>
 
 <template>

@@ -303,6 +303,14 @@ For frontend behavior/composable changes, also run:
 npm run test:unit
 ```
 
+For non-mutating static checks, run:
+
+```bash
+composer qa:check
+```
+
+`composer qa:check` does not regenerate route/type artifacts; run `composer generate` when backend route/DTO/enum contracts change.
+
 ## CI Compatibility
 
 Local changes must remain compatible with existing CI checks:

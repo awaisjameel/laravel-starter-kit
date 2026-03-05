@@ -1,11 +1,13 @@
 <script setup lang="ts" generic="TForm extends object">
     import type { FormFieldSchema, FormSectionSchema } from '@/types/base-ui'
 
+    type FormKey = Extract<keyof TForm, string>
+
     interface Props {
-        model: object
+        model: TForm
         fields?: Array<FormFieldSchema<TForm>>
         sections?: Array<FormSectionSchema<TForm>>
-        errors?: Partial<Record<Extract<keyof TForm, string>, string | undefined>>
+        errors?: Partial<Record<FormKey, string>>
         processing?: boolean
         submitLabel?: string
         cancelLabel?: string
@@ -44,16 +46,12 @@
         return []
     })
 
-    const getModelFieldValue = (model: object, fieldName: string): unknown => {
-        return Reflect.get(model, fieldName)
+    const getModelFieldValue = (fieldName: FormKey): unknown => {
+        return props.model[fieldName]
     }
 
-    const setModelFieldValue = (model: object, fieldName: string, value: unknown): void => {
-        Reflect.set(model, fieldName, value)
-    }
-
-    const setValue = (fieldName: string, value: unknown): void => {
-        setModelFieldValue(props.model, fieldName, value)
+    const setValue = (fieldName: FormKey, value: unknown): void => {
+        ;(props.model as Record<FormKey, unknown>)[fieldName] = value
     }
 </script>
 
@@ -72,8 +70,8 @@
                         :id="field.name"
                         :key="field.name"
                         :field="field"
-                        :model-value="getModelFieldValue(props.model, field.name)"
-                        :error="props.errors[field.name]"
+                        :model-value="getModelFieldValue(field.name)"
+                        :error="props.errors[field.name] ?? ''"
                         @update:model-value="setValue(field.name, $event)"
                     />
                 </div>

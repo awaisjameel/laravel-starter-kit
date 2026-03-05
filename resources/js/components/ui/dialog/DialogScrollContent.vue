@@ -18,7 +18,7 @@ const emits = defineEmits<DialogContentEmits>()
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return delegated as Partial<DialogContentProps>
 })
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)

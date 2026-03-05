@@ -11,7 +11,7 @@
         <UiSidebarGroupLabel>Platform</UiSidebarGroupLabel>
         <UiSidebarMenu>
             <UiSidebarMenuItem v-for="item in items" :key="item.title">
-                <UiSidebarMenuButton as-child :is-active="item.isActive" :tooltip="item.title">
+                <UiSidebarMenuButton as-child :is-active="item.isActive === true" :tooltip="item.title">
                     <Link :href="item.href" :aria-current="item.isActive ? 'page' : undefined">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>

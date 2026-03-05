@@ -1,21 +1,21 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../wayfinder'
 /**
- * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
+* @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
  * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:28
  * @route '/auth/confirm-password'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post'
+    method: 'post',
 })
 
 store.definition = {
-    methods: ['post'],
-    url: '/auth/confirm-password'
-} satisfies RouteDefinition<['post']>
+    methods: ["post"],
+    url: '/auth/confirm-password',
+} satisfies RouteDefinition<["post"]>
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
+* @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
  * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:28
  * @route '/auth/confirm-password'
  */
@@ -24,16 +24,16 @@ store.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
+* @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
  * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:28
  * @route '/auth/confirm-password'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post'
+    method: 'post',
 })
 const confirm = {
-    store: Object.assign(store, store)
+    store: Object.assign(store, store),
 }
 
 export default confirm

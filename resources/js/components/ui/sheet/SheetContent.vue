@@ -27,9 +27,9 @@ const props = withDefaults(defineProps<SheetContentProps>(), {
 })
 const emits = defineEmits<DialogContentEmits>()
 
-const delegatedProps = reactiveOmit(props, 'class', 'side')
+const delegatedProps = reactiveOmit(props, 'class', 'side') as Record<string, unknown>
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
 </script>
 
 <template>

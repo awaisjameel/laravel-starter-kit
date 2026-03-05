@@ -7,7 +7,6 @@ describe('resolveServerTableInitialQuery', () => {
     const fallback = {
         page: 2,
         perPage: 25,
-        search: undefined,
         sortBy: 'created_at' as SortColumn,
         sortDirection: 'desc' as const
     }
@@ -50,7 +49,6 @@ describe('resolveServerTableInitialQuery', () => {
         expect(result).toEqual({
             page: 2,
             perPage: 25,
-            search: undefined,
             sortBy: 'created_at',
             sortDirection: 'desc'
         })

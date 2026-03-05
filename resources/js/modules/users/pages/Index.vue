@@ -32,7 +32,6 @@
         fallback: {
             page: props.users.current_page,
             perPage: props.users.per_page,
-            search: undefined,
             sortBy: UserSortBy.CreatedAt,
             sortDirection: SortDirection.Desc
         },
@@ -45,6 +44,28 @@
         endpoint: UserController.index,
         initialQuery,
         debounceMs: 300
+    })
+
+    const usersTableProps = computed(() => {
+        const resolved: {
+            users: UserViewData[]
+            currentUserId: number
+            sortBy?: UserSortColumn
+            sortDirection?: 'asc' | 'desc'
+        } = {
+            users: props.users.data,
+            currentUserId: currentUserId.value
+        }
+
+        if (query.value.sortBy !== undefined) {
+            resolved.sortBy = query.value.sortBy
+        }
+
+        if (query.value.sortDirection !== undefined) {
+            resolved.sortDirection = query.value.sortDirection
+        }
+
+        return resolved
     })
 
     const openCreateUserDialog = (): void => {
@@ -90,15 +111,7 @@
                     @update:per-page="setPerPage($event)"
                 />
 
-                <UsersTable
-                    :users="props.users.data"
-                    :current-user-id="currentUserId"
-                    :sort-by="query.sortBy"
-                    :sort-direction="query.sortDirection"
-                    @edit="onEditUser"
-                    @delete="onDeleteUser"
-                    @sort="setSort($event)"
-                />
+                <UsersTable v-bind="usersTableProps" @edit="onEditUser" @delete="onDeleteUser" @sort="setSort($event)" />
 
                 <BaseTableBaseDataTablePagination
                     :current-page="props.users.current_page"

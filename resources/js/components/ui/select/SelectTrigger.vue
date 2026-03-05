@@ -11,8 +11,8 @@ const props = withDefaults(
   { size: "default" },
 )
 
-const delegatedProps = reactiveOmit(props, "class", "size")
-const forwardedProps = useForwardProps(delegatedProps)
+const delegatedProps = reactiveOmit(props, "class", "size") as Record<string, unknown>
+const forwardedProps = useForwardProps(delegatedProps) as unknown as Record<string, unknown>
 </script>
 
 <template>

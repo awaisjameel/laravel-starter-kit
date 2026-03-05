@@ -15,8 +15,6 @@
 
     const props = withDefaults(defineProps<Props>(), {
         actions: () => [],
-        sortBy: undefined,
-        sortDirection: undefined,
         emptyMessage: 'No records found.',
         tableLabel: 'Data table'
     })

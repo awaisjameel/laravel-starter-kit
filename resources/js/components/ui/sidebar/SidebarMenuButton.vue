@@ -20,7 +20,7 @@ const { isMobile, state } = useSidebar()
 
 const delegatedProps = computed(() => {
   const { tooltip, ...delegated } = props
-  return delegated
+  return delegated as Partial<SidebarMenuButtonProps>
 })
 </script>
 

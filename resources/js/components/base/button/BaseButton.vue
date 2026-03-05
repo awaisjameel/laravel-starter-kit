@@ -25,9 +25,7 @@
         loading: false,
         loadingText: 'Processing...',
         disabled: false,
-        fullWidth: false,
-        iconLeft: undefined,
-        iconRight: undefined
+        fullWidth: false
     })
 
     const isDisabled = computed(() => props.disabled || props.loading)

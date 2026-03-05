@@ -19,13 +19,20 @@ const normalizeDuration = (duration?: number): number => {
     return Math.max(1000, duration)
 }
 
-const buildToast = (variant: ToastVariant, input: CreateToastInput): ToastMessage => ({
-    id: `toast-${Date.now()}-${(toastCounter += 1)}`,
-    title: input.title,
-    description: input.description,
-    variant,
-    duration: normalizeDuration(input.duration)
-})
+const buildToast = (variant: ToastVariant, input: CreateToastInput): ToastMessage => {
+    const toast: ToastMessage = {
+        id: `toast-${Date.now()}-${(toastCounter += 1)}`,
+        title: input.title,
+        variant,
+        duration: normalizeDuration(input.duration)
+    }
+
+    if (input.description !== undefined) {
+        toast.description = input.description
+    }
+
+    return toast
+}
 
 const scheduleDismiss = (id: string, duration: number): void => {
     const timeoutId = setTimeout(() => dismiss(id), duration)

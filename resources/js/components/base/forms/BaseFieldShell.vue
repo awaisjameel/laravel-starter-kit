@@ -8,8 +8,6 @@
     }
 
     const props = withDefaults(defineProps<Props>(), {
-        description: undefined,
-        error: undefined,
         required: false
     })
 </script>

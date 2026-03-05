@@ -14,7 +14,7 @@ const props = defineProps<NavigationMenuTriggerProps & { class?: HTMLAttributes[
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props
 
-    return delegated
+    return delegated as Partial<NavigationMenuTriggerProps>
 })
 
 const forwardedProps = useForwardProps(delegatedProps)

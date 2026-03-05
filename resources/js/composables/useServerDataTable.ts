@@ -50,19 +50,60 @@ const parseSortDirection = (rawValue: string | null): SortDirection | undefined 
     return undefined
 }
 
+const buildServerTableQuery = <TSort extends string>(query: {
+    page: number
+    perPage: number
+    search?: string
+    sortBy?: TSort
+    sortDirection?: SortDirection
+}): ServerTableQuery<TSort> => {
+    const resolved: ServerTableQuery<TSort> = {
+        page: query.page,
+        perPage: query.perPage
+    }
+
+    if (query.search !== undefined) {
+        resolved.search = query.search
+    }
+
+    if (query.sortBy !== undefined) {
+        resolved.sortBy = query.sortBy
+    }
+
+    if (query.sortDirection !== undefined) {
+        resolved.sortDirection = query.sortDirection
+    }
+
+    return resolved
+}
+
 export const resolveServerTableInitialQuery = <TSort extends string>(
     options: ResolveServerTableInitialQueryOptions<TSort>
 ): ServerTableQuery<TSort> => {
     const defaultSortDirection = options.defaultSortDirection ?? 'desc'
 
     if (options.locationSearch === undefined || options.locationSearch.trim() === '') {
-        return {
+        const resolved = buildServerTableQuery<TSort>({
             page: Math.max(1, options.fallback.page),
-            perPage: Math.max(1, options.fallback.perPage),
-            search: options.fallback.search,
-            sortBy: options.fallback.sortBy ?? options.defaultSortBy,
-            sortDirection: options.fallback.sortDirection ?? defaultSortDirection
+            perPage: Math.max(1, options.fallback.perPage)
+        })
+
+        if (options.fallback.search !== undefined) {
+            resolved.search = options.fallback.search
         }
+
+        const resolvedSortBy = options.fallback.sortBy ?? options.defaultSortBy
+        if (resolvedSortBy !== undefined) {
+            resolved.sortBy = resolvedSortBy
+        }
+
+        if (options.fallback.sortDirection !== undefined) {
+            resolved.sortDirection = options.fallback.sortDirection
+        } else {
+            resolved.sortDirection = defaultSortDirection
+        }
+
+        return resolved
     }
 
     const searchString = options.locationSearch.startsWith('?') ? options.locationSearch.slice(1) : options.locationSearch
@@ -71,13 +112,24 @@ export const resolveServerTableInitialQuery = <TSort extends string>(
     const isAllowedSortBy =
         parsedSortBy !== null && parsedSortBy !== '' && (options.allowedSortBy === undefined || options.allowedSortBy.includes(parsedSortBy as TSort))
 
-    return {
+    const resolved = buildServerTableQuery<TSort>({
         page: parsePositiveInt(params.get('page')) ?? Math.max(1, options.fallback.page),
-        perPage: parsePositiveInt(params.get('perPage')) ?? Math.max(1, options.fallback.perPage),
-        search: parseSearchValue(params.get('search')) ?? options.fallback.search,
-        sortBy: isAllowedSortBy ? (parsedSortBy as TSort) : (options.fallback.sortBy ?? options.defaultSortBy),
-        sortDirection: parseSortDirection(params.get('sortDirection')) ?? options.fallback.sortDirection ?? defaultSortDirection
+        perPage: parsePositiveInt(params.get('perPage')) ?? Math.max(1, options.fallback.perPage)
+    })
+
+    const resolvedSearch = parseSearchValue(params.get('search')) ?? options.fallback.search
+    if (resolvedSearch !== undefined) {
+        resolved.search = resolvedSearch
     }
+
+    const resolvedSortBy = isAllowedSortBy ? (parsedSortBy as TSort) : (options.fallback.sortBy ?? options.defaultSortBy)
+    if (resolvedSortBy !== undefined) {
+        resolved.sortBy = resolvedSortBy
+    }
+
+    resolved.sortDirection = parseSortDirection(params.get('sortDirection')) ?? options.fallback.sortDirection ?? defaultSortDirection
+
+    return resolved
 }
 
 const sanitizeQuery = <TSort extends string>(query: ServerTableQuery<TSort>): QueryParams => {
@@ -102,13 +154,24 @@ const sanitizeQuery = <TSort extends string>(query: ServerTableQuery<TSort>): Qu
 }
 
 export function useServerDataTable<TSort extends string>(options: ServerDataTableOptions<TSort>) {
-    const query = ref<ServerTableQuery<TSort>>({
+    const initialQuery = buildServerTableQuery<TSort>({
         page: options.initialQuery.page,
-        perPage: options.initialQuery.perPage,
-        search: options.initialQuery.search,
-        sortBy: options.initialQuery.sortBy,
-        sortDirection: options.initialQuery.sortDirection
+        perPage: options.initialQuery.perPage
     })
+
+    if (options.initialQuery.search !== undefined) {
+        initialQuery.search = options.initialQuery.search
+    }
+
+    if (options.initialQuery.sortBy !== undefined) {
+        initialQuery.sortBy = options.initialQuery.sortBy
+    }
+
+    if (options.initialQuery.sortDirection !== undefined) {
+        initialQuery.sortDirection = options.initialQuery.sortDirection
+    }
+
+    const query = ref<ServerTableQuery<TSort>>(initialQuery)
 
     const searchValue = ref(query.value.search ?? '')
 

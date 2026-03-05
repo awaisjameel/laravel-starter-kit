@@ -15,8 +15,8 @@ const props = withDefaults(defineProps<PaginationFirstProps & {
   size: "default",
 })
 
-const delegatedProps = reactiveOmit(props, "class", "size")
-const forwarded = useForwardProps(delegatedProps)
+const delegatedProps = reactiveOmit(props, "class", "size") as Record<string, unknown>
+const forwarded = useForwardProps(delegatedProps) as unknown as Record<string, unknown>
 </script>
 
 <template>

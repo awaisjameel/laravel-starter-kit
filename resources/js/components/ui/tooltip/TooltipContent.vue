@@ -14,8 +14,8 @@ const props = withDefaults(defineProps<TooltipContentProps & { class?: HTMLAttri
 
 const emits = defineEmits<TooltipContentEmits>()
 
-const delegatedProps = reactiveOmit(props, 'class')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
+const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
 </script>
 
 <template>

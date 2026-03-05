@@ -89,11 +89,7 @@ describe('useFlashToasts', () => {
 function createMockPage(): MockPage {
     return reactive({
         props: {
-            flash: {
-                message: undefined,
-                error: undefined,
-                status: undefined
-            }
+            flash: {}
         }
     }) as MockPage
 }

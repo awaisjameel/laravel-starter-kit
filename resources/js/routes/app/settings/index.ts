@@ -1,19 +1,19 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../wayfinder'
-import password from './password'
+import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../wayfinder'
 import profile from './profile'
+import password from './password'
 /**
  * @see app/Modules/Settings/Routes/web.php:23
  * @route '/app/settings/appearance'
  */
 export const appearance = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: appearance.url(options),
-    method: 'get'
+    method: 'get',
 })
 
 appearance.definition = {
-    methods: ['get', 'head'],
-    url: '/app/settings/appearance'
-} satisfies RouteDefinition<['get', 'head']>
+    methods: ["get","head"],
+    url: '/app/settings/appearance',
+} satisfies RouteDefinition<["get","head"]>
 
 /**
  * @see app/Modules/Settings/Routes/web.php:23
@@ -29,7 +29,7 @@ appearance.url = (options?: RouteQueryOptions) => {
  */
 appearance.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: appearance.url(options),
-    method: 'get'
+    method: 'get',
 })
 /**
  * @see app/Modules/Settings/Routes/web.php:23
@@ -37,12 +37,12 @@ appearance.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
  */
 appearance.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: appearance.url(options),
-    method: 'head'
+    method: 'head',
 })
 const settings = {
     profile: Object.assign(profile, profile),
-    password: Object.assign(password, password),
-    appearance: Object.assign(appearance, appearance)
+password: Object.assign(password, password),
+appearance: Object.assign(appearance, appearance),
 }
 
 export default settings

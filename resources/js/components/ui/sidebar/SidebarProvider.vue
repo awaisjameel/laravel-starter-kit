@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
-import { useEventListener, useMediaQuery, useVModel } from '@vueuse/core'
+import { useEventListener, useMediaQuery } from '@vueuse/core'
 import { TooltipProvider } from 'reka-ui'
 import { computed, type HTMLAttributes, type Ref, ref } from 'vue'
 import { provideSidebarContext, SIDEBAR_COOKIE_MAX_AGE, SIDEBAR_COOKIE_NAME, SIDEBAR_KEYBOARD_SHORTCUT, SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON } from './utils'
@@ -11,7 +11,6 @@ const props = withDefaults(defineProps<{
   class?: HTMLAttributes['class']
 }>(), {
   defaultOpen: true,
-  open: undefined,
 })
 
 const emits = defineEmits<{
@@ -20,10 +19,17 @@ const emits = defineEmits<{
 
 const isMobile = useMediaQuery('(max-width: 768px)')
 const openMobile = ref(false)
+const internalOpen = ref(props.defaultOpen ?? false)
 
-const open = useVModel(props, 'open', emits, {
-  defaultValue: props.defaultOpen ?? false,
-  passive: (props.open === undefined) as false,
+const open = computed<boolean>({
+  get: () => props.open ?? internalOpen.value,
+  set: (value) => {
+    if (props.open === undefined) {
+      internalOpen.value = value
+    }
+
+    emits('update:open', value)
+  },
 }) as Ref<boolean>
 
 function setOpen(value: boolean) {

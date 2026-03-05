@@ -1,21 +1,21 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../../../wayfinder'
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
  * @route '/auth/forgot-password'
  */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
-    method: 'get'
+    method: 'get',
 })
 
 create.definition = {
-    methods: ['get', 'head'],
-    url: '/auth/forgot-password'
-} satisfies RouteDefinition<['get', 'head']>
+    methods: ["get","head"],
+    url: '/auth/forgot-password',
+} satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
  * @route '/auth/forgot-password'
  */
@@ -24,41 +24,41 @@ create.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
  * @route '/auth/forgot-password'
  */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
-    method: 'get'
+    method: 'get',
 })
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::create
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
  * @route '/auth/forgot-password'
  */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: create.url(options),
-    method: 'head'
+    method: 'head',
 })
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::store
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::store
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:27
  * @route '/auth/forgot-password'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post'
+    method: 'post',
 })
 
 store.definition = {
-    methods: ['post'],
-    url: '/auth/forgot-password'
-} satisfies RouteDefinition<['post']>
+    methods: ["post"],
+    url: '/auth/forgot-password',
+} satisfies RouteDefinition<["post"]>
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::store
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::store
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:27
  * @route '/auth/forgot-password'
  */
@@ -67,13 +67,13 @@ store.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::store
+* @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::store
  * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:27
  * @route '/auth/forgot-password'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
-    method: 'post'
+    method: 'post',
 })
 const PasswordResetLinkController = { create, store }
 

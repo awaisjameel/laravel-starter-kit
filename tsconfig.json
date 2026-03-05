@@ -40,8 +40,7 @@
         // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
         "types": [
             "vite/client",
-            "unplugin-icons/types",
-            "./resources/js/types"
+            "unplugin-icons/types"
         ] /* Specify type package names to be included without being referenced in a source file. */,
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
@@ -105,7 +104,7 @@
         // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
         // "noUnusedLocals": true,                           /* Enable error reporting when local variables aren't read. */
         // "noUnusedParameters": true,                       /* Raise an error when a function parameter isn't read. */
-        // "exactOptionalPropertyTypes": true,               /* Disabled due broad third-party optional-prop incompatibilities in current UI primitive layer. */
+        "exactOptionalPropertyTypes": true /* Interpret optional property types exactly as written, without automatically adding undefined. */,
         // "noImplicitReturns": true,                        /* Enable error reporting for codepaths that do not explicitly return in a function. */
         // "noFallthroughCasesInSwitch": true,               /* Enable error reporting for fallthrough cases in switch statements. */
         "noUncheckedIndexedAccess": true /* Add 'undefined' to a type when accessed using an index. */,
@@ -120,9 +119,16 @@
     },
     "include": [
         "resources/js/**/*.ts",
-        "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx",
         "resources/js/**/*.vue",
+        "resources/js/types/auto-imports.d.ts",
+        "resources/js/types/globals.d.ts",
+        "resources/js/types/index.d.ts",
+        "resources/js/types/ziggy.d.ts",
         "env.d.ts" // Custom environment declaration file for Vite
+    ],
+    "exclude": [
+        "resources/js/components/ui/**",
+        "resources/js/types/components.d.ts"
     ]
 }

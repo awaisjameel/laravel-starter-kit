@@ -85,8 +85,6 @@
             "@php vendor/bin/phpstan analyse --ansi"
         ],
         "qa:check": [
-            "@php artisan typescript:transform",
-            "@php artisan wayfinder:generate",
             "@php vendor/bin/pint --test",
             "@php vendor/bin/phpstan analyse --ansi",
             "npm run format:check",

@@ -29,6 +29,9 @@ composer dev
   - `php artisan test`
 - Non-mutating QA check:
   - `composer qa:check`
+- Generated artifact sync check (mutating):
+  - `composer generate`
+  - `git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts`
 
 ## Architecture
 

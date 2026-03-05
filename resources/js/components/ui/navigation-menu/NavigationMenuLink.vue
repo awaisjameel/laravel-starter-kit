@@ -12,8 +12,8 @@ import {
 const props = defineProps<NavigationMenuLinkProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<NavigationMenuLinkEmits>()
 
-const delegatedProps = reactiveOmit(props, 'class')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
+const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
 </script>
 
 <template>

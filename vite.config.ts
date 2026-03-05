@@ -14,7 +14,7 @@ import Components from 'unplugin-vue-components/vite'
 export default defineConfig({
     plugins: [
         wayfinder({
-            command: 'php artisan wayfinder:generate && npx prettier -w ./resources/js/**/*.{ts,js}'
+            command: 'php artisan wayfinder:generate --no-interaction'
         }),
         laravel({
             input: ['resources/js/app.ts'],

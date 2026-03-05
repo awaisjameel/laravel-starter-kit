@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils"
 
 const props = defineProps<SelectScrollDownButtonProps & { class?: HTMLAttributes["class"] }>()
 
-const delegatedProps = reactiveOmit(props, "class")
+const delegatedProps = reactiveOmit(props, "class") as Record<string, unknown>
 
-const forwardedProps = useForwardProps(delegatedProps)
+const forwardedProps = useForwardProps(delegatedProps) as unknown as Record<string, unknown>
 </script>
 
 <template>

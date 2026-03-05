@@ -68,36 +68,69 @@ const resolveFieldErrors = (value: unknown): Record<string, string[]> | undefine
 const buildApiError = (payload: unknown, status?: number): ApiError => {
     if (isObjectRecord(payload)) {
         const message = typeof payload.message === 'string' && payload.message.trim() !== '' ? payload.message : 'Request failed.'
+        const error: ApiError = { message }
 
-        return {
-            message,
-            status,
-            code: typeof payload.code === 'string' ? payload.code : undefined,
-            fieldErrors: resolveFieldErrors(payload.errors)
+        if (status !== undefined) {
+            error.status = status
         }
+
+        if (typeof payload.code === 'string') {
+            error.code = payload.code
+        }
+
+        const fieldErrors = resolveFieldErrors(payload.errors)
+
+        if (fieldErrors !== undefined) {
+            error.fieldErrors = fieldErrors
+        }
+
+        return error
     }
 
     if (typeof payload === 'string' && payload.trim() !== '') {
-        return {
-            message: payload,
-            status
+        const error: ApiError = {
+            message: payload
         }
+
+        if (status !== undefined) {
+            error.status = status
+        }
+
+        return error
     }
 
-    return {
-        message: 'Request failed.',
-        status
+    const fallbackError: ApiError = {
+        message: 'Request failed.'
     }
+
+    if (status !== undefined) {
+        fallbackError.status = status
+    }
+
+    return fallbackError
 }
 
 export const normalizeApiError = (error: unknown): ApiError => {
     if (isObjectRecord(error) && typeof error.message === 'string') {
-        return {
-            message: error.message,
-            status: typeof error.status === 'number' ? error.status : undefined,
-            code: typeof error.code === 'string' ? error.code : undefined,
-            fieldErrors: resolveFieldErrors(error.fieldErrors)
+        const normalizedError: ApiError = {
+            message: error.message
         }
+
+        if (typeof error.status === 'number') {
+            normalizedError.status = error.status
+        }
+
+        if (typeof error.code === 'string') {
+            normalizedError.code = error.code
+        }
+
+        const fieldErrors = resolveFieldErrors(error.fieldErrors)
+
+        if (fieldErrors !== undefined) {
+            normalizedError.fieldErrors = fieldErrors
+        }
+
+        return normalizedError
     }
 
     if (error instanceof Error) {
@@ -117,7 +150,7 @@ export async function apiRequest<TResponse>(options: ApiRequestOptions): Promise
     const method = options.method ?? 'GET'
     const csrfToken = resolveCsrfToken()
 
-    const response = await fetch(requestUrl, {
+    const requestInit: RequestInit = {
         method,
         credentials: 'same-origin',
         headers: {
@@ -125,10 +158,18 @@ export async function apiRequest<TResponse>(options: ApiRequestOptions): Promise
             ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
             ...(isMutatingMethod(method) && csrfToken !== undefined ? { 'X-CSRF-TOKEN': csrfToken } : {}),
             ...options.headers
-        },
-        body: hasBody ? JSON.stringify(options.body) : undefined,
-        signal: options.signal
-    })
+        }
+    }
+
+    if (hasBody) {
+        requestInit.body = JSON.stringify(options.body)
+    }
+
+    if (options.signal !== undefined) {
+        requestInit.signal = options.signal
+    }
+
+    const response = await fetch(requestUrl, requestInit)
 
     if (response.status === 204) {
         return undefined as TResponse

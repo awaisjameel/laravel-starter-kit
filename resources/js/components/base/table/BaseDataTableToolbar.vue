@@ -11,7 +11,6 @@
     const props = withDefaults(defineProps<Props>(), {
         searchPlaceholder: 'Search...',
         searchLabel: 'Search records',
-        perPage: undefined,
         perPageOptions: () => [10, 25, 50, 100],
         perPageLabel: 'Rows per page'
     })

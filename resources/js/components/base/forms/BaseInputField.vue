@@ -8,15 +8,15 @@
         error?: string
     }
 
-    const props = withDefaults(defineProps<Props>(), {
-        error: undefined
-    })
+    const props = defineProps<Props>()
 
     const emit = defineEmits<{
         'update:modelValue': [value: unknown]
     }>()
 
     const resolvedOptions = computed<FormOption[]>(() => props.field.options ?? [])
+    const isFieldDisabled = computed(() => props.field.disabled === true)
+    const isFieldReadonly = computed(() => props.field.readonly === true)
 
     const onFileChange = (event: Event): void => {
         const target = event.target
@@ -58,9 +58,9 @@
     <BaseFormsBaseFieldShell
         :id="props.id"
         :label="props.field.label"
-        :description="props.field.description"
-        :error="props.error"
-        :required="props.field.required"
+        :description="props.field.description ?? ''"
+        :error="props.error ?? ''"
+        :required="props.field.required === true"
     >
         <UiInput
             v-if="['text', 'email', 'password'].includes(props.field.type)"
@@ -69,8 +69,8 @@
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
             :placeholder="props.field.placeholder"
             :autocomplete="props.field.autocomplete"
-            :disabled="props.field.disabled"
-            :readonly="props.field.readonly"
+            :disabled="isFieldDisabled"
+            :readonly="isFieldReadonly"
             @update:model-value="emit('update:modelValue', $event)"
         />
 
@@ -79,22 +79,22 @@
             :id="props.id"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
             :placeholder="props.field.placeholder"
-            :disabled="props.field.disabled"
-            :readonly="props.field.readonly"
+            :disabled="isFieldDisabled"
+            :readonly="isFieldReadonly"
             @update:model-value="emit('update:modelValue', $event)"
         />
 
         <UiSelect
             v-else-if="props.field.type === 'select'"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
-            :disabled="props.field.disabled"
+            :disabled="isFieldDisabled"
             @update:model-value="emit('update:modelValue', $event)"
         >
             <UiSelectTrigger class="w-full">
                 <UiSelectValue :placeholder="props.field.placeholder ?? 'Select an option'" />
             </UiSelectTrigger>
             <UiSelectContent>
-                <UiSelectItem v-for="option in resolvedOptions" :key="option.value" :value="option.value" :disabled="option.disabled">
+                <UiSelectItem v-for="option in resolvedOptions" :key="option.value" :value="option.value" :disabled="option.disabled === true">
                     {{ option.label }}
                 </UiSelectItem>
             </UiSelectContent>
@@ -104,7 +104,7 @@
             v-else-if="props.field.type === 'multiselect'"
             :id="props.id"
             multiple
-            :disabled="props.field.disabled"
+            :disabled="isFieldDisabled"
             class="min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             @change="onMultiSelectChange"
         >
@@ -124,7 +124,7 @@
             type="file"
             :accept="props.field.accept"
             :multiple="props.field.multiple"
-            :disabled="props.field.disabled"
+            :disabled="isFieldDisabled"
             @change="onFileChange"
         />
 
@@ -132,7 +132,7 @@
             <UiCheckbox
                 :id="props.id"
                 :model-value="toBoolean(props.modelValue)"
-                :disabled="props.field.disabled"
+                :disabled="isFieldDisabled"
                 @update:model-value="emit('update:modelValue', $event === true)"
             />
             <UiLabel :for="props.id">{{ props.field.placeholder ?? props.field.label }}</UiLabel>
@@ -145,7 +145,7 @@
             </div>
             <UiSwitch
                 :model-value="toBoolean(props.modelValue)"
-                :disabled="props.field.disabled"
+                :disabled="isFieldDisabled"
                 @update:model-value="emit('update:modelValue', $event === true)"
             />
         </div>
@@ -153,12 +153,12 @@
         <UiRadioGroup
             v-else-if="props.field.type === 'radio'"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
-            :disabled="props.field.disabled"
+            :disabled="isFieldDisabled"
             class="space-y-2"
             @update:model-value="emit('update:modelValue', $event)"
         >
             <div v-for="option in resolvedOptions" :key="option.value" class="flex items-center gap-2">
-                <UiRadioGroupItem :id="`${props.id}-${option.value}`" :value="option.value" :disabled="option.disabled" />
+                <UiRadioGroupItem :id="`${props.id}-${option.value}`" :value="option.value" :disabled="option.disabled === true" />
                 <UiLabel :for="`${props.id}-${option.value}`">{{ option.label }}</UiLabel>
             </div>
         </UiRadioGroup>
@@ -180,7 +180,7 @@
             :id="props.id"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
             :placeholder="props.field.placeholder"
-            :disabled="props.field.disabled"
+            :disabled="isFieldDisabled"
             @update:model-value="emit('update:modelValue', $event)"
         />
     </BaseFormsBaseFieldShell>

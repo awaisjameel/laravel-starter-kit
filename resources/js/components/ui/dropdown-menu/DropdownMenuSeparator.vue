@@ -13,7 +13,7 @@ const props = defineProps<DropdownMenuSeparatorProps & {
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return delegated as Partial<DropdownMenuSeparatorProps>
 })
 </script>
 

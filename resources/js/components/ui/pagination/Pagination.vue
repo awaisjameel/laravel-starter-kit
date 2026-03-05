@@ -10,14 +10,15 @@ const props = defineProps<PaginationRootProps & {
 }>()
 const emits = defineEmits<PaginationRootEmits>()
 
-const delegatedProps = reactiveOmit(props, "class")
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const delegatedProps = reactiveOmit(props, "class", "itemsPerPage") as Record<string, unknown>
+const forwarded = useForwardPropsEmits(delegatedProps, emits) as unknown as Record<string, unknown>
 </script>
 
 <template>
   <PaginationRoot
     v-slot="slotProps"
     data-slot="pagination"
+    :items-per-page="props.itemsPerPage"
     v-bind="forwarded"
     :class="cn('mx-auto flex w-full justify-center', props.class)"
   >

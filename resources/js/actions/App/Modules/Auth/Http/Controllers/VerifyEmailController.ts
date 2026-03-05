@@ -1,75 +1,61 @@
-import { applyUrlDefaults, queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../../../wayfinder'
 /**
- * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
+* @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
  * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
  * @route '/auth/verify-email/{id}/{hash}'
  */
-const VerifyEmailController = (
-    args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: RouteQueryOptions
-): RouteDefinition<'get'> => ({
+const VerifyEmailController = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: VerifyEmailController.url(args, options),
-    method: 'get'
+    method: 'get',
 })
 
 VerifyEmailController.definition = {
-    methods: ['get', 'head'],
-    url: '/auth/verify-email/{id}/{hash}'
-} satisfies RouteDefinition<['get', 'head']>
+    methods: ["get","head"],
+    url: '/auth/verify-email/{id}/{hash}',
+} satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
+* @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
  * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
  * @route '/auth/verify-email/{id}/{hash}'
  */
-VerifyEmailController.url = (
-    args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: RouteQueryOptions
-) => {
+VerifyEmailController.url = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
-            id: args[0],
-            hash: args[1]
-        }
+                    id: args[0],
+                    hash: args[1],
+                }
     }
 
     args = applyUrlDefaults(args)
 
     const parsedArgs = {
-        id: args.id,
-        hash: args.hash
-    }
+                        id: args.id,
+                                hash: args.hash,
+                }
 
-    return (
-        VerifyEmailController.definition.url
+    return VerifyEmailController.definition.url
             .replace('{id}', parsedArgs.id.toString())
             .replace('{hash}', parsedArgs.hash.toString())
             .replace(/\/+$/, '') + queryParams(options)
-    )
 }
 
 /**
- * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
+* @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
  * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
  * @route '/auth/verify-email/{id}/{hash}'
  */
-VerifyEmailController.get = (
-    args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: RouteQueryOptions
-): RouteDefinition<'get'> => ({
+VerifyEmailController.get = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: VerifyEmailController.url(args, options),
-    method: 'get'
+    method: 'get',
 })
 /**
- * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
+* @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
  * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
  * @route '/auth/verify-email/{id}/{hash}'
  */
-VerifyEmailController.head = (
-    args: { id: string | number; hash: string | number } | [id: string | number, hash: string | number],
-    options?: RouteQueryOptions
-): RouteDefinition<'head'> => ({
+VerifyEmailController.head = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: VerifyEmailController.url(args, options),
-    method: 'head'
+    method: 'head',
 })
 export default VerifyEmailController

@@ -11,10 +11,7 @@
         sortDirection?: 'asc' | 'desc'
     }
 
-    const props = withDefaults(defineProps<Props>(), {
-        sortBy: undefined,
-        sortDirection: undefined
-    })
+    const props = defineProps<Props>()
 
     const emit = defineEmits<{
         delete: [user: UserViewData]
@@ -90,30 +87,51 @@
             onClick: (row) => emit('delete', row)
         }
     ])
+
+    const resolveSlotRow = (slotProps: { row: UserViewData }): UserViewData => slotProps.row
+
+    const dataTableProps = computed(() => {
+        const tableProps: {
+            rows: UserViewData[]
+            columns: Array<DataTableColumn<UserViewData, UserSortColumn>>
+            rowKey: (row: UserViewData) => number
+            actions: Array<DataTableRowAction<UserViewData>>
+            emptyMessage: string
+            sortBy?: UserSortColumn
+            sortDirection?: 'asc' | 'desc'
+        } = {
+            rows: props.users,
+            columns,
+            rowKey: (row) => row.id,
+            actions: actions.value,
+            emptyMessage: 'No users found.'
+        }
+
+        if (props.sortBy !== undefined) {
+            tableProps.sortBy = props.sortBy
+        }
+
+        if (props.sortDirection !== undefined) {
+            tableProps.sortDirection = props.sortDirection
+        }
+
+        return tableProps
+    })
 </script>
 
 <template>
-    <BaseTableBaseDataTableMobileCards :rows="props.users" :row-key="(row) => row.id" :fields="mobileFields" :actions="actions">
-        <template #mobile-header="{ row }">
+    <BaseTableBaseDataTableMobileCards :rows="props.users" :row-key="(row: UserViewData) => row.id" :fields="mobileFields" :actions="actions">
+        <template #mobile-header="slotProps">
             <div class="flex min-w-0 items-center gap-2">
-                <UserInfo :user="row" />
+                <UserInfo :user="resolveSlotRow(slotProps)" />
             </div>
         </template>
     </BaseTableBaseDataTableMobileCards>
 
-    <BaseTableBaseDataTable
-        :rows="props.users"
-        :columns="columns"
-        :row-key="(row) => row.id"
-        :actions="actions"
-        :sort-by="props.sortBy"
-        :sort-direction="props.sortDirection"
-        empty-message="No users found."
-        @sort="emit('sort', $event)"
-    >
-        <template #cell-name="{ row }">
+    <BaseTableBaseDataTable v-bind="dataTableProps" @sort="emit('sort', $event)">
+        <template #cell-name="slotProps">
             <div class="flex min-w-0 items-center gap-2">
-                <UserInfo :user="row" />
+                <UserInfo :user="resolveSlotRow(slotProps)" />
             </div>
         </template>
     </BaseTableBaseDataTable>
