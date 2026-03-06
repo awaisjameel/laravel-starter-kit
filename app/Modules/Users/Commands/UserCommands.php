@@ -7,15 +7,12 @@ namespace App\Modules\Users\Commands;
 use App\Models\User;
 use App\Modules\Users\Data\CreateUserData;
 use App\Modules\Users\Data\UpdateUserData;
-use App\Modules\Users\Events\UserManagementEvent;
 use BackedEnum;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Event;
 use Stringable;
 
 final class UserCommands
 {
-    public function create(CreateUserData $createUserData, User $actor, Request $request): User
+    public function create(CreateUserData $createUserData): UserCommandResult
     {
         $user = User::create([
             'name' => $createUserData->name,
@@ -24,17 +21,10 @@ final class UserCommands
             'password' => $createUserData->password,
         ]);
 
-        Event::dispatch(new UserManagementEvent(
-            action: 'create',
-            actor: $actor,
-            target: $user,
-            request: $request,
-        ));
-
-        return $user;
+        return new UserCommandResult(user: $user);
     }
 
-    public function update(User $user, UpdateUserData $updateUserData, User $actor, Request $request): User
+    public function update(User $user, UpdateUserData $updateUserData): UserCommandResult
     {
         $before = $user->only(['name', 'email', 'role']);
 
@@ -50,26 +40,14 @@ final class UserCommands
 
         $user->save();
 
-        Event::dispatch(new UserManagementEvent(
-            action: 'update',
-            actor: $actor,
-            target: $user,
-            request: $request,
+        return new UserCommandResult(
+            user: $user,
             changes: $this->computeChanges($before, $user, $passwordChanged),
-        ));
-
-        return $user;
+        );
     }
 
-    public function delete(User $user, User $actor, Request $request): void
+    public function delete(User $user): void
     {
-        Event::dispatch(new UserManagementEvent(
-            action: 'delete',
-            actor: $actor,
-            target: $user,
-            request: $request,
-        ));
-
         $user->delete();
     }
 

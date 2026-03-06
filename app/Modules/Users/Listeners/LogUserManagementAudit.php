@@ -21,7 +21,7 @@ final class LogUserManagementAudit
             action: $userManagementEvent->action,
             actor: $userManagementEvent->actor,
             target: $userManagementEvent->target,
-            request: $userManagementEvent->request,
+            userActionMetadata: $userManagementEvent->metadata,
             changes: $userManagementEvent->changes,
         );
     }

@@ -6,14 +6,14 @@ namespace App\Modules\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Modules\Shared\Auth\RequestActor;
-use App\Modules\Users\Commands\UserCommands;
 use App\Modules\Users\Data\UsersIndexPageData;
+use App\Modules\Users\Handlers\UserCommandHandler;
+use App\Modules\Users\Handlers\UserQueryHandler;
 use App\Modules\Users\Http\Requests\UserCreateRequest;
 use App\Modules\Users\Http\Requests\UserDestroyRequest;
 use App\Modules\Users\Http\Requests\UserIndexRequest;
 use App\Modules\Users\Http\Requests\UserUpdateRequest;
-use App\Modules\Users\Queries\UserQueries;
+use App\Modules\Users\Support\UserActionContext;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,13 +21,13 @@ use Inertia\Response;
 final class UserController extends Controller
 {
     public function __construct(
-        private readonly UserQueries $userQueries,
-        private readonly UserCommands $userCommands,
+        private readonly UserQueryHandler $userQueryHandler,
+        private readonly UserCommandHandler $userCommandHandler,
     ) {}
 
     public function index(UserIndexRequest $userIndexRequest): Response
     {
-        $lengthAwarePaginator = $this->userQueries->paginate($userIndexRequest->toDto())->withQueryString();
+        $lengthAwarePaginator = $this->userQueryHandler->index($userIndexRequest->toDto())->withQueryString();
 
         return Inertia::render(
             'modules/users/pages/Index',
@@ -37,10 +37,9 @@ final class UserController extends Controller
 
     public function store(UserCreateRequest $userCreateRequest): RedirectResponse
     {
-        $this->userCommands->create(
+        $this->userCommandHandler->create(
             $userCreateRequest->toDto(),
-            RequestActor::from($userCreateRequest),
-            $userCreateRequest,
+            UserActionContext::fromRequest($userCreateRequest),
         );
 
         return redirect()->route('app.admin.users.index')
@@ -49,11 +48,10 @@ final class UserController extends Controller
 
     public function update(UserUpdateRequest $userUpdateRequest, User $user): RedirectResponse
     {
-        $this->userCommands->update(
+        $this->userCommandHandler->update(
             $user,
             $userUpdateRequest->toDto(),
-            RequestActor::from($userUpdateRequest),
-            $userUpdateRequest
+            UserActionContext::fromRequest($userUpdateRequest),
         );
 
         return redirect()->route('app.admin.users.index')
@@ -62,7 +60,7 @@ final class UserController extends Controller
 
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): RedirectResponse
     {
-        $this->userCommands->delete($user, RequestActor::from($userDestroyRequest), $userDestroyRequest);
+        $this->userCommandHandler->delete($user, UserActionContext::fromRequest($userDestroyRequest));
 
         return redirect()->route('app.admin.users.index')
             ->with('message', 'User deleted successfully');

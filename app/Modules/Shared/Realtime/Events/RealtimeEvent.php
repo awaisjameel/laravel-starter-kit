@@ -34,4 +34,11 @@ abstract class RealtimeEvent implements ShouldBroadcast
     {
         return $this->broadcastQueue;
     }
+
+    final public function dontBroadcastToSocket(string $socketId): static
+    {
+        $this->socket = $socketId;
+
+        return $this;
+    }
 }

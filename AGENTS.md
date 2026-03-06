@@ -73,6 +73,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - Data DTOs
     - Queries
     - Commands
+    - Handlers
     - Policies/Gates
     - Broadcast events / notifications / channel callbacks
     - Resources/Transformers
@@ -167,6 +168,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Prefer extending `App\Modules\Shared\Http\Requests\DataQueryRequest` for typed query DTO hydration so defaults, trimming, enum casting, and pagination rules stay shared instead of being reimplemented per index request.
 - When controller logic requires the authenticated application user, resolve it through `App\Modules\Shared\Auth\RequestActor::from($request)` instead of repeating nullable `user()` checks in transport code.
 - Prefer module-local `Queries` for reads and `Commands` for writes instead of generic mixed-purpose `Services`.
+- When the same backend use case is exposed through multiple transports, keep orchestration in module-local `Handlers` and keep controllers as thin response adapters.
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
 - Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:

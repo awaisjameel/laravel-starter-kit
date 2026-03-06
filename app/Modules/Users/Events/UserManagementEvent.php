@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Users\Events;
 
 use App\Models\User;
+use App\Modules\Users\Support\UserActionMetadata;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 
 /**
@@ -25,7 +25,7 @@ final readonly class UserManagementEvent
         public string $action,
         public User $actor,
         public ?User $target,
-        public Request $request,
+        public UserActionMetadata $metadata,
         public array $changes = [],
     ) {}
 }

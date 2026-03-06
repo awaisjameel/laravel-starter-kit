@@ -13,7 +13,6 @@ use App\Modules\Users\Enums\UsersRealtimeAction;
 use App\Modules\Users\Events\Broadcast\UserChanged;
 use App\Modules\Users\Events\Broadcast\UsersListChanged;
 use App\Modules\Users\Events\UserManagementEvent;
-use Carbon\CarbonImmutable;
 
 final readonly class BroadcastUserManagementRealtime
 {
@@ -24,7 +23,7 @@ final readonly class BroadcastUserManagementRealtime
     public function handle(UserManagementEvent $userManagementEvent): void
     {
         $usersRealtimeAction = $this->resolveAction($userManagementEvent->action);
-        $occurredAt = CarbonImmutable::now();
+        $occurredAt = $userManagementEvent->metadata->occurredAt;
         $targetUser = $userManagementEvent->target;
         $targetUserId = $targetUser?->id;
 
@@ -35,7 +34,7 @@ final readonly class BroadcastUserManagementRealtime
                 targetUserId: $targetUserId,
                 occurredAt: $occurredAt,
             )),
-            $userManagementEvent->request,
+            $userManagementEvent->metadata->socketId,
         );
 
         if ($targetUserId === null) {
@@ -55,7 +54,7 @@ final readonly class BroadcastUserManagementRealtime
                 user: $userViewData,
                 occurredAt: $occurredAt,
             )),
-            $userManagementEvent->request,
+            $userManagementEvent->metadata->socketId,
         );
     }
 

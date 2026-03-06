@@ -7,7 +7,6 @@ namespace App\Modules\Shared\Realtime\Support;
 use App\Modules\Shared\Realtime\Contracts\RealtimeDispatcher;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Http\Request;
 
 final readonly class LaravelRealtimeDispatcher implements RealtimeDispatcher
 {
@@ -22,19 +21,18 @@ final readonly class LaravelRealtimeDispatcher implements RealtimeDispatcher
         unset($pendingBroadcast);
     }
 
-    public function dispatchToOthers(ShouldBroadcast $shouldBroadcast, ?Request $request = null): void
+    public function dispatchToOthers(ShouldBroadcast $shouldBroadcast, ?string $socketId = null): void
     {
+        if ($socketId !== null && method_exists($shouldBroadcast, 'dontBroadcastToSocket')) {
+            $shouldBroadcast->dontBroadcastToSocket($socketId);
+        }
+
         $pendingBroadcast = $this->broadcastManager->event($shouldBroadcast);
 
-        if ($this->socketId($request) !== null) {
+        if ($socketId !== null && ! method_exists($shouldBroadcast, 'dontBroadcastToSocket')) {
             $pendingBroadcast->toOthers();
         }
 
         unset($pendingBroadcast);
-    }
-
-    public function socketId(?Request $request = null): ?string
-    {
-        return $this->broadcastManager->socket($request);
     }
 }
