@@ -114,13 +114,43 @@ final class ApiV1UserEndpointsTest extends TestCase
             ->assertJsonPath('data.0.name', 'Api Zulu');
     }
 
+    public function test_admin_users_api_trims_query_input_and_applies_default_query_values(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+            'created_at' => now()->subHours(2),
+        ]);
+        Sanctum::actingAs($admin);
+
+        User::factory()->create([
+            'name' => 'Api Alice Trimmed',
+            'email' => 'api-alice-trimmed@example.com',
+            'role' => UserRole::User,
+            'created_at' => now()->subMinute(),
+        ]);
+        User::factory()->create([
+            'name' => 'Api Zulu Trimmed',
+            'email' => 'api-zulu-trimmed@example.com',
+            'role' => UserRole::User,
+            'created_at' => now(),
+        ]);
+
+        $this->getJson('/api/v1/admin/users?search=%20%20Api%20Alice%20Trimmed%20%20')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.email', 'api-alice-trimmed@example.com')
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.per_page', 10);
+
+    }
+
     public function test_admin_users_api_query_validation_errors_are_returned(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         Sanctum::actingAs($admin);
 
-        $this->getJson('/api/v1/admin/users?sortBy=invalid&sortDirection=sideways&search='.str_repeat('x', 101))
+        $this->getJson('/api/v1/admin/users?perPage=1000&page=0&sortBy=invalid&sortDirection=sideways&search='.str_repeat('x', 101))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['sortBy', 'sortDirection', 'search']);
+            ->assertJsonValidationErrors(['perPage', 'page', 'sortBy', 'sortDirection', 'search']);
     }
 }

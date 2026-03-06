@@ -141,6 +141,36 @@ final class UserManagementTest extends TestCase
         $testResponse->assertSessionHasErrors(['perPage', 'page', 'sortBy', 'sortDirection', 'search']);
     }
 
+    public function test_user_listing_trims_query_input_and_applies_default_query_values(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+            'created_at' => now()->subHours(2),
+        ]);
+        User::factory()->create([
+            'name' => 'Alice Trimmed',
+            'email' => 'alice-trimmed@example.com',
+            'role' => UserRole::User,
+            'created_at' => now()->subMinute(),
+        ]);
+        User::factory()->create([
+            'name' => 'Zulu Trimmed',
+            'email' => 'zulu-trimmed@example.com',
+            'role' => UserRole::User,
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=%20%20Alice%20Trimmed%20%20')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('users.current_page', 1)
+                ->where('users.per_page', 10)
+                ->has('users.data', 1)
+                ->where('users.data.0.email', 'alice-trimmed@example.com')
+            );
+
+    }
+
     public function test_admin_users_can_search_users_by_name_email_and_role(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);

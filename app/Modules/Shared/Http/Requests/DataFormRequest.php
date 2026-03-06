@@ -4,35 +4,19 @@ declare(strict_types=1);
 
 namespace App\Modules\Shared\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Spatie\LaravelData\Data;
+use Override;
 
 /**
- * @template TData of Data
+ * @template TData of \Spatie\LaravelData\Data
+ *
+ * @extends DataRequest<TData>
  */
-abstract class DataFormRequest extends FormRequest
+abstract class DataFormRequest extends DataRequest
 {
-    /**
-     * @return class-string<TData>
-     */
-    abstract protected function dataClass(): string;
-
-    /**
-     * @return TData
-     */
-    final public function toDto(): Data
-    {
-        $dataClass = $this->dataClass();
-
-        /** @var TData $data */
-        $data = $dataClass::from($this->dtoPayload());
-
-        return $data;
-    }
-
     /**
      * @return array<string, mixed>
      */
+    #[Override]
     protected function dtoPayload(): array
     {
         return $this->validated();
