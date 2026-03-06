@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Requests;
 
 use App\Modules\Auth\Data\PasswordResetLinkData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-final class PasswordResetLinkRequest extends FormRequest
+/**
+ * @extends DataFormRequest<PasswordResetLinkData>
+ */
+final class PasswordResetLinkRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -25,13 +28,8 @@ final class PasswordResetLinkRequest extends FormRequest
         ];
     }
 
-    public function toDto(): PasswordResetLinkData
+    protected function dataClass(): string
     {
-        /** @var array{email: string} $validated */
-        $validated = $this->validated();
-
-        return new PasswordResetLinkData(
-            email: $validated['email'],
-        );
+        return PasswordResetLinkData::class;
     }
 }

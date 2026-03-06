@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\{{ moduleNamespace }}\Http\Requests;
 
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}StoreData;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-final class {{ pagePascalName }}UpdateRequest extends FormRequest
+/**
+ * @extends DataFormRequest<{{ pagePascalName }}StoreData>
+ */
+final class {{ pagePascalName }}UpdateRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -25,13 +28,8 @@ final class {{ pagePascalName }}UpdateRequest extends FormRequest
         ];
     }
 
-    public function toDto(): {{ pagePascalName }}StoreData
+    protected function dataClass(): string
     {
-        /** @var array{name: string} $validated */
-        $validated = $this->validated();
-
-        return new {{ pagePascalName }}StoreData(
-            name: $validated['name'],
-        );
+        return {{ pagePascalName }}StoreData::class;
     }
 }

@@ -1,3 +1,4 @@
+import * as realtimeConfig from '@/lib/realtime/config'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiRequest } from '../useApiClient'
 
@@ -98,5 +99,25 @@ describe('apiRequest', () => {
         })
 
         expect(response).toBe(true)
+    })
+
+    it('includes the realtime socket id header when Echo is connected', async () => {
+        vi.spyOn(realtimeConfig, 'getRealtimeSocketId').mockReturnValue('socket-123')
+
+        const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+            expect((init?.headers as Record<string, string>)['X-Socket-ID']).toBe('socket-123')
+
+            return toJsonResponse({ ok: true })
+        })
+
+        vi.stubGlobal('fetch', fetchMock)
+
+        await apiRequest({
+            url: '/api/v1/ping',
+            method: 'POST',
+            body: { ok: true }
+        })
+
+        expect(fetchMock).toHaveBeenCalledTimes(1)
     })
 })

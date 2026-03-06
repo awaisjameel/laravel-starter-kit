@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Requests;
 
 use App\Modules\Auth\Data\ResetPasswordData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-final class ResetPasswordRequest extends FormRequest
+/**
+ * @extends DataFormRequest<ResetPasswordData>
+ */
+final class ResetPasswordRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -28,16 +31,18 @@ final class ResetPasswordRequest extends FormRequest
         ];
     }
 
-    public function toDto(): ResetPasswordData
+    protected function dataClass(): string
     {
-        /** @var array{token: string, email: string, password: string} $validated */
-        $validated = $this->validated();
+        return ResetPasswordData::class;
+    }
 
-        return new ResetPasswordData(
-            token: $validated['token'],
-            email: $validated['email'],
-            password: $validated['password'],
-            passwordConfirmation: $this->string('password_confirmation')->toString(),
-        );
+    /**
+     * @return array<string, mixed>
+     */
+    protected function dtoPayload(): array
+    {
+        return array_merge($this->validated(), [
+            'password_confirmation' => $this->string('password_confirmation')->toString(),
+        ]);
     }
 }

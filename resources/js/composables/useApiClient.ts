@@ -1,3 +1,5 @@
+import { getRealtimeSocketId } from '@/lib/realtime/config'
+
 export interface ApiError {
     message: string
     status?: number
@@ -33,6 +35,10 @@ const resolveCsrfToken = (): string | undefined => {
     const token = csrfMeta?.getAttribute('content')
 
     return token !== null && token !== undefined && token !== '' ? token : undefined
+}
+
+const resolveSocketId = (): string | undefined => {
+    return getRealtimeSocketId()
 }
 
 const toQueryString = (query: Record<string, string | number | boolean | null | undefined>): string => {
@@ -167,16 +173,22 @@ export async function apiRequest<TParser extends ApiResponseParser<unknown> | un
     const hasBody = options.body !== undefined
     const method = options.method ?? 'GET'
     const csrfToken = resolveCsrfToken()
+    const socketId = resolveSocketId()
+    const headers: Record<string, string> = {
+        Accept: 'application/json',
+        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+        ...(isMutatingMethod(method) && csrfToken !== undefined ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+        ...options.headers
+    }
+
+    if (socketId !== undefined) {
+        headers['X-Socket-ID'] = socketId
+    }
 
     const requestInit: RequestInit = {
         method,
         credentials: 'same-origin',
-        headers: {
-            Accept: 'application/json',
-            ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-            ...(isMutatingMethod(method) && csrfToken !== undefined ? { 'X-CSRF-TOKEN': csrfToken } : {}),
-            ...options.headers
-        }
+        headers
     }
 
     if (hasBody) {

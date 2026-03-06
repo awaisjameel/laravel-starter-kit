@@ -7,6 +7,7 @@ namespace Tests\Feature\Users;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Broadcast;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -16,6 +17,20 @@ final class UserManagementTest extends TestCase
 
     public function test_guests_are_redirected_from_user_management_routes(): void
     {
+        $testResponse = $this->get('/app/admin/users');
+
+        $testResponse->assertRedirect('/auth/login');
+    }
+
+    public function test_guests_are_redirected_from_user_management_routes_even_when_reverb_app_id_is_missing(): void
+    {
+        config()->set('broadcasting.default', 'reverb');
+        config()->set('broadcasting.connections.reverb.key', 'local-key');
+        config()->set('broadcasting.connections.reverb.secret', 'local-secret');
+        config()->set('broadcasting.connections.reverb.app_id', '');
+
+        Broadcast::forgetDrivers();
+
         $testResponse = $this->get('/app/admin/users');
 
         $testResponse->assertRedirect('/auth/login');

@@ -46,6 +46,17 @@
         debounceMs: 300
     })
 
+    const { activeCollaboratorCount } = useUsersIndexRealtime({
+        currentUserId,
+        onListChanged: () => {
+            if (!isUserDialogOpen.value && !isDeleteDialogOpen.value) {
+                router.reload({
+                    only: ['users']
+                })
+            }
+        }
+    })
+
     const usersTableProps = computed(() => {
         const resolved: {
             users: UserViewData[]
@@ -99,7 +110,10 @@
         <div class="flex h-full min-w-0 flex-1 flex-col gap-4 rounded-xl p-3 sm:p-4">
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <Heading title="Users" description="Manage user accounts" />
+                    <Heading
+                        title="Users"
+                        :description="`Manage user accounts${activeCollaboratorCount > 0 ? ` - ${activeCollaboratorCount} admin${activeCollaboratorCount === 1 ? '' : 's'} online` : ''}`"
+                    />
                     <BaseButton class="w-full sm:w-auto" label="Add User" :icon-left="Plus" @click="openCreateUserDialog" />
                 </div>
 

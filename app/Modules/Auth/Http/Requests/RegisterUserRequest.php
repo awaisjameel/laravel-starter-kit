@@ -6,11 +6,14 @@ namespace App\Modules\Auth\Http\Requests;
 
 use App\Models\User;
 use App\Modules\Auth\Data\RegisterUserData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-final class RegisterUserRequest extends FormRequest
+/**
+ * @extends DataFormRequest<RegisterUserData>
+ */
+final class RegisterUserRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -29,15 +32,8 @@ final class RegisterUserRequest extends FormRequest
         ];
     }
 
-    public function toDto(): RegisterUserData
+    protected function dataClass(): string
     {
-        /** @var array{name: string, email: string, password: string} $validated */
-        $validated = $this->validated();
-
-        return new RegisterUserData(
-            name: $validated['name'],
-            email: $validated['email'],
-            password: $validated['password'],
-        );
+        return RegisterUserData::class;
     }
 }

@@ -19,6 +19,8 @@ php artisan migrate
 composer dev
 ```
 
+Realtime dev dependencies are included in `composer dev`; this now starts Laravel Reverb alongside the web server, queue worker, logs, and Vite.
+
 ## Core Commands
 
 - Generate routes/types:
@@ -27,6 +29,7 @@ composer dev
   - `composer generate-and-cleanup`
   - `npm run typecheck`
   - `php artisan test`
+  - `npm run test:unit`
 - Non-mutating QA check:
   - `composer qa:check`
 - Generated artifact sync check (mutating):
@@ -51,6 +54,12 @@ Shared core model/enum:
 
 - `app/Models/User.php`
 - `app/Enums/UserRole.php`
+
+Shared realtime infrastructure:
+
+- `routes/channels.php`
+- `app/Modules/Shared/Realtime`
+- `app/Modules/*/Routes/channels.php`
 
 ### Frontend Modules
 
@@ -105,6 +114,17 @@ Generated route/action helpers:
 - `resources/js/actions/**`
 
 Never hand-edit generated files.
+
+Realtime channel pattern enums, event-name enums, presence payloads, and broadcast payload DTOs are generated into the same `resources/js/types/app-data.ts` contract surface.
+
+## Realtime
+
+- Reverb is the default broadcaster in `.env.example`.
+- The app initializes Echo through `configureRealtime()` in `resources/js/app.ts`.
+- Channel authorization is module-local in `app/Modules/*/Routes/channels.php` and aggregated by the root `routes/channels.php`.
+- Frontend modules should use shared realtime composables plus module-local `contracts/realtime.ts` helpers instead of using Echo directly.
+- `apiRequest()` automatically forwards `X-Socket-ID` so broadcast listeners can call `toOthers()` safely.
+- Queue workers should process `realtime,high,default` in that order.
 
 ## Security Defaults
 

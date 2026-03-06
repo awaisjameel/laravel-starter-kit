@@ -8,12 +8,15 @@ import { createApp, Fragment, h } from 'vue'
 import { ZiggyVue } from 'ziggy-js'
 import AppToaster from './components/base/toast/AppToaster.vue'
 import { initializeTheme } from './composables/useAppearance'
+import { configureRealtime } from './lib/realtime/config'
 import type { AppPageProps } from './types'
 import { bindGlobalRouteHelper, toZiggyVueConfig } from './utils/ziggy'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
 const pinia = createPinia()
+
+configureRealtime()
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

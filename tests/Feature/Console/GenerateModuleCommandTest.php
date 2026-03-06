@@ -64,6 +64,12 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileDoesNotExist($basePath.'/tests/Feature/Billing/IndexApiTest.php');
         $this->assertMigrationFileExists($basePath, 'billings');
 
+        $requestFileContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
+        $requestFileContents = is_string($requestFileContents) ? $requestFileContents : '';
+
+        $this->assertStringContainsString('extends DataFormRequest', $requestFileContents);
+        $this->assertStringContainsString('return IndexStoreData::class;', $requestFileContents);
+
         $routeFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/web.php');
         $routeFileContents = is_string($routeFileContents) ? $routeFileContents : '';
 

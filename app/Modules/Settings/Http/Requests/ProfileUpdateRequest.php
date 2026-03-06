@@ -6,11 +6,14 @@ namespace App\Modules\Settings\Http\Requests;
 
 use App\Models\User;
 use App\Modules\Settings\Data\ProfileUpdateData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-final class ProfileUpdateRequest extends FormRequest
+/**
+ * @extends DataFormRequest<ProfileUpdateData>
+ */
+final class ProfileUpdateRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -37,14 +40,8 @@ final class ProfileUpdateRequest extends FormRequest
         ];
     }
 
-    public function toDto(): ProfileUpdateData
+    protected function dataClass(): string
     {
-        /** @var array{name: string, email: string} $validated */
-        $validated = $this->validated();
-
-        return new ProfileUpdateData(
-            name: $validated['name'],
-            email: $validated['email'],
-        );
+        return ProfileUpdateData::class;
     }
 }

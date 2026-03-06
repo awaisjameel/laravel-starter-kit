@@ -6,13 +6,16 @@ namespace App\Modules\Users\Http\Requests;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use App\Modules\Users\Data\CreateUserData;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Password;
 
-final class UserCreateRequest extends FormRequest
+/**
+ * @extends DataFormRequest<CreateUserData>
+ */
+final class UserCreateRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -32,18 +35,8 @@ final class UserCreateRequest extends FormRequest
         ];
     }
 
-    public function toDto(): CreateUserData
+    protected function dataClass(): string
     {
-        /** @var array{name: string, email: string, password: string, role: UserRole|string} $validated */
-        $validated = $this->validated();
-
-        $role = $validated['role'] instanceof UserRole ? $validated['role'] : UserRole::from((string) $validated['role']);
-
-        return new CreateUserData(
-            name: $validated['name'],
-            email: $validated['email'],
-            role: $role,
-            password: $validated['password'],
-        );
+        return CreateUserData::class;
     }
 }

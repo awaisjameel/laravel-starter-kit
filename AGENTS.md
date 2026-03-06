@@ -50,6 +50,13 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - `HandleAppearance`
     - `HandleInertiaRequests`
     - `SecurityHeaders`
+- Module listener discovery:
+    - backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery
+    - do not manually register module listener classes in `AppServiceProvider`
+- Realtime infrastructure:
+    - root broadcast channel aggregator: `routes/channels.php`
+    - module broadcast channel files: `app/Modules/**/Routes/channels.php`
+    - shared realtime infrastructure: `app/Modules/Shared/Realtime/**`
 
 ### Backend Module Ownership Contract (Strict)
 
@@ -59,6 +66,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - Data DTOs
     - Services
     - Policies/Gates
+    - Broadcast events / notifications / channel callbacks
     - Resources/Transformers
     - Events/Listeners
 - Keep `app/Models/**` and `app/Enums/**` for truly shared domain primitives only.
@@ -80,6 +88,9 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - App entry points:
     - `resources/js/app.ts`
     - `resources/js/ssr.ts`
+- Realtime frontend shared layer:
+    - `resources/js/lib/realtime/**` = Echo/Reverb client config + channel helpers
+    - `resources/js/composables/useRealtime*.ts` = shared realtime composables
 - Auto-import contract:
     - Canonical source is `frontend-auto-import.config.mjs`.
     - `vite.config.ts`, `vitest.config.ts`, and `eslint.config.js` must consume this shared config; do not duplicate symbol lists.
@@ -99,6 +110,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - `pages/**`
     - `components/**`
     - `forms/**`
+    - `contracts/realtime.ts`
     - module-local composables/contracts/helpers
 - Do not keep feature-specific components in `resources/js/components/**`.
 - `resources/js/components/ui/**` is primitive-only.
@@ -143,12 +155,14 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 
 - Use `declare(strict_types=1);` in every PHP file.
 - Form Requests must expose typed `toDto()` methods where business input is consumed.
+- Prefer extending `App\Modules\Shared\Http\Requests\DataFormRequest` for request DTO hydration; only hand-write `toDto()` when the payload cannot be expressed through `dataClass()` + `dtoPayload()`.
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
 - Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:
     - prefer Spatie Data classes (`extends Data`) for payload/query/page contracts.
     - annotate exported contracts with `#[TypeScript]`.
 - Replace bounded string query values with enums in backend contracts (e.g., sort fields/directions), then consume generated enums in frontend.
+- Realtime channel patterns, event names, presence member payloads, and broadcast notification payloads are backend-owned contracts and must be exported via TypeScript generation when consumed on the frontend.
 
 ### Frontend
 
@@ -157,6 +171,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 - Frontend must consume backend-generated contracts from `resources/js/types/app-data.ts` for domain entities/DTOs/enums.
 - Do not redefine backend-owned entity/DTO/enum types in manual frontend files.
+- Realtime channel names must be resolved from backend-owned generated pattern enums via `resolveRealtimeChannel`; do not hand-build channel strings in module pages/components.
 - `resources/js/types/index.d.ts` should contain app-shell/shared UI types only, not duplicated backend domain contracts.
 - Inertia page props should prefer generated backend page DTO contracts when available.
 - Prefer named routes and generated helpers over hardcoded URIs.
@@ -167,6 +182,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Server-driven listing pages must derive initial query state via `resolveServerTableInitialQuery` from `useServerDataTable`.
 - API-driven state must use shared query contracts (`useApiQuery`, `useApiMutation`, `apiRequest`) with typed cache keys, retry policy, mapped errors, and optional optimistic updates.
 - `apiRequest` callers must validate response payloads at runtime via `parseResponse`; do not rely on blind generic casts.
+- `apiRequest` is the canonical place for realtime socket-id propagation; do not attach `X-Socket-ID` manually in feature code.
 - Do not call `fetch` directly inside feature page components; route data access through shared query/API composables.
 - Use Wayfinder action helpers for submits/navigation in reusable composables and feature pages.
 - Avoid `as unknown as Record<string, unknown>`; `BaseFormsBaseFormRenderer` accepts form objects directly.
@@ -174,6 +190,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Do not duplicate navigation arrays in pages/layouts/composables; centralize navigation definitions in `resources/js/config/navigation.ts`.
 - Feature module files under `resources/js/modules/**` must not import other feature modules directly; move shared code to shared/base/config layers.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
+- Feature modules must consume shared realtime composables (`useRealtimeEvent`, `useRealtimePresence`, `useRealtimeNotification`, `useRealtimeModel`, `useRealtimeConnection`) instead of using Echo directly.
 
 ### Backend-Driven Type Pipeline (Non-Negotiable)
 
@@ -182,6 +199,31 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 3. Use the DTO/enum in Request `toDto()`, Services, and Controllers/Resources.
 4. Run generation commands.
 5. Consume generated types in frontend (`@/types/app-data`) instead of hand-written duplicates.
+
+## Realtime Standard
+
+### Backend
+
+- Install and configure Reverb manually; do not use `php artisan install:broadcasting` in this repo.
+- Keep root channel aggregation in `routes/channels.php`; define actual channel authorization in `app/Modules/<Module>/Routes/channels.php`.
+- Shared realtime infrastructure belongs in `app/Modules/Shared/Realtime/**`.
+- Keep domain events separate from broadcast events. Domain listeners should translate module events into broadcast events / broadcast notifications.
+- Default realtime queue is `realtime`; broadcast events should queue after commit.
+- Realtime channel pattern enums and event-name enums must be backend-owned and exported with `#[TypeScript]`.
+- Presence channel callbacks must return typed DTO payloads, not raw model arrays.
+
+### Frontend
+
+- Configure Echo/Reverb through `configureRealtime()` in `resources/js/app.ts` only; never initialize Echo in SSR entrypoints.
+- Use `resolveRealtimeChannel()` with generated backend channel pattern enums instead of hardcoded channel strings.
+- Use shared composables for realtime subscriptions and presence state; do not import or instantiate Echo directly in feature modules.
+- Module-local usage helpers should live in `resources/js/modules/<module>/contracts/realtime.ts`.
+- Broadcast notification payloads consumed by the frontend must come from backend-generated DTO contracts.
+
+### Runtime
+
+- Local dev and production process managers must run the Reverb server alongside queue workers.
+- Queue workers must prioritize `realtime` ahead of normal queues when realtime is enabled.
 
 ## Server Table Query Contract
 
@@ -230,6 +272,8 @@ After route/DTO/enum changes run:
 
 1. `composer generate`
 2. (if needed) `php artisan wayfinder:generate --no-interaction`
+
+After realtime DTO/enum/channel-pattern changes, `composer generate` is mandatory before touching frontend consumers.
 
 ## Testing Standards
 

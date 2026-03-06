@@ -30,6 +30,11 @@ final class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return 'users.'.$this->id.'.notifications';
+    }
+
     public function toViewData(): UserViewData
     {
         return UserViewData::fromModel($this);

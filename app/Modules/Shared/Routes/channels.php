@@ -1,0 +1,7 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::channel('users.{userId}.notifications', static fn ($user, int $userId): bool => $user !== null && $user->id === $userId);

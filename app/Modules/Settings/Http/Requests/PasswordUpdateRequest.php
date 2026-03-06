@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Settings\Http\Requests;
 
 use App\Modules\Settings\Data\PasswordUpdateData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-final class PasswordUpdateRequest extends FormRequest
+/**
+ * @extends DataFormRequest<PasswordUpdateData>
+ */
+final class PasswordUpdateRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -27,15 +30,18 @@ final class PasswordUpdateRequest extends FormRequest
         ];
     }
 
-    public function toDto(): PasswordUpdateData
+    protected function dataClass(): string
     {
-        /** @var array{current_password: string, password: string} $validated */
-        $validated = $this->validated();
+        return PasswordUpdateData::class;
+    }
 
-        return new PasswordUpdateData(
-            currentPassword: $validated['current_password'],
-            password: $validated['password'],
-            passwordConfirmation: $this->string('password_confirmation')->toString(),
-        );
+    /**
+     * @return array<string, mixed>
+     */
+    protected function dtoPayload(): array
+    {
+        return array_merge($this->validated(), [
+            'password_confirmation' => $this->string('password_confirmation')->toString(),
+        ]);
     }
 }

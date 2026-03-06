@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Requests;
 
 use App\Modules\Auth\Data\ConfirmPasswordData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-final class ConfirmPasswordRequest extends FormRequest
+/**
+ * @extends DataFormRequest<ConfirmPasswordData>
+ */
+final class ConfirmPasswordRequest extends DataFormRequest
 {
     public function authorize(): bool
     {
@@ -25,13 +28,8 @@ final class ConfirmPasswordRequest extends FormRequest
         ];
     }
 
-    public function toDto(): ConfirmPasswordData
+    protected function dataClass(): string
     {
-        /** @var array{password: string} $validated */
-        $validated = $this->validated();
-
-        return new ConfirmPasswordData(
-            password: $validated['password'],
-        );
+        return ConfirmPasswordData::class;
     }
 }

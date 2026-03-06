@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Requests;
 
 use App\Modules\Auth\Data\LoginData;
+use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-final class LoginRequest extends FormRequest
+/**
+ * @extends DataFormRequest<LoginData>
+ */
+final class LoginRequest extends DataFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -62,18 +65,6 @@ final class LoginRequest extends FormRequest
         RateLimiter::clear($this->throttleKey());
     }
 
-    public function toDto(): LoginData
-    {
-        /** @var array{email: string, password: string} $validated */
-        $validated = $this->validated();
-
-        return new LoginData(
-            email: $validated['email'],
-            password: $validated['password'],
-            remember: $this->boolean('remember'),
-        );
-    }
-
     /**
      * Ensure the login request is not rate limited.
      *
@@ -103,5 +94,20 @@ final class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')->toString()).'|'.$this->ip());
+    }
+
+    protected function dataClass(): string
+    {
+        return LoginData::class;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function dtoPayload(): array
+    {
+        return array_merge($this->validated(), [
+            'remember' => $this->boolean('remember'),
+        ]);
     }
 }
