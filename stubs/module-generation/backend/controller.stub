@@ -6,24 +6,24 @@ namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Commands\{{ modelClass }}Commands;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
-use App\Modules\{{ moduleNamespace }}\Services\{{ pagePascalName }}Service;
-use Inertia\Inertia;
+use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 
 final class {{ pagePascalName }}Controller extends Controller
 {
     public function __construct(
-        private readonly {{ pagePascalName }}Service ${{ pageCamelName }}Service,
+        private readonly {{ modelClass }}Queries ${{ modelVariable }}Queries,
+        private readonly {{ modelClass }}Commands ${{ modelVariable }}Commands,
     ) {}
 
     public function index(): Response
     {
-        $items = {{ modelClass }}::query()
-            ->latest()
-            ->get(['id', 'name', 'created_at', 'updated_at'])
+        $items = collect($this->{{ modelVariable }}Queries->paginate()->items())
             ->map(fn ({{ modelClass }} ${{ modelVariable }}): array => [
                 'id' => ${{ modelVariable }}->id,
                 'name' => ${{ modelVariable }}->name,
@@ -40,7 +40,7 @@ final class {{ pagePascalName }}Controller extends Controller
 
     public function store({{ pagePascalName }}StoreRequest $request): RedirectResponse
     {
-        $this->{{ pageCamelName }}Service->create($request->toDto());
+        $this->{{ modelVariable }}Commands->create($request->toDto());
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} saved successfully');
@@ -48,7 +48,7 @@ final class {{ pagePascalName }}Controller extends Controller
 
     public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): RedirectResponse
     {
-        $this->{{ pageCamelName }}Service->update(${{ modelVariable }}, $request->toDto());
+        $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, $request->toDto());
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} updated successfully');
@@ -56,7 +56,7 @@ final class {{ pagePascalName }}Controller extends Controller
 
     public function destroy({{ modelClass }} ${{ modelVariable }}): RedirectResponse
     {
-        $this->{{ pageCamelName }}Service->delete(${{ modelVariable }});
+        $this->{{ modelVariable }}Commands->delete(${{ modelVariable }});
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} deleted successfully');

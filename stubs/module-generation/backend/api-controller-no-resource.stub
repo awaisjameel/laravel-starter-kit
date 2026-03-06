@@ -6,20 +6,22 @@ namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Commands\{{ modelClass }}Commands;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
-use App\Modules\{{ moduleNamespace }}\Services\{{ pagePascalName }}Service;
+use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
 use Illuminate\Http\JsonResponse;
 
 final class {{ pagePascalName }}ApiController extends Controller
 {
     public function __construct(
-        private readonly {{ pagePascalName }}Service ${{ pageCamelName }}Service,
+        private readonly {{ modelClass }}Queries ${{ modelVariable }}Queries,
+        private readonly {{ modelClass }}Commands ${{ modelVariable }}Commands,
     ) {}
 
     public function index(): JsonResponse
     {
-        $paginator = $this->{{ pageCamelName }}Service->paginate();
+        $paginator = $this->{{ modelVariable }}Queries->paginate();
 
         return response()->json([
             'data' => array_map(fn ({{ modelClass }} $model): array => $this->serializeModel($model), $paginator->items()),
@@ -34,7 +36,7 @@ final class {{ pagePascalName }}ApiController extends Controller
 
     public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
     {
-        $model = $this->{{ pageCamelName }}Service->create($request->toDto());
+        $model = $this->{{ modelVariable }}Commands->create($request->toDto());
 
         return response()->json(['data' => $this->serializeModel($model)], 201);
     }
@@ -46,14 +48,14 @@ final class {{ pagePascalName }}ApiController extends Controller
 
     public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
-        $model = $this->{{ pageCamelName }}Service->update(${{ modelVariable }}, $request->toDto());
+        $model = $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, $request->toDto());
 
         return response()->json(['data' => $this->serializeModel($model)]);
     }
 
     public function destroy({{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
-        $this->{{ pageCamelName }}Service->delete(${{ modelVariable }});
+        $this->{{ modelVariable }}Commands->delete(${{ modelVariable }});
 
         return response()->json([], 204);
     }

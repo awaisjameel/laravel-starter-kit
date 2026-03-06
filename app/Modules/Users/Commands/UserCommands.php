@@ -2,51 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Users\Services;
+namespace App\Modules\Users\Commands;
 
 use App\Models\User;
 use App\Modules\Users\Data\CreateUserData;
 use App\Modules\Users\Data\UpdateUserData;
-use App\Modules\Users\Data\UserIndexData;
 use App\Modules\Users\Events\UserManagementEvent;
 use BackedEnum;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Event;
 use Stringable;
 
-/**
- * Service for user management operations.
- * Encapsulates business logic for creating, updating, and deleting users.
- */
-final class UserService
+final class UserCommands
 {
-    /**
-     * Get paginated users with optional filtering and sorting.
-     *
-     * @return LengthAwarePaginator<int, User>
-     */
-    public function paginateUsers(UserIndexData $userIndexData): LengthAwarePaginator
-    {
-        /** @var Builder<User> $query */
-        $query = User::query();
-
-        $this->applySearch($query, $userIndexData->search);
-
-        return $query
-            ->orderBy($userIndexData->sortBy->value, $userIndexData->sortDirection->value)
-            ->paginate(
-                perPage: $userIndexData->perPage,
-                page: $userIndexData->page,
-            )
-            ->withQueryString();
-    }
-
-    /**
-     * Create a new user.
-     */
-    public function createUser(CreateUserData $createUserData, User $actor, Request $request): User
+    public function create(CreateUserData $createUserData, User $actor, Request $request): User
     {
         $user = User::create([
             'name' => $createUserData->name,
@@ -65,10 +34,7 @@ final class UserService
         return $user;
     }
 
-    /**
-     * Update an existing user.
-     */
-    public function updateUser(User $user, UpdateUserData $updateUserData, User $actor, Request $request): User
+    public function update(User $user, UpdateUserData $updateUserData, User $actor, Request $request): User
     {
         $before = $user->only(['name', 'email', 'role']);
 
@@ -76,29 +42,26 @@ final class UserService
         $user->email = $updateUserData->email;
         $user->role = $updateUserData->role;
 
-        if ($updateUserData->password !== null && $updateUserData->password !== '') {
+        $passwordChanged = $updateUserData->password !== null && $updateUserData->password !== '';
+
+        if ($passwordChanged) {
             $user->password = $updateUserData->password;
         }
 
         $user->save();
-
-        $changes = $this->computeChanges($before, $user, $updateUserData->password !== null && $updateUserData->password !== '');
 
         Event::dispatch(new UserManagementEvent(
             action: 'update',
             actor: $actor,
             target: $user,
             request: $request,
-            changes: $changes,
+            changes: $this->computeChanges($before, $user, $passwordChanged),
         ));
 
         return $user;
     }
 
-    /**
-     * Delete a user.
-     */
-    public function deleteUser(User $user, User $actor, Request $request): void
+    public function delete(User $user, User $actor, Request $request): void
     {
         Event::dispatch(new UserManagementEvent(
             action: 'delete',
@@ -111,8 +74,6 @@ final class UserService
     }
 
     /**
-     * Compute the changes between before and after states for audit logging.
-     *
      * @param  array<string, mixed>  $before
      * @return array<string, array<string, string>>
      */
@@ -142,9 +103,6 @@ final class UserService
         return $changes;
     }
 
-    /**
-     * Convert a value to its audit-friendly representation.
-     */
     private function auditValue(mixed $value): string
     {
         if ($value instanceof BackedEnum) {
@@ -175,24 +133,5 @@ final class UserService
         $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         return is_string($encoded) ? $encoded : '[unserializable array]';
-    }
-
-    /**
-     * @param  Builder<User>  $query
-     */
-    private function applySearch(Builder $query, ?string $search): void
-    {
-        if ($search === null || $search === '') {
-            return;
-        }
-
-        $searchTerm = '%'.$search.'%';
-
-        $query->where(function (Builder $builder) use ($searchTerm): void {
-            $builder
-                ->where('name', 'like', $searchTerm)
-                ->orWhere('email', 'like', $searchTerm)
-                ->orWhere('role', 'like', $searchTerm);
-        });
     }
 }

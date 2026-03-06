@@ -2,19 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\{{ moduleNamespace }}\Services;
+namespace App\Modules\{{ moduleNamespace }}\Commands;
 
 use App\Models\{{ modelClass }};
 use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}StoreData;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-final class {{ pagePascalName }}Service
+final class {{ modelClass }}Commands
 {
-    public function paginate(int $perPage = 15): LengthAwarePaginator
-    {
-        return {{ modelClass }}::query()->latest()->paginate($perPage);
-    }
-
     public function create({{ pagePascalName }}StoreData $storeData): {{ modelClass }}
     {
         return {{ modelClass }}::createFromData($storeData);

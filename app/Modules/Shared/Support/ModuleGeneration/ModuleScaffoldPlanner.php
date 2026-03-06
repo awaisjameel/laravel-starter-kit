@@ -97,11 +97,13 @@ final readonly class ModuleScaffoldPlanner
         $moduleRootPath = $this->moduleRootPath($generateModuleInput);
         $requestsPath = $moduleRootPath.'/Http/Requests';
         $dataPath = $moduleRootPath.'/Data';
-        $servicesPath = $moduleRootPath.'/Services';
+        $queriesPath = $moduleRootPath.'/Queries';
+        $commandsPath = $moduleRootPath.'/Commands';
 
         $directories[] = $requestsPath;
         $directories[] = $dataPath;
-        $directories[] = $servicesPath;
+        $directories[] = $queriesPath;
+        $directories[] = $commandsPath;
 
         $tokens = [
             'moduleNamespace' => $generateModuleInput->moduleName->namespace,
@@ -134,9 +136,19 @@ final readonly class ModuleScaffoldPlanner
         );
 
         $files[] = new PlannedFile(
-            path: sprintf('%s/%sService.php', $servicesPath, $generateModuleInput->pagePascalName),
+            path: sprintf('%s/%sQueries.php', $queriesPath, $this->modelClassName($generateModuleInput->moduleName)),
             contents: $this->templateRenderer->render(
-                base_path('stubs/module-generation/backend/service.stub'),
+                base_path('stubs/module-generation/backend/query.stub'),
+                array_merge($tokens, [
+                    'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
+                ]),
+            ),
+        );
+
+        $files[] = new PlannedFile(
+            path: sprintf('%s/%sCommands.php', $commandsPath, $this->modelClassName($generateModuleInput->moduleName)),
+            contents: $this->templateRenderer->render(
+                base_path('stubs/module-generation/backend/command.stub'),
                 array_merge($tokens, [
                     'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
                 ]),

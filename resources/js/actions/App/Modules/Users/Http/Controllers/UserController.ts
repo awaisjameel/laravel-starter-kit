@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../../../wayfinder'
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::index
- * @see app/Modules/Users/Http/Controllers/UserController.php:26
+ * @see app/Modules/Users/Http/Controllers/UserController.php:28
  * @route '/app/admin/users'
  */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::index
- * @see app/Modules/Users/Http/Controllers/UserController.php:26
+ * @see app/Modules/Users/Http/Controllers/UserController.php:28
  * @route '/app/admin/users'
  */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::index
- * @see app/Modules/Users/Http/Controllers/UserController.php:26
+ * @see app/Modules/Users/Http/Controllers/UserController.php:28
  * @route '/app/admin/users'
  */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::index
- * @see app/Modules/Users/Http/Controllers/UserController.php:26
+ * @see app/Modules/Users/Http/Controllers/UserController.php:28
  * @route '/app/admin/users'
  */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::store
- * @see app/Modules/Users/Http/Controllers/UserController.php:36
+ * @see app/Modules/Users/Http/Controllers/UserController.php:38
  * @route '/app/admin/users'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -59,7 +59,7 @@ store.definition = {
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::store
- * @see app/Modules/Users/Http/Controllers/UserController.php:36
+ * @see app/Modules/Users/Http/Controllers/UserController.php:38
  * @route '/app/admin/users'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -68,7 +68,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::store
- * @see app/Modules/Users/Http/Controllers/UserController.php:36
+ * @see app/Modules/Users/Http/Controllers/UserController.php:38
  * @route '/app/admin/users'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -78,7 +78,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::update
- * @see app/Modules/Users/Http/Controllers/UserController.php:48
+ * @see app/Modules/Users/Http/Controllers/UserController.php:50
  * @route '/app/admin/users/{user}'
  */
 export const update = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -93,7 +93,7 @@ update.definition = {
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::update
- * @see app/Modules/Users/Http/Controllers/UserController.php:48
+ * @see app/Modules/Users/Http/Controllers/UserController.php:50
  * @route '/app/admin/users/{user}'
  */
 update.url = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -126,7 +126,7 @@ update.url = (args: { user: number | { id: number } } | [user: number | { id: nu
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::update
- * @see app/Modules/Users/Http/Controllers/UserController.php:48
+ * @see app/Modules/Users/Http/Controllers/UserController.php:50
  * @route '/app/admin/users/{user}'
  */
 update.put = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -135,7 +135,7 @@ update.put = (args: { user: number | { id: number } } | [user: number | { id: nu
 })
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::update
- * @see app/Modules/Users/Http/Controllers/UserController.php:48
+ * @see app/Modules/Users/Http/Controllers/UserController.php:50
  * @route '/app/admin/users/{user}'
  */
 update.patch = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -145,7 +145,7 @@ update.patch = (args: { user: number | { id: number } } | [user: number | { id: 
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::destroy
- * @see app/Modules/Users/Http/Controllers/UserController.php:61
+ * @see app/Modules/Users/Http/Controllers/UserController.php:63
  * @route '/app/admin/users/{user}'
  */
 export const destroy = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -160,7 +160,7 @@ destroy.definition = {
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::destroy
- * @see app/Modules/Users/Http/Controllers/UserController.php:61
+ * @see app/Modules/Users/Http/Controllers/UserController.php:63
  * @route '/app/admin/users/{user}'
  */
 destroy.url = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -193,7 +193,7 @@ destroy.url = (args: { user: number | { id: number } } | [user: number | { id: n
 
 /**
 * @see \App\Modules\Users\Http\Controllers\UserController::destroy
- * @see app/Modules/Users/Http/Controllers/UserController.php:61
+ * @see app/Modules/Users/Http/Controllers/UserController.php:63
  * @route '/app/admin/users/{user}'
  */
 destroy.delete = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({

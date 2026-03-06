@@ -47,7 +47,9 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexUpdateRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
-        $this->assertFileExists($basePath.'/app/Modules/Billing/Services/IndexService.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
+        $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Services/IndexService.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/web.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Routes/api.php');
         $this->assertFileExists($basePath.'/app/Models/Billing.php');
@@ -103,7 +105,9 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexUpdateRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
-        $this->assertFileExists($basePath.'/app/Modules/Billing/Services/IndexService.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
+        $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Services/IndexService.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/api.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Routes/web.php');
         $this->assertFileExists($basePath.'/tests/Feature/Billing/IndexApiTest.php');

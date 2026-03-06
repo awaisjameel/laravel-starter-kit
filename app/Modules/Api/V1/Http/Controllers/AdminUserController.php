@@ -8,30 +8,32 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Api\V1\Http\Resources\UserResource;
 use App\Modules\Shared\Auth\RequestActor;
+use App\Modules\Users\Commands\UserCommands;
 use App\Modules\Users\Http\Requests\UserCreateRequest;
 use App\Modules\Users\Http\Requests\UserDestroyRequest;
 use App\Modules\Users\Http\Requests\UserIndexRequest;
 use App\Modules\Users\Http\Requests\UserUpdateRequest;
-use App\Modules\Users\Services\UserService;
+use App\Modules\Users\Queries\UserQueries;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class AdminUserController extends Controller
 {
     public function __construct(
-        private readonly UserService $userService,
+        private readonly UserQueries $userQueries,
+        private readonly UserCommands $userCommands,
     ) {}
 
     public function index(UserIndexRequest $userIndexRequest): AnonymousResourceCollection
     {
-        $lengthAwarePaginator = $this->userService->paginateUsers($userIndexRequest->toDto());
+        $lengthAwarePaginator = $this->userQueries->paginate($userIndexRequest->toDto())->withQueryString();
 
         return UserResource::collection($lengthAwarePaginator);
     }
 
     public function store(UserCreateRequest $userCreateRequest): JsonResponse
     {
-        $user = $this->userService->createUser(
+        $user = $this->userCommands->create(
             $userCreateRequest->toDto(),
             RequestActor::from($userCreateRequest),
             $userCreateRequest,
@@ -42,7 +44,7 @@ final class AdminUserController extends Controller
 
     public function update(UserUpdateRequest $userUpdateRequest, User $user): JsonResponse
     {
-        $updatedUser = $this->userService->updateUser(
+        $updatedUser = $this->userCommands->update(
             $user,
             $userUpdateRequest->toDto(),
             RequestActor::from($userUpdateRequest),
@@ -54,7 +56,7 @@ final class AdminUserController extends Controller
 
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): JsonResponse
     {
-        $this->userService->deleteUser($user, RequestActor::from($userDestroyRequest), $userDestroyRequest);
+        $this->userCommands->delete($user, RequestActor::from($userDestroyRequest), $userDestroyRequest);
 
         return response()->json([], 204);
     }

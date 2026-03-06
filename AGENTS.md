@@ -71,7 +71,8 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - Controllers
     - Requests
     - Data DTOs
-    - Services
+    - Queries
+    - Commands
     - Policies/Gates
     - Broadcast events / notifications / channel callbacks
     - Resources/Transformers
@@ -165,6 +166,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Prefer extending `App\Modules\Shared\Http\Requests\DataFormRequest` for request DTO hydration; only hand-write `toDto()` when the payload cannot be expressed through `dataClass()` + `dtoPayload()`.
 - Prefer extending `App\Modules\Shared\Http\Requests\DataQueryRequest` for typed query DTO hydration so defaults, trimming, enum casting, and pagination rules stay shared instead of being reimplemented per index request.
 - When controller logic requires the authenticated application user, resolve it through `App\Modules\Shared\Auth\RequestActor::from($request)` instead of repeating nullable `user()` checks in transport code.
+- Prefer module-local `Queries` for reads and `Commands` for writes instead of generic mixed-purpose `Services`.
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
 - Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:
@@ -311,7 +313,7 @@ Minimum expectations:
 ## Developer Automation
 
 - Use `php artisan generate:module <ModuleName> --scaffold=crud --page=<PageName>` to scaffold a typed module shell (backend + frontend + feature test), including:
-    - module-local controller/request/data/routes under `app/Modules/<Module>/**`
+    - module-local controller/request/data/query/command/routes under `app/Modules/<Module>/**`
     - Eloquent model in default location `app/Models/<Model>.php`
     - migration in default location `database/migrations/*_create_<table>_table.php`
     - frontend CRUD module assets under `resources/js/modules/<module>/**` (table, create/update dialog, delete dialog, details dialog, page, form schema, frontend test)

@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Queries;
+
+use App\Models\{{ modelClass }};
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+final class {{ modelClass }}Queries
+{
+    public function paginate(int $perPage = 15): LengthAwarePaginator
+    {
+        return {{ modelClass }}::query()->latest()->paginate($perPage);
+    }
+}
