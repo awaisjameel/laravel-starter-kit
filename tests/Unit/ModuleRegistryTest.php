@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use App\Modules\Shared\Providers\ModuleServiceProvider;
 use App\Modules\Shared\Support\ModuleRegistry;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -83,6 +84,8 @@ final class ModuleRegistryTest extends TestCase
             'app/Modules/Billing/Providers/ModuleServiceProvider.php',
             'app/Modules/Users/Providers/ModuleServiceProvider.php',
         ], $this->toRelativePaths($basePath, ModuleRegistry::providerFiles($basePath)));
+
+        $this->assertSame([], ModuleRegistry::providerClasses($basePath));
     }
 
     public function test_registry_uses_cached_manifest_when_available(): void
@@ -100,7 +103,7 @@ final class ModuleRegistryTest extends TestCase
 <?php
 
 return [
-    'version' => 1,
+    'version' => 2,
     'routes' => [
         'web' => ['app/Modules/Cached/Routes/web.php'],
         'api' => [],
@@ -124,6 +127,11 @@ PHP
         $this->assertSame([
             'app/Modules/Cached/Listeners',
         ], $this->toRelativePaths($basePath, ModuleRegistry::listenerDirectories($basePath)));
+    }
+
+    public function test_registry_resolves_autoloadable_provider_classes_for_the_application(): void
+    {
+        $this->assertContains(ModuleServiceProvider::class, ModuleRegistry::providerClasses(base_path()));
     }
 
     private function createTemporaryBasePath(): string

@@ -54,6 +54,9 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - canonical runtime discovery source is `app/Modules/Shared/Support/ModuleRegistry.php`
     - routes, gates, channels, listeners, and module providers must be exposed through the registry, not through separate ad hoc discovery logic
     - generated manifest cache is `bootstrap/cache/modules.php`
+- Module providers:
+    - module-local bindings, observers, macros, and boot hooks belong in `app/Modules/<Module>/Providers/ModuleServiceProvider.php`
+    - module providers are auto-discovered through the registry and registered from `bootstrap/app.php`, so they continue to load with cached manifests and without edits to `bootstrap/providers.php` or `AppServiceProvider.php`
 - Module listener discovery:
     - backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery
     - do not manually register module listener classes in `AppServiceProvider`

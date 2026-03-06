@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Shared\Support;
 
+use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -11,7 +12,7 @@ use SplFileInfo;
 
 final class ModuleRegistry
 {
-    private const int CACHE_VERSION = 1;
+    private const int CACHE_VERSION = 2;
 
     private const string CACHE_RELATIVE_PATH = 'bootstrap/cache/modules.php';
 
@@ -211,6 +212,22 @@ final class ModuleRegistry
         $entries = self::discover($basePath)['providers'];
 
         return $entries;
+    }
+
+    /**
+     * @return list<class-string<ServiceProvider>>
+     */
+    public static function providerClasses(string $basePath): array
+    {
+        $classes = array_values(array_filter(
+            array_map(
+                static fn (string $providerFile): ?string => self::providerClassFromPath($basePath, $providerFile),
+                self::providerFiles($basePath),
+            ),
+            static fn (?string $providerClass): bool => $providerClass !== null,
+        ));
+
+        return array_values(array_unique($classes));
     }
 
     /**
@@ -575,6 +592,33 @@ final class ModuleRegistry
         }
 
         return $normalizedAbsolutePath;
+    }
+
+    /**
+     * @return class-string<ServiceProvider>|null
+     */
+    private static function providerClassFromPath(string $basePath, string $providerFile): ?string
+    {
+        $relativePath = str_replace('\\', '/', self::relativePath($basePath, $providerFile));
+
+        if (! str_starts_with($relativePath, 'app/') || ! str_ends_with($relativePath, '.php')) {
+            return null;
+        }
+
+        $classPath = mb_substr($relativePath, 4, -4);
+
+        if ($classPath === '') {
+            return null;
+        }
+
+        $providerClass = 'App\\'.str_replace('/', '\\', $classPath);
+
+        if (! class_exists($providerClass) || ! is_subclass_of($providerClass, ServiceProvider::class)) {
+            return null;
+        }
+
+        /** @var class-string<ServiceProvider> $providerClass */
+        return $providerClass;
     }
 
     /**

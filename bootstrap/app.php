@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         app_path('Listeners'),
         ...ModuleRegistry::listenerDirectories(base_path()),
     ])
+    ->registered(function (Application $application): void {
+        foreach (ModuleRegistry::providerClasses($application->basePath()) as $providerClass) {
+            $application->register($providerClass);
+        }
+    })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',

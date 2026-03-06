@@ -5,30 +5,16 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\User;
-use App\Modules\Shared\Realtime\Contracts\RealtimeDispatcher;
-use App\Modules\Shared\Realtime\Data\PresenceMemberData;
-use App\Modules\Shared\Realtime\Support\LaravelRealtimeDispatcher;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
-use Illuminate\Broadcasting\Broadcasters\Broadcaster;
-use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        $this->app->singleton(RealtimeDispatcher::class, LaravelRealtimeDispatcher::class);
-    }
-
     /**
      * Bootstrap any application services.
      */
@@ -55,23 +41,5 @@ final class AppServiceProvider extends ServiceProvider
                 'hash' => sha1((string) $user->getEmailForVerification()),
             ],
         ));
-
-        Broadcast::resolved(static function (BroadcastManager $broadcastManager): void {
-            $broadcaster = $broadcastManager->connection();
-
-            if (! $broadcaster instanceof Broadcaster) {
-                return;
-            }
-
-            $broadcaster->resolveAuthenticatedUserUsing(static function (Request $request): ?array {
-                $user = $request->user();
-
-                if (! $user instanceof User) {
-                    return null;
-                }
-
-                return PresenceMemberData::fromUser($user)->toArray();
-            });
-        });
     }
 }
