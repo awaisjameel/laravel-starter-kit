@@ -50,6 +50,10 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - `HandleAppearance`
     - `HandleInertiaRequests`
     - `SecurityHeaders`
+- Module registry:
+    - canonical runtime discovery source is `app/Modules/Shared/Support/ModuleRegistry.php`
+    - routes, gates, channels, listeners, and module providers must be exposed through the registry, not through separate ad hoc discovery logic
+    - generated manifest cache is `bootstrap/cache/modules.php`
 - Module listener discovery:
     - backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery
     - do not manually register module listener classes in `AppServiceProvider`
@@ -259,6 +263,7 @@ For users listing, allowed `sortBy` values are:
 
 Do not hand-edit generated artifacts:
 
+- `bootstrap/cache/modules.php`
 - `resources/js/routes/**`
 - `resources/js/actions/**`
 - `resources/js/wayfinder/index.ts`
@@ -268,7 +273,7 @@ Do not hand-edit generated artifacts:
 
 Generated artifacts are the canonical frontend contract output of backend types. Do not shadow them with manual duplicates.
 
-After route/DTO/enum changes run:
+After route/gate/channel/listener/provider/DTO/enum changes run:
 
 1. `composer generate`
 2. (if needed) `php artisan wayfinder:generate --no-interaction`

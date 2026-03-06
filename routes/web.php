@@ -2,19 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Modules\Shared\Support\ModuleRouteDiscovery;
+use App\Modules\Shared\Support\ModuleRegistry;
 
-$moduleRouteFiles = ModuleRouteDiscovery::discover(
-    basePath: base_path(),
-    routeType: 'web',
-    priorityModules: [
-        'Marketing',
-        'Auth',
-        'Dashboard',
-        'Settings',
-        'Users',
-    ],
-);
+$moduleRouteFiles = ModuleRegistry::webRoutes(base_path());
 
 foreach ($moduleRouteFiles as $moduleRouteFile) {
     require $moduleRouteFile;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Modules\Shared\Support\ModuleRouteDiscovery;
+use App\Modules\Shared\Support\ModuleRegistry;
 use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -15,13 +15,7 @@ Route::middleware('auth:sanctum')
     ->withoutMiddleware([VerifyCsrfToken::class])
     ->match(['get', 'post'], 'broadcasting/user-auth', [BroadcastController::class, 'authenticateUser']);
 
-$moduleRouteFiles = ModuleRouteDiscovery::discover(
-    basePath: base_path(),
-    routeType: 'api',
-    priorityModules: [
-        'Api/V1',
-    ],
-);
+$moduleRouteFiles = ModuleRegistry::apiRoutes(base_path());
 
 foreach ($moduleRouteFiles as $moduleRouteFile) {
     require $moduleRouteFile;

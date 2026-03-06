@@ -93,10 +93,12 @@
             "npm run typecheck"
         ],
         "generate": [
+            "@php artisan modules:cache --no-interaction",
             "@php artisan typescript:transform",
             "@php artisan wayfinder:generate"
         ],
         "generate-and-cleanup": [
+            "@php artisan modules:cache --no-interaction",
             "@php artisan typescript:transform",
             "@php artisan wayfinder:generate",
             "@php vendor/bin/pint --parallel",

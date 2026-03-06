@@ -2,15 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Modules\Shared\Support\ModuleChannelDiscovery;
+use App\Modules\Shared\Support\ModuleRegistry;
 
-$moduleChannelFiles = ModuleChannelDiscovery::discover(
-    basePath: base_path(),
-    priorityModules: [
-        'Shared',
-        'Users',
-    ],
-);
+$moduleChannelFiles = ModuleRegistry::channelFiles(base_path());
 
 foreach ($moduleChannelFiles as $moduleChannelFile) {
     require $moduleChannelFile;

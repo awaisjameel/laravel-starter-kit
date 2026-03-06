@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
-use App\Modules\Shared\Support\ModuleListenerDiscovery;
+use App\Modules\Shared\Support\ModuleRegistry;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,10 +15,7 @@ use Illuminate\Http\Request;
 return Application::configure(basePath: dirname(__DIR__))
     ->withEvents([
         app_path('Listeners'),
-        ...ModuleListenerDiscovery::discoverDirectories(
-            basePath: dirname(__DIR__),
-            priorityModules: ['Users'],
-        ),
+        ...ModuleRegistry::listenerDirectories(base_path()),
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
