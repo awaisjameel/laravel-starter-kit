@@ -6,6 +6,7 @@ namespace App\Modules\Api\V1\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Api\V1\Http\Resources\UserResource;
+use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,6 +14,6 @@ final class MeController extends Controller
 {
     public function __invoke(Request $request): JsonResource
     {
-        return UserResource::make($request->user());
+        return UserResource::make(RequestActor::from($request));
     }
 }

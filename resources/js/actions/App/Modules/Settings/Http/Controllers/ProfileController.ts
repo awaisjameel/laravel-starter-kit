@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../../../wayfinder'
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::edit
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:22
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:23
  * @route '/app/settings/profile'
  */
 export const edit = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ edit.definition = {
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::edit
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:22
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:23
  * @route '/app/settings/profile'
  */
 edit.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ edit.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::edit
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:22
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:23
  * @route '/app/settings/profile'
  */
 edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ edit.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::edit
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:22
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:23
  * @route '/app/settings/profile'
  */
 edit.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -78,7 +78,7 @@ update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::destroy
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:63
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:58
  * @route '/app/settings/profile'
  */
 export const destroy = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -93,7 +93,7 @@ destroy.definition = {
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::destroy
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:63
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:58
  * @route '/app/settings/profile'
  */
 destroy.url = (options?: RouteQueryOptions) => {
@@ -102,7 +102,7 @@ destroy.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::destroy
- * @see app/Modules/Settings/Http/Controllers/ProfileController.php:63
+ * @see app/Modules/Settings/Http/Controllers/ProfileController.php:58
  * @route '/app/settings/profile'
  */
 destroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({

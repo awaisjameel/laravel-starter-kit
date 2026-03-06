@@ -7,6 +7,7 @@ namespace App\Modules\Settings\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Settings\Http\Requests\ProfileDestroyRequest;
 use App\Modules\Settings\Http\Requests\ProfileUpdateRequest;
+use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,11 +22,10 @@ final class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        $user = $request->user();
+        $user = RequestActor::from($request);
 
         return Inertia::render('modules/settings/pages/Profile', [
-            'mustVerifyEmail' => $user !== null
-                && in_array(MustVerifyEmail::class, class_implements($user), true),
+            'mustVerifyEmail' => in_array(MustVerifyEmail::class, class_implements($user), true),
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -35,12 +35,7 @@ final class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $profileUpdateRequest): RedirectResponse
     {
-        $user = $profileUpdateRequest->user();
-
-        if ($user === null) {
-            return redirect()->route('auth.login.create');
-        }
-
+        $user = RequestActor::from($profileUpdateRequest);
         $profileUpdateData = $profileUpdateRequest->toDto();
 
         $user->fill([
@@ -62,11 +57,11 @@ final class ProfileController extends Controller
      */
     public function destroy(ProfileDestroyRequest $profileDestroyRequest): RedirectResponse
     {
-        $user = $profileDestroyRequest->user();
+        $user = RequestActor::from($profileDestroyRequest);
 
         Auth::logout();
 
-        $user?->delete();
+        $user->delete();
 
         $profileDestroyRequest->session()->invalidate();
         $profileDestroyRequest->session()->regenerateToken();

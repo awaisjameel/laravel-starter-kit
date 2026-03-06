@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationNotificationController::store
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:16
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
  * @route '/auth/email/verification-notification'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationNotificationController::store
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:16
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
  * @route '/auth/email/verification-notification'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationNotificationController::store
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:16
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
  * @route '/auth/email/verification-notification'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({

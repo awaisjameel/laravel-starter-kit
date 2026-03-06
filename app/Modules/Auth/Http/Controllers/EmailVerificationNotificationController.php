@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -15,11 +16,7 @@ final class EmailVerificationNotificationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $user = $request->user();
-
-        if ($user === null) {
-            return redirect()->route('auth.login.create');
-        }
+        $user = RequestActor::from($request);
 
         if ($user->hasVerifiedEmail()) {
             return redirect()->intended(route('app.dashboard', absolute: false));

@@ -8,6 +8,8 @@ use App\Enums\UserRole;
 use App\Modules\Shared\Data\UserViewData;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,13 +19,14 @@ use Laravel\Sanctum\HasApiTokens;
  * @property UserRole $role
  * @property Carbon|null $email_verified_at
  */
-final class User extends Authenticatable
+final class User extends Authenticatable implements MustVerifyEmailContract
 {
     use HasApiTokens;
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    use MustVerifyEmail;
     use Notifiable;
 
     protected $guarded = [];

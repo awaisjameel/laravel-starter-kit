@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:28
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:29
  * @route '/auth/confirm-password'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:28
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:29
  * @route '/auth/confirm-password'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::store
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:28
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:29
  * @route '/auth/confirm-password'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({

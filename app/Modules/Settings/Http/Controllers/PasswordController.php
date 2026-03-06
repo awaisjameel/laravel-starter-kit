@@ -6,6 +6,7 @@ namespace App\Modules\Settings\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Settings\Http\Requests\PasswordUpdateRequest;
+use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -25,12 +26,8 @@ final class PasswordController extends Controller
      */
     public function update(PasswordUpdateRequest $passwordUpdateRequest): RedirectResponse
     {
-        $user = $passwordUpdateRequest->user();
         $passwordUpdateData = $passwordUpdateRequest->toDto();
-
-        if ($user === null) {
-            return redirect()->route('auth.login.create');
-        }
+        $user = RequestActor::from($passwordUpdateRequest);
 
         $user->update([
             'password' => $passwordUpdateData->password,

@@ -7,6 +7,7 @@ namespace App\Modules\Api\V1\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Api\V1\Http\Resources\UserResource;
+use App\Modules\Shared\Auth\RequestActor;
 use App\Modules\Users\Http\Requests\UserCreateRequest;
 use App\Modules\Users\Http\Requests\UserDestroyRequest;
 use App\Modules\Users\Http\Requests\UserIndexRequest;
@@ -30,39 +31,30 @@ final class AdminUserController extends Controller
 
     public function store(UserCreateRequest $userCreateRequest): JsonResponse
     {
-        $actor = $userCreateRequest->user();
-
-        if ($actor === null) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $user = $this->userService->createUser($userCreateRequest->toDto(), $actor, $userCreateRequest);
+        $user = $this->userService->createUser(
+            $userCreateRequest->toDto(),
+            RequestActor::from($userCreateRequest),
+            $userCreateRequest,
+        );
 
         return UserResource::make($user)->response()->setStatusCode(201);
     }
 
     public function update(UserUpdateRequest $userUpdateRequest, User $user): JsonResponse
     {
-        $actor = $userUpdateRequest->user();
-
-        if ($actor === null) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $updatedUser = $this->userService->updateUser($user, $userUpdateRequest->toDto(), $actor, $userUpdateRequest);
+        $updatedUser = $this->userService->updateUser(
+            $user,
+            $userUpdateRequest->toDto(),
+            RequestActor::from($userUpdateRequest),
+            $userUpdateRequest,
+        );
 
         return UserResource::make($updatedUser)->response();
     }
 
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): JsonResponse
     {
-        $actor = $userDestroyRequest->user();
-
-        if ($actor === null) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-        $this->userService->deleteUser($user, $actor, $userDestroyRequest);
+        $this->userService->deleteUser($user, RequestActor::from($userDestroyRequest), $userDestroyRequest);
 
         return response()->json([], 204);
     }

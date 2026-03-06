@@ -175,7 +175,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::confirm
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:20
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:21
  * @route '/auth/confirm-password'
  */
 export const confirm = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -190,7 +190,7 @@ confirm.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::confirm
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:20
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:21
  * @route '/auth/confirm-password'
  */
 confirm.url = (options?: RouteQueryOptions) => {
@@ -199,7 +199,7 @@ confirm.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::confirm
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:20
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:21
  * @route '/auth/confirm-password'
  */
 confirm.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -208,7 +208,7 @@ confirm.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Auth\Http\Controllers\ConfirmablePasswordController::confirm
- * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:20
+ * @see app/Modules/Auth/Http/Controllers/ConfirmablePasswordController.php:21
  * @route '/auth/confirm-password'
  */
 confirm.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

@@ -6,6 +6,7 @@ namespace App\Modules\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Shared\Auth\RequestActor;
 use App\Modules\Users\Data\UsersIndexPageData;
 use App\Modules\Users\Http\Requests\UserCreateRequest;
 use App\Modules\Users\Http\Requests\UserDestroyRequest;
@@ -34,13 +35,11 @@ final class UserController extends Controller
 
     public function store(UserCreateRequest $userCreateRequest): RedirectResponse
     {
-        $actor = $userCreateRequest->user();
-
-        if ($actor === null) {
-            return redirect()->route('auth.login.create');
-        }
-
-        $this->userService->createUser($userCreateRequest->toDto(), $actor, $userCreateRequest);
+        $this->userService->createUser(
+            $userCreateRequest->toDto(),
+            RequestActor::from($userCreateRequest),
+            $userCreateRequest,
+        );
 
         return redirect()->route('app.admin.users.index')
             ->with('message', 'User created successfully');
@@ -48,16 +47,10 @@ final class UserController extends Controller
 
     public function update(UserUpdateRequest $userUpdateRequest, User $user): RedirectResponse
     {
-        $actor = $userUpdateRequest->user();
-
-        if ($actor === null) {
-            return redirect()->route('auth.login.create');
-        }
-
         $this->userService->updateUser(
             $user,
             $userUpdateRequest->toDto(),
-            $actor,
+            RequestActor::from($userUpdateRequest),
             $userUpdateRequest
         );
 
@@ -67,13 +60,7 @@ final class UserController extends Controller
 
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): RedirectResponse
     {
-        $actor = $userDestroyRequest->user();
-
-        if ($actor === null) {
-            return redirect()->route('auth.login.create');
-        }
-
-        $this->userService->deleteUser($user, $actor, $userDestroyRequest);
+        $this->userService->deleteUser($user, RequestActor::from($userDestroyRequest), $userDestroyRequest);
 
         return redirect()->route('app.admin.users.index')
             ->with('message', 'User deleted successfully');

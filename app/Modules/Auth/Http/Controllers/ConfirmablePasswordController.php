@@ -6,6 +6,7 @@ namespace App\Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Auth\Http\Requests\ConfirmPasswordRequest;
+use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -27,15 +28,13 @@ final class ConfirmablePasswordController extends Controller
      */
     public function store(ConfirmPasswordRequest $confirmPasswordRequest): RedirectResponse
     {
-        $user = $confirmPasswordRequest->user();
+        $user = RequestActor::from($confirmPasswordRequest);
         $confirmPasswordData = $confirmPasswordRequest->toDto();
 
-        if (
-            $user === null || ! Auth::guard('web')->validate([
-                'email' => $user->email,
-                'password' => $confirmPasswordData->password,
-            ])
-        ) {
+        if (! Auth::guard('web')->validate([
+            'email' => $user->email,
+            'password' => $confirmPasswordData->password,
+        ])) {
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),
             ]);

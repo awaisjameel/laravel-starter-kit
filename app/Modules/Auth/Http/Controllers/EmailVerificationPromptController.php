@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,11 +18,7 @@ final class EmailVerificationPromptController extends Controller
      */
     public function __invoke(Request $request): RedirectResponse|Response
     {
-        $user = $request->user();
-
-        if ($user === null) {
-            return redirect()->route('auth.login.create');
-        }
+        $user = RequestActor::from($request);
 
         return $user->hasVerifiedEmail()
             ? redirect()->intended(route('app.dashboard', absolute: false))
