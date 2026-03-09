@@ -6,9 +6,7 @@ export const autoImportDirs = [
     'resources/js/stores/**',
     'resources/js/lib/**',
     'resources/js/utils/**',
-    'resources/js/modules/**/forms/**',
     'resources/js/modules/**/composables/**',
-    'resources/js/modules/**/contracts/**',
     'resources/js/modules/**/helpers/**'
 ]
 
@@ -90,15 +88,7 @@ export const autoImportRestrictedPatterns = [
         message: autoImportMessage
     },
     {
-        group: ['@/modules/**/forms/*', '@/modules/**/forms/**'],
-        message: autoImportMessage
-    },
-    {
         group: ['@/modules/**/composables/*', '@/modules/**/composables/**'],
-        message: autoImportMessage
-    },
-    {
-        group: ['@/modules/**/contracts/*', '@/modules/**/contracts/**'],
         message: autoImportMessage
     },
     {

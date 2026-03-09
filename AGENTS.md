@@ -57,6 +57,10 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Module providers:
     - module-local bindings, observers, macros, and boot hooks belong in `app/Modules/<Module>/Providers/ModuleServiceProvider.php`
     - module providers are auto-discovered through the registry and registered from `bootstrap/app.php`, so they continue to load with cached manifests and without edits to `bootstrap/providers.php` or `AppServiceProvider.php`
+- CRUD resource manifests:
+    - generated CRUD resources own a manifest at `app/Modules/<Module>/Manifests/<Page>Resource.php`
+    - the manifest is the module-local source of truth for generated resource conventions such as route defaults, role scope, API defaults, table columns, form fields, and realtime enablement
+    - when regenerating an existing CRUD resource, `generate:module` should prefer manifest defaults over requiring the same route/role/API flags again
 - Module listener discovery:
     - backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery
     - do not manually register module listener classes in `AppServiceProvider`
@@ -106,7 +110,8 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Auto-import contract:
     - Canonical source is `frontend-auto-import.config.mjs`.
     - `vite.config.ts`, `vitest.config.ts`, and `eslint.config.js` must consume this shared config; do not duplicate symbol lists.
-    - Module `forms/**`, `composables/**`, `contracts/**`, and `helpers/**` exports are auto-imported; do not manually import these paths in frontend files.
+    - Shared app-level composables, stores, libs, utils, and module-local `composables/**` and `helpers/**` exports are auto-imported.
+    - Module-local `forms/**` and `contracts/**` are not auto-imported; import them explicitly inside the owning module.
     - Module Vue components are auto-registered from `resources/js/modules/**` using namespace-style names (`<Module><Component>`), e.g. `UsersTable`, `SettingsDeleteUser`; do not manually import module components.
 - Navigation contract:
     - Centralized in `resources/js/config/navigation.ts`.
@@ -174,11 +179,13 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - When the same backend use case is exposed through multiple transports, keep orchestration in module-local `Handlers` and keep controllers as thin response adapters.
 - Inertia page controllers should prefer backend page DTOs (`#[TypeScript]` Spatie Data classes) rendered via `PageResponder` instead of inline prop arrays.
 - API controllers should prefer `JsonResource` or typed payloads returned through `ApiResponder` instead of ad hoc `response()->json(...)` calls.
+- Generated CRUD frontend/backend resource shape should be driven from the module-local resource manifest rather than by manually coordinating route, table, form, and API changes across multiple generated files.
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
 - Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:
     - prefer Spatie Data classes (`extends Data`) for payload/query/page contracts.
     - annotate exported contracts with `#[TypeScript]`.
+    - exported module CRUD page/list DTO class names must be module-prefixed (for example `BillingIndexPageData`, `BillingIndexListItemData`) so generated TypeScript contracts remain globally unique.
 - Replace bounded string query values with enums in backend contracts (e.g., sort fields/directions), then consume generated enums in frontend.
 - Realtime channel patterns, event names, presence member payloads, and broadcast notification payloads are backend-owned contracts and must be exported via TypeScript generation when consumed on the frontend.
 
@@ -207,6 +214,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Do not define inline form schema arrays (`const fields = [...]`) in pages/components; keep form schemas in `resources/js/modules/**/forms`.
 - Do not duplicate navigation arrays in pages/layouts/composables; centralize navigation definitions in `resources/js/config/navigation.ts`.
 - Feature module files under `resources/js/modules/**` must not import other feature modules directly; move shared code to shared/base/config layers.
+- Generated CRUD module pages/components should import their own module-local `forms/**` and `contracts/**` symbols explicitly.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
 - Feature modules must consume shared realtime composables (`useRealtimeEvent`, `useRealtimePresence`, `useRealtimeNotification`, `useRealtimeModel`, `useRealtimeConnection`) instead of using Echo directly.
 
@@ -327,6 +335,7 @@ Minimum expectations:
 - Use `php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageName>` to scaffold page-level frontend contracts for an existing module.
 - `--scaffold=crud-api` should generate module-local `Handlers` in addition to `Queries` and `Commands`, and generated web/API controllers should depend on those handlers instead of duplicating orchestration.
 - CRUD web scaffolds should generate backend `*PageData` / `*ListItemData` DTOs and frontend contracts should consume the generated types instead of redefining page payload shapes inline.
+- CRUD scaffolds should also generate `app/Modules/<Module>/Manifests/<Page>Resource.php`; for later regeneration, developers should edit that manifest and rerun `generate:module` with `--extend --force` instead of hand-editing multiple generated files.
 - Command options contract:
     - `--scaffold=page|crud|api|crud-api` (interactive prompt when omitted; defaults to `crud` for fresh mode and `page` for extend mode)
     - `--route-profile=app|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `app`)

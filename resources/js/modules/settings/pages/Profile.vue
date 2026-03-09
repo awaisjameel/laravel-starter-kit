@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
     import type { ProfilePageData } from '@/types/app-data'
+    import { createProfileFormDefaults, profileFormContract, type ProfileFormValues } from '../forms/profile-form-schema'
 
     defineProps<ProfilePageData>()
 

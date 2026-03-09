@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
+
     interface Props {
         open: boolean
         item: {{ pagePascalName }}ListItem
@@ -10,8 +12,12 @@
         'update:open': [open: boolean]
     }>()
 
-    const formatDate = (value: string | null): string => {
+    const formatDate = (value: string | null | undefined): string => {
         if (value === null) {
+            return 'N/A'
+        }
+
+        if (value === undefined) {
             return 'N/A'
         }
 

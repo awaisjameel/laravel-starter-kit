@@ -2,6 +2,7 @@
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import { SortDirection, UserSortBy, type UsersIndexPageData, type UserViewData } from '@/types/app-data'
     import { Plus } from 'lucide-vue-next'
+    import { useUsersIndexRealtime } from '../contracts/realtime'
 
     type UserSortColumn = `${UserSortBy}`
 

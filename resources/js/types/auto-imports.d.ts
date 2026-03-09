@@ -6,190 +6,32 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const Avatar: typeof import('../components/ui/avatar/index').Avatar
-  const AvatarFallback: typeof import('../components/ui/avatar/index').AvatarFallback
-  const AvatarImage: typeof import('../components/ui/avatar/index').AvatarImage
-  const Breadcrumb: typeof import('../components/ui/breadcrumb/index').Breadcrumb
-  const BreadcrumbEllipsis: typeof import('../components/ui/breadcrumb/index').BreadcrumbEllipsis
-  const BreadcrumbItem: typeof import('../components/ui/breadcrumb/index').BreadcrumbItem
-  const BreadcrumbLink: typeof import('../components/ui/breadcrumb/index').BreadcrumbLink
-  const BreadcrumbList: typeof import('../components/ui/breadcrumb/index').BreadcrumbList
-  const BreadcrumbPage: typeof import('../components/ui/breadcrumb/index').BreadcrumbPage
-  const BreadcrumbSeparator: typeof import('../components/ui/breadcrumb/index').BreadcrumbSeparator
-  const Button: typeof import('../components/ui/button/index').Button
-  const Card: typeof import('../components/ui/card/index').Card
-  const CardAction: typeof import('../components/ui/card/index').CardAction
-  const CardContent: typeof import('../components/ui/card/index').CardContent
-  const CardDescription: typeof import('../components/ui/card/index').CardDescription
-  const CardFooter: typeof import('../components/ui/card/index').CardFooter
-  const CardHeader: typeof import('../components/ui/card/index').CardHeader
-  const CardTitle: typeof import('../components/ui/card/index').CardTitle
-  const Checkbox: typeof import('../components/ui/checkbox/index').Checkbox
-  const Collapsible: typeof import('../components/ui/collapsible/index').Collapsible
-  const CollapsibleContent: typeof import('../components/ui/collapsible/index').CollapsibleContent
-  const CollapsibleTrigger: typeof import('../components/ui/collapsible/index').CollapsibleTrigger
   const Deferred: typeof import('@inertiajs/vue3').Deferred
-  const Dialog: typeof import('../components/ui/dialog/index').Dialog
-  const DialogClose: typeof import('../components/ui/dialog/index').DialogClose
-  const DialogContent: typeof import('../components/ui/dialog/index').DialogContent
-  const DialogDescription: typeof import('../components/ui/dialog/index').DialogDescription
-  const DialogFooter: typeof import('../components/ui/dialog/index').DialogFooter
-  const DialogHeader: typeof import('../components/ui/dialog/index').DialogHeader
-  const DialogOverlay: typeof import('../components/ui/dialog/index').DialogOverlay
-  const DialogScrollContent: typeof import('../components/ui/dialog/index').DialogScrollContent
-  const DialogTitle: typeof import('../components/ui/dialog/index').DialogTitle
-  const DialogTrigger: typeof import('../components/ui/dialog/index').DialogTrigger
-  const DropdownMenu: typeof import('../components/ui/dropdown-menu/index').DropdownMenu
-  const DropdownMenuCheckboxItem: typeof import('../components/ui/dropdown-menu/index').DropdownMenuCheckboxItem
-  const DropdownMenuContent: typeof import('../components/ui/dropdown-menu/index').DropdownMenuContent
-  const DropdownMenuGroup: typeof import('../components/ui/dropdown-menu/index').DropdownMenuGroup
-  const DropdownMenuItem: typeof import('../components/ui/dropdown-menu/index').DropdownMenuItem
-  const DropdownMenuLabel: typeof import('../components/ui/dropdown-menu/index').DropdownMenuLabel
-  const DropdownMenuPortal: typeof import('../components/ui/dropdown-menu/index').DropdownMenuPortal
-  const DropdownMenuRadioGroup: typeof import('../components/ui/dropdown-menu/index').DropdownMenuRadioGroup
-  const DropdownMenuRadioItem: typeof import('../components/ui/dropdown-menu/index').DropdownMenuRadioItem
-  const DropdownMenuSeparator: typeof import('../components/ui/dropdown-menu/index').DropdownMenuSeparator
-  const DropdownMenuShortcut: typeof import('../components/ui/dropdown-menu/index').DropdownMenuShortcut
-  const DropdownMenuSub: typeof import('../components/ui/dropdown-menu/index').DropdownMenuSub
-  const DropdownMenuSubContent: typeof import('../components/ui/dropdown-menu/index').DropdownMenuSubContent
-  const DropdownMenuSubTrigger: typeof import('../components/ui/dropdown-menu/index').DropdownMenuSubTrigger
-  const DropdownMenuTrigger: typeof import('../components/ui/dropdown-menu/index').DropdownMenuTrigger
   const EffectScope: typeof import('vue').EffectScope
-  const Head: (typeof import('@inertiajs/vue3'))['Head']
-  const Inertia: (typeof import('@inertiajs/core'))['default']
-  const InertiaMethod: (typeof import('@inertiajs/core'))['Method']
-  const Input: typeof import('../components/ui/input/index').Input
-  const Label: typeof import('../components/ui/label/index').Label
   const Method: typeof import('@inertiajs/core').Method
-  const NavigationMenu: typeof import('../components/ui/navigation-menu/index').NavigationMenu
-  const NavigationMenuContent: typeof import('../components/ui/navigation-menu/index').NavigationMenuContent
-  const NavigationMenuIndicator: typeof import('../components/ui/navigation-menu/index').NavigationMenuIndicator
-  const NavigationMenuItem: typeof import('../components/ui/navigation-menu/index').NavigationMenuItem
-  const NavigationMenuLink: typeof import('../components/ui/navigation-menu/index').NavigationMenuLink
-  const NavigationMenuList: typeof import('../components/ui/navigation-menu/index').NavigationMenuList
-  const NavigationMenuTrigger: typeof import('../components/ui/navigation-menu/index').NavigationMenuTrigger
-  const NavigationMenuViewport: typeof import('../components/ui/navigation-menu/index').NavigationMenuViewport
-  const Pagination: typeof import('../components/ui/pagination/index').Pagination
-  const PaginationContent: typeof import('../components/ui/pagination/index').PaginationContent
-  const PaginationEllipsis: typeof import('../components/ui/pagination/index').PaginationEllipsis
-  const PaginationFirst: typeof import('../components/ui/pagination/index').PaginationFirst
-  const PaginationItem: typeof import('../components/ui/pagination/index').PaginationItem
-  const PaginationLast: typeof import('../components/ui/pagination/index').PaginationLast
-  const PaginationNext: typeof import('../components/ui/pagination/index').PaginationNext
-  const PaginationPrevious: typeof import('../components/ui/pagination/index').PaginationPrevious
   const RealtimeChannelParameter: typeof import('../lib/realtime/channels').RealtimeChannelParameter
-  const SIDEBAR_COOKIE_MAX_AGE: typeof import('../components/ui/sidebar/utils').SIDEBAR_COOKIE_MAX_AGE
-  const SIDEBAR_COOKIE_NAME: typeof import('../components/ui/sidebar/utils').SIDEBAR_COOKIE_NAME
-  const SIDEBAR_KEYBOARD_SHORTCUT: typeof import('../components/ui/sidebar/utils').SIDEBAR_KEYBOARD_SHORTCUT
-  const SIDEBAR_WIDTH: typeof import('../components/ui/sidebar/utils').SIDEBAR_WIDTH
-  const SIDEBAR_WIDTH_ICON: typeof import('../components/ui/sidebar/utils').SIDEBAR_WIDTH_ICON
-  const SIDEBAR_WIDTH_MOBILE: typeof import('../components/ui/sidebar/utils').SIDEBAR_WIDTH_MOBILE
-  const Select: typeof import('../components/ui/select/index').Select
-  const SelectContent: typeof import('../components/ui/select/index').SelectContent
-  const SelectGroup: typeof import('../components/ui/select/index').SelectGroup
-  const SelectItem: typeof import('../components/ui/select/index').SelectItem
-  const SelectItemText: typeof import('../components/ui/select/index').SelectItemText
-  const SelectLabel: typeof import('../components/ui/select/index').SelectLabel
-  const SelectScrollDownButton: typeof import('../components/ui/select/index').SelectScrollDownButton
-  const SelectScrollUpButton: typeof import('../components/ui/select/index').SelectScrollUpButton
-  const SelectSeparator: typeof import('../components/ui/select/index').SelectSeparator
-  const SelectTrigger: typeof import('../components/ui/select/index').SelectTrigger
-  const SelectValue: typeof import('../components/ui/select/index').SelectValue
-  const Separator: typeof import('../components/ui/separator/index').Separator
-  const Sheet: typeof import('../components/ui/sheet/index').Sheet
-  const SheetClose: typeof import('../components/ui/sheet/index').SheetClose
-  const SheetContent: typeof import('../components/ui/sheet/index').SheetContent
-  const SheetDescription: typeof import('../components/ui/sheet/index').SheetDescription
-  const SheetFooter: typeof import('../components/ui/sheet/index').SheetFooter
-  const SheetHeader: typeof import('../components/ui/sheet/index').SheetHeader
-  const SheetTitle: typeof import('../components/ui/sheet/index').SheetTitle
-  const SheetTrigger: typeof import('../components/ui/sheet/index').SheetTrigger
-  const Sidebar: typeof import('../components/ui/sidebar/index').Sidebar
-  const SidebarContent: typeof import('../components/ui/sidebar/index').SidebarContent
-  const SidebarFooter: typeof import('../components/ui/sidebar/index').SidebarFooter
-  const SidebarGroup: typeof import('../components/ui/sidebar/index').SidebarGroup
-  const SidebarGroupAction: typeof import('../components/ui/sidebar/index').SidebarGroupAction
-  const SidebarGroupContent: typeof import('../components/ui/sidebar/index').SidebarGroupContent
-  const SidebarGroupLabel: typeof import('../components/ui/sidebar/index').SidebarGroupLabel
-  const SidebarHeader: typeof import('../components/ui/sidebar/index').SidebarHeader
-  const SidebarInput: typeof import('../components/ui/sidebar/index').SidebarInput
-  const SidebarInset: typeof import('../components/ui/sidebar/index').SidebarInset
-  const SidebarMenu: typeof import('../components/ui/sidebar/index').SidebarMenu
-  const SidebarMenuAction: typeof import('../components/ui/sidebar/index').SidebarMenuAction
-  const SidebarMenuBadge: typeof import('../components/ui/sidebar/index').SidebarMenuBadge
-  const SidebarMenuButton: typeof import('../components/ui/sidebar/index').SidebarMenuButton
-  const SidebarMenuItem: typeof import('../components/ui/sidebar/index').SidebarMenuItem
-  const SidebarMenuSkeleton: typeof import('../components/ui/sidebar/index').SidebarMenuSkeleton
-  const SidebarMenuSub: typeof import('../components/ui/sidebar/index').SidebarMenuSub
-  const SidebarMenuSubButton: typeof import('../components/ui/sidebar/index').SidebarMenuSubButton
-  const SidebarMenuSubItem: typeof import('../components/ui/sidebar/index').SidebarMenuSubItem
-  const SidebarProvider: typeof import('../components/ui/sidebar/index').SidebarProvider
-  const SidebarRail: typeof import('../components/ui/sidebar/index').SidebarRail
-  const SidebarSeparator: typeof import('../components/ui/sidebar/index').SidebarSeparator
-  const SidebarTrigger: typeof import('../components/ui/sidebar/index').SidebarTrigger
-  const Skeleton: typeof import('../components/ui/skeleton/index').Skeleton
-  const Table: typeof import('../components/ui/table/index').Table
-  const TableBody: typeof import('../components/ui/table/index').TableBody
-  const TableCaption: typeof import('../components/ui/table/index').TableCaption
-  const TableCell: typeof import('../components/ui/table/index').TableCell
-  const TableEmpty: typeof import('../components/ui/table/index').TableEmpty
-  const TableFooter: typeof import('../components/ui/table/index').TableFooter
-  const TableHead: typeof import('../components/ui/table/index').TableHead
-  const TableHeader: typeof import('../components/ui/table/index').TableHeader
-  const TableRow: typeof import('../components/ui/table/index').TableRow
-  const Tooltip: typeof import('../components/ui/tooltip/index').Tooltip
-  const TooltipContent: typeof import('../components/ui/tooltip/index').TooltipContent
-  const TooltipProvider: typeof import('../components/ui/tooltip/index').TooltipProvider
-  const TooltipTrigger: typeof import('../components/ui/tooltip/index').TooltipTrigger
   const Ziggy: typeof import('ziggy-js').Ziggy
-  const acceptHMRUpdate: (typeof import('pinia'))['acceptHMRUpdate']
   const apiRequest: typeof import('../composables/useApiClient').apiRequest
   const appRoutes: typeof import('@/routes/app').default
   const authRoutes: typeof import('@/routes/auth').default
   const bindGlobalRouteHelper: typeof import('../utils/ziggy').bindGlobalRouteHelper
-  const buildConfirmPasswordFormFields: typeof import('../modules/auth/forms/confirm-password-form-schema').buildConfirmPasswordFormFields
   const buildDashboardBreadcrumbs: typeof import('@/config/breadcrumbs').buildDashboardBreadcrumbs
-  const buildDeleteAccountFormFields: typeof import('../modules/settings/forms/delete-account-form-schema').buildDeleteAccountFormFields
-  const buildForgotPasswordFormFields: typeof import('../modules/auth/forms/forgot-password-form-schema').buildForgotPasswordFormFields
-  const buildLoginFormFields: typeof import('../modules/auth/forms/login-form-schema').buildLoginFormFields
-  const buildPasswordFormFields: typeof import('../modules/settings/forms/password-form-schema').buildPasswordFormFields
-  const buildProfileFormFields: typeof import('../modules/settings/forms/profile-form-schema').buildProfileFormFields
-  const buildRegisterFormFields: typeof import('../modules/auth/forms/register-form-schema').buildRegisterFormFields
-  const buildResetPasswordFormFields: typeof import('../modules/auth/forms/reset-password-form-schema').buildResetPasswordFormFields
   const buildSettingsAppearanceBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsAppearanceBreadcrumbs
   const buildSettingsPasswordBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsPasswordBreadcrumbs
   const buildSettingsProfileBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsProfileBreadcrumbs
-  const buildUserFormFields: typeof import('../modules/users/forms/user-form-schema').buildUserFormFields
   const buildUsersBreadcrumbs: typeof import('@/config/breadcrumbs').buildUsersBreadcrumbs
-  const buttonVariants: typeof import('../components/ui/button/index').buttonVariants
   const clearApiQueryCache: typeof import('../composables/useApiQuery').clearApiQueryCache
   const cn: typeof import('../lib/utils').cn
   const computed: typeof import('vue').computed
   const configureRealtime: typeof import('../lib/realtime/config').configureRealtime
-  const confirmPasswordFormContract: typeof import('../modules/auth/forms/confirm-password-form-schema').confirmPasswordFormContract
   const createApp: typeof import('vue').createApp
-  const createConfirmPasswordFormDefaults: typeof import('../modules/auth/forms/confirm-password-form-schema').createConfirmPasswordFormDefaults
-  const createDeleteAccountFormDefaults: typeof import('../modules/settings/forms/delete-account-form-schema').createDeleteAccountFormDefaults
-  const createForgotPasswordFormDefaults: typeof import('../modules/auth/forms/forgot-password-form-schema').createForgotPasswordFormDefaults
-  const createLoginFormDefaults: typeof import('../modules/auth/forms/login-form-schema').createLoginFormDefaults
-  const createPasswordFormDefaults: typeof import('../modules/settings/forms/password-form-schema').createPasswordFormDefaults
-  const createPinia: (typeof import('pinia'))['createPinia']
-  const createProfileFormDefaults: typeof import('../modules/settings/forms/profile-form-schema').createProfileFormDefaults
   const createRealtimeConfig: typeof import('../lib/realtime/config').createRealtimeConfig
-  const createRegisterFormDefaults: typeof import('../modules/auth/forms/register-form-schema').createRegisterFormDefaults
-  const createResetPasswordFormDefaults: typeof import('../modules/auth/forms/reset-password-form-schema').createResetPasswordFormDefaults
-  const createUserFormDefaults: typeof import('../modules/users/forms/user-form-schema').createUserFormDefaults
   const customRef: typeof import('vue').customRef
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const defineFormContract: typeof import('../lib/forms').defineFormContract
-  const defineStore: (typeof import('pinia'))['defineStore']
-  const deleteAccountFormContract: typeof import('../modules/settings/forms/delete-account-form-schema').deleteAccountFormContract
   const disconnectRealtime: typeof import('../lib/realtime/config').disconnectRealtime
   const effectScope: typeof import('vue').effectScope
-  const email: typeof import('../modules/auth/forms/reset-password-form-schema').email
-  const forgotPasswordFormContract: typeof import('../modules/auth/forms/forgot-password-form-schema').forgotPasswordFormContract
-  const getActivePinia: (typeof import('pinia'))['getActivePinia']
   const getApiQueryCacheData: typeof import('../composables/useApiQuery').getApiQueryCacheData
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
@@ -210,16 +52,9 @@ declare global {
   const isRealtimeConfigured: typeof import('../lib/realtime/config').isRealtimeConfigured
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
-  const loginFormContract: typeof import('../modules/auth/forms/login-form-schema').loginFormContract
-  const mapActions: (typeof import('pinia'))['mapActions']
-  const mapGetters: (typeof import('pinia'))['mapGetters']
   const mapInertiaFormErrors: typeof import('../lib/forms').mapInertiaFormErrors
-  const mapState: (typeof import('pinia'))['mapState']
-  const mapStores: (typeof import('pinia'))['mapStores']
-  const mapWritableState: (typeof import('pinia'))['mapWritableState']
   const markRaw: typeof import('vue').markRaw
   const marketingRoutes: typeof import('@/routes/marketing').default
-  const navigationMenuTriggerStyle: typeof import('../components/ui/navigation-menu/index').navigationMenuTriggerStyle
   const nextTick: typeof import('vue').nextTick
   const normalizeApiError: typeof import('../composables/useApiClient').normalizeApiError
   const omitUndefinedProps: typeof import('../lib/utils').omitUndefinedProps
@@ -240,27 +75,18 @@ declare global {
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
   const parameters: typeof import('../lib/realtime/channels').parameters
-  const passwordFormContract: typeof import('../modules/settings/forms/password-form-schema').passwordFormContract
-  const profileFormContract: typeof import('../modules/settings/forms/profile-form-schema').profileFormContract
   const provide: typeof import('vue').provide
-  const provideSidebarContext: typeof import('../components/ui/sidebar/utils').provideSidebarContext
   const reactive: typeof import('vue').reactive
   const readonly: typeof import('vue').readonly
   const ref: typeof import('vue').ref
-  const registerFormContract: typeof import('../modules/auth/forms/register-form-schema').registerFormContract
-  const resetPasswordFormContract: typeof import('../modules/auth/forms/reset-password-form-schema').resetPasswordFormContract
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveRealtimeChannel: typeof import('../lib/realtime/channels').resolveRealtimeChannel
   const resolveServerTableInitialQuery: typeof import('../composables/useServerDataTable').resolveServerTableInitialQuery
   const router: typeof import('@inertiajs/vue3').router
-  const setActivePinia: (typeof import('pinia'))['setActivePinia']
   const setApiQueryCacheData: typeof import('../composables/useApiQuery').setApiQueryCacheData
-  const setMapStoreSuffix: (typeof import('pinia'))['setMapStoreSuffix']
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
-  const sidebarMenuButtonVariants: typeof import('../components/ui/sidebar/index').sidebarMenuButtonVariants
-  const storeToRefs: (typeof import('pinia'))['storeToRefs']
   const toInertiaRouteDefinition: typeof import('../utils/route').toInertiaRouteDefinition
   const toRaw: typeof import('vue').toRaw
   const toRef: typeof import('vue').toRef
@@ -270,19 +96,16 @@ declare global {
   const triggerRef: typeof import('vue').triggerRef
   const unref: typeof import('vue').unref
   const updateTheme: typeof import('../composables/useAppearance').updateTheme
-  const useApi: (typeof import('../composables/useApi'))['useApi']
   const useApiMutation: typeof import('../composables/useApiQuery').useApiMutation
   const useApiQuery: typeof import('../composables/useApiQuery').useApiQuery
   const useAppPage: typeof import('../composables/useAppPage').useAppPage
   const useAppearance: typeof import('../composables/useAppearance').useAppearance
   const useAttrs: typeof import('vue').useAttrs
   const useAuthUser: typeof import('../composables/useAppPage').useAuthUser
-  const useConfirm: typeof import('../composables/useConfirm').useConfirm
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
   const useFlashToasts: typeof import('../composables/useFlashToasts').useFlashToasts
   const useForm: typeof import('@inertiajs/vue3').useForm
-  const useHttp: typeof import('../stores/useHttp').useHttp
   const useId: typeof import('vue').useId
   const useInitials: typeof import('../composables/useInitials').useInitials
   const useLink: typeof import('vue-router').useLink
@@ -301,14 +124,9 @@ declare global {
   const useRouter: typeof import('vue-router').useRouter
   const useSchemaResourceForm: typeof import('../composables/useSchemaResourceForm').useSchemaResourceForm
   const useServerDataTable: typeof import('../composables/useServerDataTable').useServerDataTable
-  const useSidebar: typeof import('../components/ui/sidebar/utils').useSidebar
   const useSlots: typeof import('vue').useSlots
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useToast: typeof import('../composables/useToast').useToast
-  const useUserRealtime: typeof import('../modules/users/contracts/realtime').useUserRealtime
-  const useUsersIndexRealtime: typeof import('../modules/users/contracts/realtime').useUsersIndexRealtime
-  const userFormContract: typeof import('../modules/users/forms/user-form-schema').userFormContract
-  const valueUpdater: typeof import('../components/ui/table/utils').valueUpdater
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
@@ -346,33 +164,6 @@ declare global {
   // @ts-ignore
   export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
   import('../utils/route')
-  // @ts-ignore
-  export type { ConfirmPasswordFormValues } from '../modules/auth/forms/confirm-password-form-schema'
-  import('../modules/auth/forms/confirm-password-form-schema')
-  // @ts-ignore
-  export type { ForgotPasswordFormValues } from '../modules/auth/forms/forgot-password-form-schema'
-  import('../modules/auth/forms/forgot-password-form-schema')
-  // @ts-ignore
-  export type { LoginFormValues } from '../modules/auth/forms/login-form-schema'
-  import('../modules/auth/forms/login-form-schema')
-  // @ts-ignore
-  export type { RegisterFormValues } from '../modules/auth/forms/register-form-schema'
-  import('../modules/auth/forms/register-form-schema')
-  // @ts-ignore
-  export type { ResetPasswordFormValues } from '../modules/auth/forms/reset-password-form-schema'
-  import('../modules/auth/forms/reset-password-form-schema')
-  // @ts-ignore
-  export type { DeleteAccountFormValues } from '../modules/settings/forms/delete-account-form-schema'
-  import('../modules/settings/forms/delete-account-form-schema')
-  // @ts-ignore
-  export type { PasswordFormValues } from '../modules/settings/forms/password-form-schema'
-  import('../modules/settings/forms/password-form-schema')
-  // @ts-ignore
-  export type { ProfileFormValues } from '../modules/settings/forms/profile-form-schema'
-  import('../modules/settings/forms/profile-form-schema')
-  // @ts-ignore
-  export type { UserFormValues } from '../modules/users/forms/user-form-schema'
-  import('../modules/users/forms/user-form-schema')
 }
 
 // for vue template auto import
@@ -389,45 +180,23 @@ declare module 'vue' {
     readonly appRoutes: UnwrapRef<typeof import('@/routes/app')['default']>
     readonly authRoutes: UnwrapRef<typeof import('@/routes/auth')['default']>
     readonly bindGlobalRouteHelper: UnwrapRef<typeof import('../utils/ziggy')['bindGlobalRouteHelper']>
-    readonly buildConfirmPasswordFormFields: UnwrapRef<typeof import('../modules/auth/forms/confirm-password-form-schema')['buildConfirmPasswordFormFields']>
     readonly buildDashboardBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildDashboardBreadcrumbs']>
-    readonly buildDeleteAccountFormFields: UnwrapRef<typeof import('../modules/settings/forms/delete-account-form-schema')['buildDeleteAccountFormFields']>
-    readonly buildForgotPasswordFormFields: UnwrapRef<typeof import('../modules/auth/forms/forgot-password-form-schema')['buildForgotPasswordFormFields']>
-    readonly buildLoginFormFields: UnwrapRef<typeof import('../modules/auth/forms/login-form-schema')['buildLoginFormFields']>
-    readonly buildPasswordFormFields: UnwrapRef<typeof import('../modules/settings/forms/password-form-schema')['buildPasswordFormFields']>
-    readonly buildProfileFormFields: UnwrapRef<typeof import('../modules/settings/forms/profile-form-schema')['buildProfileFormFields']>
-    readonly buildRegisterFormFields: UnwrapRef<typeof import('../modules/auth/forms/register-form-schema')['buildRegisterFormFields']>
-    readonly buildResetPasswordFormFields: UnwrapRef<typeof import('../modules/auth/forms/reset-password-form-schema')['buildResetPasswordFormFields']>
     readonly buildSettingsAppearanceBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsAppearanceBreadcrumbs']>
     readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsPasswordBreadcrumbs']>
     readonly buildSettingsProfileBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsProfileBreadcrumbs']>
-    readonly buildUserFormFields: UnwrapRef<typeof import('../modules/users/forms/user-form-schema')['buildUserFormFields']>
     readonly buildUsersBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildUsersBreadcrumbs']>
     readonly clearApiQueryCache: UnwrapRef<typeof import('../composables/useApiQuery')['clearApiQueryCache']>
     readonly cn: UnwrapRef<typeof import('../lib/utils')['cn']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly configureRealtime: UnwrapRef<typeof import('../lib/realtime/config')['configureRealtime']>
-    readonly confirmPasswordFormContract: UnwrapRef<typeof import('../modules/auth/forms/confirm-password-form-schema')['confirmPasswordFormContract']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
-    readonly createConfirmPasswordFormDefaults: UnwrapRef<typeof import('../modules/auth/forms/confirm-password-form-schema')['createConfirmPasswordFormDefaults']>
-    readonly createDeleteAccountFormDefaults: UnwrapRef<typeof import('../modules/settings/forms/delete-account-form-schema')['createDeleteAccountFormDefaults']>
-    readonly createForgotPasswordFormDefaults: UnwrapRef<typeof import('../modules/auth/forms/forgot-password-form-schema')['createForgotPasswordFormDefaults']>
-    readonly createLoginFormDefaults: UnwrapRef<typeof import('../modules/auth/forms/login-form-schema')['createLoginFormDefaults']>
-    readonly createPasswordFormDefaults: UnwrapRef<typeof import('../modules/settings/forms/password-form-schema')['createPasswordFormDefaults']>
-    readonly createProfileFormDefaults: UnwrapRef<typeof import('../modules/settings/forms/profile-form-schema')['createProfileFormDefaults']>
     readonly createRealtimeConfig: UnwrapRef<typeof import('../lib/realtime/config')['createRealtimeConfig']>
-    readonly createRegisterFormDefaults: UnwrapRef<typeof import('../modules/auth/forms/register-form-schema')['createRegisterFormDefaults']>
-    readonly createResetPasswordFormDefaults: UnwrapRef<typeof import('../modules/auth/forms/reset-password-form-schema')['createResetPasswordFormDefaults']>
-    readonly createUserFormDefaults: UnwrapRef<typeof import('../modules/users/forms/user-form-schema')['createUserFormDefaults']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly defineFormContract: UnwrapRef<typeof import('../lib/forms')['defineFormContract']>
-    readonly deleteAccountFormContract: UnwrapRef<typeof import('../modules/settings/forms/delete-account-form-schema')['deleteAccountFormContract']>
     readonly disconnectRealtime: UnwrapRef<typeof import('../lib/realtime/config')['disconnectRealtime']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
-    readonly email: UnwrapRef<typeof import('../modules/auth/forms/reset-password-form-schema')['email']>
-    readonly forgotPasswordFormContract: UnwrapRef<typeof import('../modules/auth/forms/forgot-password-form-schema')['forgotPasswordFormContract']>
     readonly getApiQueryCacheData: UnwrapRef<typeof import('../composables/useApiQuery')['getApiQueryCacheData']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -448,7 +217,6 @@ declare module 'vue' {
     readonly isRealtimeConfigured: UnwrapRef<typeof import('../lib/realtime/config')['isRealtimeConfigured']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
     readonly isShallow: UnwrapRef<typeof import('vue')['isShallow']>
-    readonly loginFormContract: UnwrapRef<typeof import('../modules/auth/forms/login-form-schema')['loginFormContract']>
     readonly mapInertiaFormErrors: UnwrapRef<typeof import('../lib/forms')['mapInertiaFormErrors']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly marketingRoutes: UnwrapRef<typeof import('@/routes/marketing')['default']>
@@ -472,14 +240,10 @@ declare module 'vue' {
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly parameters: UnwrapRef<typeof import('../lib/realtime/channels')['parameters']>
-    readonly passwordFormContract: UnwrapRef<typeof import('../modules/settings/forms/password-form-schema')['passwordFormContract']>
-    readonly profileFormContract: UnwrapRef<typeof import('../modules/settings/forms/profile-form-schema')['profileFormContract']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
-    readonly registerFormContract: UnwrapRef<typeof import('../modules/auth/forms/register-form-schema')['registerFormContract']>
-    readonly resetPasswordFormContract: UnwrapRef<typeof import('../modules/auth/forms/reset-password-form-schema')['resetPasswordFormContract']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRealtimeChannel: UnwrapRef<typeof import('../lib/realtime/channels')['resolveRealtimeChannel']>
     readonly resolveServerTableInitialQuery: UnwrapRef<typeof import('../composables/useServerDataTable')['resolveServerTableInitialQuery']>
@@ -528,9 +292,6 @@ declare module 'vue' {
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useToast: UnwrapRef<typeof import('../composables/useToast')['useToast']>
-    readonly useUserRealtime: UnwrapRef<typeof import('../modules/users/contracts/realtime')['useUserRealtime']>
-    readonly useUsersIndexRealtime: UnwrapRef<typeof import('../modules/users/contracts/realtime')['useUsersIndexRealtime']>
-    readonly userFormContract: UnwrapRef<typeof import('../modules/users/forms/user-form-schema')['userFormContract']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>

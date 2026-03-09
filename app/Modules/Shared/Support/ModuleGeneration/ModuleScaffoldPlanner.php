@@ -193,10 +193,13 @@ final readonly class ModuleScaffoldPlanner
         $controllersPath = $moduleRootPath.'/Http/Controllers';
         $routesPath = $moduleRootPath.'/Routes';
         $dataPath = $moduleRootPath.'/Data';
+        $manifestsPath = $moduleRootPath.'/Manifests';
+        $crudResourceManifest = $this->crudResourceManifest($generateModuleInput);
 
         $directories[] = $controllersPath;
         $directories[] = $routesPath;
         $directories[] = $dataPath;
+        $directories[] = $manifestsPath;
 
         $moduleNamespace = $generateModuleInput->moduleName->namespace;
         $moduleKebab = $generateModuleInput->moduleName->frontendKebab;
@@ -205,6 +208,8 @@ final readonly class ModuleScaffoldPlanner
         $routeNamePrefix = $generateModuleInput->routeNamePrefix;
         $modelClass = $this->modelClassName($generateModuleInput->moduleName);
         $modelVariable = $this->modelVariableName($generateModuleInput->moduleName);
+        $pageDataClass = $this->pageDataClassName($generateModuleInput);
+        $listItemDataClass = $this->listItemDataClassName($generateModuleInput);
 
         $controllerTokens = [
             'moduleNamespace' => $moduleNamespace,
@@ -216,6 +221,7 @@ final readonly class ModuleScaffoldPlanner
             'pageTitle' => $pagePascalName,
             'modelClass' => $modelClass,
             'modelVariable' => $modelVariable,
+            'pageDataClass' => $pageDataClass,
         ];
 
         $routeTokens = [
@@ -236,6 +242,8 @@ final readonly class ModuleScaffoldPlanner
             'pagePascalName' => $pagePascalName,
             'modelClass' => $modelClass,
             'modelVariable' => $modelVariable,
+            'pageDataClass' => $pageDataClass,
+            'listItemDataClass' => $listItemDataClass,
         ];
 
         $files[] = new PlannedFile(
@@ -247,7 +255,7 @@ final readonly class ModuleScaffoldPlanner
         );
 
         $files[] = new PlannedFile(
-            path: sprintf('%s/%sListItemData.php', $dataPath, $pagePascalName),
+            path: sprintf('%s/%s.php', $dataPath, $listItemDataClass),
             contents: $this->templateRenderer->render(
                 base_path('stubs/module-generation/backend/list-item-data.stub'),
                 $pageDataTokens,
@@ -255,10 +263,37 @@ final readonly class ModuleScaffoldPlanner
         );
 
         $files[] = new PlannedFile(
-            path: sprintf('%s/%sPageData.php', $dataPath, $pagePascalName),
+            path: sprintf('%s/%s.php', $dataPath, $pageDataClass),
             contents: $this->templateRenderer->render(
                 base_path('stubs/module-generation/backend/page-data.stub'),
                 $pageDataTokens,
+            ),
+        );
+
+        $files[] = new PlannedFile(
+            path: CrudResourceManifest::filePath($generateModuleInput->basePath, $generateModuleInput->moduleName, $pagePascalName),
+            contents: $this->templateRenderer->render(
+                base_path('stubs/module-generation/backend/resource-manifest.stub'),
+                [
+                    'pagePascalName' => $crudResourceManifest->pagePascalName,
+                    'modelClass' => $crudResourceManifest->modelClass,
+                    'routeProfile' => $crudResourceManifest->routeProfile,
+                    'routePrefix' => $crudResourceManifest->routePrefix,
+                    'routeNamePrefix' => $crudResourceManifest->routeNamePrefix,
+                    'routeRoles' => $this->renderPhpStringList($crudResourceManifest->allowedRoles),
+                    'routeMiddleware' => $this->renderPhpStringList($crudResourceManifest->middleware),
+                    'apiEnabled' => $this->renderPhpBoolean($crudResourceManifest->api->enabled),
+                    'apiRouteProfile' => $crudResourceManifest->api->routeProfile,
+                    'apiRoutePrefix' => $crudResourceManifest->api->routePrefix,
+                    'apiRouteNamePrefix' => $crudResourceManifest->api->routeNamePrefix,
+                    'apiMiddleware' => $this->renderPhpStringList($crudResourceManifest->api->middleware),
+                    'apiGeneratesResource' => $this->renderPhpBoolean($crudResourceManifest->api->generatesResource),
+                    'apiGeneratesFeatureTest' => $this->renderPhpBoolean($crudResourceManifest->api->generatesFeatureTest),
+                    'tableColumns' => $this->renderManifestTableColumns($crudResourceManifest),
+                    'mobileFields' => $this->renderManifestMobileFields($crudResourceManifest),
+                    'formFields' => $this->renderManifestFormFields($crudResourceManifest),
+                    'realtimeEnabled' => $this->renderPhpBoolean($crudResourceManifest->realtimeEnabled),
+                ],
             ),
         );
 
@@ -414,21 +449,30 @@ final readonly class ModuleScaffoldPlanner
             $tableName,
         );
 
-        $files[] = new PlannedFile(
-            path: sprintf('%s/%s.php', $modelsPath, $modelClass),
-            contents: $this->templateRenderer->render(
-                base_path('stubs/module-generation/backend/model.stub'),
-                $modelTokens,
-            ),
-        );
+        $modelFilePath = sprintf('%s/%s.php', $modelsPath, $modelClass);
 
-        $files[] = new PlannedFile(
-            path: sprintf('%s/%s', $migrationsPath, $migrationFileName),
-            contents: $this->templateRenderer->render(
-                base_path('stubs/module-generation/backend/migration.stub'),
-                $migrationTokens,
-            ),
-        );
+        if (! $this->filesystem->exists($modelFilePath)) {
+            $files[] = new PlannedFile(
+                path: $modelFilePath,
+                contents: $this->templateRenderer->render(
+                    base_path('stubs/module-generation/backend/model.stub'),
+                    $modelTokens,
+                ),
+            );
+        }
+
+        $existingMigrationFiles = glob($migrationsPath.sprintf('/*_create_%s_table.php', $tableName));
+        $existingMigrationFiles = is_array($existingMigrationFiles) ? $existingMigrationFiles : [];
+
+        if ($existingMigrationFiles === []) {
+            $files[] = new PlannedFile(
+                path: sprintf('%s/%s', $migrationsPath, $migrationFileName),
+                contents: $this->templateRenderer->render(
+                    base_path('stubs/module-generation/backend/migration.stub'),
+                    $migrationTokens,
+                ),
+            );
+        }
     }
 
     /**
@@ -513,6 +557,7 @@ final readonly class ModuleScaffoldPlanner
     private function appendFrontendCrudPageScaffold(GenerateModuleInput $generateModuleInput, array &$directories, array &$files): void
     {
         $moduleFrontendRootPath = $this->moduleFrontendRootPath($generateModuleInput);
+        $crudResourceManifest = $this->crudResourceManifest($generateModuleInput);
         $contractsPath = $moduleFrontendRootPath.'/contracts';
         $formsPath = $moduleFrontendRootPath.'/forms';
         $componentsPath = $moduleFrontendRootPath.'/components';
@@ -542,11 +587,20 @@ final readonly class ModuleScaffoldPlanner
             'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
             'moduleKebab' => $generateModuleInput->moduleName->frontendKebab,
             'moduleNavigationTitle' => $this->moduleNavigationTitle($generateModuleInput->moduleName->frontendKebab),
+            'dashboardNavHrefExpression' => $this->dashboardNavHrefExpression($generateModuleInput->routeNamePrefix),
+            'pageDataClass' => $this->pageDataClassName($generateModuleInput),
+            'listItemDataClass' => $this->listItemDataClassName($generateModuleInput),
+            'tableColumnDefinitions' => $this->renderTableColumnDefinitions($crudResourceManifest),
+            'mobileFieldDefinitions' => $this->renderMobileFieldDefinitions($crudResourceManifest),
+            'tablePrimaryFieldKey' => $this->tablePrimaryFieldKey($crudResourceManifest),
         ];
 
         $schemaTokens = [
             'pagePascalName' => $pagePascalName,
             'pageCamelName' => lcfirst($pagePascalName),
+            'formValueFields' => $this->renderFormValueFields($crudResourceManifest),
+            'formDefaultValues' => $this->renderFormDefaultValues($crudResourceManifest),
+            'formFieldDefinitions' => $this->renderFormFieldDefinitions($crudResourceManifest),
         ];
 
         $pageTestTokens = [
@@ -758,6 +812,12 @@ final readonly class ModuleScaffoldPlanner
         return $generateModuleInput->generateCrud && $generateModuleInput->generateApi;
     }
 
+    private function crudResourceManifest(GenerateModuleInput $generateModuleInput): CrudResourceManifest
+    {
+        return $generateModuleInput->crudResourceManifest
+            ?? CrudResourceManifest::fromGenerateModuleInput($generateModuleInput);
+    }
+
     private function moduleRootPath(GenerateModuleInput $generateModuleInput): string
     {
         return $generateModuleInput->basePath.'/app/Modules/'.$generateModuleInput->moduleName->path;
@@ -776,6 +836,16 @@ final readonly class ModuleScaffoldPlanner
     private function modelVariableName(ModuleName $moduleName): string
     {
         return Str::camel($this->modelClassName($moduleName));
+    }
+
+    private function pageDataClassName(GenerateModuleInput $generateModuleInput): string
+    {
+        return $this->modelClassName($generateModuleInput->moduleName).$generateModuleInput->pagePascalName.'PageData';
+    }
+
+    private function listItemDataClassName(GenerateModuleInput $generateModuleInput): string
+    {
+        return $this->modelClassName($generateModuleInput->moduleName).$generateModuleInput->pagePascalName.'ListItemData';
     }
 
     private function relativePath(string $basePath, string $absolutePath): string
@@ -868,6 +938,48 @@ final readonly class ModuleScaffoldPlanner
         return Str::title(str_replace('-', ' ', $moduleKebab));
     }
 
+    private function dashboardNavHrefExpression(string $routeNamePrefix): string
+    {
+        $segments = array_values(array_filter(explode('.', $routeNamePrefix), static fn (string $segment): bool => $segment !== ''));
+
+        if ($segments !== [] && $segments[0] === 'app') {
+            array_shift($segments);
+        }
+
+        $segments[] = 'index';
+        $segments[] = 'url()';
+
+        return 'appRoutes'.$this->renderJsPropertyPath($segments);
+    }
+
+    /**
+     * @param  list<string>  $segments
+     */
+    private function renderJsPropertyPath(array $segments): string
+    {
+        $path = '';
+
+        foreach ($segments as $segment) {
+            if ($segment === 'url()') {
+                $path .= '.url()';
+
+                continue;
+            }
+
+            $property = Str::camel($segment);
+
+            if ($property !== '' && preg_match('/^[A-Za-z_$][A-Za-z0-9_$]*$/', $property) === 1) {
+                $path .= '.'.$property;
+
+                continue;
+            }
+
+            $path .= '['.var_export($property, true).']';
+        }
+
+        return $path;
+    }
+
     /**
      * @param  list<string>  $allowedRoles
      */
@@ -915,5 +1027,193 @@ final readonly class ModuleScaffoldPlanner
             $deniedRoleCase,
             $routeUri,
         );
+    }
+
+    /**
+     * @param  list<string>  $values
+     */
+    private function renderPhpStringList(array $values): string
+    {
+        if ($values === []) {
+            return '';
+        }
+
+        return implode(', ', array_map(
+            static fn (string $value): string => var_export($value, true),
+            $values,
+        ));
+    }
+
+    private function renderPhpBoolean(bool $value): string
+    {
+        return $value ? 'true' : 'false';
+    }
+
+    private function renderManifestTableColumns(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode("\n", array_map(
+            fn (array $column): string => sprintf(
+                "            ['key' => %s, 'label' => %s, 'type' => %s, 'sortable' => %s],",
+                var_export($column['key'], true),
+                var_export($column['label'], true),
+                var_export($column['type'], true),
+                $this->renderPhpBoolean($column['sortable']),
+            ),
+            $crudResourceManifest->tableColumns,
+        ));
+    }
+
+    private function renderManifestMobileFields(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode("\n", array_map(function (array $mobileField): string {
+            $parts = [
+                sprintf("'key' => %s", var_export($mobileField['key'], true)),
+                sprintf("'label' => %s", var_export($mobileField['label'], true)),
+                sprintf("'type' => %s", var_export($mobileField['type'], true)),
+            ];
+
+            if (isset($mobileField['class'])) {
+                $parts[] = sprintf("'class' => %s", var_export($mobileField['class'], true));
+            }
+
+            return sprintf('            [%s],', implode(', ', $parts));
+        }, $crudResourceManifest->mobileFields));
+    }
+
+    private function renderManifestFormFields(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode("\n", array_map(function (array $formField): string {
+            $parts = [
+                sprintf("'name' => %s", var_export($formField['name'], true)),
+                sprintf("'label' => %s", var_export($formField['label'], true)),
+                sprintf("'type' => %s", var_export($formField['type'], true)),
+                sprintf("'required' => %s", $this->renderPhpBoolean($formField['required'])),
+            ];
+
+            if (isset($formField['placeholder'])) {
+                $parts[] = sprintf("'placeholder' => %s", var_export($formField['placeholder'], true));
+            }
+
+            if (isset($formField['autocomplete'])) {
+                $parts[] = sprintf("'autocomplete' => %s", var_export($formField['autocomplete'], true));
+            }
+
+            return sprintf('            [%s],', implode(', ', $parts));
+        }, $crudResourceManifest->formFields));
+    }
+
+    private function renderFormValueFields(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode("\n", array_map(
+            fn (array $formField): string => sprintf('    %s: %s', $formField['name'], $this->formFieldType($formField['type'])),
+            $crudResourceManifest->formFields,
+        ));
+    }
+
+    private function renderFormDefaultValues(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode(",\n", array_map(
+            fn (array $formField): string => sprintf('        %s: %s', $formField['name'], $this->formFieldDefaultValue($formField['type'])),
+            $crudResourceManifest->formFields,
+        ));
+    }
+
+    private function renderFormFieldDefinitions(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode(",\n", array_map(function (array $formField): string {
+            $lines = [
+                '            {',
+                sprintf('                name: %s,', $this->renderTsString($formField['name'])),
+                sprintf('                label: %s,', $this->renderTsString($formField['label'])),
+                sprintf('                type: %s,', $this->renderTsString($formField['type'])),
+                sprintf('                required: %s,', $formField['required'] ? 'true' : 'false'),
+            ];
+
+            if (isset($formField['placeholder'])) {
+                $lines[] = sprintf('                placeholder: %s,', $this->renderTsString($formField['placeholder']));
+            }
+
+            if (isset($formField['autocomplete'])) {
+                $lines[] = sprintf('                autocomplete: %s,', $this->renderTsString($formField['autocomplete']));
+            }
+
+            $lines[] = '            }';
+
+            return implode("\n", $lines);
+        }, $crudResourceManifest->formFields));
+    }
+
+    private function renderTableColumnDefinitions(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode(",\n", array_map(function (array $column): string {
+            $valueExpression = $column['type'] === 'date'
+                ? sprintf('formatDate(row.%s)', $column['key'])
+                : sprintf('row.%s', $column['key']);
+
+            return implode("\n", [
+                '        {',
+                sprintf('            key: %s,', $this->renderTsString($column['key'])),
+                sprintf('            label: %s,', $this->renderTsString($column['label'])),
+                sprintf('            sortable: %s,', $column['sortable'] ? 'true' : 'false'),
+                sprintf('            value: (row) => %s', $valueExpression),
+                '        }',
+            ]);
+        }, $crudResourceManifest->tableColumns));
+    }
+
+    private function renderMobileFieldDefinitions(CrudResourceManifest $crudResourceManifest): string
+    {
+        return implode(",\n", array_map(function (array $mobileField): string {
+            $valueExpression = $mobileField['type'] === 'date'
+                ? sprintf('formatDate(row.%s)', $mobileField['key'])
+                : sprintf('row.%s', $mobileField['key']);
+
+            $lines = [
+                '        {',
+                sprintf('            key: %s,', $this->renderTsString($mobileField['key'])),
+                sprintf('            label: %s,', $this->renderTsString($mobileField['label'])),
+            ];
+
+            if (isset($mobileField['class'])) {
+                $lines[] = sprintf('            class: %s,', $this->renderTsString($mobileField['class']));
+            }
+
+            $lines[] = sprintf('            value: (row) => %s', $valueExpression);
+            $lines[] = '        }';
+
+            return implode("\n", $lines);
+        }, $crudResourceManifest->mobileFields));
+    }
+
+    private function tablePrimaryFieldKey(CrudResourceManifest $crudResourceManifest): string
+    {
+        foreach ($crudResourceManifest->tableColumns as $column) {
+            if ($column['type'] === 'text') {
+                return $column['key'];
+            }
+        }
+
+        return $crudResourceManifest->tableColumns[0]['key'];
+    }
+
+    private function formFieldType(string $type): string
+    {
+        return match ($type) {
+            'checkbox' => 'boolean',
+            default => 'string',
+        };
+    }
+
+    private function formFieldDefaultValue(string $type): string
+    {
+        return match ($type) {
+            'checkbox' => 'false',
+            default => "''",
+        };
+    }
+
+    private function renderTsString(string $value): string
+    {
+        return var_export($value, true);
     }
 }

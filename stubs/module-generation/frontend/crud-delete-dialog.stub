@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import {{ pagePascalName }}Controller from '{{ controllerActionImportPath }}'
+    import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
 
     interface Props {
         open: boolean

@@ -6,6 +6,8 @@ namespace App\Modules\Shared\Console\Commands;
 
 use App\Enums\UserRole;
 use App\Modules\Shared\Support\ModuleGeneration\ApiRouteProfile;
+use App\Modules\Shared\Support\ModuleGeneration\CrudApiManifest;
+use App\Modules\Shared\Support\ModuleGeneration\CrudResourceManifest;
 use App\Modules\Shared\Support\ModuleGeneration\GenerateModuleInput;
 use App\Modules\Shared\Support\ModuleGeneration\ModuleName;
 use App\Modules\Shared\Support\ModuleGeneration\ModuleScaffoldExecutor;
@@ -15,6 +17,7 @@ use App\Modules\Shared\Support\ModuleGeneration\PlannedFile;
 use App\Modules\Shared\Support\ModuleGeneration\RouteProfile;
 use App\Modules\Shared\Support\ModuleGeneration\ScaffoldType;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -106,32 +109,69 @@ final class GenerateModuleCommand extends Command
     private function resolveInput(): GenerateModuleInput
     {
         $moduleName = ModuleName::fromString((string) $this->argument('module'));
+        $pageName = (string) $this->option('page');
+        $basePath = mb_trim((string) ($this->option('base-path') ?: base_path()));
+        $pagePascalName = $this->toPascalCase($pageName);
         $scaffoldType = $this->resolveScaffoldType();
         $generateCrud = ScaffoldType::includesCrud($scaffoldType);
         $generateApi = ScaffoldType::includesApi($scaffoldType);
+        $crudResourceManifest = $generateCrud
+            ? CrudResourceManifest::load(CrudResourceManifest::filePath($basePath, $moduleName, $pagePascalName))
+            : null;
 
         $routeProfile = $generateCrud
-            ? $this->resolveRouteProfile()
+            ? $this->resolveRouteProfile($crudResourceManifest?->routeProfile)
             : RouteProfile::APP;
-        $allowedRoles = $this->resolveAllowedRoles($generateCrud, $routeProfile);
+        $allowedRoles = $this->resolveAllowedRoles($generateCrud, $routeProfile, $crudResourceManifest?->allowedRoles);
         [$routePrefix, $routeNamePrefix, $middleware] = $generateCrud
-            ? $this->resolveRouteConfiguration($moduleName, $routeProfile, $allowedRoles)
+            ? $this->resolveRouteConfiguration($moduleName, $routeProfile, $allowedRoles, $crudResourceManifest)
             : $this->defaultWebRouteConfiguration($moduleName);
 
         [$apiRouteProfile, $apiRoutePrefix, $apiRouteNamePrefix, $apiMiddleware] = $generateApi
-            ? $this->resolveApiRouteConfiguration($moduleName)
+            ? $this->resolveApiRouteConfiguration($moduleName, $crudResourceManifest)
             : $this->defaultApiRouteConfiguration($moduleName);
 
         $generatePage = $this->resolveGeneratePage($generateCrud || $scaffoldType === ScaffoldType::PAGE);
-        $generateModel = $this->resolveGenerateModel($generateCrud || $generateApi);
-        $generateApiResource = $this->resolveGenerateApiResource($generateApi);
-        $generateApiFeatureTest = $this->resolveGenerateApiFeatureTest($generateApi);
+        $generateModel = $this->resolveGenerateModel(
+            hasBackendScaffold: $generateCrud || $generateApi,
+            moduleName: $moduleName,
+            basePath: $basePath,
+        );
+        $generateApiResource = $this->resolveGenerateApiResource($generateApi, $crudResourceManifest);
+        $generateApiFeatureTest = $this->resolveGenerateApiFeatureTest($generateApi, $crudResourceManifest);
 
-        $basePath = mb_trim((string) ($this->option('base-path') ?: base_path()));
+        $resolvedCrudResourceManifest = $generateCrud
+            ? ($crudResourceManifest instanceof CrudResourceManifest
+                ? new CrudResourceManifest(
+                    pagePascalName: $crudResourceManifest->pagePascalName,
+                    modelClass: $crudResourceManifest->modelClass,
+                    routeProfile: $routeProfile,
+                    routePrefix: $routePrefix,
+                    routeNamePrefix: $routeNamePrefix,
+                    allowedRoles: $allowedRoles,
+                    middleware: $middleware,
+                    api: $crudResourceManifest->api->enabled || $generateApi
+                        ? new CrudApiManifest(
+                            enabled: $generateApi,
+                            routeProfile: $apiRouteProfile,
+                            routePrefix: $apiRoutePrefix,
+                            routeNamePrefix: $apiRouteNamePrefix,
+                            middleware: $apiMiddleware,
+                            generatesResource: $generateApiResource,
+                            generatesFeatureTest: $generateApiFeatureTest,
+                        )
+                        : $crudResourceManifest->api,
+                    tableColumns: $crudResourceManifest->tableColumns,
+                    mobileFields: $crudResourceManifest->mobileFields,
+                    formFields: $crudResourceManifest->formFields,
+                    realtimeEnabled: $crudResourceManifest->realtimeEnabled,
+                )
+                : null)
+            : null;
 
         return GenerateModuleInput::fromValues(
             moduleName: $moduleName,
-            pageName: (string) $this->option('page'),
+            pageName: $pageName,
             scaffoldType: $scaffoldType,
             generateCrud: $generateCrud,
             generateApi: $generateApi,
@@ -152,6 +192,7 @@ final class GenerateModuleCommand extends Command
             force: (bool) $this->option('force'),
             dryRun: (bool) $this->option('dry-run'),
             basePath: $basePath,
+            crudResourceManifest: $resolvedCrudResourceManifest,
         );
     }
 
@@ -191,20 +232,20 @@ final class GenerateModuleCommand extends Command
         return $providedScaffoldType;
     }
 
-    private function resolveRouteProfile(): string
+    private function resolveRouteProfile(?string $defaultProfile = null): string
     {
         $providedProfile = mb_strtolower(mb_trim((string) $this->option('route-profile')));
 
         if ($providedProfile === '') {
             if (! $this->input->isInteractive()) {
-                return RouteProfile::APP;
+                return $defaultProfile ?? RouteProfile::APP;
             }
 
             /** @var string $selectedProfile */
             $selectedProfile = $this->choice(
                 question: 'Select a route profile for the generated module',
                 choices: RouteProfile::values(),
-                default: RouteProfile::APP,
+                default: $defaultProfile ?? RouteProfile::APP,
             );
 
             $providedProfile = $selectedProfile;
@@ -239,32 +280,38 @@ final class GenerateModuleCommand extends Command
      * @param  list<string>  $allowedRoles
      * @return array{0: string, 1: string, 2: list<string>}
      */
-    private function resolveRouteConfiguration(ModuleName $moduleName, string $routeProfile, array $allowedRoles): array
+    private function resolveRouteConfiguration(ModuleName $moduleName, string $routeProfile, array $allowedRoles, ?CrudResourceManifest $crudResourceManifest = null): array
     {
-        $defaultPrefix = match ($routeProfile) {
-            RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
-                ? 'app/admin/'.$moduleName->frontendKebab
-                : 'app/'.$moduleName->frontendKebab,
-            RouteProfile::PUBLIC => $moduleName->frontendKebab,
-            RouteProfile::CUSTOM => 'app/'.$moduleName->frontendKebab,
-            default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
-        };
+        $defaultPrefix = $crudResourceManifest instanceof CrudResourceManifest
+            ? $crudResourceManifest->routePrefix
+            : match ($routeProfile) {
+                RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
+                    ? 'app/admin/'.$moduleName->frontendKebab
+                    : 'app/'.$moduleName->frontendKebab,
+                RouteProfile::PUBLIC => $moduleName->frontendKebab,
+                RouteProfile::CUSTOM => 'app/'.$moduleName->frontendKebab,
+                default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
+            };
 
-        $defaultNamePrefix = match ($routeProfile) {
-            RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
-                ? 'app.admin.'.$moduleName->frontendKebab
-                : 'app.'.$moduleName->frontendKebab,
-            RouteProfile::PUBLIC => $moduleName->frontendKebab,
-            RouteProfile::CUSTOM => $moduleName->frontendKebab,
-            default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
-        };
+        $defaultNamePrefix = $crudResourceManifest instanceof CrudResourceManifest
+            ? $crudResourceManifest->routeNamePrefix
+            : match ($routeProfile) {
+                RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
+                    ? 'app.admin.'.$moduleName->frontendKebab
+                    : 'app.'.$moduleName->frontendKebab,
+                RouteProfile::PUBLIC => $moduleName->frontendKebab,
+                RouteProfile::CUSTOM => $moduleName->frontendKebab,
+                default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
+            };
 
-        $defaultMiddleware = match ($routeProfile) {
-            RouteProfile::APP => $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
-            RouteProfile::PUBLIC => [],
-            RouteProfile::CUSTOM => ['auth', 'verified'],
-            default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
-        };
+        $defaultMiddleware = $crudResourceManifest instanceof CrudResourceManifest
+            ? $crudResourceManifest->middleware
+            : match ($routeProfile) {
+                RouteProfile::APP => $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
+                RouteProfile::PUBLIC => [],
+                RouteProfile::CUSTOM => ['auth', 'verified'],
+                default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
+            };
 
         $routePrefix = mb_trim((string) $this->option('route-prefix'));
         $routeNamePrefix = mb_trim((string) $this->option('route-name-prefix'));
@@ -301,9 +348,10 @@ final class GenerateModuleCommand extends Command
     }
 
     /**
+     * @param  list<string>|null  $defaultRoles
      * @return list<string>
      */
-    private function resolveAllowedRoles(bool $generateCrud, string $routeProfile): array
+    private function resolveAllowedRoles(bool $generateCrud, string $routeProfile, ?array $defaultRoles = null): array
     {
         if (! $generateCrud || $routeProfile !== RouteProfile::APP) {
             return [];
@@ -313,6 +361,10 @@ final class GenerateModuleCommand extends Command
 
         if ($roleOption === '') {
             if (! $this->input->isInteractive()) {
+                if ($defaultRoles !== null) {
+                    return $defaultRoles;
+                }
+
                 throw new RuntimeException(sprintf(
                     'The --roles option is required for app CRUD scaffolding. Use --roles=all or comma-separated values: %s.',
                     implode(', ', $this->availableUserRoleValues()),
@@ -324,7 +376,9 @@ final class GenerateModuleCommand extends Command
                     'Select allowed roles for app CRUD routes (%s)',
                     implode(', ', array_merge(['all'], $this->availableUserRoleValues())),
                 ),
-                'all',
+                $defaultRoles === null || $defaultRoles === []
+                    ? 'all'
+                    : implode(',', $defaultRoles),
             ));
         }
 
@@ -435,19 +489,24 @@ final class GenerateModuleCommand extends Command
     /**
      * @return array{0: string, 1: string, 2: string, 3: list<string>}
      */
-    private function resolveApiRouteConfiguration(ModuleName $moduleName): array
+    private function resolveApiRouteConfiguration(ModuleName $moduleName, ?CrudResourceManifest $crudResourceManifest = null): array
     {
         $providedApiProfile = mb_strtolower(mb_trim((string) $this->option('api-route-profile')));
+        $manifestApi = $crudResourceManifest?->api;
 
         if ($providedApiProfile === '') {
             if (! $this->input->isInteractive()) {
-                $providedApiProfile = ApiRouteProfile::PROTECTED;
+                $providedApiProfile = $manifestApi instanceof CrudApiManifest
+                    ? $manifestApi->routeProfile
+                    : ApiRouteProfile::PROTECTED;
             } else {
                 /** @var string $selectedApiProfile */
                 $selectedApiProfile = $this->choice(
                     question: 'Select an API route profile for the generated module',
                     choices: ApiRouteProfile::values(),
-                    default: ApiRouteProfile::PROTECTED,
+                    default: $manifestApi instanceof CrudApiManifest
+                        ? $manifestApi->routeProfile
+                        : ApiRouteProfile::PROTECTED,
                 );
 
                 $providedApiProfile = $selectedApiProfile;
@@ -464,10 +523,14 @@ final class GenerateModuleCommand extends Command
             );
         }
 
-        [$defaultPrefix, $defaultNamePrefix, $defaultMiddleware] = $this->defaultApiRouteConfigurationForProfile(
+        [$computedPrefix, $computedNamePrefix, $computedMiddleware] = $this->defaultApiRouteConfigurationForProfile(
             moduleName: $moduleName,
             apiRouteProfile: $providedApiProfile,
         );
+
+        $defaultPrefix = $manifestApi instanceof CrudApiManifest ? $manifestApi->routePrefix : $computedPrefix;
+        $defaultNamePrefix = $manifestApi instanceof CrudApiManifest ? $manifestApi->routeNamePrefix : $computedNamePrefix;
+        $defaultMiddleware = $manifestApi instanceof CrudApiManifest ? $manifestApi->middleware : $computedMiddleware;
 
         $apiRoutePrefix = mb_trim((string) $this->option('api-route-prefix'));
         $apiRouteNamePrefix = mb_trim((string) $this->option('api-route-name-prefix'));
@@ -562,21 +625,47 @@ final class GenerateModuleCommand extends Command
         return $generateCrud && ! (bool) $this->option('no-page');
     }
 
-    private function resolveGenerateModel(bool $hasBackendScaffold): bool
+    private function resolveGenerateModel(bool $hasBackendScaffold, ModuleName $moduleName, string $basePath): bool
     {
-        return $hasBackendScaffold
-            && ! (bool) $this->option('extend')
-            && ! (bool) $this->option('no-model');
+        if (! $hasBackendScaffold || (bool) $this->option('no-model')) {
+            return false;
+        }
+
+        if (! (bool) $this->option('extend')) {
+            return true;
+        }
+
+        return $this->isModelOrMigrationMissing($moduleName, $basePath);
     }
 
-    private function resolveGenerateApiResource(bool $generateApi): bool
+    private function isModelOrMigrationMissing(ModuleName $moduleName, string $basePath): bool
     {
-        return $generateApi && ! (bool) $this->option('no-api-resource');
+        $modelClass = implode('', $moduleName->namespaceSegments);
+        $modelPath = sprintf('%s/app/Models/%s.php', $basePath, $modelClass);
+
+        if (! is_file($modelPath)) {
+            return true;
+        }
+
+        $tableName = Str::snake(Str::pluralStudly($modelClass));
+        $migrationFiles = glob($basePath.sprintf('/database/migrations/*_create_%s_table.php', $tableName));
+        $migrationFiles = is_array($migrationFiles) ? $migrationFiles : [];
+
+        return $migrationFiles === [];
     }
 
-    private function resolveGenerateApiFeatureTest(bool $generateApi): bool
+    private function resolveGenerateApiResource(bool $generateApi, ?CrudResourceManifest $crudResourceManifest = null): bool
     {
-        return $generateApi && ! (bool) $this->option('no-api-test');
+        return $generateApi
+            && ! (bool) $this->option('no-api-resource')
+            && ($crudResourceManifest?->api->generatesResource ?? true);
+    }
+
+    private function resolveGenerateApiFeatureTest(bool $generateApi, ?CrudResourceManifest $crudResourceManifest = null): bool
+    {
+        return $generateApi
+            && ! (bool) $this->option('no-api-test')
+            && ($crudResourceManifest?->api->generatesFeatureTest ?? true);
     }
 
     private function relativePath(string $basePath, string $absolutePath): string
@@ -600,6 +689,34 @@ final class GenerateModuleCommand extends Command
         }
 
         return mb_trim($response);
+    }
+
+    private function toPascalCase(string $value): string
+    {
+        $spaced = preg_replace('/([a-z0-9])([A-Z])/u', '$1 $2', $value);
+
+        if (! is_string($spaced)) {
+            throw new RuntimeException('Could not derive a valid page name from the provided value.');
+        }
+
+        $parts = preg_split('/[^a-zA-Z0-9]+/u', $spaced);
+        $parts = is_array($parts) ? $parts : [];
+
+        $normalizedParts = [];
+
+        foreach ($parts as $part) {
+            $trimmedPart = mb_trim($part);
+
+            if ($trimmedPart !== '') {
+                $normalizedParts[] = ucfirst(mb_strtolower($trimmedPart));
+            }
+        }
+
+        if ($normalizedParts === []) {
+            throw new RuntimeException('Could not derive a valid page name from the provided value.');
+        }
+
+        return implode('', $normalizedParts);
     }
 
     private function applyPerFileSelection(GenerateModuleInput $generateModuleInput, ModuleScaffoldPlan $moduleScaffoldPlan): ModuleScaffoldPlan

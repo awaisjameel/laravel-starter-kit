@@ -1,8 +1,9 @@
 <script setup lang="ts">
     import { Plus } from 'lucide-vue-next'
-    import type { {{ pagePascalName }}PageData } from '@/types/app-data'
+    import type { {{ pageDataClass }} } from '@/types/app-data'
+    import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
 
-    const props = defineProps<{{ pagePascalName }}PageData>()
+    const props = defineProps<{{ pageDataClass }}>()
     const breadcrumbs = buildDashboardBreadcrumbs()
 
     const isFormDialogOpen = ref(false)

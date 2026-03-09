@@ -47,8 +47,9 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexUpdateRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
-        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexListItemData.php');
-        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexPageData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/BillingIndexListItemData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/BillingIndexPageData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Manifests/IndexResource.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingQueryHandler.php');
@@ -86,15 +87,23 @@ final class GenerateModuleCommandTest extends TestCase
 
         $controllerFileContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Controllers/IndexController.php');
         $controllerFileContents = is_string($controllerFileContents) ? $controllerFileContents : '';
-        $this->assertStringContainsString('use App\\Modules\\Billing\\Data\\IndexPageData;', $controllerFileContents);
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Data\\BillingIndexPageData;', $controllerFileContents);
         $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\PageResponder;', $controllerFileContents);
         $this->assertStringContainsString('PageResponder::render(', $controllerFileContents);
-        $this->assertStringContainsString('IndexPageData::fromPaginator($lengthAwarePaginator)', $controllerFileContents);
+        $this->assertStringContainsString('BillingIndexPageData::fromPaginator($lengthAwarePaginator)', $controllerFileContents);
 
-        $pageDataContents = file_get_contents($basePath.'/app/Modules/Billing/Data/IndexPageData.php');
+        $pageDataContents = file_get_contents($basePath.'/app/Modules/Billing/Data/BillingIndexPageData.php');
         $pageDataContents = is_string($pageDataContents) ? $pageDataContents : '';
-        $this->assertStringContainsString('final class IndexPageData extends Data', $pageDataContents);
-        $this->assertStringContainsString('final class IndexListItemData extends Data', (string) file_get_contents($basePath.'/app/Modules/Billing/Data/IndexListItemData.php'));
+        $this->assertStringContainsString('final class BillingIndexPageData extends Data', $pageDataContents);
+        $this->assertStringContainsString('final class BillingIndexListItemData extends Data', (string) file_get_contents($basePath.'/app/Modules/Billing/Data/BillingIndexListItemData.php'));
+
+        $manifestContents = file_get_contents($basePath.'/app/Modules/Billing/Manifests/IndexResource.php');
+        $manifestContents = is_string($manifestContents) ? $manifestContents : '';
+        $this->assertStringContainsString("'profile' => 'app'", $manifestContents);
+        $this->assertStringContainsString("'roles' => []", $manifestContents);
+        $this->assertStringContainsString("'columns' => [", $manifestContents);
+        $this->assertStringContainsString("'fields' => [", $manifestContents);
+        $this->assertStringContainsString("'enabled' => false", $manifestContents);
 
         $routeFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/web.php');
         $routeFileContents = is_string($routeFileContents) ? $routeFileContents : '';
@@ -108,19 +117,38 @@ final class GenerateModuleCommandTest extends TestCase
         $pageFileContents = file_get_contents($basePath.'/resources/js/modules/billing/pages/Index.vue');
         $pageFileContents = is_string($pageFileContents) ? $pageFileContents : '';
 
-        $this->assertStringContainsString("import type { IndexPageData } from '@/types/app-data'", $pageFileContents);
+        $this->assertStringContainsString("import type { BillingIndexPageData } from '@/types/app-data'", $pageFileContents);
+        $this->assertStringContainsString("import type { IndexListItem } from '../contracts/index-crud'", $pageFileContents);
         $this->assertStringContainsString('<BillingTable', $pageFileContents);
         $this->assertStringContainsString('<BillingIndexFormDialog', $pageFileContents);
 
         $crudContractContents = file_get_contents($basePath.'/resources/js/modules/billing/contracts/index-crud.ts');
         $crudContractContents = is_string($crudContractContents) ? $crudContractContents : '';
-        $this->assertStringContainsString("import type { IndexListItemData } from '@/types/app-data'", $crudContractContents);
-        $this->assertStringContainsString('export type IndexListItem = IndexListItemData', $crudContractContents);
+        $this->assertStringContainsString("import type { BillingIndexListItemData } from '@/types/app-data'", $crudContractContents);
+        $this->assertStringContainsString('export type IndexListItem = BillingIndexListItemData', $crudContractContents);
 
         $tableFileContents = file_get_contents($basePath.'/resources/js/modules/billing/components/Table.vue');
         $tableFileContents = is_string($tableFileContents) ? $tableFileContents : '';
+        $this->assertStringContainsString("import type { IndexListItem } from '../contracts/index-crud'", $tableFileContents);
+        $this->assertStringContainsString('const formatDate = (value: string | null | undefined): string => {', $tableFileContents);
         $this->assertStringContainsString('const rowKey = (row: IndexListItem): number => row.id', $tableFileContents);
         $this->assertStringContainsString(':row-key="rowKey"', $tableFileContents);
+        $this->assertStringContainsString("key: 'created_at'", $tableFileContents);
+        $this->assertStringContainsString('formatDate(row.created_at)', $tableFileContents);
+
+        $formSchemaContents = file_get_contents($basePath.'/resources/js/modules/billing/forms/index-form-schema.ts');
+        $formSchemaContents = is_string($formSchemaContents) ? $formSchemaContents : '';
+        $this->assertStringContainsString('name: string', $formSchemaContents);
+        $this->assertStringContainsString("placeholder: 'Enter name'", $formSchemaContents);
+
+        $formDialogContents = file_get_contents($basePath.'/resources/js/modules/billing/components/IndexFormDialog.vue');
+        $formDialogContents = is_string($formDialogContents) ? $formDialogContents : '';
+        $this->assertStringContainsString("import type { IndexListItem } from '../contracts/index-crud'", $formDialogContents);
+        $this->assertStringContainsString("import { buildIndexFormFields, createIndexFormDefaults, type IndexFormValues } from '../forms/index-form-schema'", $formDialogContents);
+
+        $dashboardNavContents = file_get_contents($basePath.'/resources/js/modules/billing/contracts/dashboard-nav.ts');
+        $dashboardNavContents = is_string($dashboardNavContents) ? $dashboardNavContents : '';
+        $this->assertStringContainsString('href: appRoutes.billing.index.url()', $dashboardNavContents);
     }
 
     public function test_api_mode_scaffolds_api_assets_and_skips_frontend_assets(): void
@@ -207,8 +235,114 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\ApiResponder;', $apiControllerContents);
         $this->assertStringContainsString('private readonly BillingQueryHandler $billingQueryHandler', $apiControllerContents);
         $this->assertStringContainsString('private readonly BillingCommandHandler $billingCommandHandler', $apiControllerContents);
-        $this->assertStringContainsString('use App\\Modules\\Billing\\Data\\IndexPageData;', $webControllerContents);
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Data\\BillingIndexPageData;', $webControllerContents);
         $this->assertStringContainsString('PageResponder::render(', $webControllerContents);
+    }
+
+    public function test_extend_mode_reuses_existing_resource_manifest_defaults(): void
+    {
+        $basePath = $this->createTemporaryBasePath();
+
+        $this->runGenerateCommand([
+            'module' => 'Billing',
+            '--scaffold' => 'crud',
+            '--page' => 'Index',
+            '--route-profile' => 'app',
+            '--roles' => 'admin',
+            '--no-file-prompts' => true,
+            '--base-path' => $basePath,
+        ])->assertExitCode(0);
+
+        $this->runGenerateCommand([
+            'module' => 'Billing',
+            '--extend' => true,
+            '--scaffold' => 'crud',
+            '--page' => 'Index',
+            '--no-interaction' => true,
+            '--force' => true,
+            '--no-file-prompts' => true,
+            '--base-path' => $basePath,
+        ])->assertExitCode(0);
+
+        $routeFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/web.php');
+        $routeFileContents = is_string($routeFileContents) ? $routeFileContents : '';
+
+        $this->assertStringContainsString("Route::prefix('app/admin/billing')", $routeFileContents);
+        $this->assertStringContainsString("'can:manage-billing'", $routeFileContents);
+
+        $manifestContents = file_get_contents($basePath.'/app/Modules/Billing/Manifests/IndexResource.php');
+        $manifestContents = is_string($manifestContents) ? $manifestContents : '';
+        $this->assertStringContainsString("'roles' => ['admin']", $manifestContents);
+        $this->assertMigrationCount($basePath, 'billings', 1);
+    }
+
+    public function test_extend_mode_generates_missing_model_and_migration_for_partial_crud_module(): void
+    {
+        $basePath = $this->createTemporaryBasePath();
+        $this->ensureDirectory($basePath.'/app/Modules/Billing');
+        $this->ensureDirectory($basePath.'/app/Modules/Billing/Manifests');
+
+        file_put_contents(
+            $basePath.'/app/Modules/Billing/Manifests/IndexResource.php',
+            <<<'PHP'
+<?php
+
+declare(strict_types=1);
+
+return [
+    'page' => 'Index',
+    'model' => 'Billing',
+    'route' => [
+        'profile' => 'app',
+        'prefix' => 'app/admin/billing',
+        'name_prefix' => 'app.admin.billing',
+        'roles' => ['admin'],
+        'middleware' => ['auth', 'verified', 'can:manage-billing'],
+    ],
+    'api' => [
+        'enabled' => false,
+        'route_profile' => 'protected',
+        'route_prefix' => 'api/v1/admin/billing',
+        'route_name_prefix' => 'api.v1.admin.billing',
+        'middleware' => ['auth:sanctum'],
+        'generates_resource' => false,
+        'generates_feature_test' => false,
+    ],
+    'table' => [
+        'columns' => [
+            ['key' => 'name', 'label' => 'Name', 'type' => 'text', 'sortable' => true],
+            ['key' => 'created_at', 'label' => 'Created', 'type' => 'date', 'sortable' => true],
+        ],
+        'mobile_fields' => [
+            ['key' => 'name', 'label' => 'Name', 'type' => 'text'],
+            ['key' => 'created_at', 'label' => 'Created', 'type' => 'date'],
+        ],
+    ],
+    'form' => [
+        'fields' => [
+            ['name' => 'name', 'label' => 'Name', 'type' => 'text', 'required' => true],
+        ],
+    ],
+    'realtime' => [
+        'enabled' => false,
+    ],
+];
+PHP,
+        );
+
+        $this->runGenerateCommand([
+            'module' => 'Billing',
+            '--extend' => true,
+            '--scaffold' => 'crud',
+            '--page' => 'Index',
+            '--no-interaction' => true,
+            '--force' => true,
+            '--no-file-prompts' => true,
+            '--base-path' => $basePath,
+        ])->assertExitCode(0);
+
+        $this->assertFileExists($basePath.'/app/Models/Billing.php');
+        $this->assertMigrationFileExists($basePath, 'billings');
     }
 
     public function test_existing_module_requires_extend_flag(): void
@@ -510,6 +644,26 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertStringContainsString('test_guests_access_behavior_for_temp_check_api_index', $apiTestContents);
         $this->assertStringContainsString('test_authenticated_users_can_list_temp_check_api_results', $apiTestContents);
         $this->assertStringNotContainsString('temp check_api', $apiTestContents);
+
+        $pageDataContents = file_get_contents($basePath.'/app/Modules/TempCheck/Data/TempCheckIndexPageData.php');
+        $pageDataContents = is_string($pageDataContents) ? $pageDataContents : '';
+        $this->assertStringContainsString('final class TempCheckIndexPageData extends Data', $pageDataContents);
+
+        $listItemContents = file_get_contents($basePath.'/app/Modules/TempCheck/Data/TempCheckIndexListItemData.php');
+        $listItemContents = is_string($listItemContents) ? $listItemContents : '';
+        $this->assertStringContainsString('final class TempCheckIndexListItemData extends Data', $listItemContents);
+
+        $crudContractContents = file_get_contents($basePath.'/resources/js/modules/temp-check/contracts/index-crud.ts');
+        $crudContractContents = is_string($crudContractContents) ? $crudContractContents : '';
+        $this->assertStringContainsString("import type { TempCheckIndexListItemData } from '@/types/app-data'", $crudContractContents);
+
+        $pageContents = file_get_contents($basePath.'/resources/js/modules/temp-check/pages/Index.vue');
+        $pageContents = is_string($pageContents) ? $pageContents : '';
+        $this->assertStringContainsString("import type { TempCheckIndexPageData } from '@/types/app-data'", $pageContents);
+
+        $dashboardNavContents = file_get_contents($basePath.'/resources/js/modules/temp-check/contracts/dashboard-nav.ts');
+        $dashboardNavContents = is_string($dashboardNavContents) ? $dashboardNavContents : '';
+        $this->assertStringContainsString('href: appRoutes.admin.tempCheck.index.url()', $dashboardNavContents);
     }
 
     private function createTemporaryBasePath(): string
@@ -547,6 +701,18 @@ final class GenerateModuleCommandTest extends TestCase
         $migrationFiles = is_array($migrationFiles) ? $migrationFiles : [];
 
         $this->assertEmpty($migrationFiles, sprintf('Did not expect migration file for table [%s] to be generated.', $tableName));
+    }
+
+    private function assertMigrationCount(string $basePath, string $tableName, int $expectedCount): void
+    {
+        $migrationFiles = glob($basePath.sprintf('/database/migrations/*_create_%s_table.php', $tableName));
+        $migrationFiles = is_array($migrationFiles) ? $migrationFiles : [];
+
+        $this->assertCount(
+            $expectedCount,
+            $migrationFiles,
+            sprintf('Expected %d migration file(s) for table [%s].', $expectedCount, $tableName),
+        );
     }
 
     /**

@@ -38,6 +38,7 @@ final readonly class GenerateModuleInput
         public bool $force,
         public bool $dryRun,
         public string $basePath,
+        public ?CrudResourceManifest $crudResourceManifest,
     ) {}
 
     /**
@@ -68,6 +69,7 @@ final readonly class GenerateModuleInput
         bool $force,
         bool $dryRun,
         string $basePath,
+        ?CrudResourceManifest $crudResourceManifest = null,
     ): self {
         $pagePascalName = self::toPascalCase($pageName);
         $pageKebabName = self::toKebabCase($pageName);
@@ -187,6 +189,7 @@ final readonly class GenerateModuleInput
             force: $force,
             dryRun: $dryRun,
             basePath: $normalizedBasePath,
+            crudResourceManifest: $crudResourceManifest,
         );
     }
 

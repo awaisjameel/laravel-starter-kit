@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import type { UserViewData } from '@/types/app-data'
+    import { buildUserFormFields, createUserFormDefaults, type UserFormValues } from '../forms/user-form-schema'
 
     type UserFormMode = 'create' | 'edit'
 

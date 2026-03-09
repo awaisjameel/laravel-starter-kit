@@ -1,5 +1,7 @@
 <script setup lang="ts">
     import {{ pagePascalName }}Controller from '{{ controllerActionImportPath }}'
+    import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
+    import { build{{ pagePascalName }}FormFields, create{{ pagePascalName }}FormDefaults, type {{ pagePascalName }}FormValues } from '../forms/{{ pageKebabName }}-form-schema'
 
     type FormMode = 'create' | 'edit'
 

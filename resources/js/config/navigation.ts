@@ -2,6 +2,9 @@ import { resolveDashboardCrudNavigationItems } from '@/config/dashboard-crud-nav
 import type { NavItem } from '@/types'
 import type { UserRole } from '@/types/app-data'
 import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from 'lucide-vue-next'
+import appRoutes from '../routes/app'
+import authRoutes from '../routes/auth'
+import marketingRoutes from '../routes/marketing'
 
 export interface NavigationContext {
     isAuthenticated: boolean

@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import NewPasswordController from '@/actions/App/Modules/Auth/Http/Controllers/NewPasswordController'
     import type { ResetPasswordPageData } from '@/types/app-data'
+    import { createResetPasswordFormDefaults, resetPasswordFormContract } from '../forms/reset-password-form-schema'
 
     const props = defineProps<ResetPasswordPageData>()
 

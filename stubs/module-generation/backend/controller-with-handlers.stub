@@ -6,7 +6,7 @@ namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\{{ modelClass }};
-use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}PageData;
+use App\Modules\{{ moduleNamespace }}\Data\{{ pageDataClass }};
 use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}CommandHandler;
 use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
@@ -28,7 +28,7 @@ final class {{ pagePascalName }}Controller extends Controller
 
         return PageResponder::render(
             'modules/{{ moduleKebab }}/pages/{{ pagePascalName }}',
-            {{ pagePascalName }}PageData::fromPaginator($lengthAwarePaginator),
+            {{ pageDataClass }}::fromPaginator($lengthAwarePaginator),
         );
     }
 

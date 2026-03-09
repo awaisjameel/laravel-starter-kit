@@ -34,6 +34,7 @@ export default defineConfig({
             vueTemplate: true,
             viteOptimizeDeps: true,
             dts: 'resources/js/types/auto-imports.d.ts',
+            dtsMode: 'overwrite',
             imports: autoImportImports,
             dirs: autoImportDirs
         }),
@@ -63,7 +64,8 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './resources/js')
+            '@': path.resolve(__dirname, './resources/js'),
+            '/resources/js': path.resolve(__dirname, './resources/js')
         }
     }
 })

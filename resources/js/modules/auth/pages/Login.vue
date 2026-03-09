@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
     import type { LoginPageData } from '@/types/app-data'
+    import { loginFormContract, type LoginFormValues } from '../forms/login-form-schema'
 
     defineProps<LoginPageData>()
 

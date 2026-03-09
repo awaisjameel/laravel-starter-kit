@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import type { DataTableColumn, DataTableRowAction, MobileCardField } from '@/types/base-ui'
+    import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
 
     interface Props {
         items: {{ pagePascalName }}ListItem[]
@@ -13,8 +14,12 @@
         view: [item: {{ pagePascalName }}ListItem]
     }>()
 
-    const formatDate = (value: string | null): string => {
+    const formatDate = (value: string | null | undefined): string => {
         if (value === null) {
+            return 'N/A'
+        }
+
+        if (value === undefined) {
             return 'N/A'
         }
 
@@ -24,37 +29,11 @@
     const rowKey = (row: {{ pagePascalName }}ListItem): number => row.id
 
     const columns: Array<DataTableColumn<{{ pagePascalName }}ListItem>> = [
-        {
-            key: 'name',
-            label: 'Name',
-            sortable: false,
-            value: (row) => row.name
-        },
-        {
-            key: 'created_at',
-            label: 'Created At',
-            sortable: false,
-            value: (row) => formatDate(row.created_at)
-        },
-        {
-            key: 'updated_at',
-            label: 'Updated At',
-            sortable: false,
-            value: (row) => formatDate(row.updated_at)
-        }
+{{ tableColumnDefinitions }}
     ]
 
     const mobileFields: Array<MobileCardField<{{ pagePascalName }}ListItem>> = [
-        {
-            key: 'created_at',
-            label: 'Created',
-            value: (row) => formatDate(row.created_at)
-        },
-        {
-            key: 'updated_at',
-            label: 'Updated',
-            value: (row) => formatDate(row.updated_at)
-        }
+{{ mobileFieldDefinitions }}
     ]
 
     const actions: Array<DataTableRowAction<{{ pagePascalName }}ListItem>> = [
@@ -80,7 +59,7 @@
 <template>
     <BaseTableBaseDataTableMobileCards :rows="props.items" :row-key="rowKey" :fields="mobileFields" :actions="actions">
         <template #mobile-header="{ row }">
-            <p class="font-medium">{{ row.name }}</p>
+            <p class="font-medium">{{ row.{{ tablePrimaryFieldKey }} }}</p>
         </template>
     </BaseTableBaseDataTableMobileCards>
 
