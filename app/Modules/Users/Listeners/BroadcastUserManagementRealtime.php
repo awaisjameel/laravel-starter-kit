@@ -22,19 +22,23 @@ final readonly class BroadcastUserManagementRealtime
 
     public function handle(UserManagementEvent $userManagementEvent): void
     {
-        $usersRealtimeAction = $this->resolveAction($userManagementEvent->action);
-        $occurredAt = $userManagementEvent->metadata->occurredAt;
-        $targetUser = $userManagementEvent->target;
+        $mutationContext = $userManagementEvent->context;
+        /** @var User $actor */
+        $actor = $mutationContext->actor;
+        $usersRealtimeAction = $this->resolveAction($mutationContext->action);
+        $occurredAt = $mutationContext->occurredAt();
+        /** @var ?User $targetUser */
+        $targetUser = $mutationContext->target;
         $targetUserId = $targetUser?->id;
 
         $this->realtimeDispatcher->dispatchToOthers(
             new UsersListChanged(new UsersListChangedBroadcastData(
                 action: $usersRealtimeAction,
-                actorUserId: $userManagementEvent->actor->id,
+                actorUserId: $actor->id,
                 targetUserId: $targetUserId,
                 occurredAt: $occurredAt,
             )),
-            $userManagementEvent->metadata->socketId,
+            $mutationContext->socketId(),
         );
 
         if ($targetUserId === null) {
@@ -49,12 +53,12 @@ final readonly class BroadcastUserManagementRealtime
         $this->realtimeDispatcher->dispatchToOthers(
             new UserChanged(new UserChangedBroadcastData(
                 action: $usersRealtimeAction,
-                actorUserId: $userManagementEvent->actor->id,
+                actorUserId: $actor->id,
                 targetUserId: $targetUserId,
                 user: $userViewData,
                 occurredAt: $occurredAt,
             )),
-            $userManagementEvent->metadata->socketId,
+            $mutationContext->socketId(),
         );
     }
 

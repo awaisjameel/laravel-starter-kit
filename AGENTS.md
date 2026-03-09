@@ -177,6 +177,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - When controller logic requires the authenticated application user, resolve it through `App\Modules\Shared\Auth\RequestActor::from($request)` instead of repeating nullable `user()` checks in transport code.
 - Prefer module-local `Queries` for reads and `Commands` for writes instead of generic mixed-purpose `Services`.
 - When the same backend use case is exposed through multiple transports, keep orchestration in module-local `Handlers` and keep controllers as thin response adapters.
+- When command-side behavior fans out into audit logs, realtime, or notifications, emit one shared mutation context object from the handler and let downstream listeners consume that context instead of passing separate actor/target/metadata/change arguments through the pipeline.
 - Inertia page controllers should prefer backend page DTOs (`#[TypeScript]` Spatie Data classes) rendered via `PageResponder` instead of inline prop arrays.
 - API controllers should prefer `JsonResource` or typed payloads returned through `ApiResponder` instead of ad hoc `response()->json(...)` calls.
 - Generated CRUD frontend/backend resource shape should be driven from the module-local resource manifest rather than by manually coordinating route, table, form, and API changes across multiple generated files.

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Users\Support;
+namespace App\Modules\Shared\Mutations;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
-final readonly class UserActionMetadata
+final readonly class MutationMetadata
 {
     public function __construct(
         public ?string $ipAddress,

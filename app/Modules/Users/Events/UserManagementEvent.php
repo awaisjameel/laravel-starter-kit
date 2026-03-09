@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Users\Events;
 
 use App\Models\User;
-use App\Modules\Users\Support\UserActionMetadata;
+use App\Modules\Shared\Mutations\MutationContext;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -19,13 +19,7 @@ final readonly class UserManagementEvent
     use SerializesModels;
 
     /**
-     * @param  array<string, mixed>  $changes
+     * @param  MutationContext<User, User|null>  $context
      */
-    public function __construct(
-        public string $action,
-        public User $actor,
-        public ?User $target,
-        public UserActionMetadata $metadata,
-        public array $changes = [],
-    ) {}
+    public function __construct(public MutationContext $context) {}
 }

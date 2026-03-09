@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Users\Data;
 
 use App\Modules\Users\Enums\UsersRealtimeAction;
+use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -18,5 +19,6 @@ final class UserManagementNotificationData extends Data
         public int $actorUserId,
         public string $actorName,
         public ?int $targetUserId,
+        public CarbonImmutable $occurredAt,
     ) {}
 }

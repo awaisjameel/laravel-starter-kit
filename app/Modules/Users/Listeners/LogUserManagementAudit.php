@@ -17,13 +17,7 @@ final class LogUserManagementAudit
      */
     public function handle(UserManagementEvent $userManagementEvent): void
     {
-        UserManagementAuditLogger::log(
-            action: $userManagementEvent->action,
-            actor: $userManagementEvent->actor,
-            target: $userManagementEvent->target,
-            userActionMetadata: $userManagementEvent->metadata,
-            changes: $userManagementEvent->changes,
-        );
+        UserManagementAuditLogger::log($userManagementEvent->context);
     }
 
     /**

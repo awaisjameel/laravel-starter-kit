@@ -22,13 +22,13 @@ final readonly class UserCommandHandler
     public function create(CreateUserData $createUserData, UserActionContext $userActionContext): UserCommandResult
     {
         $userCommandResult = $this->userCommands->create($createUserData);
-
-        Event::dispatch(new UserManagementEvent(
+        $mutationContext = $userActionContext->mutation(
             action: 'create',
-            actor: $userActionContext->actor,
-            target: $userCommandResult->user,
-            metadata: $userActionContext->metadata,
-        ));
+            user: $userCommandResult->user,
+            changes: $userCommandResult->changes,
+        );
+
+        Event::dispatch(new UserManagementEvent($mutationContext));
 
         return $userCommandResult;
     }
@@ -36,26 +36,23 @@ final readonly class UserCommandHandler
     public function update(User $user, UpdateUserData $updateUserData, UserActionContext $userActionContext): UserCommandResult
     {
         $userCommandResult = $this->userCommands->update($user, $updateUserData);
-
-        Event::dispatch(new UserManagementEvent(
+        $mutationContext = $userActionContext->mutation(
             action: 'update',
-            actor: $userActionContext->actor,
-            target: $userCommandResult->user,
-            metadata: $userActionContext->metadata,
+            user: $userCommandResult->user,
             changes: $userCommandResult->changes,
-        ));
+        );
+
+        Event::dispatch(new UserManagementEvent($mutationContext));
 
         return $userCommandResult;
     }
 
     public function delete(User $user, UserActionContext $userActionContext): void
     {
-        Event::dispatch(new UserManagementEvent(
+        Event::dispatch(new UserManagementEvent($userActionContext->mutation(
             action: 'delete',
-            actor: $userActionContext->actor,
-            target: $user,
-            metadata: $userActionContext->metadata,
-        ));
+            user: $user,
+        )));
 
         $this->userCommands->delete($user);
     }

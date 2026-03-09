@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Users\Notifications;
 
 use App\Models\User;
+use App\Modules\Shared\Mutations\MutationContext;
 use App\Modules\Users\Data\UserManagementNotificationData;
 use App\Modules\Users\Enums\UsersRealtimeAction;
+use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -16,12 +18,35 @@ final class UserManagementBroadcastNotification extends Notification implements 
 {
     use Queueable;
 
-    public function __construct(
+    private function __construct(
         private readonly UsersRealtimeAction $usersRealtimeAction,
-        private readonly User $actor,
-        private readonly ?User $target,
+        private readonly int $actorUserId,
+        private readonly string $actorName,
+        private readonly ?int $targetUserId,
+        private readonly string $targetLabel,
+        private readonly CarbonImmutable $occurredAt,
     ) {
         $this->onQueue('realtime');
+    }
+
+    /**
+     * @param  MutationContext<User, User|null>  $mutationContext
+     */
+    public static function fromMutationContext(MutationContext $mutationContext): self
+    {
+        /** @var User $actor */
+        $actor = $mutationContext->actor;
+        /** @var ?User $target */
+        $target = $mutationContext->target;
+
+        return new self(
+            usersRealtimeAction: UsersRealtimeAction::from($mutationContext->action),
+            actorUserId: $actor->id,
+            actorName: $actor->name,
+            targetUserId: $target?->id,
+            targetLabel: $target instanceof User ? $target->name : 'a user',
+            occurredAt: $mutationContext->occurredAt(),
+        );
     }
 
     /**
@@ -39,21 +64,20 @@ final class UserManagementBroadcastNotification extends Notification implements 
                 'title' => 'User management updated',
                 'description' => $this->description(),
                 'action' => $this->usersRealtimeAction,
-                'actorUserId' => $this->actor->id,
-                'actorName' => $this->actor->name,
-                'targetUserId' => $this->target?->id,
+                'actorUserId' => $this->actorUserId,
+                'actorName' => $this->actorName,
+                'targetUserId' => $this->targetUserId,
+                'occurredAt' => $this->occurredAt,
             ])->toArray()
         );
     }
 
     private function description(): string
     {
-        $targetLabel = $this->target instanceof User ? $this->target->name : 'a user';
-
         return match ($this->usersRealtimeAction) {
-            UsersRealtimeAction::Create => sprintf('%s created %s.', $this->actor->name, $targetLabel),
-            UsersRealtimeAction::Update => sprintf('%s updated %s.', $this->actor->name, $targetLabel),
-            UsersRealtimeAction::Delete => sprintf('%s deleted %s.', $this->actor->name, $targetLabel),
+            UsersRealtimeAction::Create => sprintf('%s created %s.', $this->actorName, $this->targetLabel),
+            UsersRealtimeAction::Update => sprintf('%s updated %s.', $this->actorName, $this->targetLabel),
+            UsersRealtimeAction::Delete => sprintf('%s deleted %s.', $this->actorName, $this->targetLabel),
         };
     }
 }

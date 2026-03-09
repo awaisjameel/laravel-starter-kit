@@ -92,6 +92,7 @@ export type UserManagementNotificationData = {
     actorUserId: number
     actorName: string
     targetUserId?: number
+    occurredAt: string
 }
 export enum UserRole {
     Admin = 'admin',
