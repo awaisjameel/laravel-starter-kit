@@ -23,6 +23,10 @@ final class AuthServiceProvider extends ServiceProvider
         $gateFiles = ModuleRegistry::gateFiles(base_path());
 
         foreach ($gateFiles as $gateFile) {
+            if (! is_file($gateFile)) {
+                continue;
+            }
+
             require $gateFile;
         }
     }

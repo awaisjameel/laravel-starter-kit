@@ -267,7 +267,10 @@ final class ModuleRegistry
     public static function discover(string $basePath): array
     {
         $normalizedBasePath = self::normalizeBasePath($basePath);
-        $payload = self::loadCachedPayload($normalizedBasePath) ?? self::scanPayload($normalizedBasePath);
+        $cachedPayload = self::loadCachedPayload($normalizedBasePath);
+        $payload = $cachedPayload !== null && ! self::payloadHasMissingEntries($normalizedBasePath, $cachedPayload)
+            ? $cachedPayload
+            : self::scanPayload($normalizedBasePath);
 
         return self::resolvePayloadEntries($normalizedBasePath, $payload);
     }
@@ -759,6 +762,57 @@ final class ModuleRegistry
         ));
 
         return array_values(array_unique($entries));
+    }
+
+    /**
+     * @param  array{
+     *     version: int,
+     *     routes: array{web: list<string>, api: list<string>},
+     *     gates: list<string>,
+     *     channels: list<string>,
+     *     listeners: list<string>,
+     *     providers: list<string>
+     * } $payload
+     */
+    private static function payloadHasMissingEntries(string $basePath, array $payload): bool
+    {
+        if (self::hasMissingFiles($basePath, $payload['routes']['web'])) {
+            return true;
+        }
+
+        if (self::hasMissingFiles($basePath, $payload['routes']['api'])) {
+            return true;
+        }
+
+        if (self::hasMissingFiles($basePath, $payload['gates'])) {
+            return true;
+        }
+
+        if (self::hasMissingFiles($basePath, $payload['channels'])) {
+            return true;
+        }
+
+        if (self::hasMissingDirectories($basePath, $payload['listeners'])) {
+            return true;
+        }
+
+        return self::hasMissingFiles($basePath, $payload['providers']);
+    }
+
+    /**
+     * @param  list<string>  $entries
+     */
+    private static function hasMissingFiles(string $basePath, array $entries): bool
+    {
+        return array_any(self::resolveEntries($basePath, $entries), fn ($entry): bool => ! is_file($entry));
+    }
+
+    /**
+     * @param  list<string>  $entries
+     */
+    private static function hasMissingDirectories(string $basePath, array $entries): bool
+    {
+        return array_any(self::resolveEntries($basePath, $entries), fn ($entry): bool => ! is_dir($entry));
     }
 
     /**

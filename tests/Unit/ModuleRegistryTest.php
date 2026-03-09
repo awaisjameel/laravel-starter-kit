@@ -129,6 +129,46 @@ PHP
         ], $this->toRelativePaths($basePath, ModuleRegistry::listenerDirectories($basePath)));
     }
 
+    public function test_registry_rebuilds_when_cached_manifest_references_deleted_entries(): void
+    {
+        $basePath = $this->createTemporaryBasePath();
+
+        $this->createModuleFile($basePath, 'Billing', 'Routes/web.php');
+        $this->createModuleFile($basePath, 'Billing', 'Routes/gates.php');
+        $this->createModuleDirectory($basePath, 'Billing', 'Listeners');
+
+        file_put_contents(
+            ModuleRegistry::cachePath($basePath),
+            <<<'PHP'
+<?php
+
+return [
+    'version' => 2,
+    'routes' => [
+        'web' => ['app/Modules/Application/Routes/web.php'],
+        'api' => [],
+    ],
+    'gates' => ['app/Modules/Application/Routes/gates.php'],
+    'channels' => [],
+    'listeners' => ['app/Modules/Application/Listeners'],
+    'providers' => [],
+];
+PHP
+        );
+
+        $this->assertSame([
+            'app/Modules/Billing/Routes/web.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::webRoutes($basePath)));
+
+        $this->assertSame([
+            'app/Modules/Billing/Routes/gates.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::gateFiles($basePath)));
+
+        $this->assertSame([
+            'app/Modules/Billing/Listeners',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::listenerDirectories($basePath)));
+    }
+
     public function test_registry_resolves_autoloadable_provider_classes_for_the_application(): void
     {
         $this->assertContains(ModuleServiceProvider::class, ModuleRegistry::providerClasses(base_path()));
