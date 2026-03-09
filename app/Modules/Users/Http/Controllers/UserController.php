@@ -6,6 +6,7 @@ namespace App\Modules\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use App\Modules\Users\Data\UsersIndexPageData;
 use App\Modules\Users\Handlers\UserCommandHandler;
 use App\Modules\Users\Handlers\UserQueryHandler;
@@ -15,7 +16,6 @@ use App\Modules\Users\Http\Requests\UserIndexRequest;
 use App\Modules\Users\Http\Requests\UserUpdateRequest;
 use App\Modules\Users\Support\UserActionContext;
 use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
 use Inertia\Response;
 
 final class UserController extends Controller
@@ -29,9 +29,9 @@ final class UserController extends Controller
     {
         $lengthAwarePaginator = $this->userQueryHandler->index($userIndexRequest->toDto())->withQueryString();
 
-        return Inertia::render(
+        return PageResponder::render(
             'modules/users/pages/Index',
-            UsersIndexPageData::fromPaginator($lengthAwarePaginator)->toArray()
+            UsersIndexPageData::fromPaginator($lengthAwarePaginator),
         );
     }
 

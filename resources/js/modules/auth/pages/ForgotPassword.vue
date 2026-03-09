@@ -1,9 +1,8 @@
 <script setup lang="ts">
     import PasswordResetLinkController from '@/actions/App/Modules/Auth/Http/Controllers/PasswordResetLinkController'
+    import type { ForgotPasswordPageData } from '@/types/app-data'
 
-    defineProps<{
-        status?: string
-    }>()
+    defineProps<ForgotPasswordPageData>()
 
     const { form, fields, submit } = useSchemaResourceForm<ForgotPasswordFormValues>(forgotPasswordFormContract)
     const loginHref = authRoutes.login.create.url()

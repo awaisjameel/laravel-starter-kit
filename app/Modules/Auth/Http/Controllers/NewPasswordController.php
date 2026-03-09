@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Auth\Data\ResetPasswordPageData;
 use App\Modules\Auth\Http\Requests\ResetPasswordRequest;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +15,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
 use Inertia\Response;
 
 final class NewPasswordController extends Controller
@@ -23,10 +24,13 @@ final class NewPasswordController extends Controller
      */
     public function create(Request $request): Response
     {
-        return Inertia::render('modules/auth/pages/ResetPassword', [
-            'email' => $request->email,
-            'token' => $request->route('token'),
-        ]);
+        return PageResponder::render(
+            'modules/auth/pages/ResetPassword',
+            new ResetPasswordPageData(
+                email: (string) $request->string('email'),
+                token: (string) $request->route('token'),
+            ),
+        );
     }
 
     /**

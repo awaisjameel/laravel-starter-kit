@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Auth\Data\ForgotPasswordPageData;
 use App\Modules\Auth\Http\Requests\PasswordResetLinkRequest;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Inertia\Inertia;
 use Inertia\Response;
 
 final class PasswordResetLinkController extends Controller
@@ -19,9 +20,14 @@ final class PasswordResetLinkController extends Controller
      */
     public function create(Request $request): Response
     {
-        return Inertia::render('modules/auth/pages/ForgotPassword', [
-            'status' => $request->session()->get('status'),
-        ]);
+        $status = $request->session()->get('status');
+
+        return PageResponder::render(
+            'modules/auth/pages/ForgotPassword',
+            new ForgotPasswordPageData(
+                status: is_string($status) ? $status : null,
+            ),
+        );
     }
 
     public function store(PasswordResetLinkRequest $passwordResetLinkRequest): RedirectResponse

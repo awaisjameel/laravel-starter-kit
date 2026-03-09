@@ -7,12 +7,13 @@ namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\{{ modelClass }};
 use App\Modules\{{ moduleNamespace }}\Commands\{{ modelClass }}Commands;
+use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}PageData;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
 use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
-use Inertia\Response;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
+use Inertia\Response;
 
 final class {{ pagePascalName }}Controller extends Controller
 {
@@ -25,19 +26,10 @@ final class {{ pagePascalName }}Controller extends Controller
     {
         $lengthAwarePaginator = $this->{{ modelVariable }}Queries->paginate();
 
-        /** @var list<{{ modelClass }}> $models */
-        $models = $lengthAwarePaginator->items();
-
-        $items = array_map(static fn ({{ modelClass }} ${{ modelVariable }}): array => [
-                'id' => ${{ modelVariable }}->id,
-                'name' => ${{ modelVariable }}->name,
-                'created_at' => ${{ modelVariable }}->created_at?->toISOString(),
-                'updated_at' => ${{ modelVariable }}->updated_at?->toISOString(),
-            ], $models);
-
-        return Inertia::render('modules/{{ moduleKebab }}/pages/{{ pagePascalName }}', [
-            'items' => $items,
-        ]);
+        return PageResponder::render(
+            'modules/{{ moduleKebab }}/pages/{{ pagePascalName }}',
+            {{ pagePascalName }}PageData::fromPaginator($lengthAwarePaginator),
+        );
     }
 
     public function store({{ pagePascalName }}StoreRequest $request): RedirectResponse

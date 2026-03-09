@@ -9,6 +9,7 @@ use App\Models\{{ modelClass }};
 use App\Modules\{{ moduleNamespace }}\Commands\{{ modelClass }}Commands;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use App\Modules\Shared\Http\Responders\ApiResponder;
 use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
 use Illuminate\Http\JsonResponse;
 
@@ -25,7 +26,7 @@ final class {{ pagePascalName }}ApiController extends Controller
         /** @var list<{{ modelClass }}> $models */
         $models = $paginator->items();
 
-        return response()->json([
+        return ApiResponder::payload([
             'data' => array_map(static fn ({{ modelClass }} $model): array => $this->serializeModel($model), $models),
             'meta' => [
                 'current_page' => $paginator->currentPage(),
@@ -40,26 +41,26 @@ final class {{ pagePascalName }}ApiController extends Controller
     {
         $model = $this->{{ modelVariable }}Commands->create($request->toDto());
 
-        return response()->json(['data' => $this->serializeModel($model)], 201);
+        return ApiResponder::payload(['data' => $this->serializeModel($model)], 201);
     }
 
     public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
-        return response()->json(['data' => $this->serializeModel(${{ modelVariable }})]);
+        return ApiResponder::payload(['data' => $this->serializeModel(${{ modelVariable }})]);
     }
 
     public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
         $model = $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, $request->toDto());
 
-        return response()->json(['data' => $this->serializeModel($model)]);
+        return ApiResponder::payload(['data' => $this->serializeModel($model)]);
     }
 
     public function destroy({{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
         $this->{{ modelVariable }}Commands->delete(${{ modelVariable }});
 
-        return response()->json([], 204);
+        return ApiResponder::noContent();
     }
 
     /**

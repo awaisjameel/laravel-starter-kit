@@ -64,6 +64,9 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - root broadcast channel aggregator: `routes/channels.php`
     - module broadcast channel files: `app/Modules/**/Routes/channels.php`
     - shared realtime infrastructure: `app/Modules/Shared/Realtime/**`
+- Shared responder infrastructure:
+    - page responses should go through `app/Modules/Shared/Http/Responders/PageResponder.php`
+    - API JSON/resource responses should go through `app/Modules/Shared/Http/Responders/ApiResponder.php`
 
 ### Backend Module Ownership Contract (Strict)
 
@@ -169,6 +172,8 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - When controller logic requires the authenticated application user, resolve it through `App\Modules\Shared\Auth\RequestActor::from($request)` instead of repeating nullable `user()` checks in transport code.
 - Prefer module-local `Queries` for reads and `Commands` for writes instead of generic mixed-purpose `Services`.
 - When the same backend use case is exposed through multiple transports, keep orchestration in module-local `Handlers` and keep controllers as thin response adapters.
+- Inertia page controllers should prefer backend page DTOs (`#[TypeScript]` Spatie Data classes) rendered via `PageResponder` instead of inline prop arrays.
+- API controllers should prefer `JsonResource` or typed payloads returned through `ApiResponder` instead of ad hoc `response()->json(...)` calls.
 - Services must accept DTOs or explicit typed parameters, never untyped arrays.
 - Inertia shared auth user must be a typed DTO (`UserViewData|null`), not raw model serialization.
 - Any backend DTO/enum that crosses the backend/frontend boundary must be exported via TypeScript generation:
@@ -321,6 +326,7 @@ Minimum expectations:
     - frontend CRUD module assets under `resources/js/modules/<module>/**` (table, create/update dialog, delete dialog, details dialog, page, form schema, frontend test)
 - Use `php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageName>` to scaffold page-level frontend contracts for an existing module.
 - `--scaffold=crud-api` should generate module-local `Handlers` in addition to `Queries` and `Commands`, and generated web/API controllers should depend on those handlers instead of duplicating orchestration.
+- CRUD web scaffolds should generate backend `*PageData` / `*ListItemData` DTOs and frontend contracts should consume the generated types instead of redefining page payload shapes inline.
 - Command options contract:
     - `--scaffold=page|crud|api|crud-api` (interactive prompt when omitted; defaults to `crud` for fresh mode and `page` for extend mode)
     - `--route-profile=app|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `app`)

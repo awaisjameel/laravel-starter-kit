@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class PasswordResetTest extends TestCase
@@ -18,7 +19,11 @@ final class PasswordResetTest extends TestCase
     {
         $testResponse = $this->get('/auth/forgot-password');
 
-        $testResponse->assertStatus(200);
+        $testResponse
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('status', null)
+            );
     }
 
     public function test_reset_password_link_can_be_requested(): void
@@ -43,7 +48,12 @@ final class PasswordResetTest extends TestCase
         Notification::assertSentTo($user, ResetPassword::class, function ($notification): true {
             $testResponse = $this->get('/auth/reset-password/'.$notification->token);
 
-            $testResponse->assertStatus(200);
+            $testResponse
+                ->assertStatus(200)
+                ->assertInertia(fn (Assert $assert): Assert => $assert
+                    ->where('email', '')
+                    ->where('token', $notification->token)
+                );
 
             return true;
         });

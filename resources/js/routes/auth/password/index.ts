@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefa
 import confirmD7e05f from './confirm'
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
  * @route '/auth/forgot-password'
  */
 export const request = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -17,7 +17,7 @@ request.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
  * @route '/auth/forgot-password'
  */
 request.url = (options?: RouteQueryOptions) => {
@@ -26,7 +26,7 @@ request.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
  * @route '/auth/forgot-password'
  */
 request.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ request.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:20
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
  * @route '/auth/forgot-password'
  */
 request.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ request.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::email
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:27
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:33
  * @route '/auth/forgot-password'
  */
 export const email = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ email.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::email
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:27
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:33
  * @route '/auth/forgot-password'
  */
 email.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ email.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::email
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:27
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:33
  * @route '/auth/forgot-password'
  */
 email.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -79,7 +79,7 @@ email.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::reset
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:24
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:25
  * @route '/auth/reset-password/{token}'
  */
 export const reset = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -94,7 +94,7 @@ reset.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::reset
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:24
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:25
  * @route '/auth/reset-password/{token}'
  */
 reset.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -122,7 +122,7 @@ reset.url = (args: { token: string | number } | [token: string | number ] | stri
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::reset
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:24
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:25
  * @route '/auth/reset-password/{token}'
  */
 reset.get = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -131,7 +131,7 @@ reset.get = (args: { token: string | number } | [token: string | number ] | stri
 })
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::reset
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:24
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:25
  * @route '/auth/reset-password/{token}'
  */
 reset.head = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -141,7 +141,7 @@ reset.head = (args: { token: string | number } | [token: string | number ] | str
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::store
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:37
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:41
  * @route '/auth/reset-password'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -156,7 +156,7 @@ store.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::store
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:37
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:41
  * @route '/auth/reset-password'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -165,7 +165,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\NewPasswordController::store
- * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:37
+ * @see app/Modules/Auth/Http/Controllers/NewPasswordController.php:41
  * @route '/auth/reset-password'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({

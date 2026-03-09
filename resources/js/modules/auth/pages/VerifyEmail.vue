@@ -1,9 +1,8 @@
 <script setup lang="ts">
     import EmailVerificationNotificationController from '@/actions/App/Modules/Auth/Http/Controllers/EmailVerificationNotificationController'
+    import type { VerifyEmailPageData } from '@/types/app-data'
 
-    defineProps<{
-        status?: string
-    }>()
+    defineProps<VerifyEmailPageData>()
 
     const { form, submit } = useResourceForm({})
     const logoutHref = authRoutes.logout.url()

@@ -6,6 +6,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class AuthenticationTest extends TestCase
@@ -16,7 +17,12 @@ final class AuthenticationTest extends TestCase
     {
         $testResponse = $this->get('/auth/login');
 
-        $testResponse->assertStatus(200);
+        $testResponse
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('canResetPassword', true)
+                ->where('status', null)
+            );
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void

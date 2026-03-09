@@ -47,6 +47,8 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexUpdateRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexListItemData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexPageData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingQueryHandler.php');
@@ -84,8 +86,15 @@ final class GenerateModuleCommandTest extends TestCase
 
         $controllerFileContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Controllers/IndexController.php');
         $controllerFileContents = is_string($controllerFileContents) ? $controllerFileContents : '';
-        $this->assertStringContainsString('/** @var list<Billing> $models */', $controllerFileContents);
-        $this->assertStringContainsString('array_map(static fn (Billing $billing): array', $controllerFileContents);
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Data\\IndexPageData;', $controllerFileContents);
+        $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\PageResponder;', $controllerFileContents);
+        $this->assertStringContainsString('PageResponder::render(', $controllerFileContents);
+        $this->assertStringContainsString('IndexPageData::fromPaginator($lengthAwarePaginator)', $controllerFileContents);
+
+        $pageDataContents = file_get_contents($basePath.'/app/Modules/Billing/Data/IndexPageData.php');
+        $pageDataContents = is_string($pageDataContents) ? $pageDataContents : '';
+        $this->assertStringContainsString('final class IndexPageData extends Data', $pageDataContents);
+        $this->assertStringContainsString('final class IndexListItemData extends Data', (string) file_get_contents($basePath.'/app/Modules/Billing/Data/IndexListItemData.php'));
 
         $routeFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/web.php');
         $routeFileContents = is_string($routeFileContents) ? $routeFileContents : '';
@@ -99,8 +108,14 @@ final class GenerateModuleCommandTest extends TestCase
         $pageFileContents = file_get_contents($basePath.'/resources/js/modules/billing/pages/Index.vue');
         $pageFileContents = is_string($pageFileContents) ? $pageFileContents : '';
 
+        $this->assertStringContainsString("import type { IndexPageData } from '@/types/app-data'", $pageFileContents);
         $this->assertStringContainsString('<BillingTable', $pageFileContents);
         $this->assertStringContainsString('<BillingIndexFormDialog', $pageFileContents);
+
+        $crudContractContents = file_get_contents($basePath.'/resources/js/modules/billing/contracts/index-crud.ts');
+        $crudContractContents = is_string($crudContractContents) ? $crudContractContents : '';
+        $this->assertStringContainsString("import type { IndexListItemData } from '@/types/app-data'", $crudContractContents);
+        $this->assertStringContainsString('export type IndexListItem = IndexListItemData', $crudContractContents);
 
         $tableFileContents = file_get_contents($basePath.'/resources/js/modules/billing/components/Table.vue');
         $tableFileContents = is_string($tableFileContents) ? $tableFileContents : '';
@@ -147,6 +162,12 @@ final class GenerateModuleCommandTest extends TestCase
         $queryFileContents = file_get_contents($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $queryFileContents = is_string($queryFileContents) ? $queryFileContents : '';
         $this->assertStringContainsString('@return LengthAwarePaginator<int, Billing>', $queryFileContents);
+
+        $apiControllerContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Controllers/IndexApiController.php');
+        $apiControllerContents = is_string($apiControllerContents) ? $apiControllerContents : '';
+        $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\ApiResponder;', $apiControllerContents);
+        $this->assertStringContainsString('return ApiResponder::collection(', $apiControllerContents);
+        $this->assertStringContainsString('return ApiResponder::resource(IndexResource::make($model), 201);', $apiControllerContents);
     }
 
     public function test_crud_api_mode_scaffolds_both_backend_route_files(): void
@@ -183,9 +204,11 @@ final class GenerateModuleCommandTest extends TestCase
         $apiControllerContents = is_string($apiControllerContents) ? $apiControllerContents : '';
         $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingQueryHandler;', $apiControllerContents);
         $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingCommandHandler;', $apiControllerContents);
+        $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\ApiResponder;', $apiControllerContents);
         $this->assertStringContainsString('private readonly BillingQueryHandler $billingQueryHandler', $apiControllerContents);
         $this->assertStringContainsString('private readonly BillingCommandHandler $billingCommandHandler', $apiControllerContents);
-        $this->assertStringContainsString('/** @var list<Billing> $models */', $webControllerContents);
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Data\\IndexPageData;', $webControllerContents);
+        $this->assertStringContainsString('PageResponder::render(', $webControllerContents);
     }
 
     public function test_existing_module_requires_extend_flag(): void

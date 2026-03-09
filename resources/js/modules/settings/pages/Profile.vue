@@ -1,12 +1,8 @@
 <script setup lang="ts">
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
+    import type { ProfilePageData } from '@/types/app-data'
 
-    interface Props {
-        mustVerifyEmail: boolean
-        status?: string
-    }
-
-    defineProps<Props>()
+    defineProps<ProfilePageData>()
 
     const breadcrumbs = buildSettingsProfileBreadcrumbs()
     const resendVerificationHref = authRoutes.verification.send.url()

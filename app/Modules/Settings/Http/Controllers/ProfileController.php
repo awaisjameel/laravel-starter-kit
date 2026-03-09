@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Settings\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Settings\Data\ProfilePageData;
 use App\Modules\Settings\Http\Requests\ProfileDestroyRequest;
 use App\Modules\Settings\Http\Requests\ProfileUpdateRequest;
 use App\Modules\Shared\Auth\RequestActor;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use Inertia\Response;
 
 final class ProfileController extends Controller
@@ -23,11 +24,15 @@ final class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         $user = RequestActor::from($request);
+        $status = $request->session()->get('status');
 
-        return Inertia::render('modules/settings/pages/Profile', [
-            'mustVerifyEmail' => in_array(MustVerifyEmail::class, class_implements($user), true),
-            'status' => $request->session()->get('status'),
-        ]);
+        return PageResponder::render(
+            'modules/settings/pages/Profile',
+            new ProfilePageData(
+                mustVerifyEmail: in_array(MustVerifyEmail::class, class_implements($user), true),
+                status: is_string($status) ? $status : null,
+            ),
+        );
     }
 
     /**

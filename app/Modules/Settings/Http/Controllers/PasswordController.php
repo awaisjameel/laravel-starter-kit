@@ -7,8 +7,8 @@ namespace App\Modules\Settings\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Settings\Http\Requests\PasswordUpdateRequest;
 use App\Modules\Shared\Auth\RequestActor;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
 use Inertia\Response;
 
 final class PasswordController extends Controller
@@ -18,7 +18,7 @@ final class PasswordController extends Controller
      */
     public function edit(): Response
     {
-        return Inertia::render('modules/settings/pages/Password');
+        return PageResponder::render('modules/settings/pages/Password');
     }
 
     /**

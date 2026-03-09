@@ -1,10 +1,8 @@
 <script setup lang="ts">
     import AuthenticatedSessionController from '@/actions/App/Modules/Auth/Http/Controllers/AuthenticatedSessionController'
+    import type { LoginPageData } from '@/types/app-data'
 
-    defineProps<{
-        status?: string
-        canResetPassword: boolean
-    }>()
+    defineProps<LoginPageData>()
 
     const { form, fields, submit } = useSchemaResourceForm<LoginFormValues>(loginFormContract)
     const passwordRequestHref = authRoutes.password.request.url()

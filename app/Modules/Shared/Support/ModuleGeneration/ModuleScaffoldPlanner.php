@@ -192,9 +192,11 @@ final readonly class ModuleScaffoldPlanner
         $moduleRootPath = $this->moduleRootPath($generateModuleInput);
         $controllersPath = $moduleRootPath.'/Http/Controllers';
         $routesPath = $moduleRootPath.'/Routes';
+        $dataPath = $moduleRootPath.'/Data';
 
         $directories[] = $controllersPath;
         $directories[] = $routesPath;
+        $directories[] = $dataPath;
 
         $moduleNamespace = $generateModuleInput->moduleName->namespace;
         $moduleKebab = $generateModuleInput->moduleName->frontendKebab;
@@ -229,11 +231,34 @@ final readonly class ModuleScaffoldPlanner
             ? base_path('stubs/module-generation/backend/controller-with-handlers.stub')
             : base_path('stubs/module-generation/backend/controller.stub');
 
+        $pageDataTokens = [
+            'moduleNamespace' => $moduleNamespace,
+            'pagePascalName' => $pagePascalName,
+            'modelClass' => $modelClass,
+            'modelVariable' => $modelVariable,
+        ];
+
         $files[] = new PlannedFile(
             path: sprintf('%s/%sController.php', $controllersPath, $pagePascalName),
             contents: $this->templateRenderer->render(
                 $controllerStubPath,
                 $controllerTokens,
+            ),
+        );
+
+        $files[] = new PlannedFile(
+            path: sprintf('%s/%sListItemData.php', $dataPath, $pagePascalName),
+            contents: $this->templateRenderer->render(
+                base_path('stubs/module-generation/backend/list-item-data.stub'),
+                $pageDataTokens,
+            ),
+        );
+
+        $files[] = new PlannedFile(
+            path: sprintf('%s/%sPageData.php', $dataPath, $pagePascalName),
+            contents: $this->templateRenderer->render(
+                base_path('stubs/module-generation/backend/page-data.stub'),
+                $pageDataTokens,
             ),
         );
 

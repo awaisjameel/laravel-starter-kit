@@ -11,6 +11,7 @@ use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Resources\{{ pagePascalName }}Resource;
+use App\Modules\Shared\Http\Responders\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -23,32 +24,32 @@ final class {{ pagePascalName }}ApiController extends Controller
 
     public function index(): AnonymousResourceCollection
     {
-        return {{ pagePascalName }}Resource::collection($this->{{ modelVariable }}QueryHandler->index());
+        return ApiResponder::collection({{ pagePascalName }}Resource::collection($this->{{ modelVariable }}QueryHandler->index()));
     }
 
     public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
     {
         $model = $this->{{ modelVariable }}CommandHandler->create($request->toDto());
 
-        return {{ pagePascalName }}Resource::make($model)->response()->setStatusCode(201);
+        return ApiResponder::resource({{ pagePascalName }}Resource::make($model), 201);
     }
 
     public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
-        return {{ pagePascalName }}Resource::make(${{ modelVariable }})->response();
+        return ApiResponder::resource({{ pagePascalName }}Resource::make(${{ modelVariable }}));
     }
 
     public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
         $model = $this->{{ modelVariable }}CommandHandler->update(${{ modelVariable }}, $request->toDto());
 
-        return {{ pagePascalName }}Resource::make($model)->response();
+        return ApiResponder::resource({{ pagePascalName }}Resource::make($model));
     }
 
     public function destroy({{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
         $this->{{ modelVariable }}CommandHandler->delete(${{ modelVariable }});
 
-        return response()->json([], 204);
+        return ApiResponder::noContent();
     }
 }

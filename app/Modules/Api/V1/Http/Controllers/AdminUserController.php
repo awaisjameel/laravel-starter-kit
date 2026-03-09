@@ -7,6 +7,7 @@ namespace App\Modules\Api\V1\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Api\V1\Http\Resources\UserResource;
+use App\Modules\Shared\Http\Responders\ApiResponder;
 use App\Modules\Users\Handlers\UserCommandHandler;
 use App\Modules\Users\Handlers\UserQueryHandler;
 use App\Modules\Users\Http\Requests\UserCreateRequest;
@@ -28,7 +29,7 @@ final class AdminUserController extends Controller
     {
         $lengthAwarePaginator = $this->userQueryHandler->index($userIndexRequest->toDto())->withQueryString();
 
-        return UserResource::collection($lengthAwarePaginator);
+        return ApiResponder::collection(UserResource::collection($lengthAwarePaginator));
     }
 
     public function store(UserCreateRequest $userCreateRequest): JsonResponse
@@ -38,7 +39,7 @@ final class AdminUserController extends Controller
             UserActionContext::fromRequest($userCreateRequest),
         );
 
-        return UserResource::make($userCommandResult->user)->response()->setStatusCode(201);
+        return ApiResponder::resource(UserResource::make($userCommandResult->user), 201);
     }
 
     public function update(UserUpdateRequest $userUpdateRequest, User $user): JsonResponse
@@ -49,13 +50,13 @@ final class AdminUserController extends Controller
             UserActionContext::fromRequest($userUpdateRequest),
         );
 
-        return UserResource::make($userCommandResult->user)->response();
+        return ApiResponder::resource(UserResource::make($userCommandResult->user));
     }
 
     public function destroy(UserDestroyRequest $userDestroyRequest, User $user): JsonResponse
     {
         $this->userCommandHandler->delete($user, UserActionContext::fromRequest($userDestroyRequest));
 
-        return response()->json([], 204);
+        return ApiResponder::noContent();
     }
 }

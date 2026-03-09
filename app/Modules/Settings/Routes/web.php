@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 use App\Modules\Settings\Http\Controllers\PasswordController;
 use App\Modules\Settings\Http\Controllers\ProfileController;
+use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use Inertia\Response;
 
 Route::middleware('auth')
     ->prefix('app/settings')
@@ -20,5 +21,5 @@ Route::middleware('auth')
         Route::get('password', [PasswordController::class, 'edit'])->name('password.edit');
         Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-        Route::get('appearance', fn () => Inertia::render('modules/settings/pages/Appearance'))->name('appearance');
+        Route::get('appearance', fn (): Response => PageResponder::render('modules/settings/pages/Appearance'))->name('appearance');
     });

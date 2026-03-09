@@ -1,11 +1,8 @@
 <script setup lang="ts">
     import { Plus } from 'lucide-vue-next'
+    import type { {{ pagePascalName }}PageData } from '@/types/app-data'
 
-    interface Props {
-        items: {{ pagePascalName }}ListItem[]
-    }
-
-    const props = defineProps<Props>()
+    const props = defineProps<{{ pagePascalName }}PageData>()
     const breadcrumbs = buildDashboardBreadcrumbs()
 
     const isFormDialogOpen = ref(false)

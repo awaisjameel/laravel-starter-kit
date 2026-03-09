@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Modules\Api\V1\Http\Controllers\MeController::__invoke
- * @see app/Modules/Api/V1/Http/Controllers/MeController.php:15
+ * @see app/Modules/Api/V1/Http/Controllers/MeController.php:16
  * @route '/api/v1/me'
  */
 export const show = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ show.definition = {
 
 /**
 * @see \App\Modules\Api\V1\Http\Controllers\MeController::__invoke
- * @see app/Modules/Api/V1/Http/Controllers/MeController.php:15
+ * @see app/Modules/Api/V1/Http/Controllers/MeController.php:16
  * @route '/api/v1/me'
  */
 show.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ show.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Api\V1\Http\Controllers\MeController::__invoke
- * @see app/Modules/Api/V1/Http/Controllers/MeController.php:15
+ * @see app/Modules/Api/V1/Http/Controllers/MeController.php:16
  * @route '/api/v1/me'
  */
 show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ show.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Api\V1\Http\Controllers\MeController::__invoke
- * @see app/Modules/Api/V1/Http/Controllers/MeController.php:15
+ * @see app/Modules/Api/V1/Http/Controllers/MeController.php:16
  * @route '/api/v1/me'
  */
 show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
