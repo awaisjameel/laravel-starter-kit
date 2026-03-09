@@ -1,5 +1,3 @@
-<script setup lang="ts"></script>
-
 <template>
     <div class="relative min-h-svh overflow-hidden bg-background text-foreground">
         <div

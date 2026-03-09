@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
+import { computed, type HTMLAttributes } from 'vue'
+import { cn, omitUndefinedProps } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
 import { X } from 'lucide-vue-next'
 import {
@@ -29,7 +29,7 @@ const emits = defineEmits<DialogContentEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'side')
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(delegatedProps)), emits)
 </script>
 
 <template>

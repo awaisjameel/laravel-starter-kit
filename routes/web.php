@@ -2,20 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Modules\Shared\Support\ModuleRegistry;
 
-Route::get('/', fn () => Inertia::render('marketing/Welcome'))->name('home');
+$moduleRouteFiles = ModuleRegistry::webRoutes(base_path());
 
-Route::get('dashboard', fn () => Inertia::render('Dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
-
-// User management routes
-Route::middleware(['auth'])
-    ->group(function (): void {
-        Route::resource('users', UserController::class)
-            ->except(['create', 'edit', 'show']);
-    });
-
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+foreach ($moduleRouteFiles as $moduleRouteFile) {
+    require $moduleRouteFile;
+}

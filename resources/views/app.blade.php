@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         {{-- Apply persisted appearance immediately and default to light --}}
-        <script>
+        <script nonce="{{ $cspNonce ?? '' }}">
             (function() {
                 const serverAppearance = '{{ $appearance ?? "light" }}';
                 let storedAppearance = null;
@@ -25,7 +25,7 @@
         </script>
 
         {{-- Inline style to avoid background flash before CSS loads --}}
-        <style>
+        <style nonce="{{ $cspNonce ?? '' }}">
             html {
                 background-color: hsl(210 40% 98%);
             }
@@ -44,8 +44,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
 
-        @routes
-        @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+        @vite(['resources/js/app.ts', "resources/js/{$page['component']}.vue"])
         @inertiaHead
     </head>
     <body class="font-sans antialiased">

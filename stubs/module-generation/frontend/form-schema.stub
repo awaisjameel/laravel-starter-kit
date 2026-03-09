@@ -1,0 +1,18 @@
+import type { {{ storeDataClass }} } from '@/types/app-data'
+import type { FormValuesFromData } from '@/lib/forms'
+import { defineFormFields } from '@/types/base-ui'
+
+export type {{ pagePascalName }}FormValues = FormValuesFromData<{{ storeDataClass }}>
+
+export const {{ pageCamelName }}FormContract = defineFormContract<{{ pagePascalName }}FormValues>({
+    defaults: () => ({
+{{ formDefaultValues }}
+    }),
+    fields: () =>
+        defineFormFields<{{ pagePascalName }}FormValues>([
+{{ formFieldDefinitions }}
+        ])
+})
+
+export const create{{ pagePascalName }}FormDefaults = {{ pageCamelName }}FormContract.defaults
+export const build{{ pagePascalName }}FormFields = {{ pageCamelName }}FormContract.fields

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-    import type { User } from '@/types'
+    import type { UserViewData } from '@/types/app-data'
 
     interface Props {
-        user: User
+        user: UserViewData
         showEmail?: boolean
     }
 

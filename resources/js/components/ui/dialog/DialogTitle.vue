@@ -8,7 +8,7 @@ const props = defineProps<DialogTitleProps & { class?: HTMLAttributes['class'] }
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return delegated as Partial<DialogTitleProps>
 })
 
 const forwardedProps = useForwardProps(delegatedProps)

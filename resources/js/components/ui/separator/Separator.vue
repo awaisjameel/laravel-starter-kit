@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<
   decorative: true,
 })
 
-const delegatedProps = reactiveOmit(props, 'class')
+const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
 </script>
 
 <template>

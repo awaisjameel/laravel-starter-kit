@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   DropdownMenuRadioGroup,
   type DropdownMenuRadioGroupEmits,
@@ -9,7 +10,7 @@ import {
 const props = defineProps<DropdownMenuRadioGroupProps>()
 const emits = defineEmits<DropdownMenuRadioGroupEmits>()
 
-const forwarded = useForwardPropsEmits(props, emits)
+const forwarded = useForwardPropsEmits(computed(() => props as Partial<DropdownMenuRadioGroupProps>), emits)
 </script>
 
 <template>

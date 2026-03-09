@@ -1,89 +1,89 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../wayfinder'
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 const RedirectController = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: RedirectController.url(options),
-    method: 'get'
+    method: 'get',
 })
 
 RedirectController.definition = {
-    methods: ['get', 'head', 'post', 'put', 'patch', 'delete', 'options'],
-    url: '/settings'
-} satisfies RouteDefinition<['get', 'head', 'post', 'put', 'patch', 'delete', 'options']>
+    methods: ["get","head","post","put","patch","delete","options"],
+    url: '/app/settings',
+} satisfies RouteDefinition<["get","head","post","put","patch","delete","options"]>
 
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.url = (options?: RouteQueryOptions) => {
     return RedirectController.definition.url + queryParams(options)
 }
 
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: RedirectController.url(options),
-    method: 'get'
+    method: 'get',
 })
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: RedirectController.url(options),
-    method: 'head'
+    method: 'head',
 })
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: RedirectController.url(options),
-    method: 'post'
+    method: 'post',
 })
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: RedirectController.url(options),
-    method: 'put'
+    method: 'put',
 })
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: RedirectController.url(options),
-    method: 'patch'
+    method: 'patch',
 })
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: RedirectController.url(options),
-    method: 'delete'
+    method: 'delete',
 })
 /**
- * @see \Illuminate\Routing\RedirectController::__invoke
+* @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/settings'
+ * @route '/app/settings'
  */
 RedirectController.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
     url: RedirectController.url(options),
-    method: 'options'
+    method: 'options',
 })
 export default RedirectController

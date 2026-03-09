@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Data;
+
+use App\Models\{{ modelClass }};
+use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+
+#[TypeScript]
+final class {{ pageDataClass }} extends Data
+{
+    /**
+     * @param  list<{{ listItemDataClass }}>  $items
+     */
+    public function __construct(
+        public array $items,
+    ) {}
+
+    /**
+     * @param  LengthAwarePaginator<int, {{ modelClass }}>  $lengthAwarePaginator
+     */
+    public static function fromPaginator(LengthAwarePaginator $lengthAwarePaginator): self
+    {
+        /** @var list<{{ modelClass }}> $models */
+        $models = $lengthAwarePaginator->items();
+
+        return new self(
+            items: array_map(
+                static fn ({{ modelClass }} ${{ modelVariable }}): {{ listItemDataClass }} => {{ listItemDataClass }}::fromModel(${{ modelVariable }}),
+                $models,
+            ),
+        );
+    }
+}

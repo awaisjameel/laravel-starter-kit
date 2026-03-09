@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\{{ moduleNamespace }};
+
+use App\Models\{{ modelClass }};
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+final class {{ pagePascalName }}ApiTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_guests_access_behavior_for_{{ routeTestName }}_api_index(): void
+    {
+        $testResponse = $this->getJson('{{ apiRouteUri }}');
+
+        {{ apiGuestAssertion }}
+    }
+
+    public function test_authenticated_users_can_list_{{ routeTestName }}_api_results(): void
+    {
+        {{ apiAuthRequestLine }}
+
+        $testResponse->assertOk();
+
+        {{ modelClass }}::query()->create(['name' => 'Alpha']);
+
+        $testResponse = {{ apiAuthFollowUpLine }};
+
+        $testResponse->assertOk();
+        $testResponse->assertJsonStructure([
+            'data' => [
+                [
+                    'id',
+                    'name',
+                    'created_at',
+                    'updated_at',
+                ],
+            ],
+        ]);
+    }
+}

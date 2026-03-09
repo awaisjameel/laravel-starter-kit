@@ -1,24 +1,5 @@
 <script setup lang="ts">
-    import { type NavItem } from '@/types'
-
-    const sidebarNavItems: NavItem[] = [
-        {
-            title: 'Profile',
-            href: route('profile.edit')
-        },
-        {
-            title: 'Password',
-            href: route('password.edit')
-        },
-        {
-            title: 'Appearance',
-            href: route('appearance')
-        }
-    ]
-
-    const page = usePage()
-
-    const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : ''
+    const { settingsNavItems } = useNavigation()
 </script>
 
 <template>
@@ -29,13 +10,13 @@
             <aside class="w-full lg:w-48">
                 <nav class="grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
                     <UiButton
-                        v-for="item in sidebarNavItems"
+                        v-for="item in settingsNavItems"
                         :key="item.href"
                         variant="ghost"
-                        :class="['w-full justify-start', { 'bg-muted': currentPath === item.href }]"
+                        :class="['w-full justify-start', { 'bg-muted font-medium text-foreground': item.isActive }]"
                         as-child
                     >
-                        <Link :href="item.href">
+                        <Link :href="item.href" :aria-current="item.isActive ? 'page' : undefined">
                             {{ item.title }}
                         </Link>
                     </UiButton>

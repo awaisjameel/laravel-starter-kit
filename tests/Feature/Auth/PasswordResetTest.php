@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class PasswordResetTest extends TestCase
@@ -16,9 +17,13 @@ final class PasswordResetTest extends TestCase
 
     public function test_reset_password_link_screen_can_be_rendered(): void
     {
-        $testResponse = $this->get('/forgot-password');
+        $testResponse = $this->get('/auth/forgot-password');
 
-        $testResponse->assertStatus(200);
+        $testResponse
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('status', null)
+            );
     }
 
     public function test_reset_password_link_can_be_requested(): void
@@ -27,7 +32,7 @@ final class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $this->post('/auth/forgot-password', ['email' => $user->email]);
 
         Notification::assertSentTo($user, ResetPassword::class);
     }
@@ -38,12 +43,17 @@ final class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $this->post('/auth/forgot-password', ['email' => $user->email]);
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification): true {
-            $testResponse = $this->get('/reset-password/'.$notification->token);
+            $testResponse = $this->get('/auth/reset-password/'.$notification->token);
 
-            $testResponse->assertStatus(200);
+            $testResponse
+                ->assertStatus(200)
+                ->assertInertia(fn (Assert $assert): Assert => $assert
+                    ->where('email', '')
+                    ->where('token', $notification->token)
+                );
 
             return true;
         });
@@ -55,10 +65,10 @@ final class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $this->post('/auth/forgot-password', ['email' => $user->email]);
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user): true {
-            $testResponse = $this->post('/reset-password', [
+            $testResponse = $this->post('/auth/reset-password', [
                 'token' => $notification->token,
                 'email' => $user->email,
                 'password' => 'password',
@@ -67,7 +77,7 @@ final class PasswordResetTest extends TestCase
 
             $testResponse
                 ->assertSessionHasNoErrors()
-                ->assertRedirect(route('login'));
+                ->assertRedirect(route('auth.login.create', absolute: false));
 
             return true;
         });

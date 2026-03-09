@@ -7,5 +7,6 @@
     "eslint.validate": ["javascript", "typescript", "vue"],
     "[vue]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "php.version": "8.4"
 }

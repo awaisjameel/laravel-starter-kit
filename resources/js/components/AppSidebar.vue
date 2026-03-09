@@ -2,6 +2,7 @@
     import AppLogo from './AppLogo.vue'
 
     const { dashboardPrimaryItems, dashboardFooterItems } = useNavigation()
+    const dashboardHref = appRoutes.dashboard.url()
 </script>
 
 <template>
@@ -10,7 +11,7 @@
             <UiSidebarMenu>
                 <UiSidebarMenuItem>
                     <UiSidebarMenuButton size="lg" as-child>
-                        <Link :href="route('dashboard')">
+                        <Link :href="dashboardHref">
                             <AppLogo />
                         </Link>
                     </UiSidebarMenuButton>

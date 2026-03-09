@@ -16,7 +16,7 @@ const emits = defineEmits<DropdownMenuCheckboxItemEmits>()
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return delegated as Partial<DropdownMenuCheckboxItemProps>
 })
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)

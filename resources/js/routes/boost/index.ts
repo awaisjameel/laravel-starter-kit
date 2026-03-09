@@ -1,17 +1,17 @@
-import { queryParams, type RouteDefinition, type RouteQueryOptions } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../wayfinder'
 /**
  * @see vendor/laravel/boost/src/BoostServiceProvider.php:117
  * @route '/_boost/browser-logs'
  */
 export const browserLogs = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: browserLogs.url(options),
-    method: 'post'
+    method: 'post',
 })
 
 browserLogs.definition = {
-    methods: ['post'],
-    url: '/_boost/browser-logs'
-} satisfies RouteDefinition<['post']>
+    methods: ["post"],
+    url: '/_boost/browser-logs',
+} satisfies RouteDefinition<["post"]>
 
 /**
  * @see vendor/laravel/boost/src/BoostServiceProvider.php:117
@@ -27,10 +27,10 @@ browserLogs.url = (options?: RouteQueryOptions) => {
  */
 browserLogs.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: browserLogs.url(options),
-    method: 'post'
+    method: 'post',
 })
 const boost = {
-    browserLogs: Object.assign(browserLogs, browserLogs)
+    browserLogs: Object.assign(browserLogs, browserLogs),
 }
 
 export default boost

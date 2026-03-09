@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import type { SelectValueProps } from "reka-ui"
 import { SelectValue } from "reka-ui"
+import { computed } from 'vue'
 
 const props = defineProps<SelectValueProps>()
+
+const forwardedProps = computed(() => props as Record<string, unknown>)
 </script>
 
 <template>
   <SelectValue
     data-slot="select-value"
-    v-bind="props"
+    v-bind="forwardedProps"
   >
     <slot />
   </SelectValue>

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 const props = defineProps<PaginationEllipsisProps & { class?: HTMLAttributes["class"] }>()
 
-const delegatedProps = reactiveOmit(props, "class")
+const delegatedProps = reactiveOmit(props, "class") as Record<string, unknown>
 </script>
 
 <template>

@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\{{ moduleNamespace }};
+
+use App\Models\User;
+{{ userRoleImportLine }}
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
+
+final class {{ pagePascalName }}PageTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_guests_access_behavior_for_{{ routeTestName }}_page(): void
+    {
+        $testResponse = $this->get('{{ routeUri }}');
+
+        {{ guestAssertion }}
+    }
+
+{{ forbiddenRoleTest }}
+    public function test_authenticated_users_can_visit_{{ routeTestName }}_page(): void
+    {
+        $user = User::factory()->create({{ allowedRoleFactoryState }});
+
+        $testResponse = $this->actingAs($user)->get('{{ routeUri }}');
+
+        $testResponse->assertOk();
+        $testResponse->assertInertia(fn (Assert $assert): Assert => $assert
+            ->component('modules/{{ moduleKebab }}/pages/{{ pagePascalName }}')
+        );
+    }
+}

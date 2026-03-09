@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Commands;
+
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Data\{{ storeDataClass }};
+
+final class {{ modelClass }}Commands
+{
+    public function create({{ storeDataClass }} $storeData): {{ modelClass }}
+    {
+        return {{ modelClass }}::createFromData($storeData);
+    }
+
+    public function update({{ modelClass }} $model, {{ storeDataClass }} $storeData): {{ modelClass }}
+    {
+        $model->updateFromData($storeData);
+
+        return $model->refresh();
+    }
+
+    public function delete({{ modelClass }} $model): void
+    {
+        $model->delete();
+    }
+}

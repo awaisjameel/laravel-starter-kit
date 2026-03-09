@@ -15,8 +15,8 @@ final class DashboardTest extends TestCase
 
     public function test_guests_are_redirected_to_the_login_page(): void
     {
-        $testResponse = $this->get('/dashboard');
-        $testResponse->assertRedirect('/login');
+        $testResponse = $this->get('/app/dashboard');
+        $testResponse->assertRedirect('/auth/login');
     }
 
     public function test_authenticated_users_can_visit_the_dashboard(): void
@@ -24,8 +24,8 @@ final class DashboardTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $testResponse = $this->get('/dashboard');
+        $testResponse = $this->get('/app/dashboard');
         $testResponse->assertStatus(200);
-        $testResponse->assertInertia(fn (Assert $assert): Assert => $assert->component('Dashboard'));
+        $testResponse->assertInertia(fn (Assert $assert): Assert => $assert->component('modules/dashboard/pages/Index'));
     }
 }

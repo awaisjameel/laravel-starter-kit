@@ -6,6 +6,7 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class ProfileUpdateTest extends TestCase
@@ -18,9 +19,14 @@ final class ProfileUpdateTest extends TestCase
 
         $testResponse = $this
             ->actingAs($user)
-            ->get('/settings/profile');
+            ->get('/app/settings/profile');
 
-        $testResponse->assertOk();
+        $testResponse
+            ->assertOk()
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('mustVerifyEmail', true)
+                ->where('status', null)
+            );
     }
 
     public function test_profile_information_can_be_updated(): void
@@ -29,14 +35,14 @@ final class ProfileUpdateTest extends TestCase
 
         $testResponse = $this
             ->actingAs($user)
-            ->patch('/settings/profile', [
+            ->patch('/app/settings/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $testResponse
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings/profile');
+            ->assertRedirect('/app/settings/profile');
 
         $user->refresh();
 
@@ -51,14 +57,14 @@ final class ProfileUpdateTest extends TestCase
 
         $testResponse = $this
             ->actingAs($user)
-            ->patch('/settings/profile', [
+            ->patch('/app/settings/profile', [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $testResponse
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/settings/profile');
+            ->assertRedirect('/app/settings/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -69,7 +75,7 @@ final class ProfileUpdateTest extends TestCase
 
         $testResponse = $this
             ->actingAs($user)
-            ->delete('/settings/profile', [
+            ->delete('/app/settings/profile', [
                 'password' => 'password',
             ]);
 
@@ -87,14 +93,14 @@ final class ProfileUpdateTest extends TestCase
 
         $testResponse = $this
             ->actingAs($user)
-            ->from('/settings/profile')
-            ->delete('/settings/profile', [
+            ->from('/app/settings/profile')
+            ->delete('/app/settings/profile', [
                 'password' => 'wrong-password',
             ]);
 
         $testResponse
             ->assertSessionHasErrors('password')
-            ->assertRedirect('/settings/profile');
+            ->assertRedirect('/app/settings/profile');
 
         $this->assertNotNull($user->fresh());
     }

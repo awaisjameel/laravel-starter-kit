@@ -7,6 +7,8 @@ namespace Tests\Feature\Users;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Broadcast;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class UserManagementTest extends TestCase
@@ -15,16 +17,30 @@ final class UserManagementTest extends TestCase
 
     public function test_guests_are_redirected_from_user_management_routes(): void
     {
-        $testResponse = $this->get('/users');
+        $testResponse = $this->get('/app/admin/users');
 
-        $testResponse->assertRedirect('/login');
+        $testResponse->assertRedirect('/auth/login');
+    }
+
+    public function test_guests_are_redirected_from_user_management_routes_even_when_reverb_app_id_is_missing(): void
+    {
+        config()->set('broadcasting.default', 'reverb');
+        config()->set('broadcasting.connections.reverb.key', 'local-key');
+        config()->set('broadcasting.connections.reverb.secret', 'local-secret');
+        config()->set('broadcasting.connections.reverb.app_id', '');
+
+        Broadcast::forgetDrivers();
+
+        $testResponse = $this->get('/app/admin/users');
+
+        $testResponse->assertRedirect('/auth/login');
     }
 
     public function test_non_admin_users_cannot_access_user_listing(): void
     {
         $user = User::factory()->create(['role' => UserRole::User]);
 
-        $testResponse = $this->actingAs($user)->get('/users');
+        $testResponse = $this->actingAs($user)->get('/app/admin/users');
 
         $testResponse->assertForbidden();
     }
@@ -33,7 +49,7 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->get('/users');
+        $testResponse = $this->actingAs($admin)->get('/app/admin/users');
 
         $testResponse->assertOk();
     }
@@ -42,14 +58,14 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->post('/users', [
+        $testResponse = $this->actingAs($admin)->post('/app/admin/users', [
             'name' => 'New User',
             'email' => 'new-user@example.com',
             'password' => 'Password123!@#',
             'role' => UserRole::User->value,
         ]);
 
-        $testResponse->assertRedirect('/users');
+        $testResponse->assertRedirect('/app/admin/users');
         $this->assertDatabaseHas('users', [
             'email' => 'new-user@example.com',
             'role' => UserRole::User->value,
@@ -60,7 +76,7 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->post('/users', [
+        $testResponse = $this->actingAs($admin)->post('/app/admin/users', [
             'name' => '',
             'email' => 'invalid',
             'password' => 'weak',
@@ -75,14 +91,14 @@ final class UserManagementTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         $target = User::factory()->create(['role' => UserRole::User]);
 
-        $testResponse = $this->actingAs($admin)->put('/users/'.$target->id, [
+        $testResponse = $this->actingAs($admin)->put('/app/admin/users/'.$target->id, [
             'name' => 'Updated Name',
             'email' => 'updated@example.com',
             'password' => '',
             'role' => UserRole::Admin->value,
         ]);
 
-        $testResponse->assertRedirect('/users');
+        $testResponse->assertRedirect('/app/admin/users');
 
         $this->assertDatabaseHas('users', [
             'id' => $target->id,
@@ -97,9 +113,9 @@ final class UserManagementTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         $target = User::factory()->create(['role' => UserRole::User]);
 
-        $testResponse = $this->actingAs($admin)->delete('/users/'.$target->id);
+        $testResponse = $this->actingAs($admin)->delete('/app/admin/users/'.$target->id);
 
-        $testResponse->assertRedirect('/users');
+        $testResponse->assertRedirect('/app/admin/users');
         $this->assertDatabaseMissing('users', ['id' => $target->id]);
     }
 
@@ -107,7 +123,7 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->delete('/users/'.$admin->id);
+        $testResponse = $this->actingAs($admin)->delete('/app/admin/users/'.$admin->id);
 
         $testResponse->assertForbidden();
         $this->assertDatabaseHas('users', ['id' => $admin->id]);
@@ -117,9 +133,94 @@ final class UserManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $testResponse = $this->actingAs($admin)->from('/users')->get('/users?perPage=1000&page=0');
+        $testResponse = $this->actingAs($admin)->from('/app/admin/users')->get(
+            '/app/admin/users?perPage=1000&page=0&sortBy=invalid&sortDirection=sideways&search='.str_repeat('x', 101)
+        );
 
-        $testResponse->assertRedirect('/users');
-        $testResponse->assertSessionHasErrors(['perPage', 'page']);
+        $testResponse->assertRedirect('/app/admin/users');
+        $testResponse->assertSessionHasErrors(['perPage', 'page', 'sortBy', 'sortDirection', 'search']);
+    }
+
+    public function test_user_listing_trims_query_input_and_applies_default_query_values(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+            'created_at' => now()->subHours(2),
+        ]);
+        User::factory()->create([
+            'name' => 'Alice Trimmed',
+            'email' => 'alice-trimmed@example.com',
+            'role' => UserRole::User,
+            'created_at' => now()->subMinute(),
+        ]);
+        User::factory()->create([
+            'name' => 'Zulu Trimmed',
+            'email' => 'zulu-trimmed@example.com',
+            'role' => UserRole::User,
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=%20%20Alice%20Trimmed%20%20')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('users.current_page', 1)
+                ->where('users.per_page', 10)
+                ->has('users.data', 1)
+                ->where('users.data.0.email', 'alice-trimmed@example.com')
+            );
+
+    }
+
+    public function test_admin_users_can_search_users_by_name_email_and_role(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        User::factory()->create([
+            'name' => 'Alice Search',
+            'email' => 'alice@example.com',
+            'role' => UserRole::User,
+        ]);
+        User::factory()->create([
+            'name' => 'Bob Search',
+            'email' => 'bob@example.com',
+            'role' => UserRole::Admin,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=alice')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->has('users.data', 1)
+                ->where('users.data.0.email', 'alice@example.com')
+            );
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=bob@example.com')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->has('users.data', 1)
+                ->where('users.data.0.name', 'Bob Search')
+            );
+
+        $testResponse = $this->actingAs($admin)->get('/app/admin/users?search=admin');
+        $testResponse->assertOk();
+        $testResponse->assertSee('Bob Search');
+        $testResponse->assertDontSee('Alice Search');
+    }
+
+    public function test_admin_users_can_sort_users_by_allowed_fields(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        User::factory()->create(['name' => 'Alpha Sort', 'email' => 'alpha@example.com', 'role' => UserRole::User]);
+        User::factory()->create(['name' => 'Zulu Sort', 'email' => 'zulu@example.com', 'role' => UserRole::Admin]);
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=Sort&sortBy=name&sortDirection=asc')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('users.data.0.name', 'Alpha Sort')
+            );
+
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=Sort&sortBy=email&sortDirection=desc')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('users.data.0.email', 'zulu@example.com')
+            );
     }
 }

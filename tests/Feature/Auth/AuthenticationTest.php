@@ -6,6 +6,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 final class AuthenticationTest extends TestCase
@@ -14,29 +15,34 @@ final class AuthenticationTest extends TestCase
 
     public function test_login_screen_can_be_rendered(): void
     {
-        $testResponse = $this->get('/login');
+        $testResponse = $this->get('/auth/login');
 
-        $testResponse->assertStatus(200);
+        $testResponse
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('canResetPassword', true)
+                ->where('status', null)
+            );
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();
 
-        $testResponse = $this->post('/login', [
+        $testResponse = $this->post('/auth/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertAuthenticated();
-        $testResponse->assertRedirect(route('dashboard', absolute: false));
+        $testResponse->assertRedirect(route('app.dashboard', absolute: false));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
+        $this->post('/auth/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
@@ -48,7 +54,12 @@ final class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $testResponse = $this->actingAs($user)->post('/logout');
+        $this->post('/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $testResponse = $this->post('/auth/logout');
 
         $this->assertGuest();
         $testResponse->assertRedirect('/');

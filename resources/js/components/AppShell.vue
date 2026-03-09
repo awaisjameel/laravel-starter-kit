@@ -5,7 +5,8 @@
 
     defineProps<Props>()
 
-    const isOpen = usePage().props.sidebarOpen
+    const page = useAppPage()
+    const isOpen = computed(() => page.props.sidebarOpen)
 </script>
 
 <template>

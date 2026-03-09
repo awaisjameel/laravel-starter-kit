@@ -1,8 +1,5 @@
 <script setup lang="ts">
-    interface BreadcrumbItemType {
-        title: string
-        href?: string
-    }
+    import type { BreadcrumbItemType } from '@/types'
 
     defineProps<{
         breadcrumbs: BreadcrumbItemType[]

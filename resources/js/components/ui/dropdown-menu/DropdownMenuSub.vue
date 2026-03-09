@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   DropdownMenuSub,
   type DropdownMenuSubEmits,
@@ -9,7 +10,7 @@ import {
 const props = defineProps<DropdownMenuSubProps>()
 const emits = defineEmits<DropdownMenuSubEmits>()
 
-const forwarded = useForwardPropsEmits(props, emits)
+const forwarded = useForwardPropsEmits(computed(() => props as Partial<DropdownMenuSubProps>), emits)
 </script>
 
 <template>

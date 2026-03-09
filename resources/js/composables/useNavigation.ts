@@ -1,175 +1,72 @@
-import type { AppPageProps, NavItem } from '@/types'
+import {
+    buildDashboardFooterItems,
+    buildDashboardPrimaryItems,
+    buildMarketingFooterGroups,
+    buildMarketingPrimaryAction,
+    buildMarketingPrimaryItems,
+    buildMarketingSecondaryAction,
+    buildSettingsNavItems,
+    type NavigationGroup
+} from '@/config/navigation'
+import type { NavItem, NavItemActiveMatch } from '@/types'
 import { UserRole } from '@/types/app-data'
-import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from 'lucide-vue-next'
 
-export interface NavigationGroup {
-    title: string
-    items: NavItem[]
+type ActiveNavItem = NavItem & { isActive: boolean }
+type ActiveNavigationGroup = Omit<NavigationGroup, 'items'> & { items: ActiveNavItem[] }
+
+const normalizePath = (value: string): string => {
+    const trimmed = value.replace(/\/+$/, '')
+    return trimmed === '' ? '/' : trimmed
 }
 
 export function useNavigation() {
-    const page = usePage<AppPageProps>()
-
-    const user = computed(() => page.props.auth?.user ?? null)
+    const page = useAppPage()
+    const user = useAuthUser()
     const isAuthenticated = computed(() => Boolean(user.value?.id))
     const isAdmin = computed(() => user.value?.role === UserRole.Admin)
+    const baseLocation = computed(() => page.props.ziggy?.location ?? 'http://localhost')
+    const currentPath = computed(() => normalizePath(new URL(page.url, baseLocation.value).pathname))
 
-    const dashboardPrimaryItems = computed<NavItem[]>(() => {
-        const items: NavItem[] = [
-            {
-                title: 'Dashboard',
-                href: route('dashboard'),
-                icon: LayoutGrid
-            }
-        ]
+    const context = computed(() => ({
+        isAuthenticated: isAuthenticated.value,
+        isAdmin: isAdmin.value,
+        role: user.value?.role ?? null
+    }))
 
-        if (isAdmin.value) {
-            items.push({
-                title: 'Users',
-                href: route('users.index'),
-                icon: Users
-            })
+    const isActiveHref = (href: string, activeMatch: NavItemActiveMatch = 'exact'): boolean => {
+        const hrefPath = normalizePath(new URL(href, baseLocation.value).pathname)
+
+        if (activeMatch === 'exact' || hrefPath === '/') {
+            return currentPath.value === hrefPath
         }
 
-        return items
+        return currentPath.value === hrefPath || currentPath.value.startsWith(`${hrefPath}/`)
+    }
+
+    const withActiveItem = (item: NavItem): ActiveNavItem => ({
+        ...item,
+        isActive: isActiveHref(item.href, item.activeMatch)
     })
 
-    const dashboardFooterItems = computed<NavItem[]>(() => [
-        {
-            title: 'Settings',
-            href: route('profile.edit'),
-            icon: Settings
-        },
-        {
-            title: 'Security',
-            href: route('password.edit'),
-            icon: LockKeyhole
-        }
-    ])
+    const withActiveItems = (items: NavItem[]): ActiveNavItem[] => items.map((item) => withActiveItem(item))
 
-    const marketingPrimaryItems = computed<NavItem[]>(() => {
-        const items: NavItem[] = [
-            {
-                title: 'Home',
-                href: route('home')
-            }
-        ]
-
-        if (isAuthenticated.value) {
-            items.push({
-                title: 'Dashboard',
-                href: route('dashboard')
-            })
-
-            if (isAdmin.value) {
-                items.push({
-                    title: 'Users',
-                    href: route('users.index')
-                })
-            }
-        }
-
-        return items
-    })
-
-    const marketingPrimaryAction = computed<NavItem>(() => {
-        if (isAuthenticated.value) {
-            return {
-                title: 'Open dashboard',
-                href: route('dashboard'),
-                icon: LayoutGrid
-            }
-        }
-
-        return {
-            title: 'Get started',
-            href: route('register'),
-            icon: UserPlus
-        }
-    })
-
-    const marketingSecondaryAction = computed<NavItem>(() => {
-        if (isAuthenticated.value) {
-            return {
-                title: 'Settings',
-                href: route('profile.edit'),
-                icon: Settings
-            }
-        }
-
-        return {
-            title: 'Log in',
-            href: route('login'),
-            icon: LogIn
-        }
-    })
-
-    const marketingFooterGroups = computed<NavigationGroup[]>(() => {
-        const platformItems: NavItem[] = [
-            {
-                title: 'Home',
-                href: route('home')
-            }
-        ]
-
-        if (isAuthenticated.value) {
-            platformItems.push({
-                title: 'Dashboard',
-                href: route('dashboard')
-            })
-        }
-
-        const accountItems: NavItem[] = isAuthenticated.value
-            ? [
-                  {
-                      title: 'Profile settings',
-                      href: route('profile.edit')
-                  },
-                  {
-                      title: 'Password settings',
-                      href: route('password.edit')
-                  }
-              ]
-            : [
-                  {
-                      title: 'Log in',
-                      href: route('login')
-                  },
-                  {
-                      title: 'Create account',
-                      href: route('register')
-                  }
-              ]
-
-        const groups: NavigationGroup[] = [
-            {
-                title: 'Platform',
-                items: platformItems
-            },
-            {
-                title: 'Account',
-                items: accountItems
-            }
-        ]
-
-        if (isAdmin.value) {
-            groups.push({
-                title: 'Administration',
-                items: [
-                    {
-                        title: 'User management',
-                        href: route('users.index')
-                    }
-                ]
-            })
-        }
-
-        return groups
-    })
+    const settingsNavItems = computed<ActiveNavItem[]>(() => withActiveItems(buildSettingsNavItems()))
+    const dashboardPrimaryItems = computed<ActiveNavItem[]>(() => withActiveItems(buildDashboardPrimaryItems(context.value)))
+    const dashboardFooterItems = computed<ActiveNavItem[]>(() => withActiveItems(buildDashboardFooterItems()))
+    const marketingPrimaryItems = computed<ActiveNavItem[]>(() => withActiveItems(buildMarketingPrimaryItems(context.value)))
+    const marketingPrimaryAction = computed<ActiveNavItem>(() => withActiveItem(buildMarketingPrimaryAction(context.value)))
+    const marketingSecondaryAction = computed<ActiveNavItem>(() => withActiveItem(buildMarketingSecondaryAction(context.value)))
+    const marketingFooterGroups = computed<ActiveNavigationGroup[]>(() =>
+        buildMarketingFooterGroups(context.value).map((group) => ({
+            ...group,
+            items: withActiveItems(group.items)
+        }))
+    )
 
     return {
         isAuthenticated,
         isAdmin,
+        settingsNavItems,
         dashboardPrimaryItems,
         dashboardFooterItems,
         marketingPrimaryItems,

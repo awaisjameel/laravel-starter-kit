@@ -13,14 +13,14 @@ final class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        $testResponse = $this->get('/register');
+        $testResponse = $this->get('/auth/register');
 
         $testResponse->assertStatus(200);
     }
 
     public function test_new_users_can_register(): void
     {
-        $testResponse = $this->post('/register', [
+        $testResponse = $this->post('/auth/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
@@ -28,6 +28,6 @@ final class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $testResponse->assertRedirect(route('dashboard', absolute: false));
+        $testResponse->assertRedirect(route('app.dashboard', absolute: false));
     }
 }

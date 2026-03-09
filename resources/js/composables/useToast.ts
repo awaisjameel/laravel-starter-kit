@@ -1,66 +1,81 @@
-import { readonly, ref } from 'vue'
+import type { ToastMessage, ToastVariant } from '@/types/base-ui'
 
-export interface Toast {
-    id: number
-    message: string
-    type: 'success' | 'error' | 'info' | 'warning'
+interface CreateToastInput {
+    title: string
+    description?: string
     duration?: number
 }
 
-const toasts = ref<Toast[]>([])
-let toastId = 0
+const DEFAULT_DURATION = 4000
+const toasts = ref<ToastMessage[]>([])
+const timeoutIds = new Map<string, ReturnType<typeof setTimeout>>()
+let toastCounter = 0
 
-/**
- * Composable for managing toast notifications.
- * Provides a centralized way to show temporary feedback messages.
- */
+const normalizeDuration = (duration?: number): number => {
+    if (typeof duration !== 'number' || Number.isNaN(duration)) {
+        return DEFAULT_DURATION
+    }
+
+    return Math.max(1000, duration)
+}
+
+const buildToast = (variant: ToastVariant, input: CreateToastInput): ToastMessage => {
+    const toast: ToastMessage = {
+        id: `toast-${Date.now()}-${(toastCounter += 1)}`,
+        title: input.title,
+        variant,
+        duration: normalizeDuration(input.duration)
+    }
+
+    if (input.description !== undefined) {
+        toast.description = input.description
+    }
+
+    return toast
+}
+
+const scheduleDismiss = (id: string, duration: number): void => {
+    const timeoutId = setTimeout(() => dismiss(id), duration)
+    timeoutIds.set(id, timeoutId)
+}
+
+const create = (variant: ToastVariant, input: CreateToastInput): void => {
+    const toast = buildToast(variant, input)
+    toasts.value = [toast, ...toasts.value]
+    scheduleDismiss(toast.id, toast.duration)
+}
+
+const dismiss = (id: string): void => {
+    const timeoutId = timeoutIds.get(id)
+
+    if (timeoutId !== undefined) {
+        clearTimeout(timeoutId)
+        timeoutIds.delete(id)
+    }
+
+    toasts.value = toasts.value.filter((toast) => toast.id !== id)
+}
+
 export function useToast() {
-    const show = (message: string, type: Toast['type'] = 'success', duration = 3000): void => {
-        const id = ++toastId
-        toasts.value.push({ id, message, type, duration })
-
-        if (duration > 0) {
-            setTimeout(() => {
-                remove(id)
-            }, duration)
-        }
-    }
-
-    const remove = (id: number): void => {
-        const index = toasts.value.findIndex((t) => t.id === id)
-        if (index !== -1) {
-            toasts.value.splice(index, 1)
-        }
-    }
-
-    const success = (message: string, duration?: number): void => {
-        show(message, 'success', duration)
-    }
-
-    const error = (message: string, duration?: number): void => {
-        show(message, 'error', duration)
-    }
-
-    const info = (message: string, duration?: number): void => {
-        show(message, 'info', duration)
-    }
-
-    const warning = (message: string, duration?: number): void => {
-        show(message, 'warning', duration)
-    }
-
+    const success = (input: CreateToastInput): void => create('success', input)
+    const error = (input: CreateToastInput): void => create('error', input)
+    const info = (input: CreateToastInput): void => create('info', input)
+    const warning = (input: CreateToastInput): void => create('warning', input)
+    const basic = (input: CreateToastInput): void => create('default', input)
     const clear = (): void => {
+        timeoutIds.forEach((timeoutId) => clearTimeout(timeoutId))
+        timeoutIds.clear()
         toasts.value = []
     }
 
     return {
         toasts: readonly(toasts),
-        show,
-        remove,
+        toast: basic,
         success,
         error,
         info,
         warning,
+        dismiss,
         clear
     }
 }

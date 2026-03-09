@@ -48,7 +48,12 @@ final class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => mb_trim($message), 'author' => mb_trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user()?->toViewData(),
+            ],
+            'flash' => [
+                'message' => $request->session()->get('message'),
+                'error' => $request->session()->get('error'),
+                'status' => $request->session()->get('status'),
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),

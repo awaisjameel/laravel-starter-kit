@@ -5,6 +5,7 @@ import path from 'path'
 import { defineConfig } from 'vite'
 
 import { wayfinder } from '@laravel/vite-plugin-wayfinder'
+import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
 import AutoImport from 'unplugin-auto-import/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
@@ -13,7 +14,7 @@ import Components from 'unplugin-vue-components/vite'
 export default defineConfig({
     plugins: [
         wayfinder({
-            command: 'php artisan wayfinder:generate && npx prettier -w ./resources/js/**/*.{ts,js}'
+            command: 'php artisan wayfinder:generate --no-interaction'
         }),
         laravel({
             input: ['resources/js/app.ts'],
@@ -33,16 +34,9 @@ export default defineConfig({
             vueTemplate: true,
             viteOptimizeDeps: true,
             dts: 'resources/js/types/auto-imports.d.ts',
-            imports: [
-                'vue',
-                'vue-router',
-                {
-                    '@inertiajs/vue3': ['usePage', 'useForm', 'useRemember', 'usePoll', 'router', 'Deferred'],
-                    '@inertiajs/core': ['Method'],
-                    'ziggy-js': ['Ziggy']
-                }
-            ],
-            dirs: ['resources/js/composables/**', 'resources/js/stores/**', 'resources/js/lib/**', 'resources/js/utils/**']
+            dtsMode: 'overwrite',
+            imports: autoImportImports,
+            dirs: autoImportDirs
         }),
         Icons({
             compiler: 'vue3',
@@ -53,8 +47,9 @@ export default defineConfig({
             extensions: ['vue'],
             collapseSamePrefixes: true,
             directoryAsNamespace: true,
+            globalNamespaces: ['components'],
             dts: 'resources/js/types/components.d.ts',
-            dirs: ['resources/js/components', 'resources/js/layouts'],
+            dirs: ['resources/js/components', 'resources/js/layouts', 'resources/js/modules'],
             resolvers: [
                 (componentName) => {
                     if (['Link', 'Head'].includes(componentName)) {
@@ -69,7 +64,8 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './resources/js')
+            '@': path.resolve(__dirname, './resources/js'),
+            '/resources/js': path.resolve(__dirname, './resources/js')
         }
     }
 })

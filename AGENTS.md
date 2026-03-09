@@ -1,2287 +1,866 @@
 # AGENTS.md
 
-## Intent
+## Purpose
 
-This file defines mandatory rules for coding agents working in this repository.
-The goal is clean, consistent, end-to-end type-safe, secure, and performant code.
+This repository is a modular Laravel + Inertia + Vue starter kit with backend-owned contracts, strict typing, realtime support, and generator-backed conventions.
+The backend is the source of truth for DTOs, enums, route/action helpers, and realtime contracts.
+Agents must keep the codebase internally consistent, remove redundancy, and deliver complete, production-quality implementations with no partial work left behind.
+
+## Source Of Truth Hierarchy
+
+When guidance conflicts, resolve it in this order:
+
+1. Current runtime behavior and code in the repository.
+2. Generated artifacts that are owned by backend contracts.
+3. `AGENTS.md`.
+4. Secondary docs such as `README.md` and files under `docs/**`.
+
+If code and docs disagree, trust the code, then fix the docs in the same task when relevant.
+
+## Non-Negotiable Engineering Bar
+
+- Think through the full impact of every change before editing code.
+- Verify the current implementation first; never preserve stale assumptions from docs, habits, or previous starter-kit conventions.
+- Prefer the simplest design that is correct, extensible, testable, and aligned with existing project patterns.
+- Maintain excellent DI: prefer constructor injection, readonly dependencies, explicit typed inputs, and thin transport layers.
+- Maintain excellent DX: preserve predictable file placement, generated contract flows, route/action helpers, and shared abstractions instead of ad hoc patterns.
+- Maintain excellent performance: avoid duplicate scans, redundant queries, unnecessary rerenders, unnecessary network calls, and unnecessary abstractions.
+- Remove dead code, duplicate logic, stale comments, unused scaffolding, and compatibility shims when they are no longer justified.
+- Never leave a feature half-finished. If a change requires backend, frontend, generated artifacts, tests, docs, or cleanup, complete all of them in the same task.
+- Match the existing architecture precisely. If the architecture must change, update this file in the same change.
+
+## Mandatory Workflow
+
+1. Inspect the existing implementation, affected modules, related tests, and generated-contract flow before making changes.
+2. Reuse existing module services, requests, DTOs, queries, commands, handlers, responders, composables, and base UI primitives before introducing anything new.
+3. Keep changes focused, typed, and module-local unless the concern is genuinely cross-cutting.
+4. Regenerate artifacts whenever backend-owned contracts, routes, channels, providers, listeners, or enums change.
+5. Run the required quality gates after every change.
+6. Update `AGENTS.md` whenever architecture, workflows, or enforcement rules change.
+7. Do not stop at analysis. Deliver the finished implementation, verification, and cleanup unless the user explicitly redirects you.
 
 ## Agent Workflow Protocol (MANDATORY)
 
 Before writing ANY code, agents MUST follow this protocol:
 
-### 1. Understanding Phase (REQUIRED)
+1. Understanding Phase (REQUIRED)
+    - Read First: Never assume. Read all related files, understand the full context.
+    - Trace Dependencies: Map all files, services, events, and components that will be affected.
+2. Planning Phase (REQUIRED)
+    - Design First: Outline the solution architecture before coding.
+    - Impact Analysis: List all files that need changes (backend, frontend, tests, docs).
+3. Implementation Phase
+    - One Change at a Time: Make focused, atomic changes.
+    - Follow Patterns: Match existing conventions exactly.
+4. Verification Phase
+    - Run Quality Gate: `composer generate-and-cleanup` after every change.
+5. Completion Criteria
+    - All tests pass, no dead code/TODOs remain, and `AGENTS.md` is updated if applicable.
 
-- **Read First**: Never assume. Read all related files, understand the full context.
-- **Trace Dependencies**: Map all files, services, events, and components that will be affected.
-- **Identify Patterns**: Look for existing patterns in the codebase before introducing new ones.
-- **Document Understanding**: Briefly summarize what you understand before implementing.
+## Change-Impact Checklist
 
-### 2. Planning Phase (REQUIRED)
+For every non-trivial change, explicitly verify all affected layers before considering the task complete:
 
-- **Design First**: Outline the solution architecture before coding.
-- **Reuse First**: Check for existing components, composables, services, DTOs, enums.
-- **Impact Analysis**: List all files that need changes (backend, frontend, tests, docs).
-- **Test Strategy**: Define test cases before implementation (happy path, failure, edge cases).
+- backend contracts
+- generated artifacts
+- frontend consumers
+- route/action helper usage
+- authorization and policies/gates
+- realtime contracts and subscriptions
+- database schema, indexes, and query behavior
+- tests
+- docs
+- stale code removal
 
-### 3. Implementation Phase
+## Current Stack
 
-- **One Change at a Time**: Make focused, atomic changes.
-- **Follow Patterns**: Match existing conventions exactly.
-- **Type Safety**: Ensure end-to-end type safety (PHP DTO → TypeScript types).
-- **Security First**: Validate on server, authorize with policies, sanitize inputs.
+- PHP: `^8.4`
+- Laravel: `^12.50`
+- Inertia Laravel: `^2.0.21`
+- Reverb: `^1.8`
+- Sanctum: `^4.3.1`
+- Wayfinder: `^0.1.14`
+- Ziggy: `^2.6.1`
+- Spatie Laravel Data: `^4.20`
+- Spatie TypeScript Transformer: `^2.6`
+- Vue: `^3.5.29`
+- TypeScript: `^5.9.3`
+- Vite: `^7.3.1`
+- Tailwind CSS: `^4.2.1`
+- Node: `>=24.1.0`
+- npm: `>=11.2.1`
+- Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
 
-### 4. Verification Phase (MANDATORY)
+## Current Runtime And Tooling
 
-- **Run Quality Gate**: `composer generate-and-cleanup` after every change.
-- **Run Type Check**: `npm run typecheck` after frontend changes.
-- **Run Tests**: Write and run tests for all new/changed behavior.
-- **Update Documentation**: Update AGENTS.md for new features/patterns.
+- `composer dev` starts:
+    - `php artisan serve`
+    - `php artisan queue:listen --queue=realtime,high,default --tries=1`
+    - `php artisan pail --timeout=0`
+    - `npm run dev`
+    - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
+- `composer dev:ssr` builds SSR assets, then starts:
+    - `php artisan serve`
+    - `php artisan queue:listen --queue=realtime,high,default --tries=1`
+    - `php artisan pail --timeout=0`
+    - `php artisan inertia:start-ssr`
+    - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
+- `pm2.config.cjs` currently manages production-style queue workers, Reverb, and the scheduler.
 
-### 5. Completion Criteria
-
-A change is complete ONLY when:
-
-- [ ] All quality gates pass (Pint, Rector, PHPStan, ESLint, Prettier)
-- [ ] TypeScript compilation succeeds with no errors
-- [ ] All tests pass (new and existing)
-- [ ] AGENTS.md updated (if applicable)
-- [ ] No dead code, commented code, or TODOs remain
-- [ ] Both light and dark themes supported (UI changes)
-
-## Stack Snapshot (Current Project)
-
-- Backend: PHP `^8.4`, Laravel `^12.50`, Inertia Laravel `^2.0`, Sanctum `^4.3`, Wayfinder `^0.1`, Ziggy `^2.6`
-- Typed backend contracts: Spatie Laravel Data `^4.19`, Spatie TypeScript Transformer `^2.5`
-- Frontend: Vue `^3.5`, Inertia Vue `^2.3`, Tailwind CSS `^4.1`, Pinia `^3`
-- UI primitives: shadcn-vue style components on Reka UI
-- Tooling: Vite `^7`, TypeScript `^5.9` (strict), ESLint `^9`, Prettier `^3`, Pint `^1`, Rector `^2`, PHPUnit `^12`
-- Node requirements: Node `>=24.1.0`, npm `>=11.2.1`, npm only (enforced by `ensure-node-env.js`)
-
-## Non-Negotiable Rules
-
-- Before making any code changes, fully understand all requirements and the current implementation across related files, flows, and dependencies.
-- Write or modify code only after that understanding is clear, then implement in the most efficient, maintainable, and logically structured way.
-- Match existing conventions before introducing new patterns.
-- Reuse existing components, composables, DTOs, enums, and helpers before creating new ones.
-- Public client-facing UI is the **marketing domain** and must stay structurally separated from authenticated app domains (dashboard/settings/users/auth) except for approved shared primitives/utilities.
-- For any component/layout/page in a subdirectory, use the namespace-prefixed auto-registered tag name (for example `<MarketingPageLayout />`, `<UsersCreateUserDialog />`), never an unscoped alias.
-- Do not change dependencies, core folder structure, or app architecture without explicit approval.
-- Do not add new documentation files unless explicitly requested.
-- No dead code, commented-out code, placeholder TODOs, or magic strings where typed/shared constants exist.
-- For behavior changes, update or add tests that cover happy path, failure path, and relevant edge cases.
-- Every new or changed implementation must follow the same project patterns and best practices: clean, reusable, type-safe code with the most logical structure.
-
-## Documentation Accountability Policy
-
-- Any new entity, feature, service, integration, or major update to existing behavior must be documented in `AGENTS.md`.
-- `AGENTS.md` updates must be made in the same change set as the code change.
-- Documentation must be specific enough for accountability and long-term maintenance.
-- At minimum, document: purpose, impacted routes/entry points, data contracts (DTO/enums/types), validation/authorization rules, background processing, and test expectations.
-- A change is not complete until `AGENTS.md` is updated when applicable.
-
-## Architecture Map
+## Canonical Architecture
 
 ### Backend
 
-- Application bootstrap and middleware registration: `bootstrap/app.php`
-- Providers: `bootstrap/providers.php`
-- Route files:
-  - `routes/web.php`
-  - `routes/auth.php`
-  - `routes/settings.php`
-  - `routes/api.php`
-  - `routes/console.php`
-- Domain model:
-  - `app/Models/User.php` with enum cast (`UserRole`) and hashed password cast
-  - `app/Enums/UserRole.php` (`Admin`, `User`)
-  - `app/Data/UserData.php` as DTO exported to TypeScript
-- Authorization:
-  - Gate `manage-users` in `app/Providers/AuthServiceProvider.php`
-  - `UserPolicy` in `app/Policies/UserPolicy.php` enforces user management permissions
-- Middleware:
-  - `HandleAppearance` shares appearance from cookie
-  - `HandleInertiaRequests` shares `name`, `quote`, `auth.user`, `ziggy`, `sidebarOpen`
-  - `SecurityHeaders` appends CSP, frame, referrer, and browser-permission hardening headers
-  - Cookie encryption excludes `appearance` and `sidebar_state`
-- Validation:
-  - Form Requests are required for user/auth/settings writes and filtered reads
-- Persistence:
-  - Users, password reset tokens, sessions, personal access tokens
-  - Cache, job, batch, failed job tables
-  - Default seeded users controlled by `APP_SEED_USERS`
-  - Admin user-management actions are audit-logged via `App\Support\AuditLogger`
+- Application bootstrapping is defined in `bootstrap/app.php`.
+- `bootstrap/providers.php` only lists:
+    - `App\Providers\AppServiceProvider`
+    - `App\Providers\AuthServiceProvider`
+- Module providers are not added there manually; they are auto-registered during app boot through `App\Modules\Shared\Support\ModuleRegistry::providerClasses(...)`.
+- Web middleware appended in `bootstrap/app.php`:
+    - `App\Http\Middleware\HandleAppearance`
+    - `App\Http\Middleware\HandleInertiaRequests`
+    - `App\Http\Middleware\SecurityHeaders`
+    - `Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets`
+- Guest redirects are configured centrally in `bootstrap/app.php` to `route('auth.login.create')`.
+- Events are registered from `app/Listeners` and module-discovered listener directories via `ModuleRegistry::listenerDirectories(...)`.
+
+### Module Discovery
+
+- Canonical discovery source: `app/Modules/Shared/Support/ModuleRegistry.php`
+- Cache version: `3` (auto-invalidated when version changes)
+- Cached manifest path: `bootstrap/cache/modules.php`
+- Discovery payload currently includes:
+    - web routes
+    - api routes
+    - gate files
+    - policy files
+    - channel files
+    - listener directories
+    - module provider files
+- Current discovery priority order:
+    - web routes: `Marketing`, `Auth`, `Dashboard`, `Settings`, `Users`
+    - api routes: `Api/V1`
+    - gate files: `Users`
+    - policy files: `Users`
+    - channel files: `Shared`, `Users`
+    - listener directories: `Users`
+    - provider files: no explicit priority list
+- Production HTTP runtime trusts the cached manifest when available.
+- Console and non-production runtimes can rescan when the manifest is missing or stale.
+- Do not introduce separate ad hoc route, gate, channel, listener, or provider discovery logic outside the registry unless the architecture is intentionally changed and this file is updated.
+
+### Current Module Layout
+
+- Module root: `app/Modules`
+- Current modules:
+    - `Marketing` - Public marketing pages
+    - `Auth` - Authentication (login, register, password reset, email verification)
+    - `Dashboard` - Authenticated app dashboard
+    - `Settings` - User settings (profile, password, appearance)
+    - `Users` - Admin user management with realtime
+    - `Api/V1` - API v1 endpoints
+    - `Shared` - Shared infrastructure and utilities
+- Shared domain primitives remain in:
+    - `app/Models/User.php`
+    - `app/Enums/UserRole.php`
+
+### Backend Ownership Rules
+
+- Module-specific backend code must stay under `app/Modules/<Module>/**`.
+- Keep these inside the owning module:
+    - controllers
+    - requests
+    - data DTOs
+    - queries
+    - commands
+    - handlers
+    - policies
+    - gates
+    - broadcast events
+    - notifications
+    - channel callbacks
+    - listeners
+    - support classes
+    - resources
+    - manifests
+    - events (domain and broadcast)
+- Only truly shared domain primitives belong in `app/Models/**` and `app/Enums/**`.
+- If reuse spans multiple modules, move the code to `app/Modules/Shared/**` instead of duplicating it.
+- Do not place module-only code under global shared locations.
+- Backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery. Do not manually register module listener classes in `AppServiceProvider`.
+
+### Shared Backend Infrastructure
+
+- Shared page responder: `app/Modules/Shared/Http/Responders/PageResponder.php`
+- Shared API responder: `app/Modules/Shared/Http/Responders/ApiResponder.php`
+- Shared request DTO base classes:
+    - `app/Modules/Shared/Http/Requests/DataRequest.php`
+    - `app/Modules/Shared/Http/Requests/DataFormRequest.php`
+    - `app/Modules/Shared/Http/Requests/DataQueryRequest.php`
+- Shared authenticated actor resolver:
+    - `app/Modules/Shared/Auth/RequestActor.php`
+- Shared mutation context infrastructure:
+    - `app/Modules/Shared/Mutations/MutationMetadata.php`
+    - `app/Modules/Shared/Mutations/MutationContext.php`
+- Shared realtime infrastructure:
+    - `app/Modules/Shared/Realtime/**`
+    - `app/Modules/Shared/Enums/SharedRealtimeChannel.php`
+    - `app/Modules/Shared/Routes/channels.php`
+- Current auto-discovered shared module provider:
+    - `app/Modules/Shared/Providers/ModuleServiceProvider.php`
+
+### Request / Controller / Handler Conventions
+
+- Every PHP file must declare `strict_types=1`.
+- Transport-layer input must be typed through request DTOs.
+- Prefer extending `DataFormRequest` for validated form payloads.
+- Prefer extending `DataQueryRequest` for query payloads so trimming, defaults, pagination, and enum casting stay centralized.
+- `toDto()` comes from `DataRequest`; do not hand-roll ad hoc array extraction when DTO hydration fits.
+- Controllers must stay thin.
+- Use `RequestActor::from($request)` whenever controller logic requires the authenticated app user.
+- Prefer module-local `Queries` for reads and `Commands` for writes.
+- When the same use case is exposed through both web and API transports, keep orchestration in module-local `Handlers`.
+- The current `Users` module is the reference pattern for shared orchestration through `UserQueryHandler` and `UserCommandHandler`.
+- Use `PageResponder` for Inertia pages and `ApiResponder` for JSON/resource responses instead of ad hoc response building.
+
+### Mutation / Event / Realtime Pattern
+
+- When command-side behavior fans out into audit logging, notifications, or realtime, emit one mutation context object and let listeners consume it.
+- The current reference flow is:
+    - `UserActionContext::fromRequest(...)`
+    - `MutationMetadata::fromRequest(...)`
+    - `MutationContext`
+    - `UserManagementEvent`
+    - listeners under `app/Modules/Users/Listeners/**`
+- Domain events should remain separate from broadcast events.
+- Listeners translate domain events into realtime broadcasts and notifications.
+- Realtime events should extend `app/Modules/Shared/Realtime/Events/RealtimeEvent`.
+- `RealtimeEvent` currently broadcasts:
+    - on queue `realtime`
+    - with `afterCommit = true`
+- Realtime dispatch should go through `App\Modules\Shared\Realtime\Contracts\RealtimeDispatcher`.
+
+### Canonical Reference Implementations
+
+When adding similar behavior, inspect and follow the nearest established reference instead of inventing a new pattern:
+
+- `Users` module:
+    - query/command/handler orchestration
+    - mutation context flow
+    - realtime broadcasts and notifications
+    - server-driven admin listing pages
+- `Settings` module:
+    - typed form request DTO hydration
+    - page responder usage
+    - schema-driven forms
+- `Api/V1` module:
+    - API responder usage
+    - resource responses
+    - shared request DTO reuse across transports
+- `Shared` module:
+    - module registry/discovery
+    - shared realtime infrastructure
+    - shared request/responders/auth helpers
 
 ### Frontend
 
-- Entry points:
-  - `resources/js/app.ts` (CSR)
-  - `resources/js/ssr.ts` (SSR)
-- Inertia pages: `resources/js/pages` (lowercase directory is intentional), organized by domain namespaces:
-  - `resources/js/pages/marketing/**` for public client-facing pages
-  - `resources/js/pages/auth/**`, `resources/js/pages/settings/**`, `resources/js/pages/users/**` for authenticated/product flows
-- Layouts:
-  - `AppLayout` (sidebar shell for dashboard/app pages)
-  - `AuthLayout` -> `AuthSimpleLayout` (single supported auth shell)
-  - `marketing/PageLayout.vue` -> `MarketingPageLayout`
-  - `settings/Layout.vue`
-- Navigation and shell components:
-  - `AppSidebar`, `AppShell`, `AppContent`, `NavMain`, `NavFooter`, `NavUser`, `UserMenuContent`
-  - Marketing shell: `MarketingHeader`, `MarketingFooter`
-  - Shared role-aware nav source: `resources/js/composables/useNavigation.ts`
-- Domain component boundaries:
-  - Marketing-only components: `resources/js/components/marketing/**`
-  - App/dashboard shell and feature components: `resources/js/components/**` (excluding `marketing/**`)
-  - Shared primitives: `resources/js/components/ui/**`
-- Appearance/theming:
-  - `useAppearance.ts` stores preference in `localStorage` and `appearance` cookie
-  - Default appearance is light mode when no preference is set
-  - Dark mode is class-based (`.dark`), initialized early in `resources/views/app.blade.php`
-- UI component system:
-  - App components: `resources/js/components`
-  - UI primitives: `resources/js/components/ui`
-  - Auto-registration enabled with namespaces (`directoryAsNamespace: true`)
-  - For components in subdirectories, always use namespace-prefixed tags (example: `components/marketing/PageLayout.vue` => `<MarketingPageLayout />`, not `<PageLayout />`)
-- Type declarations:
-  - Shared page props and app types in `resources/js/types`
-  - Typed Pinia stores belong in `resources/js/stores`
+- App entry points:
+    - `resources/js/app.ts` - Client-side entry
+    - `resources/js/ssr.ts` - SSR entry (do not initialize Echo here)
+- Inertia page resolution currently loads Vue files from `resources/js/modules/**/*.vue`.
+- Feature pages live in `resources/js/modules/**/pages`.
+- Feature forms live in `resources/js/modules/**/forms`.
+- Feature-specific components live in `resources/js/modules/**/components`.
+- Feature-specific contracts live in `resources/js/modules/**/contracts`.
+- Feature-specific composables live in `resources/js/modules/**/composables`.
+- Feature-specific helpers live in `resources/js/modules/**/helpers`.
+- Shared layers:
+    - `resources/js/components/**`
+    - `resources/js/layouts/**`
+    - `resources/js/composables/**`
+    - `resources/js/config/**`
+    - `resources/js/lib/**`
+    - `resources/js/utils/**`
 
-## Existing Features (What Agents Must Know)
+### Frontend UI Layering
 
-- Marketing/public flow:
-  - Route `/` renders `marketing/Welcome` via Inertia and stays outside auth middleware.
-  - Marketing pages are public client-facing pages and must use the marketing namespace structure.
-  - Marketing pages use `MarketingPageLayout` with shared sticky header/navigation and shared footer.
-- Auth flows: registration, login, logout, forgot/reset password, confirm password, email verification.
-- Settings flows: profile update, password update, appearance toggle, account deletion.
-- Dashboard page behind `auth` + `verified` middleware.
-- Dashboard/app pages use sidebar layout only via `AppLayout` (backed by `AppSidebarLayout`).
-- User management (`/users`) for admins only:
-  - Server-side pagination
-  - Create, update, delete via dialogs
-  - Role managed via `UserRole` enum
-- API endpoint `/api/user` protected by Sanctum.
+- `resources/js/components/ui/**` = low-level primitive wrappers (reka-ui, icons, etc.).
+- UI primitives (`resources/js/components/ui/**`) are built using shadcn-vue style components on top of Reka UI.
+- Base UI component names use the `Ui*` prefix (for example `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`). Use these existing primitives before building custom elements.
+- `resources/js/components/base/**` = reusable app-level building blocks (`Base*`).
+- `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
+- Do not place feature-specific UI in `resources/js/components/**`.
+- Prefer composing `Base*` components rather than rebuilding common structures.
 
-## Marketing Pages Standard (Public Client-Facing)
+### Frontend Automation Contracts
 
-- Purpose:
-  - Marketing pages are public entry points focused on product communication, conversion, and trust.
-  - They must deliver premium, modern, and robust UX while remaining maintainable and type-safe.
-- Required structure:
-  - Pages: `resources/js/pages/marketing/**`
-  - Layouts: `resources/js/layouts/marketing/**`
-  - Components: `resources/js/components/marketing/**`
-  - Route URIs remain public and unprefixed by default (for example `/`, `/about`, `/pricing`), and must not be moved under `/marketing/*` unless the user explicitly requests it.
-  - Internal Inertia page namespace `marketing/*` is allowed and preferred for code organization without changing public URLs.
-- Required namespacing:
-  - Use namespace-prefixed tags for all nested files (for example `<MarketingPageLayout />`, `<MarketingHeroSection />`).
-  - Keep marketing tags/components distinct from dashboard/auth/settings/users tags/components.
-- Design-system enforcement:
-  - Use shared tokens/utilities from `resources/css/app.css` and existing `resources/js/components/ui/**` primitives first.
-  - Avoid one-off inline color systems in templates (raw hex/hsl classes) when tokenized utilities can express the same result.
-  - Build reusable sections/components instead of repeating large class blocks across pages.
-  - Maintain light/dark parity, semantic landmarks, keyboard/focus accessibility, and mobile-first responsiveness.
-  - Marketing header/navigation must be sticky and shared through `MarketingPageLayout`.
-- Cross-domain separation rules:
-  - Marketing code must not depend on dashboard shell components (`AppShell`, `AppSidebar`, `AppSidebarLayout`, etc.).
-  - Dashboard/auth/settings/users code must not depend on marketing-only components/layouts.
-  - Shared logic belongs in neutral shared layers (`components/ui`, composables, typed DTO/types, lib helpers).
-- Test expectations:
-  - New or changed marketing routes must have feature tests for public accessibility and expected response behavior.
-  - Behavior changes on marketing pages should include relevant frontend/feature coverage for edge states when applicable.
+- Canonical auto-import config: `frontend-auto-import.config.mjs`
+- The following files must stay aligned with that config:
+    - `vite.config.ts`
+    - `vitest.config.ts`
+    - `eslint.config.js`
+- Auto-imported directories currently include:
+    - `resources/js/composables/**`
+    - `resources/js/stores/**`
+    - `resources/js/lib/**`
+    - `resources/js/utils/**`
+    - `resources/js/modules/**/composables/**`
+    - `resources/js/modules/**/helpers/**`
+- Module-local `forms/**` and `contracts/**` are not auto-imported.
+- Vue components are auto-registered from:
+    - `resources/js/components`
+    - `resources/js/layouts`
+    - `resources/js/modules`
+- Module Vue components are namespace-registered; use tags like `<UsersTable />` and `<UsersDeleteUserDialog />` instead of manual imports.
+- `Link` and `Head` are resolver-provided; do not manually import them.
+- The ESLint config currently enforces:
+    - no direct imports of auto-imported composables/libs/helpers/components
+    - no cross-module imports between feature modules
+    - no inline `fields = [...]` form arrays in pages/components
+    - no duplicated navigation arrays in pages/layouts/composables
+    - no `fetch(...)` calls inside feature page files
+    - no `as unknown as Record<string, unknown>`
+    - no explicit any type (`@typescript-eslint/no-explicit-any`)
 
-## Generated Files and Codegen
+### Frontend Ownership Rules
 
-Treat these as generated artifacts and do not hand-edit unless explicitly requested:
+- Module-specific frontend code must stay under `resources/js/modules/<module>/**`.
+- Feature modules must not import other feature modules directly.
+- If code is needed across modules, promote it to a shared layer instead of crossing module boundaries.
+- `resources/js/types/index.d.ts` is for app-shell/shared UI types, not duplicated backend domain contracts.
 
-- `resources/js/routes/**` (Wayfinder named route helpers)
-- `resources/js/actions/**` (Wayfinder controller action helpers)
+### Navigation And Breadcrumb Contracts
+
+- Shared navigation config: `resources/js/config/navigation.ts`
+- Shared breadcrumb builders: `resources/js/config/breadcrumbs.ts`
+- Active-state resolution lives in `resources/js/composables/useNavigation.ts`
+- Dashboard CRUD navigation discovery lives in `resources/js/config/dashboard-crud-navigation.ts`
+- Generated CRUD dashboard navigation contracts live at `resources/js/modules/<module>/contracts/dashboard-nav.ts`
+- Do not duplicate navigation or breadcrumb arrays inline in pages/components/layouts.
+
+## Current Route Contract
+
+### Web Routes
+
+- Marketing:
+    - `GET /` -> `marketing.home`
+- Auth guest routes under `/auth`:
+    - `GET /auth/register` -> `auth.register.create`
+    - `POST /auth/register` -> `auth.register.store`
+        - middleware: `guest`, `throttle:auth-sensitive`
+    - `GET /auth/login` -> `auth.login.create`
+    - `POST /auth/login` -> `auth.login.store`
+    - `GET /auth/forgot-password` -> `auth.password.request`
+    - `POST /auth/forgot-password` -> `auth.password.email`
+        - middleware: `guest`, `throttle:auth-sensitive`
+    - `GET /auth/reset-password/{token}` -> `auth.password.reset`
+    - `POST /auth/reset-password` -> `auth.password.store`
+        - middleware: `guest`, `throttle:auth-sensitive`
+- Authenticated auth routes under `/auth`:
+    - `GET /auth/verify-email` -> `auth.verification.notice`
+    - `GET /auth/verify-email/{id}/{hash}` -> `auth.verification.verify`
+        - middleware: `auth`, `signed`, `throttle:6,1`
+    - `POST /auth/email/verification-notification` -> `auth.verification.send`
+        - middleware: `auth`, `throttle:auth-sensitive`
+    - `GET /auth/confirm-password` -> `auth.password.confirm`
+    - `POST /auth/confirm-password` -> `auth.password.confirm.store`
+    - `POST /auth/logout` -> `auth.logout`
+- App shell:
+    - `GET /app/dashboard` -> `app.dashboard`
+        - middleware: `auth`, `verified`
+- Settings routes under `/app/settings`:
+    - `GET /app/settings/profile` -> `app.settings.profile.edit`
+    - `PATCH /app/settings/profile` -> `app.settings.profile.update`
+    - `DELETE /app/settings/profile` -> `app.settings.profile.destroy`
+    - `GET /app/settings/password` -> `app.settings.password.edit`
+    - `PUT /app/settings/password` -> `app.settings.password.update`
+    - `GET /app/settings/appearance` -> `app.settings.appearance`
+    - `GET /app/settings` redirects to `/app/settings/profile`
+    - middleware: `auth`
+- Admin users routes under `/app/admin/users`:
+    - `GET /app/admin/users` -> `app.admin.users.index`
+    - `POST /app/admin/users` -> `app.admin.users.store`
+    - `PUT /app/admin/users/{user}` -> `app.admin.users.update`
+    - `PATCH /app/admin/users/{user}` -> `app.admin.users.update`
+    - `DELETE /app/admin/users/{user}` -> `app.admin.users.destroy`
+    - middleware: `auth`, `verified`, `can:manage-users`
+
+### API Routes
+
+- API broadcast auth endpoints defined in `routes/api.php`:
+    - `GET|POST /api/broadcasting/auth`
+    - `GET|POST /api/broadcasting/user-auth`
+    - middleware: `auth:sanctum`
+    - CSRF verification removed for these endpoints
+- Versioned API under `/api/v1`
+- Current user endpoint:
+    - `GET /api/v1/me` -> `api.v1.me.show`
+    - middleware: `auth:sanctum`
+- Admin users API under `/api/v1/admin/users`:
+    - `GET /api/v1/admin/users` -> `api.v1.admin.users.index`
+    - `POST /api/v1/admin/users` -> `api.v1.admin.users.store`
+    - `PUT /api/v1/admin/users/{user}` -> `api.v1.admin.users.update`
+    - `DELETE /api/v1/admin/users/{user}` -> `api.v1.admin.users.destroy`
+    - middleware: `auth:sanctum`, `can:manage-users`
+
+### Gates And Policies
+
+- `AuthServiceProvider` registers policies from `ModuleRegistry::policyMap(...)`.
+- `AuthServiceProvider` requires all discovered module gate files.
+- Current module gate:
+    - `manage-users` in `app/Modules/Users/Routes/gates.php`
+- Current module policy:
+    - `app/Modules/Users/Policies/UserPolicy.php`
+
+## Type-Safety Rules
+
+### Backend
+
+- Naming must stay explicit and predictable.
+- Controllers should be transport-oriented and action-specific.
+- Queries should expose read behavior.
+- Commands should expose write behavior.
+- Handlers should orchestrate shared use cases across transports when needed.
+- DTOs crossing the backend/frontend boundary must remain globally unique and module-prefixed when generated CRUD naming applies.
+- Use DTOs and enums instead of untyped arrays or bounded strings whenever data crosses layers.
+- Any backend DTO or enum consumed by the frontend must be exported through the TypeScript transformer.
+- Prefer Spatie Data classes for payload/query/page contracts.
+- Annotate frontend-facing DTOs/enums with `#[TypeScript]`.
+- Current shared auth user contract is `App\Modules\Shared\Data\UserViewData|null`; do not serialize the raw user model into Inertia props.
+- Request DTO hydration must be the canonical transport boundary.
+- Services, queries, commands, and handlers must accept DTOs or explicit typed parameters, never mixed arrays.
+- Prefer module-prefixed DTO names for generated CRUD contracts:
+    - `BillingIndexStoreData`
+    - `BillingIndexListItemData`
+    - `BillingIndexPageData`
+- Use enums for constrained sort/order/event/channel values.
+- Current server-table sort direction enum is `App\Modules\Shared\Enums\SortDirection`.
+- Current users sort enum is `App\Modules\Users\Enums\UserSortBy`.
+
+### Frontend
+
+- Use `<script setup lang="ts">`.
+- Keep strict TypeScript assumptions intact.
+- Consume backend-generated contracts from `resources/js/types/app-data.ts`.
+- Do not recreate backend-owned DTOs, enums, realtime payloads, or route payload shapes manually.
+- Prefer `FormValuesFromData<...>` from `resources/js/lib/forms.ts` when form values come from backend DTOs.
+- Prefer `defineFormContract(...)` and `defineFormFields(...)` for all form schemas.
+- Prefer `useSchemaResourceForm(...)` over hand-wired form state in page/components when the form matches the shared resource pattern.
+- Use generated route/action helpers rather than hardcoded URLs.
+- Use `useApiQuery`, `useApiMutation`, and `apiRequest` for API-driven state.
+- `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
+- `apiRequest` is the canonical place for `X-Socket-ID` propagation.
+- Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
+- Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
+- Avoid unsafe casts like `as User`; guard nullable values explicitly.
+
+### Backend-Driven Contract Pipeline
+
+1. Define or update the backend enum / DTO.
+2. Add `#[TypeScript]` if the frontend consumes it.
+3. Use it in requests, queries, commands, handlers, controllers, resources, and realtime payloads.
+4. Run generation commands.
+5. Consume the generated contract from `@/types/app-data`.
+6. Update tests.
+
+## Realtime Standard
+
+### Backend
+
+- Reverb is the current default broadcaster in `.env.example`.
+- Shared notification channel authorization is defined in `app/Modules/Shared/Routes/channels.php`.
+- Users realtime channel authorization is defined in `app/Modules/Users/Routes/channels.php`.
+- Root channel aggregation lives in `routes/channels.php`.
+- Current backend-owned realtime enums:
+    - `App\Modules\Shared\Enums\SharedRealtimeChannel`
+    - `App\Modules\Users\Enums\UsersRealtimeChannel`
+    - `App\Modules\Users\Enums\UsersRealtimeEvent`
+    - `App\Modules\Users\Enums\UsersRealtimeAction`
+- Presence member payload contract:
+    - `App\Modules\Shared\Realtime/Data/PresenceMemberData`
+- Broadcast notification payload contract:
+    - `App\Modules\Users/Data/UserManagementNotificationData`
+- Keep domain events separate from broadcast events.
+- Let listeners translate domain events into realtime broadcasts and notifications.
+
+### Frontend
+
+- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts` which is called from `resources/js/app.ts`.
+- Do not initialize Echo in `resources/js/ssr.ts`.
+- Shared realtime frontend helpers live in:
+    - `resources/js/lib/realtime/config.ts`
+    - `resources/js/lib/realtime/channels.ts`
+    - `resources/js/composables/useRealtime.ts`
+    - `resources/js/composables/useRealtimeConnection.ts`
+- Current shared realtime composables:
+    - `useRealtimeEvent`
+    - `useRealtimeModel`
+    - `useRealtimeNotification`
+    - `useRealtimePresence`
+    - `useRealtimeConnection`
+- Feature-level usage helpers should live in module-local `contracts/realtime.ts`.
+- The current reference implementation is `resources/js/modules/users/contracts/realtime.ts`.
+
+### Runtime
+
+- Queue workers must prioritize `realtime,high,default`.
+- Local dev and production-style runtime must run Reverb alongside queue workers.
+- Frontend realtime config currently supports:
+    - session auth via `/broadcasting/auth` and `/broadcasting/user-auth`
+    - bearer auth via `/api/broadcasting/auth` and `/api/broadcasting/user-auth`
+- Do not hand-attach broadcast auth endpoints in feature code.
+
+## Forms, Tables, And Page Data
+
+- Form schemas belong in `resources/js/modules/**/forms/*-form-schema.ts`.
+- Do not define inline schema arrays in pages/components.
+- Current shared form contracts live in:
+    - `resources/js/lib/forms.ts`
+    - `resources/js/types/base-ui.ts`
+    - `resources/js/components/base/forms/**`
+- Server-driven listing pages must use the shared table stack:
+    - `resources/js/composables/useServerDataTable.ts`
+    - `resources/js/components/base/table/**`
+- Initial query state must be derived via `resolveServerTableInitialQuery(...)`.
+- Current standard server-table query contract:
+    - `page: number`
+    - `perPage: number`
+    - `search?: string`
+    - `sortBy?: string`
+    - `sortDirection?: 'asc' | 'desc'`
+- Current allowed users `sortBy` values:
+    - `name`
+    - `email`
+    - `role`
+    - `created_at`
+
+## Notifications Standard
+
+- Global toasts are handled via `useToast` + `AppToaster`.
+- Inertia flash props (`message`, `error`, `status`) are bridged to toasts through `useFlashToasts`.
+- Use inline messages only for persistent instructional content that should not be transient.
+
+## Error And Exception Contract
+
+- Web flows should prefer standard Laravel validation, redirects, flash messaging, and shared Inertia error handling.
+- API flows should prefer `ApiResponder` plus consistent JSON/resource responses rather than ad hoc payload shapes.
+- Do not introduce feature-local exception handling conventions when the shared application exception flow already covers the case.
+- Throw exceptions deliberately and only when they represent a real exceptional path that callers can handle consistently.
+
+## Security Rules
+
+- Enforce authorization through policies, gates, and route middleware.
+- Sensitive auth endpoints must use the `auth-sensitive` rate limiter.
+- `AppServiceProvider` currently defines `auth-sensitive` as `5` requests per minute per IP.
+- Security headers must continue to be set by `App\Http\Middleware\SecurityHeaders`.
+- Current headers include:
+    - CSP
+    - `Referrer-Policy`
+    - `X-Content-Type-Options`
+    - `X-Frame-Options`
+    - `Permissions-Policy`
+- Non-production CSP is intentionally looser for local development.
+- Audit and mutation metadata must preserve useful context while avoiding sensitive-field leakage.
+
+## Database And Migration Rules
+
+- Migrations must be reversible whenever reasonably possible.
+- Avoid destructive schema changes without a safe transition plan.
+- New searchable or sortable fields must be evaluated for indexing.
+- Query changes must consider pagination, sorting, filtering, and N+1 behavior.
+- Backfills or data repair logic must be explicit; do not hide data migrations inside unrelated application code.
+- Model changes must preserve existing casts, auth behavior, and serialization contracts unless the task intentionally changes them.
+
+## Generated Files
+
+Do not hand-edit generated artifacts:
+
+- `bootstrap/cache/modules.php`
+- `resources/js/routes/**`
+- `resources/js/actions/**`
 - `resources/js/wayfinder/index.ts`
-- `resources/js/types/app-data.ts` (Spatie transformer output)
+- `resources/js/types/app-data.ts`
 - `resources/js/types/auto-imports.d.ts`
 - `resources/js/types/components.d.ts`
 
-After schema/DTO/enum/route changes:
+Generated artifacts are canonical outputs of backend contracts and generator workflows.
+Do not shadow them with manual duplicates.
 
-1. `composer generate`
-2. If needed, run `php artisan wayfinder:generate --no-interaction`
+## Generation Commands
 
-## Implementation Standards
+- Route/type/helper generation:
+    ```bash
+    composer generate
+    ```
+- `composer generate` currently runs:
+    - `php artisan modules:cache --no-interaction`
+    - `php artisan typescript:transform`
+    - `php artisan wayfinder:generate`
+- Full mutating cleanup:
+    ```bash
+    composer generate-and-cleanup
+    ```
+- `composer generate-and-cleanup` currently runs:
+    - route/type/helper generation
+    - `vendor/bin/pint --parallel`
+    - `vendor/bin/rector process`
+    - `vendor/bin/phpstan analyse --ansi`
+    - `npm run cleanup`
+- `npm run cleanup` currently runs:
+    - `npm run format`
+    - `npm run lint`
+    - `npm run typecheck`
+- Non-mutating QA:
+    ```bash
+    composer qa:check
+    ```
 
-### PHP / Laravel
+## Dependency Addition Policy
 
-- All PHP files must use `declare(strict_types=1);`.
-- Use explicit parameter and return types on all methods/functions.
-- Prefer `final class` for concrete classes unless extension is required.
-- Use Form Request classes for new validation logic.
-- Use Eloquent (`Model::query()`) and relationships before dropping to query builder.
-- Prevent N+1 queries with eager loading.
-- Use named routes and route helpers, not hard-coded URLs.
-- Keep authorization on server side (gates/policies/middleware), not only in Vue.
-- Never use `env()` outside config files.
-- Service methods must accept typed DTOs (e.g. `UserData`) or explicit typed parameters — never `array<string, mixed>`. This ensures end-to-end type safety from Form Request → DTO → Service → Model.
+- Prefer the existing Laravel, Vue, Inertia, Spatie Data, and shared project abstractions before adding new dependencies.
+- New packages require strong justification and must not overlap meaningfully with tools already in the stack.
+- Prefer native framework capabilities when they are already sufficient and project-consistent.
+- Avoid introducing dependencies that make generated contracts, SSR, strict typing, or CI harder to maintain.
 
-### Vue / TypeScript / JavaScript
+## Module Generator Contract
 
-- Default to `<script setup lang="ts">` for new Vue components.
-- Prefer TypeScript files over JavaScript for new frontend logic.
-- Keep strict typings end-to-end from backend DTO/enum -> frontend props/forms.
-- Use Inertia primitives (`useForm`, `router`, `<Link>`) for navigation and form submission.
-- Prefer Wayfinder route/action helpers over hard-coded endpoints.
-- Use named route helpers for `href` values (including breadcrumb/nav objects) instead of hard-coded path strings.
-- Keep pages in `resources/js/pages` and map server renders exactly.
-- All public client-facing pages must be under `resources/js/pages/marketing/**` and use `resources/js/layouts/marketing/**`.
-- Reuse `resources/js/components/ui` primitives before adding new custom base components.
-- All new UI must support both light and dark themes.
+- Command:
+    ```bash
+    php artisan generate:module <ModuleName>
+    ```
+- Supported scaffolds:
+    - `page` - Frontend-only page contracts
+    - `crud` - Full backend + frontend CRUD
+    - `api` - Backend API only
+    - `crud-api` - Full CRUD with both web and API
+- `--extend` requires the module to already exist.
+- Fresh mode fails if the module already exists.
+- Interactive shells prompt for scaffold/profile choices and, unless disabled, per-file generation confirmation.
+- Use `--no-file-prompts` to skip per-file confirmations.
+- Use `--dry-run` to inspect the plan without writing files.
+- Use `--force` to overwrite existing generated files.
+- Use `--base-path` only for tests or isolated generation scenarios.
+- Command options contract:
+    - `--route-profile=app|public|custom` (non-interactive defaults to `app`)
+    - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
+    - `--route-prefix=...` and `--route-name-prefix=...`
+    - `--middleware=auth,verified`
+    - `--api-route-profile=protected|public|custom` (non-interactive defaults to `protected`)
+    - `--api-route-prefix=...` and `--api-route-name-prefix=...`
+    - `--api-middleware=auth:sanctum`
+    - `--no-api-resource`, `--no-api-test`, `--no-model`, `--no-page`
 
-### Styling and UX
+### Current Generator Behavior
 
-- Tailwind v4 only (`@import 'tailwindcss';` already configured).
-- Reuse existing tokens and utilities in `resources/css/app.css`.
-- Treat the design system as mandatory: prefer tokenized utilities (`bg-background`, `text-muted-foreground`, `border-border`, etc.) over one-off hard-coded palette classes.
-- Keep class lists intentional and avoid redundant utility noise.
-- Avoid duplicate UI structures; extract repeated blocks into typed, namespaced components/layouts.
-- Prefer `gap-*` for spacing in lists/grouped layouts in all new or modified code; avoid introducing new `space-x-*`/`space-y-*` usage.
-- Build mobile-first by default: define base styles for phones first, then layer `sm:`, `md:`, and `lg:` enhancements.
-- Prevent horizontal overflow in page shells and dense UI: use `min-w-0` on flex children and `overflow-x-auto` on wide content areas.
-- For data-heavy views (tables, toolbars, filters), provide an explicit small-screen strategy (stacked cards or horizontal scroll with reachable actions).
+- `page` scaffolds frontend-only page contracts:
+    - `resources/js/modules/<module>/forms/<page-kebab>-form-schema.ts`
+    - `resources/js/modules/<module>/pages/<Page>.vue`
+    - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
+- `crud` scaffolds:
+    - module-local requests, DTOs, queries, commands
+    - web controller
+    - web routes
+    - page/list DTOs
+    - resource manifest
+    - optional gate file depending on role scope
+    - model + migration unless skipped
+    - frontend CRUD page/contracts/components unless `--no-page`
+    - feature test
+- `api` scaffolds:
+    - module-local requests, DTOs, queries, commands
+    - API controller
+    - API routes
+    - optional `JsonResource`
+    - model + migration unless skipped
+    - API feature test unless skipped
+- `crud-api` scaffolds both web and API layers and additionally generates module-local handlers.
 
-### Performance
+### Current Generated CRUD Frontend Files
 
-- Paginate large datasets (follow `/users` pattern).
-- Avoid unnecessary client state duplication of server props.
-- Avoid unnecessary watchers/computeds when derived values are static.
-- Keep payloads minimal and typed.
+- `resources/js/modules/<module>/contracts/<page-kebab>-crud.ts`
+- `resources/js/modules/<module>/contracts/dashboard-nav.ts`
+- `resources/js/modules/<module>/forms/<page-kebab>-form-schema.ts`
+- `resources/js/modules/<module>/components/Table.vue`
+- `resources/js/modules/<module>/components/<Page>FormDialog.vue`
+- `resources/js/modules/<module>/components/<Page>DeleteDialog.vue`
+- `resources/js/modules/<module>/components/<Page>DetailsDialog.vue`
+- `resources/js/modules/<module>/pages/<Page>.vue`
+- `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
 
-### Refactoring Automation (Rector)
+### Current Generated CRUD Backend Files
 
-- Central Rector config is `rector.php`.
-- Rector runs over `app`, `bootstrap`, `config`, `database`, `public`, `routes`, and `tests`.
-- Enabled Rector sets include dead code, code quality, coding style, type declarations/docblocks, privatization, naming, `instanceof`, early return, strict booleans, and PHP-version upgrades.
-- Import names cleanup is enabled with unused import removal.
-- Cache path is project-local at `storage/framework/cache/rector`.
-- Keep `AddOverrideAttributeToOverriddenMethodsRector` skipped to avoid unsafe override attribute churn in framework-integrated classes.
+- `app/Modules/<Module>/Http/Controllers/<Page>Controller.php`
+- `app/Modules/<Module>/Http/Requests/<Page>StoreRequest.php`
+- `app/Modules/<Module>/Http/Requests/<Page>UpdateRequest.php`
+- `app/Modules/<Module>/Data/<Module><Page>StoreData.php`
+- `app/Modules/<Module>/Data/<Module><Page>ListItemData.php`
+- `app/Modules/<Module>/Data/<Module><Page>PageData.php`
+- `app/Modules/<Module>/Queries/<Model>Queries.php`
+- `app/Modules/<Module>/Commands/<Model>Commands.php`
+- `app/Modules/<Module>/Manifests/<Page>Resource.php`
+- `app/Modules/<Module>/Routes/web.php`
+- `app/Modules/<Module>/Routes/gates.php` when app CRUD routes are role-restricted
+- `tests/Feature/<Module>/<Page>PageTest.php`
+- `app/Models/<Model>.php` unless skipped
+- `database/migrations/*_create_<table>_table.php` unless skipped
 
-## Validation and Quality Gate
+### Current Generated API Backend Files
 
-**MANDATORY**: After any code change, run the single unified command:
+- `app/Modules/<Module>/Http/Controllers/<Page>ApiController.php`
+- `app/Modules/<Module>/Routes/api.php`
+- `app/Modules/<Module>/Http/Resources/<Page>Resource.php` unless `--no-api-resource`
+- `tests/Feature/<Module>/<Page>ApiTest.php` unless `--no-api-test`
+
+### Current Generator Route Defaults
+
+- Web `app` profile:
+    - default prefix: `app/<module-kebab>`
+    - default name prefix: `app.<module-kebab>`
+    - default middleware: `auth`, `verified`
+- Web `app` profile with admin-only role scope:
+    - default prefix: `app/admin/<module-kebab>`
+    - default name prefix: `app.admin.<module-kebab>`
+    - default middleware: `auth`, `verified`, `can:manage-<module-kebab>`
+- Web `public` profile:
+    - default prefix: `<module-kebab>`
+    - default name prefix: `<module-kebab>`
+    - default middleware: none
+- API `protected` profile:
+    - default prefix: `api/v1/admin/<module-kebab>`
+    - default name prefix: `api.v1.admin.<module-kebab>`
+    - default middleware: `auth:sanctum`
+- API `public` profile:
+    - default prefix: `api/v1/<module-kebab>`
+    - default name prefix: `api.v1.<module-kebab>`
+    - default middleware: none
+
+### Resource Manifest Rules
+
+- Generated CRUD resources own a manifest at `app/Modules/<Module>/Manifests/<Page>Resource.php`.
+- The manifest is the module-local source of truth for:
+    - route profile
+    - route prefix
+    - route name prefix
+    - role scope
+    - middleware
+    - API defaults
+    - table columns
+    - mobile fields
+    - form fields
+    - realtime enablement
+- When regenerating an existing CRUD resource, the generator should reuse manifest defaults instead of forcing the same options to be passed again.
+
+## Performance Guardrails
+
+- Avoid repeated filesystem discovery, reflection, or route scanning outside the existing registry/generation flow.
+- Avoid N+1 queries and unnecessary model hydration on backend listing/detail endpoints.
+- Prefer eager loading and focused selects when query complexity grows.
+- Avoid unnecessary frontend reloads, refetches, or watchers when existing state can be updated deterministically.
+- Reuse shared caches, query utilities, and realtime invalidation hooks instead of duplicating fetch logic.
+- Performance optimizations must remain readable and consistent with the codebase; do not introduce obscure micro-optimizations.
+
+## Testing Standards
+
+- Every behavior change must include tests for:
+    - happy path
+    - failure path
+    - relevant edge cases
+- Extend the nearest existing test suite instead of creating disconnected coverage patterns.
+- Current backend test areas already include:
+    - auth flows
+    - settings flows
+    - dashboard and marketing rendering
+    - users web management
+    - users realtime
+    - API v1 endpoints
+    - security headers
+    - module registry / route / gate / channel / listener / provider discovery
+    - generator behavior
+- Frontend logic tests live as `resources/js/**/*.test.ts` and run under Vitest with `jsdom`.
+
+## Test Placement Rules
+
+- Backend transport behavior belongs in `tests/Feature/**`.
+- Backend pure/domain orchestration behavior belongs in `tests/Unit/**`.
+- Module-specific backend tests should stay grouped under their module namespace when practical.
+- Frontend composable, contract, and utility tests should live close to the code under `resources/js/**/__tests__/**` or `resources/js/**/*.test.ts`.
+- Generator and infrastructure behavior should be covered near their owning area, not mixed into unrelated feature suites.
+
+## Docs Sync Rules
+
+- When behavior, architecture, setup, or generation workflows change, update the relevant docs in the same task.
+- Review and update these files when relevant:
+    - `AGENTS.md`
+    - `README.md`
+    - `docs/frontend-automation.md`
+    - `docs/how-to-add-module-page.md`
+- Do not leave known stale instructions behind after changing the implementation.
+
+## Quality Gate
+
+Always run after changes:
 
 ```bash
 composer generate-and-cleanup
-```
-
-This command automatically:
-
-1. Generates TypeScript types from PHP DTOs (`php artisan typescript:transform`)
-2. Generates Wayfinder route helpers (`php artisan wayfinder:generate`)
-3. Fixes PHP code style with Pint (`pint --parallel`)
-4. Refactors PHP with Rector (`rector process`)
-5. Analyzes PHP with PHPStan (`phpstan analyse`)
-6. Formats and lints frontend code (`npm run cleanup` = prettier + eslint --fix)
-
-After running `composer generate-and-cleanup`, also run:
-
-```bash
-npm run typecheck
-```
-
-Then run targeted PHPUnit tests for changed behavior. If the change affects many areas, run full tests:
-
-```bash
 php artisan test
 ```
 
-**Agents must NEVER skip running `composer generate-and-cleanup` after making code changes.**
+For frontend behavior or composable changes, also run:
+
+```bash
+npm run test:unit
+```
+
+For non-mutating static verification, run:
+
+```bash
+composer qa:check
+```
+
+If backend route, enum, DTO, channel, provider, gate, listener, or module-registry contracts changed, `composer generate` is mandatory before considering the task complete.
+
+## CI Compatibility
+
+Local changes must remain compatible with the existing CI expectations:
+
+- Pint
+- Rector
+- PHPStan
+- Prettier
+- ESLint
+- TypeScript typecheck
+- PHPUnit / `php artisan test`
+- Vitest for frontend logic changes
 
 ## Laravel Boost MCP Workflow
 
-When Laravel Boost MCP tools are available:
+When Laravel Boost MCP tools are available to the agent:
 
 - Use `search-docs` before Laravel/Inertia/Wayfinder/Sanctum/Tailwind ecosystem changes.
 - Use `list-artisan-commands` before running Artisan commands.
 - Run Artisan with `--no-interaction` when the specific command supports it.
-- Use MCP equivalents (`tinker`, `database-query`, `browser-logs`) when applicable.
-  If MCP tools fail, use equivalent shell commands.
-
-## Service Layer Pattern
-
-- Purpose: Encapsulate business logic and complex operations that span multiple models or require external services.
-- Location: `app/Services/`
-- Naming: `{Entity}Service.php` (e.g., `UserService.php`)
-- Usage: Inject into controllers via constructor dependency injection.
-- When to use: Multi-model operations, external API integrations, complex data transformations, business rules enforcement.
-- Keep controllers thin; delegate business logic to services.
-- Services should be `final class` with explicit method types.
-
-### Service Pattern Example
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Services;
-
-use App\Models\User;
-use App\Events\UserManagementEvent;
-use Illuminate\Http\Request;
-
-final class UserService
-{
-    public function createUser(array $data, User $actor, Request $request): User
-    {
-        $user = User::create($data);
-
-        Event::dispatch(new UserManagementEvent(
-            action: 'create',
-            actor: $actor,
-            target: $user,
-            request: $request,
-        ));
-
-        return $user;
-    }
-}
-```
-
-### Controller-Service Relationship
-
-- Controllers handle HTTP: validation, authorization, response.
-- Services handle business: data operations, events, external calls.
-- Keep controllers thin; delegate to services.
-
-## Events and Listeners
-
-- Events: `app/Events/` - Dispatch for decoupled operations.
-- Listeners: `app/Listeners/` - Handle side effects asynchronously when possible.
-- Register in `AppServiceProvider` or create dedicated `EventServiceProvider`.
-- Use for: Audit logging, notifications, cache management, webhooks, search indexing.
-- Example: `UserManagementEvent` with `LogUserManagementAudit` listener.
-- Dispatch events after database transactions complete to avoid stale state.
-
-## Queue Jobs
-
-- Location: `app/Jobs/`
-- Naming: `{Action}Job.php` (e.g., `SendWelcomeEmailJob.php`)
-- Use for: Email sending, report generation, heavy computations, batch processing.
-- Configure queue connections in `.env` (sync for local, database/redis for production).
-- Dispatch with `dispatch(new SendWelcomeEmailJob($user))`.
-- Jobs should implement `ShouldQueue` for background processing.
-- Handle failures gracefully with `tries` and `backoff` properties.
-
-## API Resources
-
-- Location: `app/Http/Resources/`
-- Use for API endpoint responses requiring transformation or pagination.
-- Extend `Illuminate\Http\Resources\Json\JsonResource`.
-- Keep DTOs for Inertia pages; use Resources for API endpoints.
-- Return via `new UserResource($user)` or `UserResource::collection($users)`.
-- Resources should transform data, not contain business logic.
-
-## Testing Standards
-
-- Location: `tests/Feature/` and `tests/Unit/`
-- Naming: `{Feature}Test.php` using PascalCase.
-- All test files must use `declare(strict_types=1);`.
-- Use `RefreshDatabase` trait for database tests.
-- Test structure per method:
-  - Happy path (success scenarios)
-  - Failure path (validation, authorization)
-  - Edge cases (boundaries, empty states)
-- Use factories: `User::factory()->create(['role' => UserRole::Admin])`.
-- Assert against database state and response content.
-- Feature tests should cover routes, policies, and validation.
-- Unit tests for isolated logic (services, helpers, custom functions).
-
-### Minimum Test Requirements
-
-Every new feature or behavior change MUST include tests. Agents must never skip test writing:
-
-1. **New Routes**: Must have feature tests for:
-
-   - Successful response (happy path)
-   - Authentication requirements (if protected)
-   - Authorization requirements (if role-based)
-   - Validation errors (if accepting input)
-2. **New Controllers/Methods**: Must have tests for:
-
-   - Happy path scenario
-   - Validation failures
-   - Authorization failures (if applicable)
-3. **New Services**: Must have unit tests for:
-
-   - Public method behavior
-   - Edge cases and error handling
-4. **New Policies**: Must have feature tests verifying:
-
-   - Authorized users can access
-   - Unauthorized users cannot access
-5. **Bug Fixes**: Must include regression test that:
-
-   - Reproduces the original bug
-   - Verifies the fix works
-
-### Test Coverage Expectations
-
-- Controllers: Test all public methods
-- Services: Test all public methods with edge cases
-- Policies: Test all ability methods
-- Form Requests: Test validation rules via controller tests
-- Middleware: Test behavior with various conditions
-
-### Running Tests
-
-```bash
-# Run all tests
-php artisan test
-
-# Run specific test file
-php artisan test tests/Feature/Users/UserManagementTest.php
-
-# Run with coverage (if configured)
-php artisan test --coverage
-```
-
-## Route Helper Conventions
-
-### Backend
-
-- Use `route('name')` helper or `to_route('name')` for redirects.
-- Use named routes exclusively, never hard-code URLs.
-- Route model binding automatically resolves models.
-
-### Frontend
-
-- Import Wayfinder route helpers for form submissions: `import { store } from '@/routes/users'`.
-- Use Ziggy `route()` for navigation links and breadcrumbs.
-- Wayfinder provides type-safe URL generation with parameters.
-- Example form submission: `form.post(store().url)` or `form.submit(users.store())`.
-
-## Form Component Patterns
-
-- Use `UiInput`, `UiLabel`, `UiSelect` from `components/ui/`.
-- Wrap form fields in `<div class="grid gap-2">` containers.
-- Display errors via `<InputError :message="form.errors.field" />`.
-- Use Inertia's `useForm()` for form state management.
-- Common pattern:
-  ```vue
-  <div class="grid gap-2">
-      <UiLabel for="email">Email</UiLabel>
-      <UiInput id="email" type="email" v-model="form.email" />
-      <InputError :message="form.errors.email" />
-  </div>
-  ```
-
-## Flash Messages
-
-- Set via `redirect()->route('name')->with('message', 'Success text')`.
-- Standard keys: `message` (success), `error` (errors), `status` (status updates).
-- Access in Vue via `page.props.message` or passed props.
-- Keep messages concise and user-friendly.
-- Use session flash for one-time notifications across redirects.
-
-## Reusable Component Standards
-
-### Frontend Component Architecture
-
-- **Base Components** (`resources/js/components/ui/`):
-
-  - Pure, presentational components with no business logic.
-  - Accept props for all configurable values.
-  - Emit events for parent components to handle.
-  - Support both light and dark themes.
-  - Examples: `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`.
-- **Form Components** (`resources/js/components/form/`):
-
-  - Wrap base UI components with label/error handling.
-  - Use consistent `<div class="grid gap-2">` container pattern.
-  - Examples: `FormField`, `FormSelect`, `FormTextarea`, `FormCheckbox`.
-- **Feature Components** (`resources/js/components/{domain}/`):
-
-  - Domain-specific components with business logic.
-  - Use composables for shared behavior.
-  - Examples: `users/CreateUserDialog`, `users/EditUserDialog`.
-- **Layout Components** (`resources/js/layouts/`):
-
-  - Page shell components for consistent structure.
-  - Examples: `AppLayout`, `AuthLayout`, `MarketingPageLayout`.
-
-### When to Create New Components
-
-1. **Extract when duplicated 2+ times**: If similar UI structure appears in 2+ places, create a reusable component.
-2. **Single responsibility**: Each component should do one thing well.
-3. **Prop-driven flexibility**: Use props for variations, not separate components.
-4. **Slot-based composition**: Use slots for content injection points.
-
-### Component Naming Conventions
-
-- **Base UI**: `Ui{Name}` (e.g., `UiButton`, `UiInput`)
-- **Form**: `Form{Field}` (e.g., `FormField`, `FormSelect`)
-- **Feature**: `{Domain}{Action}` (e.g., `UsersCreateDialog`)
-- **Layout**: `{Domain}Layout` (e.g., `AppLayout`, `MarketingPageLayout`)
-
-## Composables Pattern
-
-### Purpose and Location
-
-- Location: `resources/js/composables/`
-- Naming: `use{Feature}.ts` (e.g., `useToast`, `useNavigation`, `useAppearance`)
-- Export as composable function, not object.
-
-### When to Create Composables
-
-1. **Stateful logic reuse**: Same reactive state/logic needed in multiple components.
-2. **Complex operations**: Encapsulate complex calculations or transformations.
-3. **API/data fetching**: Centralize data fetching patterns.
-4. **Cross-cutting concerns**: Toast notifications, modals, loading states.
-
-### Composable Best Practices
-
-```typescript
-// Good: Returns reactive state and methods
-export function useToast() {
-    const toasts = ref<Toast[]>([])
-
-    const show = (message: string, type: ToastType = 'success') => {
-        toasts.value.push({ id: Date.now(), message, type })
-    }
-
-    return { toasts: readonly(toasts), show }
-}
-
-// Bad: Returns only methods, no reactive state
-export function useToast() {
-    return {
-        show: (message: string) => { /* ... */ }
-    }
-}
-```
-
-### Existing Composables
-
-- `useAppearance`: Theme/appearance management (light/dark mode).
-- `useNavigation`: Role-aware navigation items.
-- `useInitials`: Generate user initials from name.
-- `useToast`: Toast notification system.
-- `useHttp`: API HTTP client (for non-Inertia API calls).
-
-## Utility Functions
-
-### Location and Purpose
-
-- Location: `resources/js/lib/`
-- Naming: Descriptive function names, `{domain}Utils.ts` for domain-specific utilities.
-- Main file: `utils.ts` for shared utilities.
-
-### When to Create Utilities
-
-1. **Pure functions**: No side effects, same input = same output.
-2. **Data transformation**: Format dates, parse strings, transform objects.
-3. **Validation helpers**: Client-side validation functions.
-4. **Constants**: Shared configuration values.
-
-### Utility Examples
-
-```typescript
-// resources/js/lib/utils.ts
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
-}
-
-export function getEnumOptions<TEnum extends Record<string, string>>(
-    enumType: TEnum
-): Array<{ value: string; label: string }> {
-    return Object.values(enumType).map((value) => ({ value, label: value }))
-}
-
-export function formatDate(date: string | Date, format: string = 'medium'): string {
-    // Date formatting logic
-}
-```
-
-## Artisan Commands
-
-### Location and Purpose
-
-- Location: `app/Console/Commands/`
-- Naming: `{Action}{Entity}` (e.g., `ImportUsers`, `GenerateReport`)
-- Register in `routes/console.php`.
-
-### When to Create Commands
-
-1. **Scheduled tasks**: Cron jobs, periodic maintenance.
-2. **Data imports/exports**: Bulk data operations.
-3. **One-time migrations**: Data transformations.
-4. **Administrative tasks**: User management, cache clearing.
-
-### Command Pattern Example
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Console\Commands;
-
-use App\Services\UserService;
-use Illuminate\Console\Command;
-
-final class ImportUsers extends Command
-{
-    protected $signature = 'users:import {file}';
-    protected $description = 'Import users from CSV file';
-
-    public function handle(UserService $userService): int
-    {
-        $file = $this->argument('file');
-        // Import logic using service
-
-        return self::SUCCESS;
-    }
-}
-```
-
-## Shared Data Components
-
-### Pagination Component
-
-- Use `PaginationNav` component for server-side pagination.
-- Accepts `Paginated<T>` type from `@/types`.
-- Emits `page-change` event for navigation.
-
-```vue
-<PaginationNav :pagination="users" @page-change="onPageChange" />
-```
-
-### Data Table Component
-
-- Use `DataTable` component for tabular data.
-- Accepts columns definition and data array/paginated data.
-- Supports custom cell slots and row actions.
-
-```vue
-<DataTable :columns="columns" :data="users" :actions="tableActions" @row-click="onRowClick">
-    <template #cell-name="{ row }">
-        <UserInfo :user="row" />
-    </template>
-</DataTable>
-```
-
-## Toast Notification System
-
-### Usage Pattern
-
-```typescript
-import { useToast } from '@/composables/useToast'
-
-const { success, error, info, warning } = useToast()
-
-// In form success callback
-form.post(route('users.store'), {
-    onSuccess: () => {
-        success('User created successfully')
-    },
-    onError: () => {
-        error('Failed to create user')
-    }
-})
-```
-
-### Toast Types
-
-- `success`: Green, checkmark icon - successful operations.
-- `error`: Red, X icon - failures and errors.
-- `info`: Blue, info icon - informational messages.
-- `warning`: Yellow, warning icon - warnings and cautions.
-
-## Code Reusability Checklist
-
-Before creating new code, verify:
-
-### Frontend
-
-- [ ] Check if existing UI component can be extended.
-- [ ] Check if composable exists for shared logic.
-- [ ] Check if utility function exists for transformation.
-- [ ] Use shared form components instead of raw inputs.
-- [ ] Use shared data components for tables/pagination.
-- [ ] Extract repeated patterns into reusable components.
-
-### Backend
-
-- [ ] Check if service exists for business logic.
-- [ ] Check if event/listener pattern applies.
-- [ ] Check if job should be used for background processing.
-- [ ] Use Form Requests for validation.
-- [ ] Use Policies for authorization.
-- [ ] Use DTOs for data transfer.
-
-## Known Caveats (Current Starter Kit State)
-
-- Validate tooling and version assumptions against `composer.json` and `package.json` before adding workflows or scripts.
-
-## CI Expectations
-
-GitHub Actions currently run:
-
-- Lint workflow: Pint, frontend format, frontend lint
-- Test workflow: build assets and run PHPUnit
-  Agents should keep local changes compatible with those checks.
-
-## Feature Module Structure
-
-For scalable applications (e-commerce, CRM, management systems), organize code by feature modules:
-
-### Module Directory Structure
-
-```
-app/Modules/{FeatureName}/
-├── Controllers/           # Feature-specific controllers
-├── Models/               # Feature-specific models
-├── Services/             # Feature-specific services
-├── Events/               # Feature-specific events
-├── Listeners/            # Feature-specific listeners
-├── Jobs/                 # Feature-specific jobs
-├── Policies/             # Feature-specific policies
-├── Requests/             # Feature-specific form requests
-├── Resources/            # Feature-specific API resources
-├── Data/                 # Feature-specific DTOs
-├── Enums/                # Feature-specific enums
-└── Routes/               # Feature-specific routes
-```
-
-### When to Use Modules
-
-1. **Large features**: E-commerce catalog, orders, payments, inventory
-2. **Domain isolation**: CRM contacts, deals, tasks, reports
-3. **Team boundaries**: Features owned by specific teams
-4. **Optional features**: Features that can be enabled/disabled
-
-### Module Registration
-
-Register module routes in `app/Providers/ModuleServiceProvider.php`:
-
-```php
-final class ModuleServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        $this->loadRoutesFrom(base_path('app/Modules/Orders/Routes/api.php'));
-    }
-}
-```
-
-## Repository Pattern (Optional)
-
-For complex data access patterns, use repositories:
-
-### When to Use Repositories
-
-1. **Complex queries**: Multi-table joins, complex filters
-2. **Multiple data sources**: API + database + cache
-3. **Testing isolation**: Mock data layer easily
-4. **Query reuse**: Same query logic across multiple services
-
-### Repository Pattern Example
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Repositories;
-
-use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-
-final class UserRepository
-{
-    public function findActivePaginated(int $perPage = 15): LengthAwarePaginator
-    {
-        return User::query()
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
-    }
-
-    public function findByRole(string $role): iterable
-    {
-        return User::query()
-            ->where('role', $role)
-            ->get();
-    }
-}
-```
-
-### Service-Repository Relationship
-
-- Services use repositories for data access
-- Repositories contain only query logic
-- Services contain business logic
-- Controllers use services, not repositories directly
-
-## API Error Handling
-
-### Exception Classes
-
-Use structured exceptions for API errors:
-
-- `App\Exceptions\ApiException` - Base exception class
-- `App\Exceptions\NotFoundError` - 404 errors
-- `App\Exceptions\ValidationError` - 422 errors
-- `App\Exceptions\UnauthorizedError` - 403 errors
-
-### Usage Example
-
-```php
-use App\Exceptions\NotFoundError;
-
-public function show(int $id): JsonResponse
-{
-    $user = User::find($id);
-
-    if ($user === null) {
-        throw new NotFoundError('User not found', code: 'USER_NOT_FOUND');
-    }
-
-    return response()->json($user);
-}
-```
-
-### Error Response Format
-
-```json
-{
-    "success": false,
-    "error": {
-        "type": "App\\Exceptions\\NotFoundError",
-        "message": "User not found",
-        "code": "USER_NOT_FOUND",
-        "details": {}
-    }
-}
-```
-
-## Shared UI Components
-
-### Confirmation Dialog
-
-Use `ConfirmDialog` for destructive or important actions:
-
-```vue
-<script setup lang="ts">
-    const open = ref(false)
-    const handleConfirm = () => {
-        // Perform action
-        open.value = false
-    }
-</script>
-
-<template>
-    <ConfirmDialog
-        v-model:open="open"
-        title="Delete User"
-        description="This action cannot be undone."
-        confirm-text="Delete"
-        variant="danger"
-        @confirm="handleConfirm"
-    />
-</template>
-```
-
-### Programmatic Confirmation
-
-Use `useConfirm` composable for Promise-based confirmations:
-
-```typescript
-const { confirm } = useConfirm()
-
-const handleDelete = async () => {
-    const confirmed = await confirm({
-        title: 'Delete Item',
-        description: 'This action cannot be undone.',
-        variant: 'danger',
-    })
-
-    if (confirmed) {
-        // proceed with deletion
-    }
-}
-```
-
-### Loading States
-
-Use `LoadingSpinner` for inline loading:
-
-```vue
-<LoadingSpinner size="md" color="primary" />
-```
-
-Use `LoadingOverlay` for container loading:
-
-```vue
-<div class="relative min-h-[200px]">
-    <LoadingOverlay :loading="isLoading" text="Loading data..." />
-    <!-- Content -->
-</div>
-```
-
-### Empty States
-
-Use `EmptyState` for empty data displays:
-
-```vue
-<EmptyState
-    title="No users found"
-    description="Get started by creating your first user."
-    icon="inbox"
-    action-text="Add User"
-    @action="handleAddUser"
-/>
-```
-
-## API Versioning
-
-### Structure
-
-```
-routes/api/v1/
-routes/api/v2/
-
-app/Http/Controllers/Api/V1/
-app/Http/Controllers/Api/V2/
-```
-
-### Route Registration
-
-In `routes/api.php`:
-
-```php
-Route::prefix('v1')->group(function () {
-    require __DIR__ . '/api/v1.php';
-});
-
-Route::prefix('v2')->group(function () {
-    require __DIR__ . '/api/v2.php';
-});
-```
-
-### Version-Specific Controllers
-
-```php
-namespace App\Http\Controllers\Api\V1;
-
-final class UserController extends Controller
-{
-    // v1 implementation
-}
-
-namespace App\Http\Controllers\Api\V2;
-
-final class UserController extends Controller
-{
-    // v2 implementation with breaking changes
-}
-```
-
-## State Management Patterns
-
-### When to Use Pinia Stores
-
-1. **Global state**: User preferences, theme, notifications
-2. **Cross-component state**: Shared data across multiple components
-3. **Complex state**: State with computed properties and actions
-4. **Persistence**: State that needs localStorage/sessionStorage
-
-### Store Pattern
-
-```typescript
-// resources/js/stores/useUserStore.ts
-import { defineStore } from 'pinia'
-
-export const useUserStore = defineStore('user', () => {
-    const user = ref<User | null>(null)
-    const preferences = ref<UserPreferences>({})
-
-    const isAdmin = computed(() => user.value?.role === 'Admin')
-
-    const setUser = (newUser: User) => {
-        user.value = newUser
-    }
-
-    const clearUser = () => {
-        user.value = null
-        preferences.value = {}
-    }
-
-    return {
-        user,
-        preferences,
-        isAdmin,
-        setUser,
-        clearUser,
-    }
-})
-```
-
-## Caching Strategies
-
-### Cache Patterns
-
-```php
-use Illuminate\Support\Facades\Cache;
-
-// Cache with tags (for Redis)
-$users = Cache::tags(['users', 'active'])
-    ->remember('users.active', 3600, fn () => User::where('is_active', true)->get());
-
-// Cache with lock (prevent cache stampede)
-$users = Cache::lock('users.active.lock', 10)
-    ->get(fn () => Cache::remember('users.active', 3600, fn () => User::where('is_active', true)->get()));
-
-// Clear cache by tags
-Cache::tags(['users'])->flush();
-```
-
-### Cache Invalidation
-
-Use events to invalidate cache:
-
-```php
-// In a listener
-public function handle(UserUpdated $event): void
-{
-    Cache::tags(['users'])->forget("user.{$event->user->id}");
-    Cache::tags(['users'])->forget('users.active');
-}
-```
-
-## Performance Optimization
-
-### Database
-
-1. **Eager Loading**: Always eager load relationships to prevent N+1
-2. **Indexing**: Add indexes on frequently queried columns
-3. **Pagination**: Use cursor pagination for large datasets
-4. **Read Replicas**: Route read queries to replicas
-
-### Frontend
-
-1. **Code Splitting**: Lazy load routes and heavy components
-2. **Virtual Scrolling**: Use for long lists
-3. **Debounce/Throttle**: For search inputs and resize handlers
-4. **Image Optimization**: Use WebP, lazy loading, responsive images
-
-### Example: Lazy Loading Routes
-
-```typescript
-// In router or page component
-const HeavyComponent = defineAsyncComponent(() =>
-    import('@/components/HeavyComponent.vue')
-)
-```
-
-## Security Best Practices
-
-### Input Validation
-
-1. **Server-side validation**: Always validate on server, never trust client
-2. **Form Requests**: Use Form Request classes for validation
-3. **Type safety**: Use strict types and DTOs
-
-### Authorization
-
-1. **Policies**: Use policies for model-level authorization
-2. **Gates**: Use gates for action-level authorization
-3. **Middleware**: Use middleware for route-level protection
-
-### Data Protection
-
-1. **Encryption**: Encrypt sensitive data at rest
-2. **Hashing**: Hash passwords and sensitive tokens
-3. **Sanitization**: Sanitize user input before storage
-4. **Rate Limiting**: Implement rate limiting on API endpoints
-
-## Code Quality Checklist
-
-Before submitting any code change, verify:
-
-### Architecture
-
-- [ ] Code follows existing patterns and conventions
-- [ ] Proper separation of concerns (Controller → Service → Model)
-- [ ] No business logic in controllers
-- [ ] No direct database queries in controllers
-
-### Type Safety
-
-- [ ] All PHP files use `declare(strict_types=1);`
-- [ ] All methods have explicit parameter and return types
-- [ ] DTOs are used for data transfer
-- [ ] TypeScript types match backend DTOs
-
-### Testing
-
-- [ ] Tests cover happy path, failure path, and edge cases
-- [ ] Tests are isolated and don't depend on each other
-- [ ] Mock external services and APIs
-- [ ] Use factories for test data
-
-### Performance
-
-- [ ] N+1 queries are prevented with eager loading
-- [ ] Large datasets are paginated
-- [ ] Expensive operations are cached
-- [ ] Heavy operations are queued
-
-### Security
-
-- [ ] Input is validated on server side
-- [ ] Authorization is enforced
-- [ ] Sensitive data is encrypted
-- [ ] No sensitive data in logs
-
-### Maintainability
-
-- [ ] Code is self-documenting with clear naming
-- [ ] Complex logic has docblock comments
-- [ ] No dead code or commented-out code
-- [ ] No magic strings or numbers
-
----
-
-# AGENTS.md
-
-## Intent
-
-This file defines mandatory rules for coding agents working in this repository.
-The goal is clean, consistent, end-to-end type-safe, secure, and performant code.
-
-## Agent Workflow Protocol (MANDATORY)
-
-Before writing ANY code, agents MUST follow this protocol:
-
-### 1. Understanding Phase (REQUIRED)
-
-- **Read First**: Never assume. Read all related files, understand the full context.
-- **Trace Dependencies**: Map all files, services, events, and components that will be affected.
-- **Identify Patterns**: Look for existing patterns in the codebase before introducing new ones.
-- **Document Understanding**: Briefly summarize what you understand before implementing.
-
-### 2. Planning Phase (REQUIRED)
-
-- **Design First**: Outline the solution architecture before coding.
-- **Reuse First**: Check for existing components, composables, services, DTOs, enums.
-- **Impact Analysis**: List all files that need changes (backend, frontend, tests, docs).
-- **Test Strategy**: Define test cases before implementation. See [Testing Standards](#testing-standards) for minimum requirements.
-
-### 3. Implementation Phase
-
-- **One Change at a Time**: Make focused, atomic changes.
-- **Follow Patterns**: Match existing conventions exactly.
-- **Type Safety**: Ensure end-to-end type safety (PHP DTO → TypeScript types).
-- **Security First**: Validate on server, authorize with policies, sanitize inputs.
-
-### 4. Verification Phase (MANDATORY)
-
-- **Run Quality Gate**: See [Validation and Quality Gate](#validation-and-quality-gate) for complete workflow.
-- **Run Type Check**: `npm run typecheck` after frontend changes.
-- **Run Tests**: Write and run tests for all new/changed behavior.
-- **Update Documentation**: Update AGENTS.md for new features/patterns.
-
-### 5. Completion Criteria
-
-A change is complete ONLY when:
-
-- [ ] All quality gates pass (Pint, Rector, PHPStan, ESLint, Prettier)
-- [ ] TypeScript compilation succeeds with no errors
-- [ ] All tests pass (new and existing) - minimum tests required per [Testing Standards](#testing-standards)
-- [ ] AGENTS.md updated (if applicable)
-- [ ] No dead code, commented code, or TODOs remain
-- [ ] Both light and dark themes supported (UI changes)
-
-## Stack Snapshot (Current Project)
-
-- Backend: PHP `^8.4`, Laravel `^12.50`, Inertia Laravel `^2.0`, Sanctum `^4.3`, Wayfinder `^0.1`, Ziggy `^2.6`
-- Typed backend contracts: Spatie Laravel Data `^4.19`, Spatie TypeScript Transformer `^2.5`
-- Frontend: Vue `^3.5`, Inertia Vue `^2.3`, Tailwind CSS `^4.1`, Pinia `^3`
-- UI primitives: shadcn-vue style components on Reka UI
-- Tooling: Vite `^7`, TypeScript `^5.9` (strict), ESLint `^9`, Prettier `^3`, Pint `^1`, Rector `^2`, PHPUnit `^12`
-- Node requirements: Node `>=24.1.0`, npm `>=11.2.1`, npm only (enforced by `ensure-node-env.js`)
-
-## Non-Negotiable Rules
-
-- Before making any code changes, fully understand all requirements and the current implementation across related files, flows, and dependencies.
-- Write or modify code only after that understanding is clear, then implement in the most efficient, maintainable, and logically structured way.
-- Match existing conventions before introducing new patterns.
-- Reuse existing components, composables, DTOs, enums, and helpers before creating new ones.
-- Public client-facing UI is the **marketing domain** and must stay structurally separated from authenticated app domains (dashboard/settings/users/auth) except for approved shared primitives/utilities.
-- For any component/layout/page in a subdirectory, use the namespace-prefixed auto-registered tag name (for example `<MarketingPageLayout />`, `<UsersCreateUserDialog />`), never an unscoped alias.
-- Do not change dependencies, core folder structure, or app architecture without explicit approval.
-- Do not add new documentation files unless explicitly requested.
-- No dead code, commented-out code, placeholder TODOs, or magic strings where typed/shared constants exist.
-- For behavior changes, update or add tests that cover happy path, failure path, and relevant edge cases.
-- Every new or changed implementation must follow the same project patterns and best practices: clean, reusable, type-safe code with the most logical structure.
-
-## Documentation Accountability Policy
-
-- Any new entity, feature, service, integration, or major update to existing behavior must be documented in `AGENTS.md`.
-- `AGENTS.md` updates must be made in the same change set as the code change.
-- Documentation must be specific enough for accountability and long-term maintenance.
-- At minimum, document: purpose, impacted routes/entry points, data contracts (DTO/enums/types), validation/authorization rules, background processing, and test expectations.
-- A change is not complete until `AGENTS.md` is updated when applicable.
-
-## Architecture Map
-
-### Backend
-
-- Application bootstrap and middleware registration: `bootstrap/app.php`
-- Providers: `bootstrap/providers.php`
-- Route files:
-  - `routes/web.php`
-  - `routes/auth.php`
-  - `routes/settings.php`
-  - `routes/api.php`
-  - `routes/console.php`
-- Domain model:
-  - `app/Models/User.php` with enum cast (`UserRole`) and hashed password cast
-  - `app/Enums/UserRole.php` (`Admin`, `User`)
-  - `app/Data/UserData.php` as DTO exported to TypeScript
-- Authorization:
-  - Gate `manage-users` in `app/Providers/AuthServiceProvider.php`
-  - `UserPolicy` in `app/Policies/UserPolicy.php` enforces user management permissions
-- Middleware:
-  - `HandleAppearance` shares appearance from cookie
-  - `HandleInertiaRequests` shares `name`, `quote`, `auth.user`, `ziggy`, `sidebarOpen`
-  - `SecurityHeaders` appends CSP, frame, referrer, and browser-permission hardening headers
-  - Cookie encryption excludes `appearance` and `sidebar_state`
-- Validation:
-  - Form Requests are required for user/auth/settings writes and filtered reads
-- Persistence:
-  - Users, password reset tokens, sessions, personal access tokens
-  - Cache, job, batch, failed job tables
-  - Default seeded users controlled by `APP_SEED_USERS`
-  - Admin user-management actions are audit-logged via `App\Support\AuditLogger`
-
-### Frontend
-
-- Entry points:
-  - `resources/js/app.ts` (CSR)
-  - `resources/js/ssr.ts` (SSR)
-- Inertia pages: `resources/js/pages` (lowercase directory is intentional), organized by domain namespaces:
-  - `resources/js/pages/marketing/**` for public client-facing pages
-  - `resources/js/pages/auth/**`, `resources/js/pages/settings/**`, `resources/js/pages/users/**` for authenticated/product flows
-- Layouts:
-  - `AppLayout` (sidebar shell for dashboard/app pages)
-  - `AuthLayout` -> `AuthSimpleLayout` (single supported auth shell)
-  - `MarketingPageLayout` for public marketing pages
-  - `settings/Layout.vue`
-- Navigation and shell components:
-  - `AppSidebar`, `AppShell`, `AppContent`, `NavMain`, `NavFooter`, `NavUser`, `UserMenuContent`
-  - Marketing shell: `MarketingHeader`, `MarketingFooter`
-  - Shared role-aware nav source: `resources/js/composables/useNavigation.ts`
-- Domain component boundaries:
-  - Marketing-only components: `resources/js/components/marketing/**`
-  - App/dashboard shell and feature components: `resources/js/components/**` (excluding `marketing/**`)
-  - Shared primitives: `resources/js/components/ui/**`
-- Appearance/theming:
-  - `useAppearance.ts` stores preference in `localStorage` and `appearance` cookie
-  - Default appearance is light mode when no preference is set
-  - Dark mode is class-based (`.dark`), initialized early in `resources/views/app.blade.php`
-- UI component system:
-  - App components: `resources/js/components`
-  - UI primitives: `resources/js/components/ui`
-  - Auto-registration enabled with namespaces (`directoryAsNamespace: true`)
-  - For components in subdirectories, always use namespace-prefixed tags (example: `components/marketing/PageLayout.vue` => `<MarketingPageLayout />`, not `<PageLayout />`)
-- Type declarations:
-  - Shared page props and app types in `resources/js/types`
-  - Typed Pinia stores belong in `resources/js/stores`
-
-## Existing Features (What Agents Must Know)
-
-- Marketing/public flow: Route `/` renders `marketing/Welcome` via Inertia and stays outside auth middleware. See [Marketing Pages Standard](#marketing-pages-standard) for complete details.
-- Auth flows: registration, login, logout, forgot/reset password, confirm password, email verification.
-- Settings flows: profile update, password update, appearance toggle, account deletion.
-- Dashboard page behind `auth` + `verified` middleware.
-- Dashboard/app pages use sidebar layout only via `AppLayout` (backed by `AppSidebarLayout`).
-- User management (`/users`) for admins only:
-  - Server-side pagination
-  - Create, update, delete via dialogs
-  - Role managed via `UserRole` enum
-- API endpoint `/api/user` protected by Sanctum.
-
-## Marketing Pages Standard (Public Client-Facing)
-
-### Purpose
-
-Marketing pages are public entry points focused on product communication, conversion, and trust. They must deliver premium, modern, and robust UX while remaining maintainable and type-safe.
-
-### Required Structure
-
-- **Pages**: `resources/js/pages/marketing/**`
-- **Layouts**: `resources/js/layouts/marketing/**`
-- **Components**: `resources/js/components/marketing/**`
-- **Route URIs**: Remain public and unprefixed by default (for example `/`, `/about`, `/pricing`), and must not be moved under `/marketing/*` unless the user explicitly requests it.
-- **Internal Inertia page namespace**: `marketing/*` is allowed and preferred for code organization without changing public URLs.
-
-### Required Namespacing
-
-- Use namespace-prefixed tags for all nested files (for example `<MarketingPageLayout />`, `<MarketingHeroSection />`).
-- Keep marketing tags/components distinct from dashboard/auth/settings/users tags/components.
-
-### Design-System Enforcement
-
-- Use shared tokens/utilities from `resources/css/app.css` and existing `resources/js/components/ui/**` primitives first.
-- Avoid one-off inline color systems in templates (raw hex/hsl classes) when tokenized utilities can express the same result.
-- Build reusable sections/components instead of repeating large class blocks across pages.
-- Maintain light/dark parity, semantic landmarks, keyboard/focus accessibility, and mobile-first responsiveness.
-- Marketing header/navigation must be sticky and shared through `MarketingPageLayout`.
-
-### Cross-Domain Separation Rules
-
-- Marketing code must not depend on dashboard shell components (`AppShell`, `AppSidebar`, `AppSidebarLayout`, etc.).
-- Dashboard/auth/settings/users code must not depend on marketing-only components/layouts.
-- Shared logic belongs in neutral shared layers (`components/ui`, composables, typed DTO/types, lib helpers).
-
-### Test Expectations
-
-- New or changed marketing routes must have feature tests for public accessibility and expected response behavior.
-- Behavior changes on marketing pages should include relevant frontend/feature coverage for edge states when applicable.
-
-## Generated Files and Codegen
-
-Treat these as generated artifacts and do not hand-edit unless explicitly requested:
-
-- `resources/js/routes/**` (Wayfinder named route helpers)
-- `resources/js/actions/**` (Wayfinder controller action helpers)
-- `resources/js/wayfinder/index.ts`
-- `resources/js/types/app-data.ts` (Spatie transformer output)
-- `resources/js/types/auto-imports.d.ts`
-- `resources/js/types/components.d.ts`
-
-After schema/DTO/enum/route changes:
-
-1. `composer generate`
-2. If needed, run `php artisan wayfinder:generate --no-interaction`
-
-## Validation and Quality Gate
-
-**MANDATORY**: After any code change, run the single unified command:
-
-```bash
-composer generate-and-cleanup
-```
-
-This command automatically:
-
-1. Generates TypeScript types from PHP DTOs (`php artisan typescript:transform`)
-2. Generates Wayfinder route helpers (`php artisan wayfinder:generate`)
-3. Fixes PHP code style with Pint (`pint --parallel`)
-4. Refactors PHP with Rector (`rector process`)
-5. Analyzes PHP with PHPStan (`phpstan analyse`)
-6. Formats and lints frontend code (`npm run cleanup` = prettier + eslint --fix)
-
-After running `composer generate-and-cleanup`, also run:
-
-```bash
-npm run typecheck
-```
-
-Then run targeted PHPUnit tests for changed behavior. If the change affects many areas, run full tests:
-
-```bash
-php artisan test
-```
-
-**Agents must NEVER skip running `composer generate-and-cleanup` after making code changes.**
-
-## Implementation Standards
-
-### PHP / Laravel
-
-- All PHP files must use `declare(strict_types=1);`.
-- Use explicit parameter and return types on all methods/functions.
-- Prefer `final class` for concrete classes unless extension is required.
-- Use Form Request classes for new validation logic.
-- Use Eloquent (`Model::query()`) and relationships before dropping to query builder.
-- Prevent N+1 queries with eager loading.
-- Use named routes and route helpers, not hard-coded URLs.
-- Keep authorization on server side (gates/policies/middleware), not only in Vue.
-- Never use `env()` outside config files.
-
-### Vue / TypeScript / JavaScript
-
-- Default to `<script setup lang="ts">` for new Vue components.
-- Prefer TypeScript files over JavaScript for new frontend logic.
-- Keep strict typings end-to-end from backend DTO/enum -> frontend props/forms.
-- Use Inertia primitives (`useForm`, `router`, `<Link>`) for navigation and form submission.
-- Prefer Wayfinder route/action helpers over hard-coded endpoints.
-- Use named route helpers for `href` values (including breadcrumb/nav objects) instead of hard-coded path strings.
-- Keep pages in `resources/js/pages` and map server renders exactly.
-- All public client-facing pages must be under `resources/js/pages/marketing/**` and use `resources/js/layouts/marketing/**`.
-- Reuse `resources/js/components/ui` primitives before adding new custom base components.
-- All new UI must support both light and dark themes.
-
-### Styling and UX
-
-- Tailwind v4 only (`@import 'tailwindcss';` already configured).
-- Reuse existing tokens and utilities in `resources/css/app.css`.
-- Treat the design system as mandatory: prefer tokenized utilities (`bg-background`, `text-muted-foreground`, `border-border`, etc.) over one-off hard-coded palette classes.
-- Keep class lists intentional and avoid redundant utility noise.
-- Avoid duplicate UI structures; extract repeated blocks into typed, namespaced components/layouts.
-- Prefer `gap-*` for spacing in lists/grouped layouts in all new or modified code; avoid introducing new `space-x-*`/`space-y-*` usage.
-- Build mobile-first by default: define base styles for phones first, then layer `sm:`, `md:`, and `lg:` enhancements.
-- Prevent horizontal overflow in page shells and dense UI: use `min-w-0` on flex children and `overflow-x-auto` on wide content areas.
-- For data-heavy views (tables, toolbars, filters), provide an explicit small-screen strategy (stacked cards or horizontal scroll with reachable actions).
-
-### Performance
-
-- Paginate large datasets (follow `/users` pattern).
-- Avoid unnecessary client state duplication of server props.
-- Avoid unnecessary watchers/computeds when derived values are static.
-- Keep payloads minimal and typed.
-
-### Refactoring Automation (Rector)
-
-- Central Rector config is `rector.php`.
-- Rector runs over `app`, `bootstrap`, `config`, `database`, `public`, `routes`, and `tests`.
-- Enabled Rector sets include dead code, code quality, coding style, type declarations/docblocks, privatization, naming, `instanceof`, early return, and PHP-version upgrades.
-- Import names cleanup is enabled with unused import removal.
-- Cache path is project-local at `storage/framework/cache/rector`.
-- Keep `AddOverrideAttributeToOverriddenMethodsRector` skipped to avoid unsafe override attribute churn in framework-integrated classes.
-
-## Component Architecture
-
-### Frontend Component Hierarchy
-
-- **Base Components** (`resources/js/components/ui/`):
-
-  - Pure, presentational components with no business logic.
-  - Accept props for all configurable values.
-  - Emit events for parent components to handle.
-  - Support both light and dark themes.
-  - Examples: `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`.
-- **Form Components** (`resources/js/components/form/`):
-
-  - Wrap base UI components with label/error handling.
-  - Use consistent `<div class="grid gap-2">` container pattern.
-  - Examples: `FormField`, `FormSelect`, `FormTextarea`, `FormCheckbox`.
-- **Feature Components** (`resources/js/components/{domain}/`):
-
-  - Domain-specific components with business logic.
-  - Use composables for shared behavior.
-  - Examples: `users/CreateUserDialog`, `users/EditUserDialog`.
-- **Layout Components** (`resources/js/layouts/`):
-
-  - Page shell components for consistent structure.
-  - Examples: `AppLayout`, `AuthLayout`, `MarketingPageLayout`.
-
-### Component Naming Conventions
-
-- **Base UI**: `Ui{Name}` (e.g., `UiButton`, `UiInput`)
-- **Form**: `Form{Field}` (e.g., `FormField`, `FormSelect`)
-- **Feature**: `{Domain}{Action}` (e.g., `UsersCreateDialog`)
-- **Layout**: `{Domain}Layout` (e.g., `AppLayout`, `MarketingPageLayout`)
-
-### When to Create New Components
-
-1. **Extract when duplicated 2+ times**: If similar UI structure appears in 2+ places, create a reusable component.
-2. **Single responsibility**: Each component should do one thing well.
-3. **Prop-driven flexibility**: Use props for variations, not separate components.
-4. **Slot-based composition**: Use slots for content injection points.
-
-### Form Component Pattern
-
-Use `UiInput`, `UiLabel`, `UiSelect` from `components/ui/`. Wrap form fields in `<div class="grid gap-2">` containers. Display errors via `<InputError :message="form.errors.field" />`. Use Inertia's `useForm()` for form state management.
-
-Common pattern:
-
-```vue
-<div class="grid gap-2">
-    <UiLabel for="email">Email</UiLabel>
-    <UiInput id="email" type="email" v-model="form.email" />
-    <InputError :message="form.errors.email" />
-</div>
-```
-
-### Shared UI Components
-
-**Confirmation Dialog**: Use `ConfirmDialog` for destructive or important actions:
-
-```vue
-<script setup lang="ts">
-    const open = ref(false)
-    const handleConfirm = () => {
-        // Perform action
-        open.value = false
-    }
-</script>
-
-<template>
-    <ConfirmDialog
-        v-model:open="open"
-        title="Delete User"
-        description="This action cannot be undone."
-        confirm-text="Delete"
-        variant="danger"
-        @confirm="handleConfirm"
-    />
-</template>
-```
-
-**Programmatic Confirmation**: Use `useConfirm` composable for Promise-based confirmations:
-
-```typescript
-const { confirm } = useConfirm()
-
-const handleDelete = async () => {
-    const confirmed = await confirm({
-        title: 'Delete Item',
-        description: 'This action cannot be undone.',
-        variant: 'danger',
-    })
-
-    if (confirmed) {
-        // proceed with deletion
-    }
-}
-```
-
-**Loading States**: Use `LoadingSpinner` for inline loading, `LoadingOverlay` for container loading.
-
-**Empty States**: Use `EmptyState` for empty data displays:
-
-```vue
-<EmptyState
-    title="No users found"
-    description="Get started by creating your first user."
-    icon="inbox"
-    action-text="Add User"
-    @action="handleAddUser"
-/>
-```
-
-### Shared Data Components
-
-**Pagination Component**: Use `PaginationNav` component for server-side pagination. Accepts `Paginated<T>` type from `@/types`. Emits `page-change` event for navigation.
-
-```vue
-<PaginationNav :pagination="users" @page-change="onPageChange" />
-```
-
-**Data Table Component**: Use `DataTable` component for tabular data. Accepts columns definition and data array/paginated data. Supports custom cell slots and row actions.
-
-```vue
-<DataTable :columns="columns" :data="users" :actions="tableActions" @row-click="onRowClick">
-    <template #cell-name="{ row }">
-        <UserInfo :user="row" />
-    </template>
-</DataTable>
-```
-
-## Composables
-
-### Purpose and Location
-
-- Location: `resources/js/composables/`
-- Naming: `use{Feature}.ts` (e.g., `useToast`, `useNavigation`, `useAppearance`)
-- Export as composable function, not object.
-
-### When to Create Composables
-
-1. **Stateful logic reuse**: Same reactive state/logic needed in multiple components.
-2. **Complex operations**: Encapsulate complex calculations or transformations.
-3. **API/data fetching**: Centralize data fetching patterns.
-4. **Cross-cutting concerns**: Toast notifications, modals, loading states.
-
-### Composable Best Practices
-
-```typescript
-// Good: Returns reactive state and methods
-export function useToast() {
-    const toasts = ref<Toast[]>([])
-
-    const show = (message: string, type: ToastType = 'success') => {
-        toasts.value.push({ id: Date.now(), message, type })
-    }
-
-    return { toasts: readonly(toasts), show }
-}
-
-// Bad: Returns only methods, no reactive state
-export function useToast() {
-    return {
-        show: (message: string) => { /* ... */ }
-    }
-}
-```
-
-### Existing Composables
-
-- `useAppearance`: Theme/appearance management (light/dark mode).
-- `useNavigation`: Role-aware navigation items.
-- `useInitials`: Generate user initials from name.
-- `useToast`: Toast notification system.
-- `useHttp`: API HTTP client (for non-Inertia API calls).
-- `useConfirm`: Promise-based confirmation dialogs.
-
-### Toast Notification System
-
-Usage pattern:
-
-```typescript
-import { useToast } from '@/composables/useToast'
-
-const { success, error, info, warning } = useToast()
-
-// In form success callback
-form.post(route('users.store'), {
-    onSuccess: () => {
-        success('User created successfully')
-    },
-    onError: () => {
-        error('Failed to create user')
-    }
-})
-```
-
-Toast types:
-
-- `success`: Green, checkmark icon - successful operations.
-- `error`: Red, X icon - failures and errors.
-- `info`: Blue, info icon - informational messages.
-- `warning`: Yellow, warning icon - warnings and cautions.
-
-## Utility Functions
-
-### Location and Purpose
-
-- Location: `resources/js/lib/`
-- Naming: Descriptive function names, `{domain}Utils.ts` for domain-specific utilities.
-- Main file: `utils.ts` for shared utilities.
-
-### When to Create Utilities
-
-1. **Pure functions**: No side effects, same input = same output.
-2. **Data transformation**: Format dates, parse strings, transform objects.
-3. **Validation helpers**: Client-side validation functions.
-4. **Constants**: Shared configuration values.
-
-### Utility Examples
-
-```typescript
-// resources/js/lib/utils.ts
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
-}
-
-export function getEnumOptions<TEnum extends Record<string, string>>(
-    enumType: TEnum
-): Array<{ value: string; label: string }> {
-    return Object.values(enumType).map((value) => ({ value, label: value }))
-}
-
-export function formatDate(date: string | Date, format: string = 'medium'): string {
-    // Date formatting logic
-}
-```
-
-## Backend Service Layer
-
-### Purpose and Location
-
-- Location: `app/Services/`
-- Naming: `{Entity}Service.php` (e.g., `UserService.php`)
-- Always use `final class` with explicit types.
-- Inject via constructor dependency injection.
-
-### When to Use Services
-
-1. **Multi-model operations**: Operations involving multiple Eloquent models.
-2. **External integrations**: API calls, file storage, third-party services.
-3. **Complex business logic**: Rules that don't belong in models or controllers.
-4. **Reusable operations**: Same logic needed in multiple controllers/commands.
-
-### Service Pattern Example
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Services;
-
-use App\Models\User;
-use App\Events\UserManagementEvent;
-use Illuminate\Http\Request;
-
-final class UserService
-{
-    public function createUser(array $data, User $actor, Request $request): User
-    {
-        $user = User::create($data);
-
-        Event::dispatch(new UserManagementEvent(
-            action: 'create',
-            actor: $actor,
-            target: $user,
-            request: $request,
-        ));
-
-        return $user;
-    }
-}
-```
-
-### Controller-Service Relationship
-
-- Controllers handle HTTP: validation, authorization, response.
-- Services handle business: data operations, events, external calls.
-- Keep controllers thin; delegate to services.
-
-## Events and Listeners
-
-- Events: `app/Events/` - Dispatch for decoupled operations.
-- Listeners: `app/Listeners/` - Handle side effects asynchronously when possible.
-- Register in `AppServiceProvider` or create dedicated `EventServiceProvider`.
-- Use for: Audit logging, notifications, cache management, webhooks, search indexing.
-- Example: `UserManagementEvent` with `LogUserManagementAudit` listener.
-- Dispatch events after database transactions complete to avoid stale state.
-
-## Queue Jobs
-
-- Location: `app/Jobs/`
-- Naming: `{Action}Job.php` (e.g., `SendWelcomeEmailJob.php`)
-- Use for: Email sending, report generation, heavy computations, batch processing.
-- Configure queue connections in `.env` (sync for local, database/redis for production).
-- Dispatch with `dispatch(new SendWelcomeEmailJob($user))`.
-- Jobs should implement `ShouldQueue` for background processing.
-- Handle failures gracefully with `tries` and `backoff` properties.
-
-## API Resources
-
-- Location: `app/Http/Resources/`
-- Use for API endpoint responses requiring transformation or pagination.
-- Extend `Illuminate\Http\Resources\Json\JsonResource`.
-- Keep DTOs for Inertia pages; use Resources for API endpoints.
-- Return via `new UserResource($user)` or `UserResource::collection($users)`.
-- Resources should transform data, not contain business logic.
-
-## API Error Handling
-
-### Exception Classes
-
-Use structured exceptions for API errors:
-
-- `App\Exceptions\ApiException` - Base exception class
-- `App\Exceptions\NotFoundError` - 404 errors
-- `App\Exceptions\ValidationError` - 422 errors
-- `App\Exceptions\UnauthorizedError` - 403 errors
-
-### Usage Example
-
-```php
-use App\Exceptions\NotFoundError;
-
-public function show(int $id): JsonResponse
-{
-    $user = User::find($id);
-
-    if ($user === null) {
-        throw new NotFoundError('User not found', code: 'USER_NOT_FOUND');
-    }
-
-    return response()->json($user);
-}
-```
-
-### Error Response Format
-
-```json
-{
-    "success": false,
-    "error": {
-        "type": "App\\Exceptions\\NotFoundError",
-        "message": "User not found",
-        "code": "USER_NOT_FOUND",
-        "details": {}
-    }
-}
-```
-
-## API Versioning
-
-### Structure
-
-```
-routes/api/v1/
-routes/api/v2/
-
-app/Http/Controllers/Api/V1/
-app/Http/Controllers/Api/V2/
-```
-
-### Route Registration
-
-In `routes/api.php`:
-
-```php
-Route::prefix('v1')->group(function () {
-    require __DIR__ . '/api/v1.php';
-});
-
-Route::prefix('v2')->group(function () {
-    require __DIR__ . '/api/v2.php';
-});
-```
-
-### Version-Specific Controllers
-
-```php
-namespace App\Http\Controllers\Api\V1;
-
-final class UserController extends Controller
-{
-    // v1 implementation
-}
-
-namespace App\Http\Controllers\Api\V2;
-
-final class UserController extends Controller
-{
-    // v2 implementation with breaking changes
-}
-```
-
-## Route Helper Conventions
-
-### Backend
-
-- Use `route('name')` helper or `to_route('name')` for redirects.
-- Use named routes exclusively, never hard-code URLs.
-- Route model binding automatically resolves models.
-
-### Frontend
-
-- Import Wayfinder route helpers for form submissions: `import { store } from '@/routes/users'`.
-- Use Ziggy `route()` for navigation links and breadcrumbs.
-- Wayfinder provides type-safe URL generation with parameters.
-- Example form submission: `form.post(store().url)` or `form.submit(users.store())`.
-
-## Flash Messages
-
-- Set via `redirect()->route('name')->with('message', 'Success text')`.
-- Standard keys: `message` (success), `error` (errors), `status` (status updates).
-- Access in Vue via `page.props.message` or passed props.
-- Keep messages concise and user-friendly.
-- Use session flash for one-time notifications across redirects.
-
-## Testing Standards
-
-### Location and Naming
-
-- Location: `tests/Feature/` and `tests/Unit/`
-- Naming: `{Feature}Test.php` using PascalCase.
-- All test files must use `declare(strict_types=1);`.
-- Use `RefreshDatabase` trait for database tests.
-
-### Test Structure Per Method
-
-- Happy path (success scenarios)
-- Failure path (validation, authorization)
-- Edge cases (boundaries, empty states)
-- Use factories: `User::factory()->create(['role' => UserRole::Admin])`.
-- Assert against database state and response content.
-- Feature tests should cover routes, policies, and validation.
-- Unit tests for isolated logic (services, helpers, custom functions).
-
-### Minimum Test Requirements (MANDATORY)
-
-Every new feature or behavior change MUST include tests. Agents must never skip test writing:
-
-1. **New Routes**: Must have feature tests for:
-
-   - Successful response (happy path)
-   - Authentication requirements (if protected)
-   - Authorization requirements (if role-based)
-   - Validation errors (if accepting input)
-2. **New Controllers/Methods**: Must have tests for:
-
-   - Happy path scenario
-   - Validation failures
-   - Authorization failures (if applicable)
-3. **New Services**: Must have unit tests for:
-
-   - Public method behavior
-   - Edge cases and error handling
-4. **New Policies**: Must have feature tests verifying:
-
-   - Authorized users can access
-   - Unauthorized users cannot access
-5. **Bug Fixes**: Must include regression test that:
-
-   - Reproduces the original bug
-   - Verifies the fix works
-
-### Test Coverage Expectations
-
-- Controllers: Test all public methods
-- Services: Test all public methods with edge cases
-- Policies: Test all ability methods
-- Form Requests: Test validation rules via controller tests
-- Middleware: Test behavior with various conditions
-
-### Running Tests
-
-```bash
-# Run all tests
-php artisan test
-
-# Run specific test file
-php artisan test tests/Feature/Users/UserManagementTest.php
-
-# Run with coverage (if configured)
-php artisan test --coverage
-```
-
-## Artisan Commands
-
-### Location and Purpose
-
-- Location: `app/Console/Commands/`
-- Naming: `{Action}{Entity}` (e.g., `ImportUsers`, `GenerateReport`)
-- Register in `routes/console.php`.
-
-### When to Create Commands
-
-1. **Scheduled tasks**: Cron jobs, periodic maintenance.
-2. **Data imports/exports**: Bulk data operations.
-3. **One-time migrations**: Data transformations.
-4. **Administrative tasks**: User management, cache clearing.
-
-### Command Pattern Example
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Console\Commands;
-
-use App\Services\UserService;
-use Illuminate\Console\Command;
-
-final class ImportUsers extends Command
-{
-    protected $signature = 'users:import {file}';
-    protected $description = 'Import users from CSV file';
-
-    public function handle(UserService $userService): int
-    {
-        $file = $this->argument('file');
-        // Import logic using service
-
-        return self::SUCCESS;
-    }
-}
-```
-
-## Feature Module Structure
-
-For scalable applications (e-commerce, CRM, management systems), organize code by feature modules:
-
-### Module Directory Structure
-
-```
-app/Modules/{FeatureName}/
-├── Controllers/           # Feature-specific controllers
-├── Models/               # Feature-specific models
-├── Services/             # Feature-specific services
-├── Events/               # Feature-specific events
-├── Listeners/            # Feature-specific listeners
-├── Jobs/                 # Feature-specific jobs
-├── Policies/             # Feature-specific policies
-├── Requests/             # Feature-specific form requests
-├── Resources/            # Feature-specific API resources
-├── Data/                 # Feature-specific DTOs
-├── Enums/                # Feature-specific enums
-└── Routes/               # Feature-specific routes
-```
-
-### When to Use Modules
-
-1. **Large features**: E-commerce catalog, orders, payments, inventory
-2. **Domain isolation**: CRM contacts, deals, tasks, reports
-3. **Team boundaries**: Features owned by specific teams
-4. **Optional features**: Features that can be enabled/disabled
-
-### Module Registration
-
-Register module routes in `app/Providers/ModuleServiceProvider.php`:
-
-```php
-final class ModuleServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        $this->loadRoutesFrom(base_path('app/Modules/Orders/Routes/api.php'));
-    }
-}
-```
-
-## Repository Pattern (Optional)
-
-For complex data access patterns, use repositories:
-
-### When to Use Repositories
-
-1. **Complex queries**: Multi-table joins, complex filters
-2. **Multiple data sources**: API + database + cache
-3. **Testing isolation**: Mock data layer easily
-4. **Query reuse**: Same query logic across multiple services
-
-### Repository Pattern Example
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Repositories;
-
-use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-
-final class UserRepository
-{
-    public function findActivePaginated(int $perPage = 15): LengthAwarePaginator
-    {
-        return User::query()
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
-    }
-
-    public function findByRole(string $role): iterable
-    {
-        return User::query()
-            ->where('role', $role)
-            ->get();
-    }
-}
-```
-
-### Service-Repository Relationship
-
-- Services use repositories for data access
-- Repositories contain only query logic
-- Services contain business logic
-- Controllers use services, not repositories directly
-
-## State Management Patterns
-
-### When to Use Pinia Stores
-
-1. **Global state**: User preferences, theme, notifications
-2. **Cross-component state**: Shared data across multiple components
-3. **Complex state**: State with computed properties and actions
-4. **Persistence**: State that needs localStorage/sessionStorage
-
-### Store Pattern
-
-```typescript
-// resources/js/stores/useUserStore.ts
-import { defineStore } from 'pinia'
-
-export const useUserStore = defineStore('user', () => {
-    const user = ref<User | null>(null)
-    const preferences = ref<UserPreferences>({})
-
-    const isAdmin = computed(() => user.value?.role === 'Admin')
-
-    const setUser = (newUser: User) => {
-        user.value = newUser
-    }
-
-    const clearUser = () => {
-        user.value = null
-        preferences.value = {}
-    }
-
-    return {
-        user,
-        preferences,
-        isAdmin,
-        setUser,
-        clearUser,
-    }
-})
-```
-
-## Caching Strategies
-
-### Cache Patterns
-
-```php
-use Illuminate\Support\Facades\Cache;
-
-// Cache with tags (for Redis)
-$users = Cache::tags(['users', 'active'])
-    ->remember('users.active', 3600, fn () => User::where('is_active', true)->get());
-
-// Cache with lock (prevent cache stampede)
-$users = Cache::lock('users.active.lock', 10)
-    ->get(fn () => Cache::remember('users.active', 3600, fn () => User::where('is_active', true)->get()));
-
-// Clear cache by tags
-Cache::tags(['users'])->flush();
-```
-
-### Cache Invalidation
-
-Use events to invalidate cache:
-
-```php
-// In a listener
-public function handle(UserUpdated $event): void
-{
-    Cache::tags(['users'])->forget("user.{$event->user->id}");
-    Cache::tags(['users'])->forget('users.active');
-}
-```
-
-## Performance Optimization
-
-### Database
-
-1. **Eager Loading**: Always eager load relationships to prevent N+1
-2. **Indexing**: Add indexes on frequently queried columns
-3. **Pagination**: Use cursor pagination for large datasets
-4. **Read Replicas**: Route read queries to replicas
-
-### Frontend
-
-1. **Code Splitting**: Lazy load routes and heavy components
-2. **Virtual Scrolling**: Use for long lists
-3. **Debounce/Throttle**: For search inputs and resize handlers
-4. **Image Optimization**: Use WebP, lazy loading, responsive images
-
-### Example: Lazy Loading Routes
-
-```typescript
-// In router or page component
-const HeavyComponent = defineAsyncComponent(() =>
-    import('@/components/HeavyComponent.vue')
-)
-```
-
-## Security Best Practices
-
-### Input Validation
-
-1. **Server-side validation**: Always validate on server, never trust client
-2. **Form Requests**: Use Form Request classes for validation
-3. **Type safety**: Use strict types and DTOs
-
-### Authorization
-
-1. **Policies**: Use policies for model-level authorization
-2. **Gates**: Use gates for action-level authorization
-3. **Middleware**: Use middleware for route-level protection
-
-### Data Protection
-
-1. **Encryption**: Encrypt sensitive data at rest
-2. **Hashing**: Hash passwords and sensitive tokens
-3. **Sanitization**: Sanitize user input before storage
-4. **Rate Limiting**: Implement rate limiting on API endpoints
-
-## Code Quality Checklist
-
-Before submitting any code change, verify:
-
-### Architecture
-
-- [ ] Code follows existing patterns and conventions
-- [ ] Proper separation of concerns (Controller → Service → Model)
-- [ ] No business logic in controllers
-- [ ] No direct database queries in controllers
-
-### Type Safety
-
-- [ ] All PHP files use `declare(strict_types=1);`
-- [ ] All methods have explicit parameter and return types
-- [ ] DTOs are used for data transfer
-- [ ] TypeScript types match backend DTOs
-
-### Testing
-
-- [ ] Tests cover happy path, failure path, and edge cases
-- [ ] Tests are isolated and don't depend on each other
-- [ ] Mock external services and APIs
-- [ ] Use factories for test data
-
-### Performance
-
-- [ ] N+1 queries are prevented with eager loading
-- [ ] Large datasets are paginated
-- [ ] Expensive operations are cached
-- [ ] Heavy operations are queued
-
-### Security
-
-- [ ] Input is validated on server side
-- [ ] Authorization is enforced
-- [ ] Sensitive data is encrypted
-- [ ] No sensitive data in logs
-
-### Maintainability
-
-- [ ] Code is self-documenting with clear naming
-- [ ] Complex logic has docblock comments
-- [ ] No dead code or commented-out code
-- [ ] No magic strings or numbers
-
-## Code Reusability Checklist
-
-Before creating new code, verify:
-
-### Frontend
-
-- [ ] Check if existing UI component can be extended.
-- [ ] Check if composable exists for shared logic.
-- [ ] Check if utility function exists for transformation.
-- [ ] Use shared form components instead of raw inputs.
-- [ ] Use shared data components for tables/pagination.
-- [ ] Extract repeated patterns into reusable components.
-
-### Backend
-
-- [ ] Check if service exists for business logic.
-- [ ] Check if event/listener pattern applies.
-- [ ] Check if job should be used for background processing.
-- [ ] Use Form Requests for validation.
-- [ ] Use Policies for authorization.
-- [ ] Use DTOs for data transfer.
-
-## Known Caveats (Current Starter Kit State)
-
-- Validate tooling and version assumptions against `composer.json` and `package.json` before adding workflows or scripts.
-
-## CI Expectations
-
-GitHub Actions currently run:
-
-- Lint workflow: Pint, frontend format, frontend lint
-- Test workflow: build assets and run PHPUnit
-
-Agents should keep local changes compatible with those checks.
-
-## Laravel Boost MCP Workflow
-
-When Laravel Boost MCP tools are available:
-
-- Use `search-docs` before Laravel/Inertia/Wayfinder/Sanctum/Tailwind ecosystem changes.
-- Use `list-artisan-commands` before running Artisan commands.
-- Run Artisan with `--no-interaction` when the specific command supports it.
-- Use MCP equivalents (`tinker`, `database-query`, `browser-logs`) when applicable.
-  If MCP tools fail, use equivalent shell commands.
+- Use MCP equivalents (`tinker`, `database-query`, `browser-logs`) when applicable. If MCP tools fail, fallback to equivalent terminal shell commands.
+
+## Breaking Change Policy
+
+- Treat the following as breaking unless every consumer is updated in the same task:
+    - route names or URI contracts
+    - DTO or resource payload shapes
+    - enum values
+    - generated type/action/route outputs
+    - realtime channel patterns, event names, or payload contracts
+    - policy/gate ability names
+- If a breaking contract change is intentional, update all affected backend code, frontend consumers, tests, generated artifacts, and docs together.
+
+## Final Enforcement Rules
+
+- Do not hand-wave or defer required implementation steps.
+- Do not preserve stale abstractions because they already exist in a draft, comment, or doc.
+- Do not add new abstractions when an existing query, command, handler, responder, composable, or base component already solves the problem.
+- Do not move module-specific code into shared layers prematurely.
+- Do not couple frontend modules directly to each other.
+- Do not bypass generated contracts with manual copies.
+- Do not ship code that is untested, partially wired, or inconsistent with the rest of the repository.
+- The correct solution is the one that is accurate, complete, typed, cohesive, maintainable, and aligned with the current implementation of this codebase.
+- Never lose full context of things you started working on (tasks, full logic of each task, tasks done, tasks remaining) until everything is successfully done.
+- Never make assumptions; if you don't know something or have some doubts, stop and ask questions.

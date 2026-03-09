@@ -8,7 +8,7 @@ const props = defineProps<NavigationMenuIndicatorProps & { class?: HTMLAttribute
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
-  return delegated
+  return delegated as Partial<NavigationMenuIndicatorProps>
 })
 
 const forwardedProps = useForwardProps(delegatedProps)
