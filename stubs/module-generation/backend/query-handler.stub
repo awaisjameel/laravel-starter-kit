@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Handlers;
+
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+final readonly class {{ modelClass }}QueryHandler
+{
+    public function __construct(
+        private {{ modelClass }}Queries ${{ modelVariable }}Queries,
+    ) {}
+
+    /**
+     * @return LengthAwarePaginator<int, {{ modelClass }}>
+     */
+    public function index(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->{{ modelVariable }}Queries->paginate($perPage);
+    }
+}

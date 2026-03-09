@@ -99,11 +99,16 @@ final readonly class ModuleScaffoldPlanner
         $dataPath = $moduleRootPath.'/Data';
         $queriesPath = $moduleRootPath.'/Queries';
         $commandsPath = $moduleRootPath.'/Commands';
+        $handlersPath = $moduleRootPath.'/Handlers';
 
         $directories[] = $requestsPath;
         $directories[] = $dataPath;
         $directories[] = $queriesPath;
         $directories[] = $commandsPath;
+
+        if ($this->shouldGenerateHandlers($generateModuleInput)) {
+            $directories[] = $handlersPath;
+        }
 
         $tokens = [
             'moduleNamespace' => $generateModuleInput->moduleName->namespace,
@@ -154,6 +159,28 @@ final readonly class ModuleScaffoldPlanner
                 ]),
             ),
         );
+
+        if ($this->shouldGenerateHandlers($generateModuleInput)) {
+            $handlerTokens = array_merge($tokens, [
+                'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
+            ]);
+
+            $files[] = new PlannedFile(
+                path: sprintf('%s/%sQueryHandler.php', $handlersPath, $this->modelClassName($generateModuleInput->moduleName)),
+                contents: $this->templateRenderer->render(
+                    base_path('stubs/module-generation/backend/query-handler.stub'),
+                    $handlerTokens,
+                ),
+            );
+
+            $files[] = new PlannedFile(
+                path: sprintf('%s/%sCommandHandler.php', $handlersPath, $this->modelClassName($generateModuleInput->moduleName)),
+                contents: $this->templateRenderer->render(
+                    base_path('stubs/module-generation/backend/command-handler.stub'),
+                    $handlerTokens,
+                ),
+            );
+        }
     }
 
     /**
@@ -198,10 +225,14 @@ final readonly class ModuleScaffoldPlanner
             'modelRouteParameter' => '{'.$modelVariable.'}',
         ];
 
+        $controllerStubPath = $this->shouldGenerateHandlers($generateModuleInput)
+            ? base_path('stubs/module-generation/backend/controller-with-handlers.stub')
+            : base_path('stubs/module-generation/backend/controller.stub');
+
         $files[] = new PlannedFile(
             path: sprintf('%s/%sController.php', $controllersPath, $pagePascalName),
             contents: $this->templateRenderer->render(
-                base_path('stubs/module-generation/backend/controller.stub'),
+                $controllerStubPath,
                 $controllerTokens,
             ),
         );
@@ -290,9 +321,12 @@ final readonly class ModuleScaffoldPlanner
             'modelClass' => $modelClass,
         ];
 
-        $apiControllerStubPath = $generateModuleInput->generateApiResource
-            ? base_path('stubs/module-generation/backend/api-controller.stub')
-            : base_path('stubs/module-generation/backend/api-controller-no-resource.stub');
+        $apiControllerStubPath = match (true) {
+            $this->shouldGenerateHandlers($generateModuleInput) && $generateModuleInput->generateApiResource => base_path('stubs/module-generation/backend/api-controller-with-handlers.stub'),
+            $this->shouldGenerateHandlers($generateModuleInput) && ! $generateModuleInput->generateApiResource => base_path('stubs/module-generation/backend/api-controller-no-resource-with-handlers.stub'),
+            $generateModuleInput->generateApiResource => base_path('stubs/module-generation/backend/api-controller.stub'),
+            default => base_path('stubs/module-generation/backend/api-controller-no-resource.stub'),
+        };
 
         $files[] = new PlannedFile(
             path: sprintf('%s/%sApiController.php', $controllersPath, $pagePascalName),
@@ -688,6 +722,11 @@ final readonly class ModuleScaffoldPlanner
         );
 
         return sprintf("    ->middleware([%s])\n", implode(', ', $quoted));
+    }
+
+    private function shouldGenerateHandlers(GenerateModuleInput $generateModuleInput): bool
+    {
+        return $generateModuleInput->generateCrud && $generateModuleInput->generateApi;
     }
 
     private function moduleRootPath(GenerateModuleInput $generateModuleInput): string

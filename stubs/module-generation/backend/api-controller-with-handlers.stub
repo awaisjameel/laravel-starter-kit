@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}CommandHandler;
+use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use App\Modules\{{ moduleNamespace }}\Http\Resources\{{ pagePascalName }}Resource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
+final class {{ pagePascalName }}ApiController extends Controller
+{
+    public function __construct(
+        private readonly {{ modelClass }}QueryHandler ${{ modelVariable }}QueryHandler,
+        private readonly {{ modelClass }}CommandHandler ${{ modelVariable }}CommandHandler,
+    ) {}
+
+    public function index(): AnonymousResourceCollection
+    {
+        return {{ pagePascalName }}Resource::collection($this->{{ modelVariable }}QueryHandler->index());
+    }
+
+    public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
+    {
+        $model = $this->{{ modelVariable }}CommandHandler->create($request->toDto());
+
+        return {{ pagePascalName }}Resource::make($model)->response()->setStatusCode(201);
+    }
+
+    public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        return {{ pagePascalName }}Resource::make(${{ modelVariable }})->response();
+    }
+
+    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        $model = $this->{{ modelVariable }}CommandHandler->update(${{ modelVariable }}, $request->toDto());
+
+        return {{ pagePascalName }}Resource::make($model)->response();
+    }
+
+    public function destroy({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        $this->{{ modelVariable }}CommandHandler->delete(${{ modelVariable }});
+
+        return response()->json([], 204);
+    }
+}

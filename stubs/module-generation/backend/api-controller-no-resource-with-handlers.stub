@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}CommandHandler;
+use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use Illuminate\Http\JsonResponse;
+
+final class {{ pagePascalName }}ApiController extends Controller
+{
+    public function __construct(
+        private readonly {{ modelClass }}QueryHandler ${{ modelVariable }}QueryHandler,
+        private readonly {{ modelClass }}CommandHandler ${{ modelVariable }}CommandHandler,
+    ) {}
+
+    public function index(): JsonResponse
+    {
+        $paginator = $this->{{ modelVariable }}QueryHandler->index();
+
+        return response()->json([
+            'data' => array_map(fn ({{ modelClass }} $model): array => $this->serializeModel($model), $paginator->items()),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
+        ]);
+    }
+
+    public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
+    {
+        $model = $this->{{ modelVariable }}CommandHandler->create($request->toDto());
+
+        return response()->json(['data' => $this->serializeModel($model)], 201);
+    }
+
+    public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        return response()->json(['data' => $this->serializeModel(${{ modelVariable }})]);
+    }
+
+    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        $model = $this->{{ modelVariable }}CommandHandler->update(${{ modelVariable }}, $request->toDto());
+
+        return response()->json(['data' => $this->serializeModel($model)]);
+    }
+
+    public function destroy({{ modelClass }} ${{ modelVariable }}): JsonResponse
+    {
+        $this->{{ modelVariable }}CommandHandler->delete(${{ modelVariable }});
+
+        return response()->json([], 204);
+    }
+
+    /**
+     * @return array{id: int, name: string, created_at: string|null, updated_at: string|null}
+     */
+    private function serializeModel({{ modelClass }} $model): array
+    {
+        return [
+            'id' => $model->id,
+            'name' => $model->name,
+            'created_at' => $model->created_at?->toISOString(),
+            'updated_at' => $model->updated_at?->toISOString(),
+        ];
+    }
+}

@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}CommandHandler;
+use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
+use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+
+final class {{ pagePascalName }}Controller extends Controller
+{
+    public function __construct(
+        private readonly {{ modelClass }}QueryHandler ${{ modelVariable }}QueryHandler,
+        private readonly {{ modelClass }}CommandHandler ${{ modelVariable }}CommandHandler,
+    ) {}
+
+    public function index(): Response
+    {
+        $items = collect($this->{{ modelVariable }}QueryHandler->index()->items())
+            ->map(fn ({{ modelClass }} ${{ modelVariable }}): array => [
+                'id' => ${{ modelVariable }}->id,
+                'name' => ${{ modelVariable }}->name,
+                'created_at' => ${{ modelVariable }}->created_at?->toISOString(),
+                'updated_at' => ${{ modelVariable }}->updated_at?->toISOString(),
+            ])
+            ->values()
+            ->all();
+
+        return Inertia::render('modules/{{ moduleKebab }}/pages/{{ pagePascalName }}', [
+            'items' => $items,
+        ]);
+    }
+
+    public function store({{ pagePascalName }}StoreRequest $request): RedirectResponse
+    {
+        $this->{{ modelVariable }}CommandHandler->create($request->toDto());
+
+        return redirect()->route('{{ routeIndexName }}')
+            ->with('message', '{{ pageTitle }} saved successfully');
+    }
+
+    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): RedirectResponse
+    {
+        $this->{{ modelVariable }}CommandHandler->update(${{ modelVariable }}, $request->toDto());
+
+        return redirect()->route('{{ routeIndexName }}')
+            ->with('message', '{{ pageTitle }} updated successfully');
+    }
+
+    public function destroy({{ modelClass }} ${{ modelVariable }}): RedirectResponse
+    {
+        $this->{{ modelVariable }}CommandHandler->delete(${{ modelVariable }});
+
+        return redirect()->route('{{ routeIndexName }}')
+            ->with('message', '{{ pageTitle }} deleted successfully');
+    }
+}

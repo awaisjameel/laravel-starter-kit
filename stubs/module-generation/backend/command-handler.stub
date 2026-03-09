@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{{ moduleNamespace }}\Handlers;
+
+use App\Models\{{ modelClass }};
+use App\Modules\{{ moduleNamespace }}\Commands\{{ modelClass }}Commands;
+use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}StoreData;
+
+final readonly class {{ modelClass }}CommandHandler
+{
+    public function __construct(
+        private {{ modelClass }}Commands ${{ modelVariable }}Commands,
+    ) {}
+
+    public function create({{ pagePascalName }}StoreData $storeData): {{ modelClass }}
+    {
+        return $this->{{ modelVariable }}Commands->create($storeData);
+    }
+
+    public function update({{ modelClass }} $model, {{ pagePascalName }}StoreData $storeData): {{ modelClass }}
+    {
+        return $this->{{ modelVariable }}Commands->update($model, $storeData);
+    }
+
+    public function delete({{ modelClass }} $model): void
+    {
+        $this->{{ modelVariable }}Commands->delete($model);
+    }
+}

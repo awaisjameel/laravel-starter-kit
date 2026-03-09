@@ -320,6 +320,7 @@ Minimum expectations:
     - migration in default location `database/migrations/*_create_<table>_table.php`
     - frontend CRUD module assets under `resources/js/modules/<module>/**` (table, create/update dialog, delete dialog, details dialog, page, form schema, frontend test)
 - Use `php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageName>` to scaffold page-level frontend contracts for an existing module.
+- `--scaffold=crud-api` should generate module-local `Handlers` in addition to `Queries` and `Commands`, and generated web/API controllers should depend on those handlers instead of duplicating orchestration.
 - Command options contract:
     - `--scaffold=page|crud|api|crud-api` (interactive prompt when omitted; defaults to `crud` for fresh mode and `page` for extend mode)
     - `--route-profile=app|public|custom` (interactive prompt when omitted in interactive shells; non-interactive defaults to `app`)

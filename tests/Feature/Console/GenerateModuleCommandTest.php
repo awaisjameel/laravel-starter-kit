@@ -49,6 +49,8 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
+        $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingQueryHandler.php');
+        $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingCommandHandler.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Services/IndexService.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/web.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Routes/api.php');
@@ -107,6 +109,8 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
+        $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingQueryHandler.php');
+        $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingCommandHandler.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Services/IndexService.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/api.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Routes/web.php');
@@ -141,8 +145,24 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/api.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Controllers/IndexController.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Controllers/IndexApiController.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Handlers/BillingQueryHandler.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Handlers/BillingCommandHandler.php');
         $this->assertFileExists($basePath.'/tests/Feature/Billing/IndexPageTest.php');
         $this->assertFileExists($basePath.'/tests/Feature/Billing/IndexApiTest.php');
+
+        $webControllerContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Controllers/IndexController.php');
+        $webControllerContents = is_string($webControllerContents) ? $webControllerContents : '';
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingQueryHandler;', $webControllerContents);
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingCommandHandler;', $webControllerContents);
+        $this->assertStringContainsString('private readonly BillingQueryHandler $billingQueryHandler', $webControllerContents);
+        $this->assertStringContainsString('private readonly BillingCommandHandler $billingCommandHandler', $webControllerContents);
+
+        $apiControllerContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Controllers/IndexApiController.php');
+        $apiControllerContents = is_string($apiControllerContents) ? $apiControllerContents : '';
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingQueryHandler;', $apiControllerContents);
+        $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingCommandHandler;', $apiControllerContents);
+        $this->assertStringContainsString('private readonly BillingQueryHandler $billingQueryHandler', $apiControllerContents);
+        $this->assertStringContainsString('private readonly BillingCommandHandler $billingCommandHandler', $apiControllerContents);
     }
 
     public function test_existing_module_requires_extend_flag(): void
