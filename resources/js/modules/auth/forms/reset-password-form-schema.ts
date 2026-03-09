@@ -1,11 +1,14 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { ResetPasswordData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface ResetPasswordFormValues {
-    token: string
-    email: string
-    password: string
-    password_confirmation: string
-}
+export type ResetPasswordFormValues = FormValuesFromData<
+    ResetPasswordData,
+    {
+        password_confirmation: string
+    },
+    'passwordConfirmation'
+>
 
 export const createResetPasswordFormDefaults = (token: string, email: string): ResetPasswordFormValues => ({
     token,

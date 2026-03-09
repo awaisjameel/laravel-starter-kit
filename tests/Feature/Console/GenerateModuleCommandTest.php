@@ -46,7 +46,7 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Controllers/IndexController.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexUpdateRequest.php');
-        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/BillingIndexStoreData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/BillingIndexListItemData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Data/BillingIndexPageData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Manifests/IndexResource.php');
@@ -75,7 +75,7 @@ final class GenerateModuleCommandTest extends TestCase
         $requestFileContents = is_string($requestFileContents) ? $requestFileContents : '';
 
         $this->assertStringContainsString('extends DataFormRequest', $requestFileContents);
-        $this->assertStringContainsString('return IndexStoreData::class;', $requestFileContents);
+        $this->assertStringContainsString('return BillingIndexStoreData::class;', $requestFileContents);
 
         $modelFileContents = file_get_contents($basePath.'/app/Models/Billing.php');
         $modelFileContents = is_string($modelFileContents) ? $modelFileContents : '';
@@ -138,7 +138,8 @@ final class GenerateModuleCommandTest extends TestCase
 
         $formSchemaContents = file_get_contents($basePath.'/resources/js/modules/billing/forms/index-form-schema.ts');
         $formSchemaContents = is_string($formSchemaContents) ? $formSchemaContents : '';
-        $this->assertStringContainsString('name: string', $formSchemaContents);
+        $this->assertStringContainsString("import type { BillingIndexStoreData } from '@/types/app-data'", $formSchemaContents);
+        $this->assertStringContainsString('export type IndexFormValues = FormValuesFromData<BillingIndexStoreData>', $formSchemaContents);
         $this->assertStringContainsString("placeholder: 'Enter name'", $formSchemaContents);
 
         $formDialogContents = file_get_contents($basePath.'/resources/js/modules/billing/components/IndexFormDialog.vue');
@@ -167,7 +168,7 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Resources/IndexResource.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexStoreRequest.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Http/Requests/IndexUpdateRequest.php');
-        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/IndexStoreData.php');
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Data/BillingIndexStoreData.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $this->assertFileExists($basePath.'/app/Modules/Billing/Commands/BillingCommands.php');
         $this->assertFileDoesNotExist($basePath.'/app/Modules/Billing/Handlers/BillingQueryHandler.php');

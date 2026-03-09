@@ -1,8 +1,8 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { ProfileDestroyData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface DeleteAccountFormValues {
-    password: string
-}
+export type DeleteAccountFormValues = FormValuesFromData<ProfileDestroyData>
 
 export const deleteAccountFormContract = defineFormContract<DeleteAccountFormValues>({
     defaults: () => ({

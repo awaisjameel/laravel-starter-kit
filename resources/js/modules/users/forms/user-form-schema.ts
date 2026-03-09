@@ -1,11 +1,15 @@
+import type { FormValuesFromData } from '@/lib/forms'
 import { getEnumOptions } from '@/lib/utils'
 import type { CreateUserData } from '@/types/app-data'
 import { UserRole } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export type UserFormValues = Omit<CreateUserData, 'role'> & {
-    role: CreateUserData['role'] | ''
-}
+export type UserFormValues = FormValuesFromData<
+    CreateUserData,
+    {
+        role: CreateUserData['role'] | ''
+    }
+>
 
 const roleOptions = getEnumOptions(UserRole).map((role) => ({
     value: role.value,

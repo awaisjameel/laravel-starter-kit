@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\{{ moduleNamespace }}\Http\Requests;
 
 use App\Modules\Shared\Http\Requests\DataFormRequest;
-use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}StoreData;
+use App\Modules\{{ moduleNamespace }}\Data\{{ storeDataClass }};
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * @extends DataFormRequest<{{ pagePascalName }}StoreData>
+ * @extends DataFormRequest<{{ storeDataClass }}>
  */
 final class {{ pagePascalName }}StoreRequest extends DataFormRequest
 {
@@ -30,6 +30,6 @@ final class {{ pagePascalName }}StoreRequest extends DataFormRequest
 
     protected function dataClass(): string
     {
-        return {{ pagePascalName }}StoreData::class;
+        return {{ storeDataClass }}::class;
     }
 }

@@ -1,11 +1,13 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { RegisterUserData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface RegisterFormValues {
-    name: string
-    email: string
-    password: string
-    password_confirmation: string
-}
+export type RegisterFormValues = FormValuesFromData<
+    RegisterUserData,
+    {
+        password_confirmation: string
+    }
+>
 
 export const registerFormContract = defineFormContract<RegisterFormValues>({
     defaults: () => ({

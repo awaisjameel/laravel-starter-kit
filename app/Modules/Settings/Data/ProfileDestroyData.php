@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\{{ moduleNamespace }}\Data;
+namespace App\Modules\Settings\Data;
 
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
-final class {{ storeDataClass }} extends Data
+final class ProfileDestroyData extends Data
 {
     public function __construct(
-        public string $name,
+        public string $password,
     ) {}
 }

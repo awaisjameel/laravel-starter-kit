@@ -1,3 +1,6 @@
+export type ConfirmPasswordData = {
+    password: string
+}
 export type CreateUserData = {
     name: string
     email: string
@@ -7,14 +10,30 @@ export type CreateUserData = {
 export type ForgotPasswordPageData = {
     status?: string
 }
+export type LoginData = {
+    email: string
+    password: string
+    remember: boolean
+}
 export type LoginPageData = {
     canResetPassword: boolean
     status?: string
+}
+export type PasswordResetLinkData = {
+    email: string
+}
+export type PasswordUpdateData = {
+    currentPassword: string
+    password: string
+    passwordConfirmation: string
 }
 export type PresenceMemberData = {
     id: number
     name: string
     role: UserRole
+}
+export type ProfileDestroyData = {
+    password: string
 }
 export type ProfilePageData = {
     mustVerifyEmail: boolean
@@ -28,6 +47,12 @@ export type RegisterUserData = {
     name: string
     email: string
     password: string
+}
+export type ResetPasswordData = {
+    token: string
+    email: string
+    password: string
+    passwordConfirmation: string
 }
 export type ResetPasswordPageData = {
     email: string

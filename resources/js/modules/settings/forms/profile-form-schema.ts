@@ -1,7 +1,8 @@
+import type { FormValuesFromData } from '@/lib/forms'
 import type { ProfileUpdateData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export type ProfileFormValues = ProfileUpdateData
+export type ProfileFormValues = FormValuesFromData<ProfileUpdateData>
 
 export const createProfileFormDefaults = (user: Pick<ProfileFormValues, 'name' | 'email'>): ProfileFormValues => ({
     name: user.name,

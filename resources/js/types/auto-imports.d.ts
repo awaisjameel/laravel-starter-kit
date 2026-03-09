@@ -156,7 +156,7 @@ declare global {
   export type { ResourceSubmitOptions } from '../composables/useResourceForm'
   import('../composables/useResourceForm')
   // @ts-ignore
-  export type { FormErrorMap, FormContract } from '../lib/forms'
+  export type { FormErrorMap, FormContract, FormValuesFromData } from '../lib/forms'
   import('../lib/forms')
   // @ts-ignore
   export type { RealtimeAuthMode, RealtimeAuthStrategy, ConfigureRealtimeOptions } from '../lib/realtime/config'

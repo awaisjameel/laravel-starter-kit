@@ -1,8 +1,8 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { ConfirmPasswordData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface ConfirmPasswordFormValues {
-    password: string
-}
+export type ConfirmPasswordFormValues = FormValuesFromData<ConfirmPasswordData>
 
 export const confirmPasswordFormContract = defineFormContract<ConfirmPasswordFormValues>({
     defaults: () => ({

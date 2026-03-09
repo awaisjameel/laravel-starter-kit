@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Modules\{{ moduleNamespace }}\Data\{{ pagePascalName }}StoreData;
+use App\Modules\{{ moduleNamespace }}\Data\{{ storeDataClass }};
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +23,7 @@ final class {{ modelClass }} extends Model
         'name',
     ];
 
-    public static function createFromData({{ pagePascalName }}StoreData $storeData): self
+    public static function createFromData({{ storeDataClass }} $storeData): self
     {
         /** @var self $model */
         $model = self::query()->create($storeData->toArray());
@@ -31,7 +31,7 @@ final class {{ modelClass }} extends Model
         return $model;
     }
 
-    public function updateFromData({{ pagePascalName }}StoreData $storeData): bool
+    public function updateFromData({{ storeDataClass }} $storeData): bool
     {
         return $this->fill($storeData->toArray())->save();
     }

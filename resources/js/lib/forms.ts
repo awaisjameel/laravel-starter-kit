@@ -9,6 +9,12 @@ export interface FormContract<TForm extends FormDataType<TForm>> {
     normalizeErrors?: (errors: unknown) => FormErrorMap<TForm>
 }
 
+export type FormValuesFromData<
+    TData extends object,
+    TOverrides extends object = Record<never, never>,
+    TOmittedKeys extends keyof TData = never
+> = Omit<TData, TOmittedKeys | keyof TOverrides> & TOverrides
+
 const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 export const mapInertiaFormErrors = <TForm extends object>(errors: unknown): FormErrorMap<TForm> => {

@@ -1,10 +1,15 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { PasswordUpdateData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface PasswordFormValues {
-    current_password: string
-    password: string
-    password_confirmation: string
-}
+export type PasswordFormValues = FormValuesFromData<
+    PasswordUpdateData,
+    {
+        current_password: string
+        password_confirmation: string
+    },
+    'currentPassword' | 'passwordConfirmation'
+>
 
 export const passwordFormContract = defineFormContract<PasswordFormValues>({
     defaults: () => ({

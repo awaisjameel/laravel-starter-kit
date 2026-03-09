@@ -1,8 +1,8 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { PasswordResetLinkData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface ForgotPasswordFormValues {
-    email: string
-}
+export type ForgotPasswordFormValues = FormValuesFromData<PasswordResetLinkData>
 
 export const forgotPasswordFormContract = defineFormContract<ForgotPasswordFormValues>({
     defaults: () => ({

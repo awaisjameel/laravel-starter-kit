@@ -114,6 +114,7 @@ final readonly class ModuleScaffoldPlanner
             'moduleNamespace' => $generateModuleInput->moduleName->namespace,
             'pagePascalName' => $generateModuleInput->pagePascalName,
             'modelClass' => $this->modelClassName($generateModuleInput->moduleName),
+            'storeDataClass' => $this->storeDataClassName($generateModuleInput),
         ];
 
         $files[] = new PlannedFile(
@@ -133,7 +134,7 @@ final readonly class ModuleScaffoldPlanner
         );
 
         $files[] = new PlannedFile(
-            path: sprintf('%s/%sStoreData.php', $dataPath, $generateModuleInput->pagePascalName),
+            path: sprintf('%s/%s.php', $dataPath, $this->storeDataClassName($generateModuleInput)),
             contents: $this->templateRenderer->render(
                 base_path('stubs/module-generation/backend/data.stub'),
                 $tokens,
@@ -598,6 +599,7 @@ final readonly class ModuleScaffoldPlanner
         $schemaTokens = [
             'pagePascalName' => $pagePascalName,
             'pageCamelName' => lcfirst($pagePascalName),
+            'storeDataClass' => $this->storeDataClassName($generateModuleInput),
             'formValueFields' => $this->renderFormValueFields($crudResourceManifest),
             'formDefaultValues' => $this->renderFormDefaultValues($crudResourceManifest),
             'formFieldDefinitions' => $this->renderFormFieldDefinitions($crudResourceManifest),
@@ -846,6 +848,11 @@ final readonly class ModuleScaffoldPlanner
     private function listItemDataClassName(GenerateModuleInput $generateModuleInput): string
     {
         return $this->modelClassName($generateModuleInput->moduleName).$generateModuleInput->pagePascalName.'ListItemData';
+    }
+
+    private function storeDataClassName(GenerateModuleInput $generateModuleInput): string
+    {
+        return $this->modelClassName($generateModuleInput->moduleName).$generateModuleInput->pagePascalName.'StoreData';
     }
 
     private function relativePath(string $basePath, string $absolutePath): string

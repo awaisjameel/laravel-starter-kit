@@ -1,10 +1,8 @@
+import type { FormValuesFromData } from '@/lib/forms'
+import type { LoginData } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
 
-export interface LoginFormValues {
-    email: string
-    password: string
-    remember: boolean
-}
+export type LoginFormValues = FormValuesFromData<LoginData>
 
 export const loginFormContract = defineFormContract<LoginFormValues>({
     defaults: () => ({

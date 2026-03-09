@@ -186,6 +186,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
     - prefer Spatie Data classes (`extends Data`) for payload/query/page contracts.
     - annotate exported contracts with `#[TypeScript]`.
     - exported module CRUD page/list DTO class names must be module-prefixed (for example `BillingIndexPageData`, `BillingIndexListItemData`) so generated TypeScript contracts remain globally unique.
+    - generated CRUD form payload DTOs must also be module-prefixed (for example `BillingIndexStoreData`) so frontend form types can be derived from backend payload contracts without global-name collisions.
 - Replace bounded string query values with enums in backend contracts (e.g., sort fields/directions), then consume generated enums in frontend.
 - Realtime channel patterns, event names, presence member payloads, and broadcast notification payloads are backend-owned contracts and must be exported via TypeScript generation when consumed on the frontend.
 
@@ -202,6 +203,7 @@ The architecture is backend-contract-driven: backend DTOs/enums are the source o
 - Prefer named routes and generated helpers over hardcoded URIs.
 - New forms should use schema-driven rendering via shared form contracts/components in `resources/js/components/base/forms/**`.
 - Feature forms must define typed form contracts via `defineFormContract` + `defineFormFields` in module schema files (`resources/js/modules/**/forms/*-form-schema.ts`) and reuse them in pages/components.
+- Prefer deriving frontend form value types from backend-generated DTOs via `FormValuesFromData<...>` instead of hand-writing duplicate interfaces when the form payload is backend-owned.
 - Feature pages should consume schema contracts with `useSchemaResourceForm` instead of duplicating `initialValues` and field wiring inline.
 - Server-driven listing pages should use shared server table composables/components in `resources/js/components/base/table/**`.
 - Server-driven listing pages must derive initial query state via `resolveServerTableInitialQuery` from `useServerDataTable`.
@@ -335,6 +337,7 @@ Minimum expectations:
 - Use `php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageName>` to scaffold page-level frontend contracts for an existing module.
 - `--scaffold=crud-api` should generate module-local `Handlers` in addition to `Queries` and `Commands`, and generated web/API controllers should depend on those handlers instead of duplicating orchestration.
 - CRUD web scaffolds should generate backend `*PageData` / `*ListItemData` DTOs and frontend contracts should consume the generated types instead of redefining page payload shapes inline.
+- CRUD web scaffolds should generate backend `*StoreData` DTOs with `#[TypeScript]`, and generated frontend form schemas should derive `*FormValues` from those exported DTO contracts.
 - CRUD scaffolds should also generate `app/Modules/<Module>/Manifests/<Page>Resource.php`; for later regeneration, developers should edit that manifest and rerun `generate:module` with `--extend --force` instead of hand-editing multiple generated files.
 - Command options contract:
     - `--scaffold=page|crud|api|crud-api` (interactive prompt when omitted; defaults to `crud` for fresh mode and `page` for extend mode)
