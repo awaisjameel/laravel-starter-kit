@@ -12,7 +12,7 @@ use SplFileInfo;
 
 final class ModuleRegistry
 {
-    private const int CACHE_VERSION = 2;
+    private const int CACHE_VERSION = 3;
 
     private const string CACHE_RELATIVE_PATH = 'bootstrap/cache/modules.php';
 
@@ -20,6 +20,7 @@ final class ModuleRegistry
      * @var array{
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -31,10 +32,23 @@ final class ModuleRegistry
             'api' => ['Api/V1'],
         ],
         'gates' => ['Users'],
+        'policies' => ['Users'],
         'channels' => ['Shared', 'Users'],
         'listeners' => ['Users'],
         'providers' => [],
     ];
+
+    /**
+     * @var array<string, array{
+     *     routes: array{web: list<string>, api: list<string>},
+     *     gates: list<string>,
+     *     policies: list<string>,
+     *     channels: list<string>,
+     *     listeners: list<string>,
+     *     providers: list<string>
+     * }>
+     */
+    private static array $resolvedPayloadCache = [];
 
     /**
      * @return list<string>
@@ -98,6 +112,43 @@ final class ModuleRegistry
         $entries = self::discover($basePath)['gates'];
 
         return $entries;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function policyFiles(string $basePath): array
+    {
+        /** @var list<string> $entries */
+        $entries = self::discover($basePath)['policies'];
+
+        return $entries;
+    }
+
+    /**
+     * @return array<class-string, class-string>
+     */
+    public static function policyMap(string $basePath): array
+    {
+        $policyMap = [];
+
+        foreach (self::policyFiles($basePath) as $policyFile) {
+            $policyClass = self::policyClassFromPath($basePath, $policyFile);
+
+            if ($policyClass === null) {
+                continue;
+            }
+
+            $modelClass = self::modelClassFromPolicyClass($policyClass);
+
+            if ($modelClass === null) {
+                continue;
+            }
+
+            $policyMap[$modelClass] = $policyClass;
+        }
+
+        return $policyMap;
     }
 
     /**
@@ -235,6 +286,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -255,24 +307,46 @@ final class ModuleRegistry
         return "<?php\n\nreturn ".var_export(self::buildCachePayload($basePath), true).";\n";
     }
 
+    public static function flushRuntimeCache(): void
+    {
+        self::$resolvedPayloadCache = [];
+    }
+
+    public static function shouldTrustCachedManifest(?bool $runningInConsole = null, ?string $appEnv = null): bool
+    {
+        $resolvedRunningInConsole = $runningInConsole ?? self::runningInConsole();
+        $resolvedAppEnv = mb_strtolower(mb_trim($appEnv ?? self::appEnv()));
+
+        return $resolvedAppEnv === 'production' && ! $resolvedRunningInConsole;
+    }
+
     /**
      * @return array{
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
      * }
      */
-    public static function discover(string $basePath): array
+    public static function discover(string $basePath, ?bool $runningInConsole = null, ?string $appEnv = null): array
     {
         $normalizedBasePath = self::normalizeBasePath($basePath);
-        $cachedPayload = self::loadCachedPayload($normalizedBasePath);
-        $payload = $cachedPayload !== null && ! self::payloadHasMissingEntries($normalizedBasePath, $cachedPayload)
-            ? $cachedPayload
-            : self::scanPayload($normalizedBasePath);
 
-        return self::resolvePayloadEntries($normalizedBasePath, $payload);
+        if (isset(self::$resolvedPayloadCache[$normalizedBasePath])) {
+            return self::$resolvedPayloadCache[$normalizedBasePath];
+        }
+
+        $cachedPayload = self::loadCachedPayload($normalizedBasePath);
+        $payload = match (true) {
+            $cachedPayload === null => self::scanPayload($normalizedBasePath),
+            self::shouldTrustCachedManifest($runningInConsole, $appEnv) => $cachedPayload,
+            ! self::payloadHasMissingEntries($normalizedBasePath, $cachedPayload) => $cachedPayload,
+            default => self::scanPayload($normalizedBasePath),
+        };
+
+        return self::$resolvedPayloadCache[$normalizedBasePath] = self::resolvePayloadEntries($normalizedBasePath, $payload);
     }
 
     private static function normalizeRouteType(string $routeType): string
@@ -291,6 +365,26 @@ final class ModuleRegistry
         return mb_rtrim($basePath, '\\/');
     }
 
+    private static function appEnv(): string
+    {
+        $appEnv = getenv('APP_ENV');
+
+        if (is_string($appEnv) && $appEnv !== '') {
+            return $appEnv;
+        }
+
+        $serverAppEnv = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? 'production';
+
+        return is_string($serverAppEnv) && $serverAppEnv !== ''
+            ? $serverAppEnv
+            : 'production';
+    }
+
+    private static function runningInConsole(): bool
+    {
+        return in_array(PHP_SAPI, ['cli', 'phpdbg'], true);
+    }
+
     private static function modulesRoot(string $basePath): string
     {
         return self::normalizeBasePath($basePath).DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'Modules';
@@ -301,6 +395,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -335,6 +430,11 @@ final class ModuleRegistry
                 basePath: $basePath,
                 filename: 'gates.php',
                 priorityModules: self::DEFAULT_PRIORITY_MODULES['gates'],
+            ),
+            'policies' => self::scanPolicyEntries(
+                modulesRoot: $modulesRoot,
+                basePath: $basePath,
+                priorityModules: self::DEFAULT_PRIORITY_MODULES['policies'],
             ),
             'channels' => self::scanRouteSupportEntries(
                 modulesRoot: $modulesRoot,
@@ -410,6 +510,25 @@ final class ModuleRegistry
      * @param  list<string>  $priorityModules
      * @return list<string>
      */
+    private static function scanPolicyEntries(string $modulesRoot, string $basePath, array $priorityModules): array
+    {
+        return self::mergePrioritizedEntries(
+            priorityEntries: self::priorityPolicyEntries(
+                modulesRoot: $modulesRoot,
+                basePath: $basePath,
+                priorityModules: $priorityModules,
+            ),
+            discoveredEntries: self::discoverPolicyFiles(
+                modulesRoot: $modulesRoot,
+                basePath: $basePath,
+            ),
+        );
+    }
+
+    /**
+     * @param  list<string>  $priorityModules
+     * @return list<string>
+     */
     private static function scanNamedDirectoryEntries(string $modulesRoot, string $basePath, string $directoryName, array $priorityModules): array
     {
         return self::mergePrioritizedEntries(
@@ -448,6 +567,40 @@ final class ModuleRegistry
                 filename: $filename,
             ),
         );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function discoverPolicyFiles(string $modulesRoot, string $basePath): array
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($modulesRoot, RecursiveDirectoryIterator::SKIP_DOTS),
+        );
+
+        $entries = [];
+
+        /** @var SplFileInfo $file */
+        foreach ($iterator as $file) {
+            if (! $file->isFile()) {
+                continue;
+            }
+
+            if (! str_ends_with($file->getFilename(), 'Policy.php')) {
+                continue;
+            }
+
+            if ($file->getPathInfo()->getFilename() !== 'Policies') {
+                continue;
+            }
+
+            $entries[] = self::relativePath($basePath, $file->getRealPath() ?: $file->getPathname());
+        }
+
+        $entries = array_values(array_unique($entries));
+        sort($entries, SORT_STRING);
+
+        return $entries;
     }
 
     /**
@@ -568,6 +721,42 @@ final class ModuleRegistry
     }
 
     /**
+     * @param  list<string>  $priorityModules
+     * @return list<string>
+     */
+    private static function priorityPolicyEntries(string $modulesRoot, string $basePath, array $priorityModules): array
+    {
+        $entries = [];
+
+        foreach ($priorityModules as $priorityModule) {
+            $normalizedModulePath = mb_trim($priorityModule, " \t\n\r\0\x0B\\/");
+
+            if ($normalizedModulePath === '') {
+                continue;
+            }
+
+            $modulePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $normalizedModulePath);
+            $policiesPath = $modulesRoot.DIRECTORY_SEPARATOR.$modulePath.DIRECTORY_SEPARATOR.'Policies';
+
+            if (! is_dir($policiesPath)) {
+                continue;
+            }
+
+            $files = glob($policiesPath.DIRECTORY_SEPARATOR.'*Policy.php');
+            $files = is_array($files) ? $files : [];
+            sort($files, SORT_STRING);
+
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $entries[] = self::relativePath($basePath, realpath($file) ?: $file);
+                }
+            }
+        }
+
+        return array_values(array_unique($entries));
+    }
+
+    /**
      * @param  list<string>  $priorityEntries
      * @param  list<string>  $discoveredEntries
      * @return list<string>
@@ -625,6 +814,59 @@ final class ModuleRegistry
     }
 
     /**
+     * @return class-string|null
+     */
+    private static function policyClassFromPath(string $basePath, string $policyFile): ?string
+    {
+        $relativePath = str_replace('\\', '/', self::relativePath($basePath, $policyFile));
+
+        if (! str_starts_with($relativePath, 'app/') || ! str_ends_with($relativePath, '.php')) {
+            return null;
+        }
+
+        $classPath = mb_substr($relativePath, 4, -4);
+
+        if ($classPath === '') {
+            return null;
+        }
+
+        $policyClass = 'App\\'.str_replace('/', '\\', $classPath);
+
+        if (! class_exists($policyClass)) {
+            return null;
+        }
+
+        return $policyClass;
+    }
+
+    /**
+     * @param  class-string  $policyClass
+     * @return class-string|null
+     */
+    private static function modelClassFromPolicyClass(string $policyClass): ?string
+    {
+        $policyBaseName = class_basename($policyClass);
+
+        if (! str_ends_with($policyBaseName, 'Policy')) {
+            return null;
+        }
+
+        $modelBaseName = mb_substr($policyBaseName, 0, -6);
+
+        if ($modelBaseName === '') {
+            return null;
+        }
+
+        $modelClass = 'App\\Models\\'.$modelBaseName;
+
+        if (! class_exists($modelClass)) {
+            return null;
+        }
+
+        return $modelClass;
+    }
+
+    /**
      * @param  list<string>  $entries
      * @return list<string>
      */
@@ -648,6 +890,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -655,6 +898,7 @@ final class ModuleRegistry
      * @return array{
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -668,6 +912,7 @@ final class ModuleRegistry
                 'api' => self::resolveEntries($basePath, $payload['routes']['api']),
             ],
             'gates' => self::resolveEntries($basePath, $payload['gates']),
+            'policies' => self::resolveEntries($basePath, $payload['policies']),
             'channels' => self::resolveEntries($basePath, $payload['channels']),
             'listeners' => self::resolveEntries($basePath, $payload['listeners']),
             'providers' => self::resolveEntries($basePath, $payload['providers']),
@@ -679,6 +924,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -714,6 +960,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -736,6 +983,7 @@ final class ModuleRegistry
                 'api' => self::normalizeEntryList($routes['api'] ?? []),
             ],
             'gates' => self::normalizeEntryList($payload['gates'] ?? []),
+            'policies' => self::normalizeEntryList($payload['policies'] ?? []),
             'channels' => self::normalizeEntryList($payload['channels'] ?? []),
             'listeners' => self::normalizeEntryList($payload['listeners'] ?? []),
             'providers' => self::normalizeEntryList($payload['providers'] ?? []),
@@ -769,6 +1017,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -785,6 +1034,10 @@ final class ModuleRegistry
         }
 
         if (self::hasMissingFiles($basePath, $payload['gates'])) {
+            return true;
+        }
+
+        if (self::hasMissingFiles($basePath, $payload['policies'])) {
             return true;
         }
 
@@ -820,6 +1073,7 @@ final class ModuleRegistry
      *     version: int,
      *     routes: array{web: list<string>, api: list<string>},
      *     gates: list<string>,
+     *     policies: list<string>,
      *     channels: list<string>,
      *     listeners: list<string>,
      *     providers: list<string>
@@ -834,6 +1088,7 @@ final class ModuleRegistry
                 'api' => [],
             ],
             'gates' => [],
+            'policies' => [],
             'channels' => [],
             'listeners' => [],
             'providers' => [],

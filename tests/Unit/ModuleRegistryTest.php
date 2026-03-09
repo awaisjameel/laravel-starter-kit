@@ -20,6 +20,7 @@ final class ModuleRegistryTest extends TestCase
     protected function tearDown(): void
     {
         $filesystem = app(Filesystem::class);
+        ModuleRegistry::flushRuntimeCache();
 
         foreach ($this->temporaryBasePaths as $temporaryBasePath) {
             if ($filesystem->isDirectory($temporaryBasePath)) {
@@ -42,6 +43,8 @@ final class ModuleRegistryTest extends TestCase
         $this->createModuleFile($basePath, 'Api/V2', 'Routes/api.php');
         $this->createModuleFile($basePath, 'Users', 'Routes/gates.php');
         $this->createModuleFile($basePath, 'Billing', 'Routes/gates.php');
+        $this->createModuleFile($basePath, 'Users', 'Policies/UserPolicy.php');
+        $this->createModuleFile($basePath, 'Billing', 'Policies/BillingPolicy.php');
         $this->createModuleFile($basePath, 'Shared', 'Routes/channels.php');
         $this->createModuleFile($basePath, 'Users', 'Routes/channels.php');
         $this->createModuleFile($basePath, 'Billing', 'Routes/channels.php');
@@ -69,6 +72,11 @@ final class ModuleRegistryTest extends TestCase
         ], $this->toRelativePaths($basePath, ModuleRegistry::gateFiles($basePath)));
 
         $this->assertSame([
+            'app/Modules/Users/Policies/UserPolicy.php',
+            'app/Modules/Billing/Policies/BillingPolicy.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::policyFiles($basePath)));
+
+        $this->assertSame([
             'app/Modules/Shared/Routes/channels.php',
             'app/Modules/Users/Routes/channels.php',
             'app/Modules/Billing/Routes/channels.php',
@@ -94,6 +102,7 @@ final class ModuleRegistryTest extends TestCase
 
         $this->createModuleFile($basePath, 'Cached', 'Routes/web.php');
         $this->createModuleFile($basePath, 'Cached', 'Routes/gates.php');
+        $this->createModuleFile($basePath, 'Cached', 'Policies/CachedPolicy.php');
         $this->createModuleDirectory($basePath, 'Cached', 'Listeners');
         $this->createModuleFile($basePath, 'Ignored', 'Routes/web.php');
 
@@ -103,12 +112,13 @@ final class ModuleRegistryTest extends TestCase
 <?php
 
 return [
-    'version' => 2,
+    'version' => 3,
     'routes' => [
         'web' => ['app/Modules/Cached/Routes/web.php'],
         'api' => [],
     ],
     'gates' => ['app/Modules/Cached/Routes/gates.php'],
+    'policies' => ['app/Modules/Cached/Policies/CachedPolicy.php'],
     'channels' => [],
     'listeners' => ['app/Modules/Cached/Listeners'],
     'providers' => [],
@@ -123,6 +133,10 @@ PHP
         $this->assertSame([
             'app/Modules/Cached/Routes/gates.php',
         ], $this->toRelativePaths($basePath, ModuleRegistry::gateFiles($basePath)));
+
+        $this->assertSame([
+            'app/Modules/Cached/Policies/CachedPolicy.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::policyFiles($basePath)));
 
         $this->assertSame([
             'app/Modules/Cached/Listeners',
@@ -143,12 +157,13 @@ PHP
 <?php
 
 return [
-    'version' => 2,
+    'version' => 3,
     'routes' => [
         'web' => ['app/Modules/Application/Routes/web.php'],
         'api' => [],
     ],
     'gates' => ['app/Modules/Application/Routes/gates.php'],
+    'policies' => ['app/Modules/Application/Policies/ApplicationPolicy.php'],
     'channels' => [],
     'listeners' => ['app/Modules/Application/Listeners'],
     'providers' => [],
@@ -164,6 +179,8 @@ PHP
             'app/Modules/Billing/Routes/gates.php',
         ], $this->toRelativePaths($basePath, ModuleRegistry::gateFiles($basePath)));
 
+        $this->assertSame([], ModuleRegistry::policyFiles($basePath));
+
         $this->assertSame([
             'app/Modules/Billing/Listeners',
         ], $this->toRelativePaths($basePath, ModuleRegistry::listenerDirectories($basePath)));
@@ -172,6 +189,67 @@ PHP
     public function test_registry_resolves_autoloadable_provider_classes_for_the_application(): void
     {
         $this->assertContains(ModuleServiceProvider::class, ModuleRegistry::providerClasses(base_path()));
+    }
+
+    public function test_registry_runtime_caches_discovery_results_until_flushed(): void
+    {
+        $basePath = $this->createTemporaryBasePath();
+
+        $this->createModuleFile($basePath, 'Billing', 'Routes/web.php');
+
+        $this->assertSame([
+            'app/Modules/Billing/Routes/web.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::webRoutes($basePath)));
+
+        $this->createModuleFile($basePath, 'Reports', 'Routes/web.php');
+
+        $this->assertSame([
+            'app/Modules/Billing/Routes/web.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::webRoutes($basePath)));
+
+        ModuleRegistry::flushRuntimeCache();
+
+        $this->assertSame([
+            'app/Modules/Billing/Routes/web.php',
+            'app/Modules/Reports/Routes/web.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::webRoutes($basePath)));
+    }
+
+    public function test_registry_trusts_cached_manifest_for_production_http_runtime(): void
+    {
+        $basePath = $this->createTemporaryBasePath();
+
+        $this->createModuleFile($basePath, 'Billing', 'Routes/web.php');
+
+        file_put_contents(
+            ModuleRegistry::cachePath($basePath),
+            <<<'PHP'
+<?php
+
+return [
+    'version' => 3,
+    'routes' => [
+        'web' => ['app/Modules/Cached/Routes/web.php'],
+        'api' => [],
+    ],
+    'gates' => [],
+    'policies' => [],
+    'channels' => [],
+    'listeners' => [],
+    'providers' => [],
+];
+PHP
+        );
+
+        $this->assertSame([
+            'app/Modules/Cached/Routes/web.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::discover($basePath, false, 'production')['routes']['web']));
+
+        ModuleRegistry::flushRuntimeCache();
+
+        $this->assertSame([
+            'app/Modules/Billing/Routes/web.php',
+        ], $this->toRelativePaths($basePath, ModuleRegistry::discover($basePath, true, 'production')['routes']['web']));
     }
 
     private function createTemporaryBasePath(): string

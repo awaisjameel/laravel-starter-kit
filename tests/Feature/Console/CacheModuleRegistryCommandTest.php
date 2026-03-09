@@ -36,6 +36,7 @@ final class CacheModuleRegistryCommandTest extends TestCase
 
         $this->createModuleFile($basePath, 'Marketing', 'Routes/web.php');
         $this->createModuleFile($basePath, 'Users', 'Routes/gates.php');
+        $this->createModuleFile($basePath, 'Users', 'Policies/UserPolicy.php');
         $this->createModuleFile($basePath, 'Shared', 'Routes/channels.php');
         $this->createModuleDirectory($basePath, 'Users', 'Listeners');
         $this->createModuleFile($basePath, 'Users', 'Providers/ModuleServiceProvider.php');
@@ -65,6 +66,10 @@ final class CacheModuleRegistryCommandTest extends TestCase
         $this->assertSame([
             'app/Modules/Users/Routes/gates.php',
         ], $payload['gates'] ?? []);
+
+        $this->assertSame([
+            'app/Modules/Users/Policies/UserPolicy.php',
+        ], $payload['policies'] ?? []);
 
         $this->assertSame([
             'app/Modules/Shared/Routes/channels.php',

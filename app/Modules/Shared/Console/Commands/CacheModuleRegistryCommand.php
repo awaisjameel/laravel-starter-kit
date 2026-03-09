@@ -37,6 +37,7 @@ final class CacheModuleRegistryCommand extends Command
         $entryCount = count($payload['routes']['web'])
             + count($payload['routes']['api'])
             + count($payload['gates'])
+            + count($payload['policies'])
             + count($payload['channels'])
             + count($payload['listeners'])
             + count($payload['providers']);
