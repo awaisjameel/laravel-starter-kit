@@ -39,6 +39,24 @@ If code and docs disagree, trust the code, then fix the docs in the same task wh
 6. Update `AGENTS.md` whenever architecture, workflows, or enforcement rules change.
 7. Do not stop at analysis. Deliver the finished implementation, verification, and cleanup unless the user explicitly redirects you.
 
+## Agent Workflow Protocol (MANDATORY)
+
+Before writing ANY code, agents MUST follow this protocol:
+
+1. Understanding Phase (REQUIRED)
+    - Read First: Never assume. Read all related files, understand the full context.
+    - Trace Dependencies: Map all files, services, events, and components that will be affected.
+2. Planning Phase (REQUIRED)
+    - Design First: Outline the solution architecture before coding.
+    - Impact Analysis: List all files that need changes (backend, frontend, tests, docs).
+3. Implementation Phase
+    - One Change at a Time: Make focused, atomic changes.
+    - Follow Patterns: Match existing conventions exactly.
+4. Verification Phase
+    - Run Quality Gate: `composer generate-and-cleanup` after every change.
+5. Completion Criteria
+    - All tests pass, no dead code/TODOs remain, and `AGENTS.md` is updated if applicable.
+
 ## Change-Impact Checklist
 
 For every non-trivial change, explicitly verify all affected layers before considering the task complete:
@@ -71,6 +89,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - Tailwind CSS: `^4.2.1`
 - Node: `>=24.1.0`
 - npm: `>=11.2.1`
+- Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
 
 ## Current Runtime And Tooling
 
@@ -266,6 +285,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 ### Frontend UI Layering
 
 - `resources/js/components/ui/**` = low-level primitive wrappers (reka-ui, icons, etc.).
+- UI primitives (`resources/js/components/ui/**`) are built using shadcn-vue style components on top of Reka UI.
+- Base UI component names use the `Ui*` prefix (for example `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`). Use these existing primitives before building custom elements.
 - `resources/js/components/base/**` = reusable app-level building blocks (`Base*`).
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
@@ -810,6 +831,15 @@ Local changes must remain compatible with the existing CI expectations:
 - TypeScript typecheck
 - PHPUnit / `php artisan test`
 - Vitest for frontend logic changes
+
+## Laravel Boost MCP Workflow
+
+When Laravel Boost MCP tools are available to the agent:
+
+- Use `search-docs` before Laravel/Inertia/Wayfinder/Sanctum/Tailwind ecosystem changes.
+- Use `list-artisan-commands` before running Artisan commands.
+- Run Artisan with `--no-interaction` when the specific command supports it.
+- Use MCP equivalents (`tinker`, `database-query`, `browser-logs`) when applicable. If MCP tools fail, fallback to equivalent terminal shell commands.
 
 ## Breaking Change Policy
 
