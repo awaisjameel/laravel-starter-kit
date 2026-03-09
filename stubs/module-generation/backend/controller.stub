@@ -23,15 +23,17 @@ final class {{ pagePascalName }}Controller extends Controller
 
     public function index(): Response
     {
-        $items = collect($this->{{ modelVariable }}Queries->paginate()->items())
-            ->map(fn ({{ modelClass }} ${{ modelVariable }}): array => [
+        $lengthAwarePaginator = $this->{{ modelVariable }}Queries->paginate();
+
+        /** @var list<{{ modelClass }}> $models */
+        $models = $lengthAwarePaginator->items();
+
+        $items = array_map(static fn ({{ modelClass }} ${{ modelVariable }}): array => [
                 'id' => ${{ modelVariable }}->id,
                 'name' => ${{ modelVariable }}->name,
                 'created_at' => ${{ modelVariable }}->created_at?->toISOString(),
                 'updated_at' => ${{ modelVariable }}->updated_at?->toISOString(),
-            ])
-            ->values()
-            ->all();
+            ], $models);
 
         return Inertia::render('modules/{{ moduleKebab }}/pages/{{ pagePascalName }}', [
             'items' => $items,

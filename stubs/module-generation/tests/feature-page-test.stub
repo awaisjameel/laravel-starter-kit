@@ -14,7 +14,7 @@ final class {{ pagePascalName }}PageTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guests_access_behavior_for_{{ routeLabel }}_page(): void
+    public function test_guests_access_behavior_for_{{ routeTestName }}_page(): void
     {
         $testResponse = $this->get('{{ routeUri }}');
 
@@ -22,7 +22,7 @@ final class {{ pagePascalName }}PageTest extends TestCase
     }
 
 {{ forbiddenRoleTest }}
-    public function test_authenticated_users_can_visit_{{ routeLabel }}_page(): void
+    public function test_authenticated_users_can_visit_{{ routeTestName }}_page(): void
     {
         $user = User::factory()->create({{ allowedRoleFactoryState }});
 

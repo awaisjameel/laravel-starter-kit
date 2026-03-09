@@ -22,9 +22,11 @@ final class {{ pagePascalName }}ApiController extends Controller
     public function index(): JsonResponse
     {
         $paginator = $this->{{ modelVariable }}QueryHandler->index();
+        /** @var list<{{ modelClass }}> $models */
+        $models = $paginator->items();
 
         return response()->json([
-            'data' => array_map(fn ({{ modelClass }} $model): array => $this->serializeModel($model), $paginator->items()),
+            'data' => array_map(static fn ({{ modelClass }} $model): array => $this->serializeModel($model), $models),
             'meta' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),

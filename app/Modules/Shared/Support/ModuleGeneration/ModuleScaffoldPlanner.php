@@ -622,6 +622,7 @@ final readonly class ModuleScaffoldPlanner
 
         $routeUri = $generateModuleInput->routePrefix === '' ? '/' : '/'.$generateModuleInput->routePrefix;
         $routeLabel = str_replace('-', ' ', $generateModuleInput->moduleName->frontendKebab);
+        $routeTestName = str_replace(' ', '_', $routeLabel);
         $guestAssertion = in_array('auth', $generateModuleInput->middleware, true)
             ? "\$testResponse->assertRedirect('/auth/login');"
             : '$testResponse->assertOk();';
@@ -634,6 +635,7 @@ final readonly class ModuleScaffoldPlanner
             'moduleKebab' => $generateModuleInput->moduleName->frontendKebab,
             'routeUri' => $routeUri,
             'routeLabel' => $routeLabel,
+            'routeTestName' => $routeTestName,
             'guestAssertion' => $guestAssertion,
             'userRoleImportLine' => $restrictedByRoles ? "use App\\Enums\\UserRole;\n" : '',
             'forbiddenRoleTest' => $deniedRoleCase !== null
@@ -673,6 +675,7 @@ final readonly class ModuleScaffoldPlanner
 
         $apiRouteUri = $generateModuleInput->apiRoutePrefix === '' ? '/' : '/'.$generateModuleInput->apiRoutePrefix;
         $routeLabel = str_replace('-', ' ', $generateModuleInput->moduleName->frontendKebab);
+        $routeTestName = str_replace(' ', '_', $routeLabel);
         $apiRequiresAuth = in_array('auth:sanctum', $generateModuleInput->apiMiddleware, true);
 
         $apiGuestAssertion = $apiRequiresAuth
@@ -692,6 +695,7 @@ final readonly class ModuleScaffoldPlanner
             'pagePascalName' => $generateModuleInput->pagePascalName,
             'modelClass' => $this->modelClassName($generateModuleInput->moduleName),
             'routeLabel' => $routeLabel,
+            'routeTestName' => $routeTestName,
             'apiRouteUri' => $apiRouteUri,
             'apiGuestAssertion' => $apiGuestAssertion,
             'apiAuthRequestLine' => $apiAuthRequestLine,

@@ -21,6 +21,8 @@
         return new Date(value).toLocaleDateString()
     }
 
+    const rowKey = (row: {{ pagePascalName }}ListItem): number => row.id
+
     const columns: Array<DataTableColumn<{{ pagePascalName }}ListItem>> = [
         {
             key: 'name',
@@ -76,7 +78,7 @@
 </script>
 
 <template>
-    <BaseTableBaseDataTableMobileCards :rows="props.items" :row-key="(row) => row.id" :fields="mobileFields" :actions="actions">
+    <BaseTableBaseDataTableMobileCards :rows="props.items" :row-key="rowKey" :fields="mobileFields" :actions="actions">
         <template #mobile-header="{ row }">
             <p class="font-medium">{{ row.name }}</p>
         </template>
@@ -85,7 +87,7 @@
     <BaseTableBaseDataTable
         :rows="props.items"
         :columns="columns"
-        :row-key="(row) => row.id"
+        :row-key="rowKey"
         :actions="actions"
         empty-message="No records found."
     />

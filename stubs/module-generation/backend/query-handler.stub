@@ -6,7 +6,7 @@ namespace App\Modules\{{ moduleNamespace }}\Handlers;
 
 use App\Models\{{ modelClass }};
 use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final readonly class {{ modelClass }}QueryHandler
 {

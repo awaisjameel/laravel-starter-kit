@@ -13,14 +13,14 @@ final class {{ pagePascalName }}ApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guests_access_behavior_for_{{ routeLabel }}_api_index(): void
+    public function test_guests_access_behavior_for_{{ routeTestName }}_api_index(): void
     {
         $testResponse = $this->getJson('{{ apiRouteUri }}');
 
         {{ apiGuestAssertion }}
     }
 
-    public function test_authenticated_users_can_list_{{ routeLabel }}_api_results(): void
+    public function test_authenticated_users_can_list_{{ routeTestName }}_api_results(): void
     {
         {{ apiAuthRequestLine }}
 

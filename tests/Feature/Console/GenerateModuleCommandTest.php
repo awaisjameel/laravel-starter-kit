@@ -74,6 +74,19 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertStringContainsString('extends DataFormRequest', $requestFileContents);
         $this->assertStringContainsString('return IndexStoreData::class;', $requestFileContents);
 
+        $modelFileContents = file_get_contents($basePath.'/app/Models/Billing.php');
+        $modelFileContents = is_string($modelFileContents) ? $modelFileContents : '';
+        $this->assertStringContainsString('/** @use HasFactory<Factory<self>> */', $modelFileContents);
+
+        $queryFileContents = file_get_contents($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
+        $queryFileContents = is_string($queryFileContents) ? $queryFileContents : '';
+        $this->assertStringContainsString('@return LengthAwarePaginator<int, Billing>', $queryFileContents);
+
+        $controllerFileContents = file_get_contents($basePath.'/app/Modules/Billing/Http/Controllers/IndexController.php');
+        $controllerFileContents = is_string($controllerFileContents) ? $controllerFileContents : '';
+        $this->assertStringContainsString('/** @var list<Billing> $models */', $controllerFileContents);
+        $this->assertStringContainsString('array_map(static fn (Billing $billing): array', $controllerFileContents);
+
         $routeFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/web.php');
         $routeFileContents = is_string($routeFileContents) ? $routeFileContents : '';
 
@@ -88,6 +101,11 @@ final class GenerateModuleCommandTest extends TestCase
 
         $this->assertStringContainsString('<BillingTable', $pageFileContents);
         $this->assertStringContainsString('<BillingIndexFormDialog', $pageFileContents);
+
+        $tableFileContents = file_get_contents($basePath.'/resources/js/modules/billing/components/Table.vue');
+        $tableFileContents = is_string($tableFileContents) ? $tableFileContents : '';
+        $this->assertStringContainsString('const rowKey = (row: IndexListItem): number => row.id', $tableFileContents);
+        $this->assertStringContainsString(':row-key="rowKey"', $tableFileContents);
     }
 
     public function test_api_mode_scaffolds_api_assets_and_skips_frontend_assets(): void
@@ -125,6 +143,10 @@ final class GenerateModuleCommandTest extends TestCase
 
         $this->assertStringContainsString("Route::prefix('api/v1/admin/billing')", $apiRouteFileContents);
         $this->assertStringContainsString("->as('api.v1.admin.billing.')", $apiRouteFileContents);
+
+        $queryFileContents = file_get_contents($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
+        $queryFileContents = is_string($queryFileContents) ? $queryFileContents : '';
+        $this->assertStringContainsString('@return LengthAwarePaginator<int, Billing>', $queryFileContents);
     }
 
     public function test_crud_api_mode_scaffolds_both_backend_route_files(): void
@@ -163,6 +185,7 @@ final class GenerateModuleCommandTest extends TestCase
         $this->assertStringContainsString('use App\\Modules\\Billing\\Handlers\\BillingCommandHandler;', $apiControllerContents);
         $this->assertStringContainsString('private readonly BillingQueryHandler $billingQueryHandler', $apiControllerContents);
         $this->assertStringContainsString('private readonly BillingCommandHandler $billingCommandHandler', $apiControllerContents);
+        $this->assertStringContainsString('/** @var list<Billing> $models */', $webControllerContents);
     }
 
     public function test_existing_module_requires_extend_flag(): void
@@ -437,6 +460,33 @@ final class GenerateModuleCommandTest extends TestCase
 
         $this->assertStringContainsString("Route::prefix('app/admin/billing')", $routeFileContents);
         $this->assertStringContainsString("'can:manage-billing'", $routeFileContents);
+    }
+
+    public function test_multi_word_module_names_generate_php_safe_feature_test_methods(): void
+    {
+        $basePath = $this->createTemporaryBasePath();
+
+        $this->runGenerateCommand([
+            'module' => 'TempCheck',
+            '--scaffold' => 'crud-api',
+            '--route-profile' => 'app',
+            '--roles' => 'admin',
+            '--api-route-profile' => 'protected',
+            '--no-file-prompts' => true,
+            '--base-path' => $basePath,
+        ])->assertExitCode(0);
+
+        $pageTestContents = file_get_contents($basePath.'/tests/Feature/TempCheck/IndexPageTest.php');
+        $pageTestContents = is_string($pageTestContents) ? $pageTestContents : '';
+        $this->assertStringContainsString('test_guests_access_behavior_for_temp_check_page', $pageTestContents);
+        $this->assertStringContainsString('test_authenticated_users_can_visit_temp_check_page', $pageTestContents);
+        $this->assertStringNotContainsString('temp check_page', $pageTestContents);
+
+        $apiTestContents = file_get_contents($basePath.'/tests/Feature/TempCheck/IndexApiTest.php');
+        $apiTestContents = is_string($apiTestContents) ? $apiTestContents : '';
+        $this->assertStringContainsString('test_guests_access_behavior_for_temp_check_api_index', $apiTestContents);
+        $this->assertStringContainsString('test_authenticated_users_can_list_temp_check_api_results', $apiTestContents);
+        $this->assertStringNotContainsString('temp check_api', $apiTestContents);
     }
 
     private function createTemporaryBasePath(): string
