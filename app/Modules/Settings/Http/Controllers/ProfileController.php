@@ -10,6 +10,7 @@ use App\Modules\Settings\Http\Requests\ProfileDestroyRequest;
 use App\Modules\Settings\Http\Requests\ProfileUpdateRequest;
 use App\Modules\Shared\Auth\RequestActor;
 use App\Modules\Shared\Http\Responders\PageResponder;
+use App\Modules\Shared\Support\SessionHelper;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,13 +25,12 @@ final class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         $user = RequestActor::from($request);
-        $status = $request->session()->get('status');
 
         return PageResponder::render(
             'modules/settings/pages/Profile',
             new ProfilePageData(
                 mustVerifyEmail: in_array(MustVerifyEmail::class, class_implements($user), true),
-                status: is_string($status) ? $status : null,
+                status: SessionHelper::resolveStatus($request),
             ),
         );
     }

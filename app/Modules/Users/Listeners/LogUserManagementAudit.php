@@ -19,16 +19,4 @@ final class LogUserManagementAudit
     {
         UserManagementAuditLogger::log($userManagementEvent->context);
     }
-
-    /**
-     * Register the listeners for the subscriber.
-     *
-     * @return array<string, string>
-     */
-    public function subscribe(): array
-    {
-        return [
-            UserManagementEvent::class => 'handle',
-        ];
-    }
 }

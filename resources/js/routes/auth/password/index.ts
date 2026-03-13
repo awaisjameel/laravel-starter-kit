@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefa
 import confirmD7e05f from './confirm'
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:22
  * @route '/auth/forgot-password'
  */
 export const request = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -17,7 +17,7 @@ request.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:22
  * @route '/auth/forgot-password'
  */
 request.url = (options?: RouteQueryOptions) => {
@@ -26,7 +26,7 @@ request.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:22
  * @route '/auth/forgot-password'
  */
 request.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ request.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::request
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:21
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:22
  * @route '/auth/forgot-password'
  */
 request.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ request.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::email
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:33
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:32
  * @route '/auth/forgot-password'
  */
 export const email = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ email.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::email
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:33
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:32
  * @route '/auth/forgot-password'
  */
 email.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ email.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\PasswordResetLinkController::email
- * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:33
+ * @see app/Modules/Auth/Http/Controllers/PasswordResetLinkController.php:32
  * @route '/auth/forgot-password'
  */
 email.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({

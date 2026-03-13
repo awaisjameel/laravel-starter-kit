@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Auth\Data\LoginPageData;
 use App\Modules\Auth\Http\Requests\LoginRequest;
 use App\Modules\Shared\Http\Responders\PageResponder;
+use App\Modules\Shared\Support\SessionHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,13 +22,11 @@ final class AuthenticatedSessionController extends Controller
      */
     public function create(Request $request): Response
     {
-        $status = $request->session()->get('status');
-
         return PageResponder::render(
             'modules/auth/pages/Login',
             new LoginPageData(
                 canResetPassword: Route::has('auth.password.request'),
-                status: is_string($status) ? $status : null,
+                status: SessionHelper::resolveStatus($request),
             ),
         );
     }

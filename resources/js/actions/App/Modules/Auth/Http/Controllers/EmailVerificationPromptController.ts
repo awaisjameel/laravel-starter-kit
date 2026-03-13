@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 const EmailVerificationPromptController = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ EmailVerificationPromptController.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 EmailVerificationPromptController.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ EmailVerificationPromptController.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 EmailVerificationPromptController.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ EmailVerificationPromptController.get = (options?: RouteQueryOptions): RouteDefi
 })
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 EmailVerificationPromptController.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 export const notice = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ notice.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 notice.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ notice.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 notice.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ notice.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:20
+ * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
  * @route '/auth/verify-email'
  */
 notice.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
