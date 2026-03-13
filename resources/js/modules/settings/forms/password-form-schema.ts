@@ -42,6 +42,3 @@ export const passwordFormContract = defineFormContract<PasswordFormValues>({
             }
         ])
 })
-
-export const createPasswordFormDefaults = passwordFormContract.defaults
-export const buildPasswordFormFields = passwordFormContract.fields

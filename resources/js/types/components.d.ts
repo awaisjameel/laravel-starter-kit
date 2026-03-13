@@ -62,6 +62,7 @@ declare module 'vue' {
     NavMain: typeof import('./../components/NavMain.vue')['default']
     NavUser: typeof import('./../components/NavUser.vue')['default']
     PlaceholderPattern: typeof import('./../components/PlaceholderPattern.vue')['default']
+    SavedFeedback: typeof import('./../components/SavedFeedback.vue')['default']
     SettingsAppearanceTabs: typeof import('./../modules/settings/components/AppearanceTabs.vue')['default']
     SettingsDeleteUser: typeof import('./../modules/settings/components/DeleteUser.vue')['default']
     SettingsLayout: typeof import('./../layouts/settings/Layout.vue')['default']

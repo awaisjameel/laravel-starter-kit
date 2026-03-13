@@ -19,6 +19,3 @@ export const forgotPasswordFormContract = defineFormContract<ForgotPasswordFormV
             }
         ])
 })
-
-export const createForgotPasswordFormDefaults = forgotPasswordFormContract.defaults
-export const buildForgotPasswordFormFields = forgotPasswordFormContract.fields

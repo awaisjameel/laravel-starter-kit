@@ -20,6 +20,7 @@ declare global {
   const buildSettingsPasswordBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsPasswordBreadcrumbs
   const buildSettingsProfileBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsProfileBreadcrumbs
   const buildUsersBreadcrumbs: typeof import('@/config/breadcrumbs').buildUsersBreadcrumbs
+  const capitalize: typeof import('../lib/utils').capitalize
   const clearApiQueryCache: typeof import('../composables/useApiQuery').clearApiQueryCache
   const cn: typeof import('../lib/utils').cn
   const computed: typeof import('vue').computed
@@ -32,12 +33,13 @@ declare global {
   const defineFormContract: typeof import('../lib/forms').defineFormContract
   const disconnectRealtime: typeof import('../lib/realtime/config').disconnectRealtime
   const effectScope: typeof import('vue').effectScope
+  const formatDate: typeof import('../lib/utils').formatDate
   const getApiQueryCacheData: typeof import('../composables/useApiQuery').getApiQueryCacheData
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const getEnumOptions: typeof import('../lib/utils').getEnumOptions
-  const getInitials: typeof import('../composables/useInitials').getInitials
+  const getInitials: typeof import('../lib/utils').getInitials
   const getMonths: typeof import('../lib/utils').getMonths
   const getRealtimeClient: typeof import('../lib/realtime/config').getRealtimeClient
   const getRealtimeSocketId: typeof import('../lib/realtime/config').getRealtimeSocketId
@@ -46,6 +48,7 @@ declare global {
   const initializeTheme: typeof import('../composables/useAppearance').initializeTheme
   const inject: typeof import('vue').inject
   const invalidateApiQueryCache: typeof import('../composables/useApiQuery').invalidateApiQueryCache
+  const isObjectRecord: typeof import('../lib/utils').isObjectRecord
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
@@ -94,6 +97,7 @@ declare global {
   const toValue: typeof import('vue').toValue
   const toZiggyVueConfig: typeof import('../utils/ziggy').toZiggyVueConfig
   const triggerRef: typeof import('vue').triggerRef
+  const unknown: typeof import('../lib/utils').unknown
   const unref: typeof import('vue').unref
   const updateTheme: typeof import('../composables/useAppearance').updateTheme
   const useApiMutation: typeof import('../composables/useApiQuery').useApiMutation
@@ -185,6 +189,7 @@ declare module 'vue' {
     readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsPasswordBreadcrumbs']>
     readonly buildSettingsProfileBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsProfileBreadcrumbs']>
     readonly buildUsersBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildUsersBreadcrumbs']>
+    readonly capitalize: UnwrapRef<typeof import('../lib/utils')['capitalize']>
     readonly clearApiQueryCache: UnwrapRef<typeof import('../composables/useApiQuery')['clearApiQueryCache']>
     readonly cn: UnwrapRef<typeof import('../lib/utils')['cn']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
@@ -197,12 +202,13 @@ declare module 'vue' {
     readonly defineFormContract: UnwrapRef<typeof import('../lib/forms')['defineFormContract']>
     readonly disconnectRealtime: UnwrapRef<typeof import('../lib/realtime/config')['disconnectRealtime']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly formatDate: UnwrapRef<typeof import('../lib/utils')['formatDate']>
     readonly getApiQueryCacheData: UnwrapRef<typeof import('../composables/useApiQuery')['getApiQueryCacheData']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
     readonly getEnumOptions: UnwrapRef<typeof import('../lib/utils')['getEnumOptions']>
-    readonly getInitials: UnwrapRef<typeof import('../composables/useInitials')['getInitials']>
+    readonly getInitials: UnwrapRef<typeof import('../lib/utils')['getInitials']>
     readonly getMonths: UnwrapRef<typeof import('../lib/utils')['getMonths']>
     readonly getRealtimeClient: UnwrapRef<typeof import('../lib/realtime/config')['getRealtimeClient']>
     readonly getRealtimeSocketId: UnwrapRef<typeof import('../lib/realtime/config')['getRealtimeSocketId']>
@@ -211,6 +217,7 @@ declare module 'vue' {
     readonly initializeTheme: UnwrapRef<typeof import('../composables/useAppearance')['initializeTheme']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly invalidateApiQueryCache: UnwrapRef<typeof import('../composables/useApiQuery')['invalidateApiQueryCache']>
+    readonly isObjectRecord: UnwrapRef<typeof import('../lib/utils')['isObjectRecord']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
@@ -259,6 +266,7 @@ declare module 'vue' {
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
     readonly toZiggyVueConfig: UnwrapRef<typeof import('../utils/ziggy')['toZiggyVueConfig']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
+    readonly unknown: UnwrapRef<typeof import('../lib/utils')['unknown']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly updateTheme: UnwrapRef<typeof import('../composables/useAppearance')['updateTheme']>
     readonly useApiMutation: UnwrapRef<typeof import('../composables/useApiQuery')['useApiMutation']>

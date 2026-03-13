@@ -20,6 +20,3 @@ export const confirmPasswordFormContract = defineFormContract<ConfirmPasswordFor
             }
         ])
 })
-
-export const createConfirmPasswordFormDefaults = confirmPasswordFormContract.defaults
-export const buildConfirmPasswordFormFields = confirmPasswordFormContract.fields

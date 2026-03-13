@@ -3,8 +3,7 @@
     import { SortDirection, UserSortBy, type UsersIndexPageData, type UserViewData } from '@/types/app-data'
     import { Plus } from 'lucide-vue-next'
     import { useUsersIndexRealtime } from '../contracts/realtime'
-
-    type UserSortColumn = `${UserSortBy}`
+    import type { UserSortColumn } from '../contracts/types'
 
     const userSortColumns = [UserSortBy.Name, UserSortBy.Email, UserSortBy.Role, UserSortBy.CreatedAt] as const
 

@@ -35,5 +35,3 @@ export const profileFormContract = defineFormContract<ProfileFormValues>({
             }
         ])
 })
-
-export const buildProfileFormFields = profileFormContract.fields

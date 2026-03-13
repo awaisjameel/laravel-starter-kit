@@ -52,6 +52,3 @@ export const registerFormContract = defineFormContract<RegisterFormValues>({
             }
         ])
 })
-
-export const createRegisterFormDefaults = registerFormContract.defaults
-export const buildRegisterFormFields = registerFormContract.fields

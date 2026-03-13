@@ -20,6 +20,3 @@ export const deleteAccountFormContract = defineFormContract<DeleteAccountFormVal
             }
         ])
 })
-
-export const createDeleteAccountFormDefaults = deleteAccountFormContract.defaults
-export const buildDeleteAccountFormFields = deleteAccountFormContract.fields

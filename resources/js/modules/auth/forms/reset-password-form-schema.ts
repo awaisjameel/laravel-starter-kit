@@ -45,5 +45,3 @@ export const resetPasswordFormContract = defineFormContract<ResetPasswordFormVal
             }
         ])
 })
-
-export const buildResetPasswordFormFields = resetPasswordFormContract.fields

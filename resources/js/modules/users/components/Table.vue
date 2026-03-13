@@ -1,8 +1,8 @@
 <script setup lang="ts">
-    import type { UserSortBy, UserViewData } from '@/types/app-data'
+    import { capitalize, formatDate } from '@/lib/utils'
+    import type { UserViewData } from '@/types/app-data'
     import type { DataTableColumn, DataTableRowAction, MobileCardField } from '@/types/base-ui'
-
-    type UserSortColumn = `${UserSortBy}`
+    import type { UserSortColumn } from '../contracts/types'
 
     interface Props {
         currentUserId: number
@@ -19,9 +19,6 @@
         sort: [column: UserSortColumn]
     }>()
 
-    const formatDate = (value: string): string => new Date(value).toLocaleDateString()
-    const formatRole = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1)
-
     const columns: Array<DataTableColumn<UserViewData, UserSortColumn>> = [
         {
             key: 'name',
@@ -36,7 +33,7 @@
             sortable: true,
             sortKey: 'role',
             class: 'capitalize',
-            value: (row) => formatRole(row.role)
+            value: (row) => capitalize(row.role)
         },
         {
             key: 'email',
@@ -58,7 +55,7 @@
         {
             key: 'role',
             label: 'Role',
-            value: (row) => formatRole(row.role)
+            value: (row) => capitalize(row.role)
         },
         {
             key: 'email',

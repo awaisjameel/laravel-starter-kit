@@ -1,8 +1,8 @@
 <script setup lang="ts">
-    import type { BreadcrumbItemType } from '@/types'
+    import type { BreadcrumbItem } from '@/types'
 
     defineProps<{
-        breadcrumbs: BreadcrumbItemType[]
+        breadcrumbs: BreadcrumbItem[]
     }>()
 </script>
 

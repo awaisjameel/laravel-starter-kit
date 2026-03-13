@@ -36,6 +36,3 @@ export const loginFormContract = defineFormContract<LoginFormValues>({
             }
         ])
 })
-
-export const createLoginFormDefaults = loginFormContract.defaults
-export const buildLoginFormFields = loginFormContract.fields

@@ -31,6 +31,31 @@ export function getMonths() {
     return Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('default', { month: 'long' }))
 }
 
+export const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
+
+export function capitalize(value: string): string {
+    if (value === '') return ''
+    return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+export function formatDate(value: string, locale?: string): string {
+    return new Date(value).toLocaleDateString(locale)
+}
+
+export function getInitials(fullName?: string): string {
+    if (!fullName) return ''
+
+    const names = fullName.trim().split(' ')
+    const firstName = names[0] ?? ''
+
+    if (names.length === 0) return ''
+    if (names.length === 1) return firstName.charAt(0).toUpperCase()
+
+    const lastName = names[names.length - 1] ?? ''
+
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+}
+
 type StringEnum = Record<string, string>
 
 export function getEnumOptions<TEnum extends StringEnum>(enumType: TEnum): Array<{ value: TEnum[keyof TEnum]; label: string }> {

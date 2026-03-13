@@ -1,3 +1,4 @@
+import { isObjectRecord } from '@/lib/utils'
 import type { FormFieldSchema } from '@/types/base-ui'
 import type { FormDataType } from '@inertiajs/core'
 
@@ -14,8 +15,6 @@ export type FormValuesFromData<
     TOverrides extends object = Record<never, never>,
     TOmittedKeys extends keyof TData = never
 > = Omit<TData, TOmittedKeys | keyof TOverrides> & TOverrides
-
-const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 export const mapInertiaFormErrors = <TForm extends object>(errors: unknown): FormErrorMap<TForm> => {
     if (!isObjectRecord(errors)) {

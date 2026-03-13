@@ -1,5 +1,5 @@
 import type { FormValuesFromData } from '@/lib/forms'
-import { getEnumOptions } from '@/lib/utils'
+import { capitalize, getEnumOptions } from '@/lib/utils'
 import type { CreateUserData } from '@/types/app-data'
 import { UserRole } from '@/types/app-data'
 import { defineFormFields } from '@/types/base-ui'
@@ -13,7 +13,7 @@ export type UserFormValues = FormValuesFromData<
 
 const roleOptions = getEnumOptions(UserRole).map((role) => ({
     value: role.value,
-    label: role.label.charAt(0).toUpperCase() + role.label.slice(1)
+    label: capitalize(role.label)
 }))
 
 export const createUserFormDefaults = (): UserFormValues => ({

@@ -1,4 +1,5 @@
 import { getRealtimeSocketId } from '@/lib/realtime/config'
+import { isObjectRecord } from '@/lib/utils'
 
 export interface ApiError {
     message: string
@@ -23,7 +24,6 @@ type ApiRequestResult<TParser extends ApiResponseParser<unknown> | undefined> = 
     ? TResponse
     : unknown
 
-const isObjectRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 const isMutatingMethod = (method: ApiRequestMethod): boolean => method !== 'GET'
 
 const resolveCsrfToken = (): string | undefined => {
