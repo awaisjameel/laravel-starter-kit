@@ -21,7 +21,13 @@ If code and docs disagree, trust the code, then fix the docs in the same task wh
 
 - Think through the full impact of every change before editing code.
 - Verify the current implementation first; never preserve stale assumptions from docs, habits, or previous starter-kit conventions.
+- Understand the full requirement and the full existing implementation before changing anything; do not optimize locally while missing a broader contract, dependency, or workflow constraint.
 - Prefer the simplest design that is correct, extensible, testable, and aligned with existing project patterns.
+- Continuously align the codebase to global patterns, standards, and best practices across backend, frontend, generated artifacts, and tests instead of letting module-local exceptions accumulate.
+- Every meaningful change should reduce mismatch, incomplete logic, duplicate behavior, weak typing, and ad hoc structure where it touches the system.
+- Structure code for maximum cleanliness, reusability, maintainability, strict type safety, extensibility, performance, modularity, robustness, and long-term developer experience.
+- Prefer the solution with the fewest necessary touch points and the strongest shared abstraction, but never at the cost of correctness, clarity, or alignment with current architecture.
+- Preserve working functionality while refactoring. Cleanup is expected to improve consistency and safety without introducing regressions or speculative rewrites.
 - Maintain excellent DI: prefer constructor injection, readonly dependencies, explicit typed inputs, and thin transport layers.
 - Maintain excellent DX: preserve predictable file placement, generated contract flows, route/action helpers, and shared abstractions instead of ad hoc patterns.
 - Maintain excellent performance: avoid duplicate scans, redundant queries, unnecessary rerenders, unnecessary network calls, and unnecessary abstractions.
@@ -32,12 +38,25 @@ If code and docs disagree, trust the code, then fix the docs in the same task wh
 ## Mandatory Workflow
 
 1. Inspect the existing implementation, affected modules, related tests, and generated-contract flow before making changes.
-2. Reuse existing module services, requests, DTOs, queries, commands, handlers, responders, composables, and base UI primitives before introducing anything new.
-3. Keep changes focused, typed, and module-local unless the concern is genuinely cross-cutting.
-4. Regenerate artifacts whenever backend-owned contracts, routes, channels, providers, listeners, or enums change.
-5. Run the required quality gates after every change.
-6. Update `AGENTS.md` whenever architecture, workflows, or enforcement rules change.
-7. Do not stop at analysis. Deliver the finished implementation, verification, and cleanup unless the user explicitly redirects you.
+2. Confirm the actual requirement, invariants, and user-visible behavior that must remain correct before choosing an implementation approach.
+3. Reuse existing module services, requests, DTOs, queries, commands, handlers, responders, composables, and base UI primitives before introducing anything new.
+4. Choose the most efficient clean change that improves global consistency and minimizes future touch points, not just the shortest local patch.
+5. Keep changes focused, typed, and module-local unless the concern is genuinely cross-cutting.
+6. Regenerate artifacts whenever backend-owned contracts, routes, channels, providers, listeners, or enums change.
+7. Run the required quality gates after every change and treat `composer generate-and-cleanup` as a mandatory zero-error, zero-warning completion gate.
+8. Update `AGENTS.md` whenever architecture, workflows, or enforcement rules change.
+9. Do not stop at analysis. Deliver the finished implementation, verification, and cleanup unless the user explicitly redirects you.
+
+## Global Alignment Standard
+
+- Backend, frontend, generated contracts, tests, and docs must converge on one consistent canonical implementation for each concern.
+- Do not leave known mismatch, duplicate semantics, inconsistent naming, incomplete logic, or parallel contract shapes in place when the current task touches them.
+- Prefer direct cleanup over compatibility shims unless persisted data or external consumers require an explicit transition.
+- Use backend-owned DTOs, enums, route helpers, realtime payloads, and generated contracts as the canonical contract surface. Do not redefine them manually in frontend or feature-local code.
+- Shared concerns must use shared abstractions. Module-specific concerns must remain module-local. Do not duplicate cross-cutting behavior in feature modules and do not prematurely move feature-specific logic into shared layers.
+- Refactors must improve consistency across modules, not create a stronger pattern in one module while leaving newly introduced divergence elsewhere in the touched scope.
+- Any cleanup that changes structure must keep strict typing intact end to end: request DTOs, handlers, resources, generated types, composables, page props, tests, and runtime parsing.
+- When choosing between alternatives, prefer the one that most clearly strengthens long-term maintainability, explicit contracts, and safe extension paths.
 
 ## Agent Workflow Protocol (MANDATORY)
 
@@ -46,14 +65,18 @@ Before writing ANY code, agents MUST follow this protocol:
 1. Understanding Phase (REQUIRED)
     - Read First: Never assume. Read all related files, understand the full context.
     - Trace Dependencies: Map all files, services, events, and components that will be affected.
+    - Validate Requirements: Confirm the exact requirement, expected runtime behavior, generated-contract implications, and non-functional constraints before designing a change.
 2. Planning Phase (REQUIRED)
     - Design First: Outline the solution architecture before coding.
     - Impact Analysis: List all files that need changes (backend, frontend, tests, docs).
+    - Alignment Check: Compare the intended change to existing global patterns and identify any touched mismatch, duplicate logic, or incomplete contract that should be cleaned up in the same pass.
 3. Implementation Phase
     - One Change at a Time: Make focused, atomic changes.
     - Follow Patterns: Match existing conventions exactly.
+    - Raise The Bar: Leave touched code more consistent, more strictly typed, and less duplicated than you found it.
 4. Verification Phase
     - Run Quality Gate: `composer generate-and-cleanup` after every change.
+    - Zero-Warning Rule: Do not consider the task complete while `composer generate-and-cleanup` reports errors or warnings that can be resolved within the repository.
 5. Completion Criteria
     - All tests pass, no dead code/TODOs remain, and `AGENTS.md` is updated if applicable.
 
@@ -818,6 +841,8 @@ composer qa:check
 ```
 
 If backend route, enum, DTO, channel, provider, gate, listener, or module-registry contracts changed, `composer generate` is mandatory before considering the task complete.
+
+`composer generate-and-cleanup` must finish without unresolved errors or warnings before a task is considered complete.
 
 ## CI Compatibility
 
