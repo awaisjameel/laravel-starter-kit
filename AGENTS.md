@@ -98,7 +98,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 ## Current Stack
 
 - PHP: `^8.4`
-- Laravel: `^12.50`
+- Laravel: `^13.0`
 - Inertia Laravel: `^2.0.21`
 - Reverb: `^1.8`
 - Sanctum: `^4.3.1`

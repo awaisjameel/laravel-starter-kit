@@ -1,6 +1,6 @@
 # Laravel Modular Inertia Starter Kit
 
-A Laravel 12 + Inertia + Vue 3 starter kit with strict typed contracts from backend DTOs to frontend TypeScript.
+A Laravel 13 + Inertia + Vue 3 starter kit with strict typed contracts from backend DTOs to frontend TypeScript.
 
 ## Requirements
 
