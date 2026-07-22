@@ -31,6 +31,34 @@ describe('useApiQuery', () => {
         expect(secondQuery.data.value).toEqual({ count: 1 })
     })
 
+    it('never fetches or caches while the server renders', async () => {
+        vi.stubEnv('SSR', true)
+
+        try {
+            const queryFn = vi.fn(async () => ({ count: 1 }))
+
+            const query = useApiQuery({
+                key: 'ssr-query',
+                queryFn
+            })
+
+            await nextTick()
+            await query.refresh()
+
+            expect(queryFn).not.toHaveBeenCalled()
+            expect(query.isLoading.value).toBe(false)
+
+            // The SSR process is shared by every visitor, so nothing may be written
+            // to (or read back from) the module-level cache while it renders.
+            setApiQueryCacheData<number[]>('ssr-query', [1])
+            expect(getApiQueryCacheData<number[]>('ssr-query')).toBeUndefined()
+        } finally {
+            vi.unstubAllEnvs()
+        }
+
+        expect(getApiQueryCacheData<number[]>('ssr-query')).toBeUndefined()
+    })
+
     it('retries failed requests and resolves when a retry succeeds', async () => {
         const queryFn = vi
             .fn<() => Promise<{ ok: boolean }>>()

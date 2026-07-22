@@ -1,4 +1,5 @@
-import { AppPageProps } from '@/types/index'
+import type { AppPageProps } from '@/types/index'
+import type { createHeadManager, Page, Router } from '@inertiajs/core'
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -17,13 +18,18 @@ declare module 'vite/client' {
     }
 }
 
+// Interface merging, so this only has to add what the app contributes: Inertia's
+// own `PageProps` members come from the declaration being merged into. Listing
+// `PageProps` as a supertype here would resolve to this same augmentation and be
+// circular, so the empty body is the point rather than an oversight.
 declare module '@inertiajs/core' {
-    interface PageProps extends InertiaPageProps, AppPageProps {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    interface PageProps extends AppPageProps {}
 }
 
 declare module '@vue/runtime-core' {
     interface ComponentCustomProperties {
-        $inertia: typeof Router
+        $inertia: Router
         $page: Page
         $headManager: ReturnType<typeof createHeadManager>
     }

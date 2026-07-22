@@ -57,7 +57,11 @@ final class HandleInertiaRequests extends Middleware
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
-                'location' => $request->url(),
+                // `fullUrl()` keeps the query string. Server-driven listing pages
+                // rehydrate their table state (page, search, sort) from this value,
+                // so dropping the query would silently reset a shared or bookmarked
+                // URL back to the default sort while the data stayed filtered.
+                'location' => $request->fullUrl(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

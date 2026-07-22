@@ -10,7 +10,13 @@ import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 
-import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
+import {
+    autoImportDirs,
+    autoImportImports,
+    componentAutoImportOptions,
+    iconComponentPrefix,
+    inertiaComponentResolver
+} from './frontend-auto-import.config.mjs'
 
 const ssrEntry = 'resources/js/ssr.ts'
 const jsDirectory = fileURLToPath(new URL('./resources/js', import.meta.url))
@@ -55,21 +61,12 @@ export default defineConfig({
             autoInstall: true
         }),
         Components({
-            deep: true,
-            extensions: ['vue'],
-            collapseSamePrefixes: true,
-            directoryAsNamespace: true,
-            globalNamespaces: ['components'],
+            ...componentAutoImportOptions,
             dts: 'resources/js/types/components.d.ts',
-            dirs: ['resources/js/components', 'resources/js/layouts', 'resources/js/modules'],
             resolvers: [
-                (componentName) => {
-                    if (['Link', 'Head'].includes(componentName)) {
-                        return { name: componentName, from: '@inertiajs/vue3' }
-                    }
-                },
+                inertiaComponentResolver,
                 IconsResolver({
-                    prefix: 'Icon'
+                    prefix: iconComponentPrefix
                 })
             ]
         })

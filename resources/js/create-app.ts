@@ -4,7 +4,7 @@ import { Fragment, h } from 'vue'
 import { ZiggyVue } from 'ziggy-js'
 import AppToaster from './components/base/toast/AppToaster.vue'
 import type { AppPageProps } from './types'
-import { bindGlobalRouteHelper, toZiggyVueConfig } from './utils/ziggy'
+import { toZiggyVueConfig } from './utils/ziggy'
 
 interface CreateAppInstanceOptions {
     create: CreateAppFunction<Element>
@@ -15,13 +15,11 @@ interface CreateAppInstanceOptions {
 
 // Single source of truth for the root tree and the plugins both entries install,
 // so the client and the server render the same component tree and hydration
-// cannot drift. Pinia is created per instance because the SSR process is
-// long-lived and must not share store state between requests.
-export const createAppInstance = ({ create, page, plugin, ziggy }: CreateAppInstanceOptions): VueApp => {
-    bindGlobalRouteHelper(ziggy)
-
-    return create({ render: () => h(Fragment, [page(), h(AppToaster)]) })
+// cannot drift. Everything request-scoped is bound per instance because the SSR
+// process is long-lived: Pinia must not share store state between requests, and
+// `ZiggyVue` keeps `route()` on this app rather than on a shared global.
+export const createAppInstance = ({ create, page, plugin, ziggy }: CreateAppInstanceOptions): VueApp =>
+    create({ render: () => h(Fragment, [page(), h(AppToaster)]) })
         .use(plugin)
         .use(ZiggyVue, toZiggyVueConfig(ziggy))
         .use(createPinia())
-}

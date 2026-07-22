@@ -38,7 +38,13 @@ const DEFAULT_STALE_TIME = 30_000
 const DEFAULT_RETRY_COUNT = 1
 const DEFAULT_RETRY_DELAY_MS = 300
 
+// Query results are per-visitor data. The SSR process is long-lived and shared by
+// every request, so this module-level cache must stay empty there — otherwise one
+// user's response would be served to the next request that renders the same key.
+// The same reasoning keeps `useToast` client-only and Pinia per-app-instance.
 const queryCache = new Map<string, QueryCacheEntry<unknown>>()
+
+const isServerRendering = (): boolean => import.meta.env.SSR === true
 
 const toCacheKey = (key: ApiCacheKey): string => {
     if (Array.isArray(key)) {
@@ -90,6 +96,10 @@ export const invalidateApiQueryCache = (...keys: ApiCacheKey[]): void => {
 }
 
 export const getApiQueryCacheData = <TData>(key: ApiCacheKey): TData | undefined => {
+    if (isServerRendering()) {
+        return undefined
+    }
+
     const cacheEntry = queryCache.get(toCacheKey(key))
     return cacheEntry?.data as TData | undefined
 }
@@ -98,6 +108,10 @@ export const setApiQueryCacheData = <TData>(
     key: ApiCacheKey,
     valueOrUpdater: TData | ((current: TData | undefined) => TData | undefined)
 ): TData | undefined => {
+    if (isServerRendering()) {
+        return undefined
+    }
+
     const serializedKey = toCacheKey(key)
     const currentValue = queryCache.get(serializedKey)?.data as TData | undefined
     const nextValue =
@@ -128,6 +142,14 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
     const resolveCacheKey = (): string => toCacheKey(toValue(options.key))
 
     const execute = async ({ force = false }: { force?: boolean } = {}): Promise<TSelected | undefined> => {
+        // Never fetch or cache while the server renders. Page data already arrives
+        // through Inertia props, and a request issued here would both run without a
+        // request context and write another visitor's payload into `queryCache`.
+        if (isServerRendering()) {
+            isLoading.value = false
+            return data.value
+        }
+
         const cacheKey = resolveCacheKey()
 
         if (!force && !resolveEnabled(options.enabled)) {

@@ -1,6 +1,5 @@
 import type { FormValuesFromData } from '@/lib/forms'
 import type { ProfileUpdateData } from '@/types/app-data'
-import { defineFormFields } from '@/types/base-ui'
 
 export type ProfileFormValues = FormValuesFromData<ProfileUpdateData>
 

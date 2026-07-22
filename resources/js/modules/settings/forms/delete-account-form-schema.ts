@@ -1,6 +1,5 @@
 import type { FormValuesFromData } from '@/lib/forms'
 import type { ProfileDestroyData } from '@/types/app-data'
-import { defineFormFields } from '@/types/base-ui'
 
 export type DeleteAccountFormValues = FormValuesFromData<ProfileDestroyData>
 

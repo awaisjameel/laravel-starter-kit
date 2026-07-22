@@ -1,6 +1,5 @@
 import type { FormValuesFromData } from '@/lib/forms'
 import type { RegisterUserData } from '@/types/app-data'
-import { defineFormFields } from '@/types/base-ui'
 
 export type RegisterFormValues = FormValuesFromData<
     RegisterUserData,

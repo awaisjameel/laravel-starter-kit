@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import { autoImportRestrictedPaths, autoImportRestrictedPatterns } from './frontend-auto-import.config.mjs'
+import { autoImportRestrictedPaths, autoImportRestrictedPatterns, autoImportSourceGlobs } from './frontend-auto-import.config.mjs'
 
 const modulesRoot = path.resolve(process.cwd(), 'resources/js/modules')
 
@@ -36,6 +36,9 @@ const baseRestrictedSyntaxSelectors = [
 
 const buildRestrictedSyntaxRule = (extraSelectors = []) => ['error', ...baseRestrictedSyntaxSelectors, ...extraSelectors]
 
+// The `@typescript-eslint` variant is what understands `allowTypeImports`, so a
+// shared layer can keep exporting types that consumers import explicitly while
+// its runtime exports stay auto-import-only.
 const buildNoRestrictedImportsRule = (extraPatterns = []) => [
     'error',
     {
@@ -44,15 +47,60 @@ const buildNoRestrictedImportsRule = (extraPatterns = []) => [
     }
 ]
 
+const restrictedImportRules = (extraPatterns = []) => ({
+    'no-restricted-imports': 'off',
+    '@typescript-eslint/no-restricted-imports': buildNoRestrictedImportsRule(extraPatterns)
+})
+
 const moduleBoundaryConfigs = frontendModuleNames.map((moduleName) => ({
     files: [`resources/js/modules/${moduleName}/**/*.{ts,vue}`],
+    rules: restrictedImportRules([
+        {
+            group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
+            message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`
+        }
+    ])
+}))
+
+// Files inside the auto-imported directories define those symbols; they wire up
+// their own siblings with explicit imports rather than depending on auto-import
+// resolving back into the directory it is scanning.
+const autoImportSourceConfig = {
+    files: autoImportSourceGlobs,
     rules: {
-        'no-restricted-imports': buildNoRestrictedImportsRule([
+        'no-restricted-imports': 'off',
+        '@typescript-eslint/no-restricted-imports': 'off'
+    }
+}
+
+const testFileGlobs = ['resources/js/**/__tests__/**/*.ts', 'resources/js/**/*.test.ts']
+
+// Specs must be able to name the real thing: component auto-registration only
+// applies to compiled SFC templates, and spying needs a module namespace object.
+// Module boundaries are still enforced below.
+const testFileConfig = {
+    files: testFileGlobs,
+    rules: {
+        'no-restricted-imports': 'off',
+        '@typescript-eslint/no-restricted-imports': 'off'
+    }
+}
+
+const moduleTestBoundaryConfigs = frontendModuleNames.map((moduleName) => ({
+    files: testFileGlobs.map((glob) => glob.replace('resources/js/', `resources/js/modules/${moduleName}/`)),
+    rules: {
+        '@typescript-eslint/no-restricted-imports': [
+            'error',
             {
-                group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
-                message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`
+                patterns: [
+                    {
+                        group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
+                        message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`,
+                        allowTypeImports: true
+                    }
+                ]
             }
-        ])
+        ]
     }
 }))
 
@@ -93,10 +141,13 @@ export default defineConfigWithVueTs(
             'vue/multi-word-component-names': 'off',
             '@typescript-eslint/no-explicit-any': 'error',
             'no-restricted-syntax': buildRestrictedSyntaxRule(),
-            'no-restricted-imports': buildNoRestrictedImportsRule()
+            ...restrictedImportRules()
         }
     },
     ...moduleBoundaryConfigs,
     pageDataAccessGuardConfig,
+    autoImportSourceConfig,
+    testFileConfig,
+    ...moduleTestBoundaryConfigs,
     prettier
 )

@@ -78,3 +78,27 @@ The following files consume it and must stay aligned:
 - `vite.config.ts`
 - `vitest.config.ts`
 - `eslint.config.js`
+
+It exports two contracts:
+
+- **Symbol auto-import** (`autoImportDirs`, `autoImportImports`) - drives `unplugin-auto-import` in
+  `vite.config.ts` and `vitest.config.ts`, and the restricted-import rules in `eslint.config.js`.
+- **Component auto-registration** (`componentAutoImportOptions`, `inertiaComponentResolver`,
+  `iconComponentPrefix`) - drives `unplugin-vue-components` in both `vite.config.ts` and
+  `vitest.config.ts`, so a mounted component resolves `Ui*`, `Base*`, and module components in
+  tests exactly as it does at runtime. Only stub children that need a live runtime dependency
+  (for example `Link`, which needs the Inertia router).
+
+### Import rules
+
+`eslint.config.js` uses `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`:
+
+- Runtime values from `@/composables/**`, `@/stores/**`, `@/lib/**`, `@/utils/**`,
+  `@/modules/**/composables/**`, and `@/modules/**/helpers/**` must come from auto-import.
+- `import type { ... }` from those paths stays legal, because auto-import only provides values.
+- Files _inside_ those directories are exempt: they wire up their own siblings with explicit
+  imports instead of relying on auto-import resolving back into the directory being scanned.
+
+Auto-imported symbols used only inside a `<template>` are not typed by `vue-tsc` (the generated
+`declare module 'vue'` augmentation does not merge into `@vue/runtime-core`). Derive a
+`computed` in `<script setup>` instead of calling an auto-imported helper directly in markup.

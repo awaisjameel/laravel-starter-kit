@@ -12,7 +12,6 @@ declare global {
   const apiRequest: typeof import('../composables/useApiClient').apiRequest
   const appRoutes: typeof import('@/routes/app').default
   const authRoutes: typeof import('@/routes/auth').default
-  const bindGlobalRouteHelper: typeof import('../utils/ziggy').bindGlobalRouteHelper
   const buildDashboardBreadcrumbs: typeof import('@/config/breadcrumbs').buildDashboardBreadcrumbs
   const buildSettingsAppearanceBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsAppearanceBreadcrumbs
   const buildSettingsPasswordBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsPasswordBreadcrumbs
@@ -29,6 +28,7 @@ declare global {
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const defineFormContract: typeof import('../lib/forms').defineFormContract
+  const defineFormFields: typeof import('../lib/forms').defineFormFields
   const disconnectRealtime: typeof import('../lib/realtime/config').disconnectRealtime
   const effectScope: typeof import('vue').effectScope
   const formatDate: typeof import('../lib/utils').formatDate
@@ -180,7 +180,6 @@ declare module 'vue' {
     readonly apiRequest: UnwrapRef<typeof import('../composables/useApiClient')['apiRequest']>
     readonly appRoutes: UnwrapRef<typeof import('@/routes/app')['default']>
     readonly authRoutes: UnwrapRef<typeof import('@/routes/auth')['default']>
-    readonly bindGlobalRouteHelper: UnwrapRef<typeof import('../utils/ziggy')['bindGlobalRouteHelper']>
     readonly buildDashboardBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildDashboardBreadcrumbs']>
     readonly buildSettingsAppearanceBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsAppearanceBreadcrumbs']>
     readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsPasswordBreadcrumbs']>
@@ -197,6 +196,7 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly defineFormContract: UnwrapRef<typeof import('../lib/forms')['defineFormContract']>
+    readonly defineFormFields: UnwrapRef<typeof import('../lib/forms')['defineFormFields']>
     readonly disconnectRealtime: UnwrapRef<typeof import('../lib/realtime/config')['disconnectRealtime']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly formatDate: UnwrapRef<typeof import('../lib/utils')['formatDate']>

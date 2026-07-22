@@ -315,6 +315,11 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Passing `AppPageProps` as the type argument is what keeps `props.initialPage.props` typed; do not fall back to casting individual shared props.
 - Both entries build their Vue app through `resources/js/create-app.ts`, so the root tree (`App` plus `AppToaster`) and the installed plugins are declared once and cannot drift apart. Register new plugins and root-level components there, never in a single entry.
 - Pinia is created per app instance rather than at module scope, so the long-lived SSR process never shares store state between requests.
+- Nothing request-scoped may be written to a module-level binding or to `globalThis`. The SSR process is long-lived and serves concurrent requests, so a per-request global is overwritten by whichever request rendered last. Current applications of this rule:
+    - Pinia is per app instance (`create-app.ts`)
+    - `route()` is installed per app instance by `ZiggyVue`; there is deliberately no `globalThis.route` binding
+    - `useToast` drops toasts under SSR
+    - `useApiQuery` never reads, writes, or fetches into its module-level cache under SSR
 - `app.ts` hydrates when Inertia marks the root element with `data-server-rendered` and mounts a fresh app otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
 - `resources/js/ssr.ts` must stay a bare top-level `createInertiaApp(...)` statement. `@inertiajs/vite` rewrites it into the render function used by the dev SSR endpoint and the `createServer` boot used by production builds. Do not reintroduce a manual `createServer` wrapper.
 - `app.ts` passes Inertia a CSP `nonce` read from the `meta[name="csp-nonce"]` tag rendered by `resources/views/app.blade.php`, so Inertia's injected style elements satisfy `SecurityHeaders`.
@@ -360,20 +365,31 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/modules/**/composables/**`
     - `resources/js/modules/**/helpers/**`
 - Module-local `forms/**` and `contracts/**` are not auto-imported.
+- `frontend-auto-import.config.mjs` owns two contracts:
+    - symbol auto-import (`autoImportDirs`, `autoImportImports`, restricted paths/patterns)
+    - component auto-registration (`componentAutoImportOptions`, `inertiaComponentResolver`, `iconComponentPrefix`)
 - Vue components are auto-registered from:
     - `resources/js/components`
     - `resources/js/layouts`
     - `resources/js/modules`
+- `vitest.config.ts` installs the same `unplugin-vue-components` and `unplugin-icons` setup as `vite.config.ts`, so a mounted component resolves `Ui*`, `Base*`, and module components exactly as it does at runtime. Only stub children that need a live runtime dependency, such as `Link`.
+- Component auto-registration only rewrites compiled SFC templates. A runtime `template` string in a spec still needs an explicit component reference.
+- Auto-imported symbols used only inside a `<template>` are not typed by `vue-tsc`, because the generated `declare module 'vue'` augmentation does not merge into `@vue/runtime-core`. Derive a `computed` in `<script setup>` rather than calling an auto-imported helper directly in markup.
 - Module Vue components are namespace-registered; use tags like `<UsersTable />` and `<UsersDeleteUserDialog />` instead of manual imports.
 - `Link` and `Head` are resolver-provided; do not manually import them.
 - The ESLint config currently enforces:
-    - no direct imports of auto-imported composables/libs/helpers/components
+    - no direct imports of auto-imported composables/stores/libs/utils/helpers/components
     - no cross-module imports between feature modules
     - no inline `fields = [...]` form arrays in pages/components
     - no duplicated navigation arrays in pages/layouts/composables
     - no `fetch(...)` calls inside feature page files
     - no `as unknown as Record<string, unknown>`
     - no explicit any type (`@typescript-eslint/no-explicit-any`)
+- Restricted imports use `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`. Auto-import only provides runtime values, so `import type { ... }` from a restricted path stays legal everywhere.
+- Two scopes are deliberately exempt from the auto-import restriction:
+    - files inside the auto-imported directories themselves (`autoImportSourceGlobs`), which wire up their own siblings with explicit imports instead of relying on auto-import resolving back into the directory being scanned
+    - test files, which must be able to name real components and module namespaces for mounting and spying
+- Feature-module test files still enforce the cross-module boundary rule.
 
 ### Frontend Ownership Rules
 
@@ -504,10 +520,12 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Consume backend-generated contracts from `resources/js/types/app-data.ts`.
 - Do not recreate backend-owned DTOs, enums, realtime payloads, or route payload shapes manually.
 - Prefer `FormValuesFromData<...>` from `resources/js/lib/forms.ts` when form values come from backend DTOs.
-- Prefer `defineFormContract(...)` and `defineFormFields(...)` for all form schemas.
+- Prefer `defineFormContract(...)` and `defineFormFields(...)` for all form schemas. Both live in `resources/js/lib/forms.ts` and are auto-imported; do not import them manually. `resources/js/types/base-ui.ts` keeps the field/schema _types_ only.
 - Prefer `useSchemaResourceForm(...)` over hand-wired form state in page/components when the form matches the shared resource pattern.
 - Use generated route/action helpers rather than hardcoded URLs.
 - Use `useApiQuery`, `useApiMutation`, and `apiRequest` for API-driven state.
+- `useApiQuery` is client-only by design: it never fetches or touches its shared cache during SSR. Server-rendered page data must arrive through Inertia props.
+- Use generated Wayfinder route/action helpers in application code. Ziggy's `route()` is available on the app instance through `ZiggyVue` but is not the canonical route surface.
 - `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
 - `apiRequest` is the canonical place for `X-Socket-ID` propagation.
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
@@ -582,6 +600,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/composables/useServerDataTable.ts`
     - `resources/js/components/base/table/**`
 - Initial query state must be derived via `resolveServerTableInitialQuery(...)`.
+- That derivation reads the request URL from the shared `ziggy.location` prop, which `HandleInertiaRequests::share()` sets from `$request->fullUrl()`. It must keep the query string; `$request->url()` would drop it and silently reset a shared or bookmarked listing URL to the default sort.
 - Current standard server-table query contract:
     - `page: number`
     - `perPage: number`

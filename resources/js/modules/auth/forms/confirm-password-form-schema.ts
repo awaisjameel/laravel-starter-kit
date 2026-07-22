@@ -1,6 +1,5 @@
 import type { FormValuesFromData } from '@/lib/forms'
 import type { ConfirmPasswordData } from '@/types/app-data'
-import { defineFormFields } from '@/types/base-ui'
 
 export type ConfirmPasswordFormValues = FormValuesFromData<ConfirmPasswordData>
 

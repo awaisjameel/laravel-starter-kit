@@ -223,4 +223,27 @@ final class UserManagementTest extends TestCase
                 ->where('users.data.0.email', 'zulu@example.com')
             );
     }
+
+    public function test_shared_location_prop_preserves_the_query_string(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        // Server-driven listing pages rehydrate their table state from this prop.
+        // Without the query string the page would fall back to the default sort
+        // while the rendered rows stayed sorted the way the request asked for.
+        $this->actingAs($admin)
+            ->get('/app/admin/users?search=Sort&sortBy=name&sortDirection=asc&page=1')
+            ->assertInertia(fn (Assert $assert): Assert => $assert
+                ->where('ziggy.location', function (string $location): bool {
+                    parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
+
+                    return parse_url($location, PHP_URL_PATH) === '/app/admin/users' && $query === [
+                        'page' => '1',
+                        'search' => 'Sort',
+                        'sortBy' => 'name',
+                        'sortDirection' => 'asc',
+                    ];
+                })
+            );
+    }
 }

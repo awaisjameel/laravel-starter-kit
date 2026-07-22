@@ -1,8 +1,6 @@
 import type { FormValuesFromData } from '@/lib/forms'
-import { capitalize, getEnumOptions } from '@/lib/utils'
 import type { CreateUserData } from '@/types/app-data'
 import { UserRole } from '@/types/app-data'
-import { defineFormFields } from '@/types/base-ui'
 
 export type UserFormValues = FormValuesFromData<
     CreateUserData,

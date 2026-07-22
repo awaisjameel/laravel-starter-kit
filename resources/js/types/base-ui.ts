@@ -32,8 +32,6 @@ export interface FormSectionSchema<TForm extends object = Record<string, unknown
     fields: Array<FormFieldSchema<TForm>>
 }
 
-export const defineFormFields = <TForm extends object>(fields: Array<FormFieldSchema<TForm>>): Array<FormFieldSchema<TForm>> => fields
-
 export type SortDirection = 'asc' | 'desc'
 
 export interface ServerTableQuery<TSort extends string = string> {
