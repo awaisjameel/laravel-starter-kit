@@ -98,21 +98,35 @@ For every non-trivial change, explicitly verify all affected layers before consi
 ## Current Stack
 
 - PHP: `^8.4`
-- Laravel: `^13.0`
-- Inertia Laravel: `^2.0.21`
-- Reverb: `^1.8`
-- Sanctum: `^4.3.1`
-- Wayfinder: `^0.1.14`
-- Ziggy: `^2.6.1`
-- Spatie Laravel Data: `^4.20`
-- Spatie TypeScript Transformer: `^2.6`
-- Vue: `^3.5.29`
-- TypeScript: `^5.9.3`
-- Vite: `^7.3.1`
-- Tailwind CSS: `^4.2.1`
+- Laravel: `^13.21`
+- Inertia Laravel: `^3.1`
+- Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.6`
+- Reverb: `^1.11`
+- Sanctum: `^4.3.3`
+- Wayfinder: `^0.1.20`
+- Ziggy: `^2.6.3`
+- Spatie Laravel Data: `^4.23`
+- Spatie TypeScript Transformer: `^3.3`
+- PHPUnit: `^13.2`
+- PHPStan/Larastan: `^2.2` / `^3.10`
+- Rector: `^2.5`
+- Vue: `^3.5.40`
+- TypeScript: `^6.0`
+- Vite: `^8.1` (Rolldown bundler)
+- `laravel-vite-plugin`: `^3.1`
+- Tailwind CSS: `^4.3`
+- Pinia: `^4.0`
+- Icons: `@lucide/vue` `^1.25` (the `lucide-vue-next` package is deprecated)
 - Node: `>=24.1.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
+
+### Version Constraints Worth Knowing
+
+- TypeScript must stay on `6.x`. TypeScript 7 (the native compiler) has no stable programmatic API yet, so `vue-tsc`/Volar cannot use it and `typescript-eslint` caps at `<6.1.0`.
+- `concurrently` 10 pins a vulnerable `shell-quote`. `package.json` carries an `overrides` entry forcing `shell-quote ^1.10.0`; drop it once upstream repins.
+- `optionalDependencies` pin the Linux x64 native binaries used by CI/Docker. Vite 8 bundles with Rolldown, so the binding is `@rolldown/binding-linux-x64-gnu` (not `@rollup/rollup-*`).
+- Those three entries must use exact versions that match the resolved core packages (`rolldown`, `lightningcss`, `@tailwindcss/oxide`). A caret range can hoist a newer binding than the core package expects and break the Linux build. Re-check them after any Vite or Tailwind bump.
 
 ## Current Runtime And Tooling
 
@@ -128,7 +142,11 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `php artisan pail --timeout=0`
     - `php artisan inertia:start-ssr`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
-- `pm2.config.cjs` currently manages production-style queue workers, Reverb, and the scheduler.
+- `pm2.config.cjs` currently manages production-style queue workers, Reverb, the Inertia SSR server, and the scheduler.
+- SSR is served two different ways and both are wired up:
+    - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
+    - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/ssr.js` and `php artisan inertia:start-ssr` serves it.
+- `INERTIA_SSR_ENABLED` in `.env.example` toggles both paths.
 
 ## Canonical Architecture
 
@@ -138,6 +156,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - `bootstrap/providers.php` only lists:
     - `App\Providers\AppServiceProvider`
     - `App\Providers\AuthServiceProvider`
+    - `App\Providers\TypeScriptTransformerServiceProvider`
 - Module providers are not added there manually; they are auto-registered during app boot through `App\Modules\Shared\Support\ModuleRegistry::providerClasses(...)`.
 - Web middleware appended in `bootstrap/app.php`:
     - `App\Http\Middleware\HandleAppearance`
@@ -289,8 +308,17 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 - App entry points:
     - `resources/js/app.ts` - Client-side entry
-    - `resources/js/ssr.ts` - SSR entry (do not initialize Echo here)
-- Inertia page resolution currently loads Vue files from `resources/js/modules/**/*.vue`.
+    - `resources/js/ssr.ts` - SSR entry
+    - `resources/js/create-app.ts` - Root tree and plugins shared by both entries
+- Both entries call `createInertiaApp<AppPageProps>` with the same `pages` shorthand. `@inertiajs/vite` compiles it into an `import.meta.glob` resolver over `resources/js/modules/**/*.vue`, and the `transform` strips the leading `modules/` from the backend-supplied component name (`modules/users/pages/Index`).
+- That `pages` object is rewritten by a static AST transform, so it must stay an inline object literal in each entry. It cannot be hoisted into a shared constant, and the duplication between the two entries is intentional.
+- Passing `AppPageProps` as the type argument is what keeps `props.initialPage.props` typed; do not fall back to casting individual shared props.
+- Both entries build their Vue app through `resources/js/create-app.ts`, so the root tree (`App` plus `AppToaster`) and the installed plugins are declared once and cannot drift apart. Register new plugins and root-level components there, never in a single entry.
+- Pinia is created per app instance rather than at module scope, so the long-lived SSR process never shares store state between requests.
+- `app.ts` hydrates when Inertia marks the root element with `data-server-rendered` and mounts a fresh app otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
+- `resources/js/ssr.ts` must stay a bare top-level `createInertiaApp(...)` statement. `@inertiajs/vite` rewrites it into the render function used by the dev SSR endpoint and the `createServer` boot used by production builds. Do not reintroduce a manual `createServer` wrapper.
+- `app.ts` passes Inertia a CSP `nonce` read from the `meta[name="csp-nonce"]` tag rendered by `resources/views/app.blade.php`, so Inertia's injected style elements satisfy `SecurityHeaders`.
+- The root Blade template uses `data-inertia` (not `inertia`) on head elements, per Inertia v3.
 - Feature pages live in `resources/js/modules/**/pages`.
 - Feature forms live in `resources/js/modules/**/forms`.
 - Feature-specific components live in `resources/js/modules/**/components`.
@@ -314,6 +342,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
+- Icons come from `@lucide/vue`. It exports unsuffixed names only, so use `ChevronLeft`, not `ChevronLeftIcon`. The `LucideIcon` type backs `NavItem.icon` in `resources/js/types/index.d.ts`.
+- Iconify sets are also available through `unplugin-icons` using the `Icon*` component prefix.
 
 ### Frontend Automation Contracts
 
@@ -448,7 +478,14 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Use DTOs and enums instead of untyped arrays or bounded strings whenever data crosses layers.
 - Any backend DTO or enum consumed by the frontend must be exported through the TypeScript transformer.
 - Prefer Spatie Data classes for payload/query/page contracts.
-- Annotate frontend-facing DTOs/enums with `#[TypeScript]`.
+- Annotate frontend-facing DTOs/enums with `#[TypeScript]`. Enums under `app/**` are collected regardless of the attribute.
+- TypeScript generation is configured in `app/Providers/TypeScriptTransformerServiceProvider.php`. Transformer v3 has no config file; do not reintroduce `config/typescript-transformer.php`.
+- That provider is the single place that owns the generated contract surface. Current settings:
+    - `DataClassTransformer(nullableAsOptional: true)` so nullable DTO properties stay `foo?: T` rather than `T | null`
+    - `EnumTransformer(useUnionEnums: false)` so PHP enums become native TypeScript enums
+    - `FlatModuleWriter('app-data.ts')` into `resources/js/types`, keeping one flat ES module
+    - `withoutManifest()` so no transformer manifest file lands in `resources/js/types`
+- Route and controller type generation from the transformer stays off. Wayfinder and Ziggy own that surface.
 - Current shared auth user contract is `App\Modules\Shared\Data\UserViewData|null`; do not serialize the raw user model into Inertia props.
 - Request DTO hydration must be the canonical transport boundary.
 - Services, queries, commands, and handlers must accept DTOs or explicit typed parameters, never mixed arrays.
@@ -508,8 +545,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 ### Frontend
 
-- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts` which is called from `resources/js/app.ts`.
-- Do not initialize Echo in `resources/js/ssr.ts`.
+- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts`. Both `resources/js/app.ts` and `resources/js/ssr.ts` call it.
+- `configureRealtime()` is SSR-aware: under `import.meta.env.SSR` it configures the `null` broadcaster, so realtime composables resolve to inert channels instead of throwing or opening a WebSocket while the server renders. Never make a realtime composable depend on a live connection at `setup()` time.
 - Shared realtime frontend helpers live in:
     - `resources/js/lib/realtime/config.ts`
     - `resources/js/lib/realtime/channels.ts`
@@ -561,6 +598,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 - Global toasts are handled via `useToast` + `AppToaster`.
 - Inertia flash props (`message`, `error`, `status`) are bridged to toasts through `useFlashToasts`.
+- Toasts are client-only: `useToast` drops them during SSR and `AppToaster` renders none until it is mounted, which keeps the server output and the first client render identical. Do not remove either guard without moving the toast state out of module scope.
 - Use inline messages only for persistent instructional content that should not be transient.
 
 ## Error And Exception Contract

@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import type { UserViewData } from '@/types/app-data'
-    import { LogOut, Settings } from 'lucide-vue-next'
+    import { LogOut, Settings } from '@lucide/vue'
 
     interface Props {
         user: UserViewData

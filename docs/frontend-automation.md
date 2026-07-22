@@ -33,18 +33,19 @@ Use `--no-file-prompts` to skip per-file confirmations and generate all planned 
 Generated frontend files:
 
 - `--scaffold=page`:
-  - `resources/js/modules/<module>/forms/<page>-form-schema.ts`
-  - `resources/js/modules/<module>/pages/<Page>.vue`
-  - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
+    - `resources/js/modules/<module>/forms/<page>-form-schema.ts`
+    - `resources/js/modules/<module>/pages/<Page>.vue`
+    - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
 - `--scaffold=crud` (when page generation is enabled):
-  - `resources/js/modules/<module>/contracts/<page>-crud.ts`
-  - `resources/js/modules/<module>/forms/<page>-form-schema.ts`
-  - `resources/js/modules/<module>/components/Table.vue`
-  - `resources/js/modules/<module>/components/<Page>FormDialog.vue`
-  - `resources/js/modules/<module>/components/<Page>DeleteDialog.vue`
-  - `resources/js/modules/<module>/components/<Page>DetailsDialog.vue`
-  - `resources/js/modules/<module>/pages/<Page>.vue`
-  - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
+    - `resources/js/modules/<module>/contracts/<page>-crud.ts`
+    - `resources/js/modules/<module>/contracts/dashboard-nav.ts`
+    - `resources/js/modules/<module>/forms/<page>-form-schema.ts`
+    - `resources/js/modules/<module>/components/Table.vue`
+    - `resources/js/modules/<module>/components/<Page>FormDialog.vue`
+    - `resources/js/modules/<module>/components/<Page>DeleteDialog.vue`
+    - `resources/js/modules/<module>/components/<Page>DetailsDialog.vue`
+    - `resources/js/modules/<module>/pages/<Page>.vue`
+    - `resources/js/modules/<module>/pages/__tests__/<Page>.test.ts`
 
 Generated backend additions (fresh module mode):
 
@@ -52,10 +53,16 @@ Generated backend additions (fresh module mode):
 - `app/Modules/<Module>/Http/Controllers/<Page>ApiController.php` (`api`)
 - `app/Modules/<Module>/Http/Requests/<Page>StoreRequest.php`
 - `app/Modules/<Module>/Http/Requests/<Page>UpdateRequest.php`
-- `app/Modules/<Module>/Data/<Page>StoreData.php`
-- `app/Modules/<Module>/Services/<Page>Service.php`
+- `app/Modules/<Module>/Data/<Module><Page>StoreData.php`
+- `app/Modules/<Module>/Data/<Module><Page>ListItemData.php`
+- `app/Modules/<Module>/Data/<Module><Page>PageData.php`
+- `app/Modules/<Module>/Queries/<Model>Queries.php`
+- `app/Modules/<Module>/Commands/<Model>Commands.php`
+- `app/Modules/<Module>/Handlers/**` (`crud-api`)
+- `app/Modules/<Module>/Manifests/<Page>Resource.php` (`crud`)
 - `app/Modules/<Module>/Routes/web.php` (`crud`)
 - `app/Modules/<Module>/Routes/api.php` (`api`)
+- `app/Modules/<Module>/Routes/gates.php` (`crud`, role-restricted app routes)
 - `app/Modules/<Module>/Http/Resources/<Page>Resource.php` (`api`, optional)
 - `app/Models/<Model>.php`
 - `database/migrations/*_create_<table>_table.php`

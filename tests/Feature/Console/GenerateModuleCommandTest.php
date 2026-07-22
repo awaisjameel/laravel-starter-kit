@@ -150,6 +150,11 @@ final class GenerateModuleCommandTest extends TestCase
         $dashboardNavContents = file_get_contents($basePath.'/resources/js/modules/billing/contracts/dashboard-nav.ts');
         $dashboardNavContents = is_string($dashboardNavContents) ? $dashboardNavContents : '';
         $this->assertStringContainsString('href: appRoutes.billing.index.url()', $dashboardNavContents);
+        $this->assertStringContainsString("from '@lucide/vue'", $dashboardNavContents);
+
+        $crudPageContents = file_get_contents($basePath.'/resources/js/modules/billing/pages/Index.vue');
+        $crudPageContents = is_string($crudPageContents) ? $crudPageContents : '';
+        $this->assertStringContainsString("from '@lucide/vue'", $crudPageContents);
     }
 
     public function test_api_mode_scaffolds_api_assets_and_skips_frontend_assets(): void

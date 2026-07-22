@@ -282,34 +282,34 @@ final class GenerateModuleCommand extends Command
      */
     private function resolveRouteConfiguration(ModuleName $moduleName, string $routeProfile, array $allowedRoles, ?CrudResourceManifest $crudResourceManifest = null): array
     {
-        $defaultPrefix = $crudResourceManifest instanceof CrudResourceManifest
-            ? $crudResourceManifest->routePrefix
+        [$defaultPrefix, $defaultNamePrefix, $defaultMiddleware] = $crudResourceManifest instanceof CrudResourceManifest
+            ? [
+                $crudResourceManifest->routePrefix,
+                $crudResourceManifest->routeNamePrefix,
+                $crudResourceManifest->middleware,
+            ]
             : match ($routeProfile) {
                 RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
-                    ? 'app/admin/'.$moduleName->frontendKebab
-                    : 'app/'.$moduleName->frontendKebab,
-                RouteProfile::PUBLIC => $moduleName->frontendKebab,
-                RouteProfile::CUSTOM => 'app/'.$moduleName->frontendKebab,
-                default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
-            };
-
-        $defaultNamePrefix = $crudResourceManifest instanceof CrudResourceManifest
-            ? $crudResourceManifest->routeNamePrefix
-            : match ($routeProfile) {
-                RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
-                    ? 'app.admin.'.$moduleName->frontendKebab
-                    : 'app.'.$moduleName->frontendKebab,
-                RouteProfile::PUBLIC => $moduleName->frontendKebab,
-                RouteProfile::CUSTOM => $moduleName->frontendKebab,
-                default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
-            };
-
-        $defaultMiddleware = $crudResourceManifest instanceof CrudResourceManifest
-            ? $crudResourceManifest->middleware
-            : match ($routeProfile) {
-                RouteProfile::APP => $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
-                RouteProfile::PUBLIC => [],
-                RouteProfile::CUSTOM => ['auth', 'verified'],
+                    ? [
+                        'app/admin/'.$moduleName->frontendKebab,
+                        'app.admin.'.$moduleName->frontendKebab,
+                        $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
+                    ]
+                    : [
+                        'app/'.$moduleName->frontendKebab,
+                        'app.'.$moduleName->frontendKebab,
+                        $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
+                    ],
+                RouteProfile::PUBLIC => [
+                    $moduleName->frontendKebab,
+                    $moduleName->frontendKebab,
+                    [],
+                ],
+                RouteProfile::CUSTOM => [
+                    'app/'.$moduleName->frontendKebab,
+                    $moduleName->frontendKebab,
+                    ['auth', 'verified'],
+                ],
                 default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
             };
 

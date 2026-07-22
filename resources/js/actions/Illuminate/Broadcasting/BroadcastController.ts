@@ -103,6 +103,11 @@ authenticate95142b6115a9d019b8204096de0eb7b5.head = (options?: RouteQueryOptions
     method: 'head',
 })
 
+/**
+* Multiple routes resolve to \Illuminate\Broadcasting\BroadcastController::authenticate, so this export is a
+* dictionary keyed by URI rather than a callable. Call a specific route with `authenticate['<uri>'](...)`,
+* or import the route by name from your generated `routes/` directory.
+*/
 export const authenticate = {
     '/api/broadcasting/auth': authenticate7e6d5e884dedc4c100d439e039b017c3,
     '/broadcasting/auth': authenticate95142b6115a9d019b8204096de0eb7b5,

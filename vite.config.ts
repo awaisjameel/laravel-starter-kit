@@ -1,15 +1,19 @@
+import inertia from '@inertiajs/vite'
+import { wayfinder } from '@laravel/vite-plugin-wayfinder'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import laravel from 'laravel-vite-plugin'
-import path from 'path'
-import { defineConfig } from 'vite'
-
-import { wayfinder } from '@laravel/vite-plugin-wayfinder'
-import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
+import { fileURLToPath, URL } from 'node:url'
 import AutoImport from 'unplugin-auto-import/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
+import { defineConfig } from 'vite'
+
+import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
+
+const ssrEntry = 'resources/js/ssr.ts'
+const jsDirectory = fileURLToPath(new URL('./resources/js', import.meta.url))
 
 export default defineConfig({
     plugins: [
@@ -18,8 +22,16 @@ export default defineConfig({
         }),
         laravel({
             input: ['resources/js/app.ts'],
-            ssr: 'resources/js/ssr.ts',
+            ssr: ssrEntry,
             refresh: true
+        }),
+        // Serves SSR from the Vite dev server (no separate node process in dev),
+        // warms up page modules, and wraps `resources/js/ssr.ts` for production.
+        inertia({
+            ssr: {
+                entry: ssrEntry,
+                cluster: true
+            }
         }),
         tailwindcss(),
         vue({
@@ -64,8 +76,23 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './resources/js'),
-            '/resources/js': path.resolve(__dirname, './resources/js')
+            '@': jsDirectory,
+            '/resources/js': jsDirectory
+        }
+    },
+    build: {
+        rollupOptions: {
+            onwarn: (warning, defaultHandler) => {
+                // `@inertiajs/vite` enables sourcemaps for the SSR build but rewrites
+                // the `pages` shorthand without emitting one, so every build warns
+                // about the entry files. Only those entries are affected and the
+                // plugin owns the transform, so there is nothing to fix here.
+                if (warning.code === 'SOURCEMAP_BROKEN' && warning.plugin === '@inertiajs/vite') {
+                    return
+                }
+
+                defaultHandler(warning)
+            }
         }
     }
 })

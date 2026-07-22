@@ -4,6 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        {{-- Consumed by resources/js/app.ts so Inertia can nonce the style elements it injects --}}
+        <meta name="csp-nonce" content="{{ $cspNonce ?? '' }}">
+
         {{-- Apply persisted appearance immediately and default to light --}}
         <script nonce="{{ $cspNonce ?? '' }}">
             (function() {
@@ -35,7 +38,7 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title data-inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">

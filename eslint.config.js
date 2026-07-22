@@ -1,10 +1,10 @@
-import fs from 'node:fs'
-import path from 'node:path'
 import prettier from 'eslint-config-prettier'
 import vue from 'eslint-plugin-vue'
+import fs from 'node:fs'
+import path from 'node:path'
 
-import { autoImportRestrictedPaths, autoImportRestrictedPatterns } from './frontend-auto-import.config.mjs'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
+import { autoImportRestrictedPaths, autoImportRestrictedPatterns } from './frontend-auto-import.config.mjs'
 
 const modulesRoot = path.resolve(process.cwd(), 'resources/js/modules')
 

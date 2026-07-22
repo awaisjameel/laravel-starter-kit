@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import type { ToastCloseProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
-import { X } from 'lucide-vue-next'
+import { X } from '@lucide/vue'
 import { ToastClose, useForwardProps } from 'reka-ui'
 import { computed } from 'vue'
 

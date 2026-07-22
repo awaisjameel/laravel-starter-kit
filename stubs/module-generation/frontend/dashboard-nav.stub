@@ -1,5 +1,5 @@
 import type { DashboardCrudNavigationContract } from '@/config/dashboard-crud-navigation'
-{{ dashboardNavRoleImportLine }}import { Shapes } from 'lucide-vue-next'
+{{ dashboardNavRoleImportLine }}import { Shapes } from '@lucide/vue'
 
 const dashboardNavigation: DashboardCrudNavigationContract = {
     key: '{{ moduleKebab }}',

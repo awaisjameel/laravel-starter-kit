@@ -1,35 +1,48 @@
 import '../css/app.css'
 
 import { createInertiaApp } from '@inertiajs/vue3'
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
-import { createPinia } from 'pinia'
-import type { DefineComponent } from 'vue'
-import { createApp, Fragment, h } from 'vue'
-import { ZiggyVue } from 'ziggy-js'
-import AppToaster from './components/base/toast/AppToaster.vue'
+import { createApp, createSSRApp, h } from 'vue'
 import { initializeTheme } from './composables/useAppearance'
+import { createAppInstance } from './create-app'
 import { configureRealtime } from './lib/realtime/config'
 import type { AppPageProps } from './types'
-import { bindGlobalRouteHelper, toZiggyVueConfig } from './utils/ziggy'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
-const pinia = createPinia()
+// Lets Inertia tag the style elements it injects (progress bar, error modal)
+// so they satisfy the nonce-based CSP set by `App\Http\Middleware\SecurityHeaders`.
+const cspNonce = document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')?.content ?? ''
 
 configureRealtime()
 
-createInertiaApp({
+createInertiaApp<AppPageProps>({
+    // Resolved by `@inertiajs/vite`, which rewrites this literal into an
+    // `import.meta.glob` resolver at build time, so it cannot be extracted
+    // into a shared constant. Page names are module-relative, for example
+    // `modules/users/pages/Index`.
+    pages: {
+        path: './modules',
+        extension: '.vue',
+        transform: (name) => name.replace(/^modules\//, '')
+    },
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) => resolvePageComponent(`./${name}.vue`, import.meta.glob<DefineComponent>('./modules/**/*.vue')),
+    nonce: cspNonce,
     setup({ el, App, props, plugin }) {
-        const ziggy = props.initialPage.props.ziggy as AppPageProps['ziggy']
-        bindGlobalRouteHelper(ziggy)
+        if (el === null) {
+            throw new Error('Inertia could not find its root element. Check the `@inertia` directive in `resources/views/app.blade.php`.')
+        }
 
-        createApp({ render: () => h(Fragment, [h(App, props), h(AppToaster)]) })
-            .use(plugin)
-            .use(ZiggyVue, toZiggyVueConfig(ziggy))
-            .use(pinia)
-            .mount(el)
+        // Inertia marks server-rendered roots with `data-server-rendered`. Hydrate
+        // those and mount the rest, so toggling `INERTIA_SSR_ENABLED` never leaves
+        // the client hydrating markup that was never rendered.
+        const create = el.hasAttribute('data-server-rendered') ? createSSRApp : createApp
+
+        createAppInstance({
+            create,
+            page: () => h(App, props),
+            plugin,
+            ziggy: props.initialPage.props.ziggy
+        }).mount(el)
     },
     progress: {
         color: '#4B5563'

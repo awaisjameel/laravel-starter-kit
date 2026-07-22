@@ -9,8 +9,6 @@ declare global {
   const Deferred: typeof import('@inertiajs/vue3').Deferred
   const EffectScope: typeof import('vue').EffectScope
   const Method: typeof import('@inertiajs/core').Method
-  const RealtimeChannelParameter: typeof import('../lib/realtime/channels').RealtimeChannelParameter
-  const Ziggy: typeof import('ziggy-js').Ziggy
   const apiRequest: typeof import('../composables/useApiClient').apiRequest
   const appRoutes: typeof import('@/routes/app').default
   const authRoutes: typeof import('@/routes/auth').default
@@ -77,7 +75,6 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
-  const parameters: typeof import('../lib/realtime/channels').parameters
   const provide: typeof import('vue').provide
   const reactive: typeof import('vue').reactive
   const readonly: typeof import('vue').readonly
@@ -97,7 +94,6 @@ declare global {
   const toValue: typeof import('vue').toValue
   const toZiggyVueConfig: typeof import('../utils/ziggy').toZiggyVueConfig
   const triggerRef: typeof import('vue').triggerRef
-  const unknown: typeof import('../lib/utils').unknown
   const unref: typeof import('vue').unref
   const updateTheme: typeof import('../composables/useAppearance').updateTheme
   const useApiMutation: typeof import('../composables/useApiQuery').useApiMutation
@@ -163,6 +159,9 @@ declare global {
   export type { FormErrorMap, FormContract, FormValuesFromData } from '../lib/forms'
   import('../lib/forms')
   // @ts-ignore
+  export type { RealtimeChannelParameter } from '../lib/realtime/channels'
+  import('../lib/realtime/channels')
+  // @ts-ignore
   export type { RealtimeAuthMode, RealtimeAuthStrategy, ConfigureRealtimeOptions } from '../lib/realtime/config'
   import('../lib/realtime/config')
   // @ts-ignore
@@ -178,8 +177,6 @@ declare module 'vue' {
     readonly Deferred: UnwrapRef<typeof import('@inertiajs/vue3')['Deferred']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly Method: UnwrapRef<typeof import('@inertiajs/core')['Method']>
-    readonly RealtimeChannelParameter: UnwrapRef<typeof import('../lib/realtime/channels')['RealtimeChannelParameter']>
-    readonly Ziggy: UnwrapRef<typeof import('ziggy-js')['Ziggy']>
     readonly apiRequest: UnwrapRef<typeof import('../composables/useApiClient')['apiRequest']>
     readonly appRoutes: UnwrapRef<typeof import('@/routes/app')['default']>
     readonly authRoutes: UnwrapRef<typeof import('@/routes/auth')['default']>
@@ -246,7 +243,6 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
-    readonly parameters: UnwrapRef<typeof import('../lib/realtime/channels')['parameters']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
@@ -266,7 +262,6 @@ declare module 'vue' {
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
     readonly toZiggyVueConfig: UnwrapRef<typeof import('../utils/ziggy')['toZiggyVueConfig']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
-    readonly unknown: UnwrapRef<typeof import('../lib/utils')['unknown']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly updateTheme: UnwrapRef<typeof import('../composables/useAppearance')['updateTheme']>
     readonly useApiMutation: UnwrapRef<typeof import('../composables/useApiQuery')['useApiMutation']>

@@ -1,8 +1,8 @@
-import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
-import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
+import { fileURLToPath, URL } from 'node:url'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vitest/config'
+import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
 
 export default defineConfig({
     plugins: [
