@@ -19,7 +19,7 @@ use Spatie\TypeScriptTransformer\Writers\FlatModuleWriter;
  *
  * The whole frontend consumes these contracts from `@/types/app-data`, so the
  * output stays a single flat ES module. Route and controller generation is
- * intentionally left off: Wayfinder and Ziggy own that surface.
+ * intentionally left off: Wayfinder owns that surface.
  */
 final class TypeScriptTransformerServiceProvider extends TypeScriptTransformerApplicationServiceProvider
 {

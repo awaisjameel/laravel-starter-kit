@@ -40,8 +40,7 @@ createInertiaApp<AppPageProps>({
         createAppInstance({
             create,
             page: () => h(App, props),
-            plugin,
-            ziggy: props.initialPage.props.ziggy
+            plugin
         }).mount(el)
     },
     progress: {

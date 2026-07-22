@@ -7,7 +7,6 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Tighten\Ziggy\Ziggy;
 
 final class HandleInertiaRequests extends Middleware
 {
@@ -55,14 +54,13 @@ final class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
                 'status' => $request->session()->get('status'),
             ],
-            'ziggy' => [
-                ...(new Ziggy)->toArray(),
-                // `fullUrl()` keeps the query string. Server-driven listing pages
-                // rehydrate their table state (page, search, sort) from this value,
-                // so dropping the query would silently reset a shared or bookmarked
-                // URL back to the default sort while the data stayed filtered.
-                'location' => $request->fullUrl(),
-            ],
+            // The absolute request URL. Inertia's own `page.url` is relative, so the
+            // frontend needs an origin to resolve it against, and `fullUrl()` keeps
+            // the query string: server-driven listing pages rehydrate their table
+            // state (page, search, sort) from it, and dropping the query would
+            // silently reset a shared or bookmarked URL to the default sort while
+            // the rendered rows stayed filtered.
+            'location' => $request->fullUrl(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

@@ -42,9 +42,43 @@ const DEFAULT_RETRY_DELAY_MS = 300
 // every request, so this module-level cache must stay empty there — otherwise one
 // user's response would be served to the next request that renders the same key.
 // The same reasoning keeps `useToast` client-only and Pinia per-app-instance.
+//
+// Entries hold the raw `queryFn` result, never a `select` projection, so one cache
+// entry can serve consumers that project the same key differently.
 const queryCache = new Map<string, QueryCacheEntry<unknown>>()
 
+// Requests currently in flight, keyed exactly like `queryCache`. Two components that
+// mount with the same key share one network request instead of racing two. Empty
+// under SSR for the same reason as `queryCache`: `execute` returns before it is read.
+const inFlightRequests = new Map<string, Promise<unknown>>()
+
 const isServerRendering = (): boolean => import.meta.env.SSR === true
+
+/**
+ * Runs `request` at most once per cache key at a time, handing every concurrent
+ * caller the same promise. Only the raw fetch is shared: `select` and `mapError`
+ * stay per caller, so joining never leaks one consumer's projection into another.
+ */
+const dedupeRequest = async <TData>(cacheKey: string, request: () => Promise<TData>): Promise<TData> => {
+    const pendingRequest = inFlightRequests.get(cacheKey) as Promise<TData> | undefined
+
+    if (pendingRequest !== undefined) {
+        return pendingRequest
+    }
+
+    const startedRequest = request()
+    inFlightRequests.set(cacheKey, startedRequest)
+
+    try {
+        return await startedRequest
+    } finally {
+        // Only retire our own entry. An invalidation between start and settle may
+        // already have dropped it and let a newer request take the slot.
+        if (inFlightRequests.get(cacheKey) === startedRequest) {
+            inFlightRequests.delete(cacheKey)
+        }
+    }
+}
 
 const toCacheKey = (key: ApiCacheKey): string => {
     if (Array.isArray(key)) {
@@ -82,19 +116,25 @@ const isCacheFresh = (updatedAt: number, staleTimeMs: number): boolean => {
 
 export const clearApiQueryCache = (): void => {
     queryCache.clear()
+    inFlightRequests.clear()
 }
 
 export const invalidateApiQueryCache = (...keys: ApiCacheKey[]): void => {
     if (keys.length === 0) {
-        queryCache.clear()
+        clearApiQueryCache()
         return
     }
 
+    // Dropping the in-flight entry too, so a request that started before the
+    // invalidation cannot be joined by a consumer that mounts after it.
     keys.forEach((key) => {
-        queryCache.delete(toCacheKey(key))
+        const serializedKey = toCacheKey(key)
+        queryCache.delete(serializedKey)
+        inFlightRequests.delete(serializedKey)
     })
 }
 
+/** Reads the raw cached `queryFn` result for a key, before any `select` projection. */
 export const getApiQueryCacheData = <TData>(key: ApiCacheKey): TData | undefined => {
     if (isServerRendering()) {
         return undefined
@@ -104,6 +144,10 @@ export const getApiQueryCacheData = <TData>(key: ApiCacheKey): TData | undefined
     return cacheEntry?.data as TData | undefined
 }
 
+/**
+ * Writes the raw cached result for a key, in the shape `queryFn` returns. Returning
+ * `undefined` from the updater evicts the entry. Used for optimistic updates.
+ */
 export const setApiQueryCacheData = <TData>(
     key: ApiCacheKey,
     valueOrUpdater: TData | ((current: TData | undefined) => TData | undefined)
@@ -133,13 +177,33 @@ export const setApiQueryCacheData = <TData>(
 export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options: UseApiQueryOptions<TData, TSelected, TError>) {
     const data = ref<TSelected | undefined>(options.initialData)
     const error = ref<TError | null>(null)
-    const isLoading = ref(options.initialData === undefined)
+    // A disabled query has no fetch pending, so it must not start out loading;
+    // otherwise a consumer gated behind `enabled` renders a spinner forever.
+    const isLoading = ref(options.initialData === undefined && resolveEnabled(options.enabled))
     const isFetching = ref(false)
 
     const staleTimeMs = options.staleTimeMs ?? DEFAULT_STALE_TIME
     const retryCount = options.retry ?? DEFAULT_RETRY_COUNT
     const retryDelayMs = options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS
     const resolveCacheKey = (): string => toCacheKey(toValue(options.key))
+    const selectData = (rawData: TData): TSelected => (options.select !== undefined ? options.select(rawData) : (rawData as unknown as TSelected))
+
+    const fetchWithRetry = async (): Promise<TData> => {
+        let attempt = 0
+
+        while (true) {
+            try {
+                return await options.queryFn()
+            } catch (caughtError) {
+                if (attempt >= retryCount) {
+                    throw caughtError
+                }
+
+                attempt += 1
+                await wait(retryDelayMs)
+            }
+        }
+    }
 
     const execute = async ({ force = false }: { force?: boolean } = {}): Promise<TSelected | undefined> => {
         // Never fetch or cache while the server renders. Page data already arrives
@@ -150,16 +214,16 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
             return data.value
         }
 
-        const cacheKey = resolveCacheKey()
-
         if (!force && !resolveEnabled(options.enabled)) {
+            isLoading.value = false
             return data.value
         }
 
+        const cacheKey = resolveCacheKey()
         const cachedValue = queryCache.get(cacheKey)
 
         if (!force && cachedValue !== undefined && isCacheFresh(cachedValue.updatedAt, staleTimeMs)) {
-            data.value = cachedValue.data as TSelected
+            data.value = selectData(cachedValue.data as TData)
             error.value = null
             isLoading.value = false
             return data.value
@@ -172,37 +236,25 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
         }
 
         try {
-            let attempt = 0
+            // Deduped even when forced: a request already in flight is by definition
+            // as fresh as one started now, so a refresh joins it rather than doubling
+            // the load on the endpoint.
+            const rawData = await dedupeRequest(cacheKey, fetchWithRetry)
 
-            while (attempt <= retryCount) {
-                try {
-                    const rawData = await options.queryFn()
-                    const selectedData = options.select !== undefined ? options.select(rawData) : (rawData as unknown as TSelected)
+            queryCache.set(cacheKey, {
+                data: rawData,
+                updatedAt: Date.now()
+            })
 
-                    queryCache.set(cacheKey, {
-                        data: selectedData,
-                        updatedAt: Date.now()
-                    })
-
-                    data.value = selectedData
-                    error.value = null
-                    isLoading.value = false
-                    return selectedData
-                } catch (caughtError) {
-                    if (attempt >= retryCount) {
-                        const mappedError = mapErrorWith(options.mapError, caughtError)
-                        error.value = mappedError
-                        isLoading.value = false
-                        throw mappedError
-                    }
-
-                    attempt += 1
-                    await wait(retryDelayMs)
-                }
-            }
-
+            data.value = selectData(rawData)
+            error.value = null
             return data.value
+        } catch (caughtError) {
+            const mappedError = mapErrorWith(options.mapError, caughtError)
+            error.value = mappedError
+            throw mappedError
         } finally {
+            isLoading.value = false
             isFetching.value = false
         }
     }
@@ -214,15 +266,23 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
     watch(
         () => [resolveEnabled(options.enabled), resolveCacheKey()] as const,
         ([enabled]) => {
-            if (enabled) {
-                void execute()
+            if (!enabled) {
+                isLoading.value = false
+                return
             }
+
+            // The failure is already captured in `error`, so swallowing it here keeps
+            // a background fetch from surfacing as an unhandled promise rejection.
+            // `refresh()` still rejects for callers that want to await the outcome.
+            void execute().catch(() => undefined)
         },
         { immediate: true }
     )
 
     const isError = computed(() => error.value !== null)
-    const isSuccess = computed(() => !isLoading.value && !isError.value)
+    // Requires data: a disabled query is neither loading nor errored, but it has
+    // resolved nothing, so reporting success would be a lie.
+    const isSuccess = computed(() => !isLoading.value && !isError.value && data.value !== undefined)
 
     return {
         data: readonly(data),

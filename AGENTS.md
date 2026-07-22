@@ -103,8 +103,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.6`
 - Reverb: `^1.11`
 - Sanctum: `^4.3.3`
-- Wayfinder: `^0.1.20`
-- Ziggy: `^2.6.3`
+- Wayfinder: `^0.1.20` (sole route surface; Ziggy is deliberately not installed)
 - Spatie Laravel Data: `^4.23`
 - Spatie TypeScript Transformer: `^3.3`
 - PHPUnit: `^13.2`
@@ -317,9 +316,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Pinia is created per app instance rather than at module scope, so the long-lived SSR process never shares store state between requests.
 - Nothing request-scoped may be written to a module-level binding or to `globalThis`. The SSR process is long-lived and serves concurrent requests, so a per-request global is overwritten by whichever request rendered last. Current applications of this rule:
     - Pinia is per app instance (`create-app.ts`)
-    - `route()` is installed per app instance by `ZiggyVue`; there is deliberately no `globalThis.route` binding
     - `useToast` drops toasts under SSR
-    - `useApiQuery` never reads, writes, or fetches into its module-level cache under SSR
+    - `useApiQuery` never reads, writes, or fetches into its module-level cache or in-flight request map under SSR
 - `app.ts` hydrates when Inertia marks the root element with `data-server-rendered` and mounts a fresh app otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
 - `resources/js/ssr.ts` must stay a bare top-level `createInertiaApp(...)` statement. `@inertiajs/vite` rewrites it into the render function used by the dev SSR endpoint and the `createServer` boot used by production builds. Do not reintroduce a manual `createServer` wrapper.
 - `app.ts` passes Inertia a CSP `nonce` read from the `meta[name="csp-nonce"]` tag rendered by `resources/views/app.blade.php`, so Inertia's injected style elements satisfy `SecurityHeaders`.
@@ -501,7 +499,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `EnumTransformer(useUnionEnums: false)` so PHP enums become native TypeScript enums
     - `FlatModuleWriter('app-data.ts')` into `resources/js/types`, keeping one flat ES module
     - `withoutManifest()` so no transformer manifest file lands in `resources/js/types`
-- Route and controller type generation from the transformer stays off. Wayfinder and Ziggy own that surface.
+- Route and controller type generation from the transformer stays off. Wayfinder owns that surface.
 - Current shared auth user contract is `App\Modules\Shared\Data\UserViewData|null`; do not serialize the raw user model into Inertia props.
 - Request DTO hydration must be the canonical transport boundary.
 - Services, queries, commands, and handlers must accept DTOs or explicit typed parameters, never mixed arrays.
@@ -525,7 +523,12 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Use generated route/action helpers rather than hardcoded URLs.
 - Use `useApiQuery`, `useApiMutation`, and `apiRequest` for API-driven state.
 - `useApiQuery` is client-only by design: it never fetches or touches its shared cache during SSR. Server-rendered page data must arrive through Inertia props.
-- Use generated Wayfinder route/action helpers in application code. Ziggy's `route()` is available on the app instance through `ZiggyVue` but is not the canonical route surface.
+- `useApiQuery` semantics worth knowing before changing it:
+    - Concurrent consumers of the same cache key share one request, including a forced `refresh()`. Only the raw fetch is shared; `select` and `mapError` stay per caller.
+    - `queryCache` stores the raw `queryFn` result, never a `select` projection, so one entry can serve consumers that project the same key differently. `getApiQueryCacheData`/`setApiQueryCacheData` operate on that raw shape.
+    - `invalidateApiQueryCache` also drops the in-flight entry, so a request that started before the invalidation cannot be joined afterwards.
+    - A disabled query is never `isLoading`, and `isSuccess` additionally requires resolved data.
+- Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
 - `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
 - `apiRequest` is the canonical place for `X-Socket-ID` propagation.
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
@@ -600,7 +603,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/composables/useServerDataTable.ts`
     - `resources/js/components/base/table/**`
 - Initial query state must be derived via `resolveServerTableInitialQuery(...)`.
-- That derivation reads the request URL from the shared `ziggy.location` prop, which `HandleInertiaRequests::share()` sets from `$request->fullUrl()`. It must keep the query string; `$request->url()` would drop it and silently reset a shared or bookmarked listing URL to the default sort.
+- That derivation reads the request URL from the shared `location` prop, which `HandleInertiaRequests::share()` sets from `$request->fullUrl()`. It must stay absolute and keep the query string: Inertia's own `page.url` is relative, and `$request->url()` would drop the query and silently reset a shared or bookmarked listing URL to the default sort.
 - Current standard server-table query contract:
     - `page: number`
     - `perPage: number`

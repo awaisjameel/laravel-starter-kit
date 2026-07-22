@@ -11,7 +11,7 @@ A Laravel 13 + Inertia 3 + Vue 3 starter kit with strict typed contracts from ba
 ## Stack
 
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
-- Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder, Ziggy
+- Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
 - Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, `@lucide/vue`
 - PHPUnit 13, Vitest 4, Pint, PHPStan/Larastan, Rector, ESLint 10, Prettier 3
 

@@ -21,7 +21,7 @@
 
     const locationSearch = (() => {
         try {
-            return new URL(page.props.ziggy.location).search
+            return new URL(page.props.location).search
         } catch {
             return ''
         }

@@ -120,7 +120,6 @@
         "resources/js/types/auto-imports.d.ts",
         "resources/js/types/globals.d.ts",
         "resources/js/types/index.d.ts",
-        "resources/js/types/ziggy.d.ts",
         "env.d.ts" // Custom environment declaration file for Vite
     ],
     "exclude": ["resources/js/components/ui/**", "resources/js/types/components.d.ts"]

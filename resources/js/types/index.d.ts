@@ -1,5 +1,4 @@
 import type { LucideIcon } from '@lucide/vue'
-import type { Config } from 'ziggy-js'
 import { UserViewData } from './app-data'
 
 export interface Auth {
@@ -31,7 +30,11 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
         error?: string
         status?: string
     }
-    ziggy: Config & { location: string }
+    /**
+     * Absolute URL of the current request, including the query string. Inertia's
+     * `page.url` is relative, so this is the origin to resolve it against.
+     */
+    location: string
     sidebarOpen: boolean
 }
 

@@ -84,9 +84,7 @@ function createMockPage({ url, role }: { url: string; role: UserRole | null }): 
                 user: role === null ? null : createUser(role)
             },
             flash: {},
-            ziggy: {
-                location: `http://localhost${url}`
-            } as AppPageProps['ziggy'],
+            location: `http://localhost${url}`,
             sidebarOpen: true
         }
     }

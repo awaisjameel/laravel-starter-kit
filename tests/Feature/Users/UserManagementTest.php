@@ -234,7 +234,7 @@ final class UserManagementTest extends TestCase
         $this->actingAs($admin)
             ->get('/app/admin/users?search=Sort&sortBy=name&sortDirection=asc&page=1')
             ->assertInertia(fn (Assert $assert): Assert => $assert
-                ->where('ziggy.location', function (string $location): bool {
+                ->where('location', function (string $location): bool {
                     parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
 
                     return parse_url($location, PHP_URL_PATH) === '/app/admin/users' && $query === [

@@ -25,7 +25,6 @@ createInertiaApp<AppPageProps>({
         createAppInstance({
             create: createSSRApp,
             page: () => h(App, props),
-            plugin,
-            ziggy: props.initialPage.props.ziggy
+            plugin
         })
 })
