@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Enums\Appearance;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -62,6 +63,9 @@ final class HandleInertiaRequests extends Middleware
             // the rendered rows stayed filtered.
             'location' => $request->fullUrl(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // Same value `HandleAppearance` puts on the root element, so the appearance
+            // UI renders correctly on the server and hydrates without a mismatch.
+            'appearance' => Appearance::fromCookie($request->cookie(Appearance::COOKIE)),
         ];
     }
 }

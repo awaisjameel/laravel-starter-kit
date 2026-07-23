@@ -19,6 +19,12 @@ import {
 } from './frontend-auto-import.config.mjs'
 
 const ssrEntry = 'resources/js/ssr.ts'
+// The stylesheet is its own entry rather than an import inside `app.ts`. SSR ships
+// a fully rendered document, so the browser paints as soon as the HTML lands: if the
+// CSS only arrived through the JS module graph the page would render unstyled first
+// and reflow once the bundle evaluated. As a separate entry, `@vite` emits a
+// render-blocking `<link rel="stylesheet">` in both dev and production instead.
+const cssEntry = 'resources/css/app.css'
 const jsDirectory = fileURLToPath(new URL('./resources/js', import.meta.url))
 
 export default defineConfig({
@@ -27,7 +33,7 @@ export default defineConfig({
             command: 'php artisan wayfinder:generate --no-interaction'
         }),
         laravel({
-            input: ['resources/js/app.ts'],
+            input: [cssEntry, 'resources/js/app.ts'],
             ssr: ssrEntry,
             refresh: true
         }),

@@ -43,7 +43,6 @@ declare global {
   const getRealtimeSocketId: typeof import('../lib/realtime/config').getRealtimeSocketId
   const getYears: typeof import('../lib/utils').getYears
   const h: typeof import('vue').h
-  const initializeTheme: typeof import('../composables/useAppearance').initializeTheme
   const inject: typeof import('vue').inject
   const invalidateApiQueryCache: typeof import('../composables/useApiQuery').invalidateApiQueryCache
   const isObjectRecord: typeof import('../lib/utils').isObjectRecord
@@ -94,7 +93,6 @@ declare global {
   const toValue: typeof import('vue').toValue
   const triggerRef: typeof import('vue').triggerRef
   const unref: typeof import('vue').unref
-  const updateTheme: typeof import('../composables/useAppearance').updateTheme
   const useApiMutation: typeof import('../composables/useApiQuery').useApiMutation
   const useApiQuery: typeof import('../composables/useApiQuery').useApiQuery
   const useAppPage: typeof import('../composables/useAppPage').useAppPage
@@ -142,9 +140,6 @@ declare global {
   // @ts-ignore
   export type { ApiCacheKey } from '../composables/useApiQuery'
   import('../composables/useApiQuery')
-  // @ts-ignore
-  export type { Appearance } from '../composables/useAppearance'
-  import('../composables/useAppearance')
   // @ts-ignore
   export type { RealtimeCacheKey, RealtimeNotification } from '../composables/useRealtime'
   import('../composables/useRealtime')
@@ -210,7 +205,6 @@ declare module 'vue' {
     readonly getRealtimeSocketId: UnwrapRef<typeof import('../lib/realtime/config')['getRealtimeSocketId']>
     readonly getYears: UnwrapRef<typeof import('../lib/utils')['getYears']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
-    readonly initializeTheme: UnwrapRef<typeof import('../composables/useAppearance')['initializeTheme']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly invalidateApiQueryCache: UnwrapRef<typeof import('../composables/useApiQuery')['invalidateApiQueryCache']>
     readonly isObjectRecord: UnwrapRef<typeof import('../lib/utils')['isObjectRecord']>
@@ -261,7 +255,6 @@ declare module 'vue' {
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
-    readonly updateTheme: UnwrapRef<typeof import('../composables/useAppearance')['updateTheme']>
     readonly useApiMutation: UnwrapRef<typeof import('../composables/useApiQuery')['useApiMutation']>
     readonly useApiQuery: UnwrapRef<typeof import('../composables/useApiQuery')['useApiQuery']>
     readonly useAppPage: UnwrapRef<typeof import('../composables/useAppPage')['useAppPage']>

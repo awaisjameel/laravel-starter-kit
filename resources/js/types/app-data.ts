@@ -1,3 +1,7 @@
+export enum Appearance {
+    Light = 'light',
+    Dark = 'dark'
+}
 export type ConfirmPasswordData = {
     password: string
 }

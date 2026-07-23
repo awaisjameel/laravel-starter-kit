@@ -1,8 +1,5 @@
-import '../css/app.css'
-
 import { createInertiaApp } from '@inertiajs/vue3'
 import { createApp, createSSRApp, h } from 'vue'
-import { initializeTheme } from './composables/useAppearance'
 import { createAppInstance } from './create-app'
 import { configureRealtime } from './lib/realtime/config'
 import type { AppPageProps } from './types'
@@ -47,6 +44,3 @@ createInertiaApp<AppPageProps>({
         color: '#4B5563'
     }
 })
-
-// This will set light / dark mode on page load...
-initializeTheme()

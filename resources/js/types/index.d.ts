@@ -1,5 +1,5 @@
 import type { LucideIcon } from '@lucide/vue'
-import { UserViewData } from './app-data'
+import { Appearance, UserViewData } from './app-data'
 
 export interface Auth {
     user: UserViewData | null
@@ -36,6 +36,11 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
      */
     location: string
     sidebarOpen: boolean
+    /**
+     * Colour scheme the server rendered this response with, taken from the
+     * `appearance` cookie. Seeds the appearance UI so it hydrates without a mismatch.
+     */
+    appearance: Appearance
 }
 
 export interface SelectOption {

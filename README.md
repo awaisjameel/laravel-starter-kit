@@ -65,6 +65,7 @@ Shared core model/enum:
 
 - `app/Models/User.php`
 - `app/Enums/UserRole.php`
+- `app/Enums/Appearance.php`
 
 Shared realtime infrastructure:
 
@@ -136,6 +137,15 @@ Realtime channel pattern enums, event-name enums, presence payloads, and broadca
 - Frontend modules should use shared realtime composables plus module-local `contracts/realtime.ts` helpers instead of using Echo directly.
 - `apiRequest()` automatically forwards `X-Socket-ID` so broadcast listeners can call `toOthers()` safely.
 - Queue workers should process `realtime,high,default` in that order.
+
+## Rendering and Visual Stability
+
+SSR delivers a fully rendered document, so anything the browser needs for the first
+paint has to arrive as markup rather than as a side effect of the JS bundle:
+
+- `resources/css/app.css` is its own Vite entry and is listed first in `@vite`, so it is a render-blocking stylesheet in dev and production. Importing it from `app.ts` instead would paint the server-rendered HTML unstyled and reflow once the bundle evaluated.
+- The color scheme comes from the `appearance` cookie and is rendered onto `<html>` by Blade — no boot script, and no post-hydration re-apply. The same value is shared as an Inertia prop so the appearance controls render identically on both sides.
+- Web fonts use `display=swap` and a pair of preconnects (the stylesheet fetch is same-origin to the font host, the font files are CORS, and they use separate connections).
 
 ## Security Defaults
 

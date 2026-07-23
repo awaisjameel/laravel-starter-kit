@@ -34,6 +34,7 @@ If code and docs disagree, trust the code, then fix the docs in the same task wh
 - Remove dead code, duplicate logic, stale comments, unused scaffolding, and compatibility shims when they are no longer justified.
 - Never leave a feature half-finished. If a change requires backend, frontend, generated artifacts, tests, docs, or cleanup, complete all of them in the same task.
 - Match the existing architecture precisely. If the architecture must change, update this file in the same change.
+- No unnecessary code comments. Code should be self-documenting. Use comments only to explain why something is done, not what is done.
 
 ## Mandatory Workflow
 
@@ -318,10 +319,15 @@ When adding similar behavior, inspect and follow the nearest established referen
     - Pinia is per app instance (`create-app.ts`)
     - `useToast` drops toasts under SSR
     - `useApiQuery` never reads, writes, or fetches into its module-level cache or in-flight request map under SSR
+    - `useAppearance` keeps only a client override at module scope, seeded from the `appearance` page prop and written solely from a browser interaction
 - `app.ts` hydrates when Inertia marks the root element with `data-server-rendered` and mounts a fresh app otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
 - `resources/js/ssr.ts` must stay a bare top-level `createInertiaApp(...)` statement. `@inertiajs/vite` rewrites it into the render function used by the dev SSR endpoint and the `createServer` boot used by production builds. Do not reintroduce a manual `createServer` wrapper.
 - `app.ts` passes Inertia a CSP `nonce` read from the `meta[name="csp-nonce"]` tag rendered by `resources/views/app.blade.php`, so Inertia's injected style elements satisfy `SecurityHeaders`.
 - The root Blade template uses `data-inertia` (not `inertia`) on head elements, per Inertia v3.
+- `resources/css/app.css` is a Vite entry of its own (`vite.config.ts` `input`, first in the `@vite` array) and must never be imported from `app.ts`. SSR ships a fully rendered document, so the browser paints as soon as the HTML lands; CSS reaching it through the JS module graph would render that markup unstyled and reflow when the bundle evaluated. As a separate entry it is a render-blocking `<link rel="stylesheet">` in dev and production alike — the Vite dev server serves it as real `text/css` because a `<link>` sends `Accept: text/css`.
+- The color scheme is server-rendered. `HandleAppearance` normalizes the `appearance` cookie through `App\Enums\Appearance` and shares it with the root view, which puts `class="dark"` on `<html>` directly; there is no boot script and nothing for the client to re-apply. `HandleInertiaRequests` shares the same value as a page prop so `useAppearance` seeds the appearance UI from it and hydrates without a mismatch. `useAppearance` holds only a client override (`null` until the visitor toggles), which is what keeps this module-level state out of the shared SSR process.
+- Nothing that renders into markup may be nondeterministic. `Math.random()`, `Date.now()`, and `crypto.randomUUID()` produce one value in the SSR process and a different one during hydration, so Vue reports a mismatch and the server's value is the one that stays in the DOM. Use `useId()` for generated element ids and `url(#…)` references (`PlaceholderPattern`, `SidebarMenuSkeleton`); it is stable across both renders. This applies to vendored `components/ui/**` primitives too — upstream shadcn-vue does not assume SSR.
+- `SecurityHeaders` allows the `http:`/`https:` scheme sources in `style-src` only when `App::isLocal()`, because the dev stylesheet is a `<link>` to the Vite dev server origin rather than to `'self'`. Production keeps the nonce-based policy, where every asset is same-origin.
 - Feature pages live in `resources/js/modules/**/pages`.
 - Feature forms live in `resources/js/modules/**/forms`.
 - Feature-specific components live in `resources/js/modules/**/components`.
