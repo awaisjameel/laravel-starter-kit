@@ -8,6 +8,8 @@ A Laravel 13 + Inertia 3 + Vue 3 starter kit with strict typed contracts from ba
 - Node 24+ and npm 11+
 - Composer 2+
 
+Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Composer runtime constraint.
+
 ## Stack
 
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
@@ -17,12 +19,14 @@ A Laravel 13 + Inertia 3 + Vue 3 starter kit with strict typed contracts from ba
 
 TypeScript is intentionally pinned to 6.x: TypeScript 7 does not yet expose the programmatic API that `vue-tsc` and `typescript-eslint` need.
 
+`composer.lock` and `package-lock.json` are committed application contracts. Use Composer and npm install commands that honor them; npm is the only supported JavaScript package manager.
+
 ## Quick Start
 
 ```bash
 cp .env.example .env
 composer install
-npm install
+npm ci
 php artisan key:generate
 php artisan migrate
 composer dev

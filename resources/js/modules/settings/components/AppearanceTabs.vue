@@ -14,7 +14,9 @@
     // The tab triggers only ever carry the two enum values, but the emitted type is
     // widened by the primitive, so narrow rather than cast.
     const selectAppearance = (value: unknown): void => {
-        updateAppearance(value === Appearance.Dark ? Appearance.Dark : Appearance.Light)
+        if (value === Appearance.Light || value === Appearance.Dark) {
+            updateAppearance(value)
+        }
     }
 </script>
 

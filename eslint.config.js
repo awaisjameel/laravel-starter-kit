@@ -52,14 +52,14 @@ const restrictedImportRules = (extraPatterns = []) => ({
     '@typescript-eslint/no-restricted-imports': buildNoRestrictedImportsRule(extraPatterns)
 })
 
+const crossModuleImportPattern = (moduleName) => ({
+    group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
+    message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`
+})
+
 const moduleBoundaryConfigs = frontendModuleNames.map((moduleName) => ({
     files: [`resources/js/modules/${moduleName}/**/*.{ts,vue}`],
-    rules: restrictedImportRules([
-        {
-            group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
-            message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`
-        }
-    ])
+    rules: restrictedImportRules([crossModuleImportPattern(moduleName)])
 }))
 
 // Files inside the auto-imported directories define those symbols; they wire up
@@ -72,6 +72,19 @@ const autoImportSourceConfig = {
         '@typescript-eslint/no-restricted-imports': 'off'
     }
 }
+
+const moduleAutoImportSourceBoundaryConfigs = frontendModuleNames.map((moduleName) => ({
+    files: [`resources/js/modules/${moduleName}/composables/**/*.ts`, `resources/js/modules/${moduleName}/helpers/**/*.ts`],
+    rules: {
+        'no-restricted-imports': 'off',
+        '@typescript-eslint/no-restricted-imports': [
+            'error',
+            {
+                patterns: [crossModuleImportPattern(moduleName)]
+            }
+        ]
+    }
+}))
 
 const testFileGlobs = ['resources/js/**/__tests__/**/*.ts', 'resources/js/**/*.test.ts']
 
@@ -92,13 +105,7 @@ const moduleTestBoundaryConfigs = frontendModuleNames.map((moduleName) => ({
         '@typescript-eslint/no-restricted-imports': [
             'error',
             {
-                patterns: [
-                    {
-                        group: frontendModuleNames.filter((candidate) => candidate !== moduleName).map((candidate) => `@/modules/${candidate}/**`),
-                        message: `Cross-module imports are not allowed in feature module "${moduleName}". Move shared code to a shared/base layer.`,
-                        allowTypeImports: true
-                    }
-                ]
+                patterns: [crossModuleImportPattern(moduleName)]
             }
         ]
     }
@@ -147,6 +154,7 @@ export default defineConfigWithVueTs(
     ...moduleBoundaryConfigs,
     pageDataAccessGuardConfig,
     autoImportSourceConfig,
+    ...moduleAutoImportSourceBoundaryConfigs,
     testFileConfig,
     ...moduleTestBoundaryConfigs,
     prettier

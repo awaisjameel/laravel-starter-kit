@@ -96,8 +96,10 @@ It exports two contracts:
 - Runtime values from `@/composables/**`, `@/stores/**`, `@/lib/**`, `@/utils/**`,
   `@/modules/**/composables/**`, and `@/modules/**/helpers/**` must come from auto-import.
 - `import type { ... }` from those paths stays legal, because auto-import only provides values.
-- Files _inside_ those directories are exempt: they wire up their own siblings with explicit
-  imports instead of relying on auto-import resolving back into the directory being scanned.
+- Files _inside_ those directories are exempt from auto-import restrictions: they wire up
+  their own siblings with explicit imports instead of relying on auto-import resolving back
+  into the directory being scanned. Feature-module boundaries still apply, including to
+  module-local composables/helpers and tests.
 
 Auto-imported symbols used only inside a `<template>` are not typed by `vue-tsc` (the generated
 `declare module 'vue'` augmentation does not merge into `@vue/runtime-core`). Derive a

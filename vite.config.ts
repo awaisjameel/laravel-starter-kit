@@ -85,6 +85,12 @@ export default defineConfig({
     },
     build: {
         rollupOptions: {
+            checks: {
+                // These transforms intentionally own most of this small app's build
+                // work. Rolldown's percentage-based advisory is therefore noisy even
+                // when the complete production build finishes in a few seconds.
+                pluginTimings: false
+            },
             onwarn: (warning, defaultHandler) => {
                 // `@inertiajs/vite` enables sourcemaps for the SSR build but rewrites
                 // the `pages` shorthand without emitting one, so every build warns

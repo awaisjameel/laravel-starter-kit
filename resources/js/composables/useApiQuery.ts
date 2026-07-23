@@ -10,18 +10,32 @@ type QueryCacheEntry<TData> = {
     updatedAt: number
 }
 
-type ErrorMapper<TError> = (error: unknown) => TError
+type QueryCacheRevision = {
+    epoch: number
+    key: number
+}
 
-interface UseApiQueryOptions<TData, TSelected = TData, TError = ApiError> {
+type ErrorMapper<TError> = (error: unknown) => TError
+type IsSameType<TLeft, TRight> = [TLeft] extends [TRight] ? ([TRight] extends [TLeft] ? true : false) : false
+
+interface UseApiQueryBaseOptions<TData, TError> {
     key: ApiCacheKeyInput
     queryFn: () => Promise<TData>
     enabled?: boolean | Ref<boolean> | ComputedRef<boolean> | (() => boolean)
     staleTimeMs?: number
     retry?: number
     retryDelayMs?: number
-    select?: (data: TData) => TSelected
-    initialData?: TSelected
     mapError?: ErrorMapper<TError>
+}
+
+interface UseSelectedApiQueryOptions<TData, TSelected, TError> extends UseApiQueryBaseOptions<TData, TError> {
+    select: (data: TData) => TSelected
+    initialData?: TSelected
+}
+
+interface UseIdentityApiQueryOptions<TData, TError> extends UseApiQueryBaseOptions<TData, TError> {
+    select?: undefined
+    initialData?: TData
 }
 
 interface UseApiMutationOptions<TVariables, TResult, TError = ApiError, TContext = unknown> {
@@ -51,8 +65,24 @@ const queryCache = new Map<string, QueryCacheEntry<unknown>>()
 // mount with the same key share one network request instead of racing two. Empty
 // under SSR for the same reason as `queryCache`: `execute` returns before it is read.
 const inFlightRequests = new Map<string, Promise<unknown>>()
+const queryCacheRevisions = new Map<string, number>()
+let queryCacheEpoch = 0
 
 const isServerRendering = (): boolean => import.meta.env.SSR === true
+
+const currentQueryCacheRevision = (cacheKey: string): QueryCacheRevision => ({
+    epoch: queryCacheEpoch,
+    key: queryCacheRevisions.get(cacheKey) ?? 0
+})
+
+const isCurrentQueryCacheRevision = (cacheKey: string, revision: QueryCacheRevision): boolean =>
+    revision.epoch === queryCacheEpoch && revision.key === (queryCacheRevisions.get(cacheKey) ?? 0)
+
+const invalidateQueryCacheKey = (cacheKey: string): void => {
+    queryCacheRevisions.set(cacheKey, (queryCacheRevisions.get(cacheKey) ?? 0) + 1)
+    queryCache.delete(cacheKey)
+    inFlightRequests.delete(cacheKey)
+}
 
 /**
  * Runs `request` at most once per cache key at a time, handing every concurrent
@@ -94,7 +124,7 @@ const wait = async (durationMs: number): Promise<void> => {
     })
 }
 
-const resolveEnabled = (enabled: UseApiQueryOptions<unknown>['enabled']): boolean => {
+const resolveEnabled = (enabled: UseApiQueryBaseOptions<unknown, unknown>['enabled']): boolean => {
     if (enabled === undefined) {
         return true
     }
@@ -115,8 +145,10 @@ const isCacheFresh = (updatedAt: number, staleTimeMs: number): boolean => {
 }
 
 export const clearApiQueryCache = (): void => {
+    queryCacheEpoch += 1
     queryCache.clear()
     inFlightRequests.clear()
+    queryCacheRevisions.clear()
 }
 
 export const invalidateApiQueryCache = (...keys: ApiCacheKey[]): void => {
@@ -125,13 +157,7 @@ export const invalidateApiQueryCache = (...keys: ApiCacheKey[]): void => {
         return
     }
 
-    // Dropping the in-flight entry too, so a request that started before the
-    // invalidation cannot be joined by a consumer that mounts after it.
-    keys.forEach((key) => {
-        const serializedKey = toCacheKey(key)
-        queryCache.delete(serializedKey)
-        inFlightRequests.delete(serializedKey)
-    })
+    keys.forEach((key) => invalidateQueryCacheKey(toCacheKey(key)))
 }
 
 /** Reads the raw cached `queryFn` result for a key, before any `select` projection. */
@@ -161,8 +187,9 @@ export const setApiQueryCacheData = <TData>(
     const nextValue =
         typeof valueOrUpdater === 'function' ? (valueOrUpdater as (current: TData | undefined) => TData | undefined)(currentValue) : valueOrUpdater
 
+    invalidateQueryCacheKey(serializedKey)
+
     if (nextValue === undefined) {
-        queryCache.delete(serializedKey)
         return undefined
     }
 
@@ -174,19 +201,25 @@ export const setApiQueryCacheData = <TData>(
     return nextValue
 }
 
-export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options: UseApiQueryOptions<TData, TSelected, TError>) {
+function createApiQuery<TData, TSelected, TError>(options: UseSelectedApiQueryOptions<TData, TSelected, TError>) {
     const data = ref<TSelected | undefined>(options.initialData)
     const error = ref<TError | null>(null)
     // A disabled query has no fetch pending, so it must not start out loading;
     // otherwise a consumer gated behind `enabled` renders a spinner forever.
     const isLoading = ref(options.initialData === undefined && resolveEnabled(options.enabled))
     const isFetching = ref(false)
+    const activeExecutionIds = new Set<number>()
+    let latestExecutionId = 0
+    let latestExecutionCacheKey: string | undefined
 
     const staleTimeMs = options.staleTimeMs ?? DEFAULT_STALE_TIME
     const retryCount = options.retry ?? DEFAULT_RETRY_COUNT
     const retryDelayMs = options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS
     const resolveCacheKey = (): string => toCacheKey(toValue(options.key))
-    const selectData = (rawData: TData): TSelected => (options.select !== undefined ? options.select(rawData) : (rawData as unknown as TSelected))
+    const syncFetchState = (): void => {
+        isFetching.value = activeExecutionIds.has(latestExecutionId)
+        isLoading.value = data.value === undefined && isFetching.value
+    }
 
     const fetchWithRetry = async (): Promise<TData> => {
         let attempt = 0
@@ -206,34 +239,35 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
     }
 
     const execute = async ({ force = false }: { force?: boolean } = {}): Promise<TSelected | undefined> => {
+        const executionId = ++latestExecutionId
+
         // Never fetch or cache while the server renders. Page data already arrives
         // through Inertia props, and a request issued here would both run without a
         // request context and write another visitor's payload into `queryCache`.
         if (isServerRendering()) {
-            isLoading.value = false
+            syncFetchState()
             return data.value
         }
 
         if (!force && !resolveEnabled(options.enabled)) {
-            isLoading.value = false
+            syncFetchState()
             return data.value
         }
 
         const cacheKey = resolveCacheKey()
+        latestExecutionCacheKey = cacheKey
         const cachedValue = queryCache.get(cacheKey)
 
         if (!force && cachedValue !== undefined && isCacheFresh(cachedValue.updatedAt, staleTimeMs)) {
-            data.value = selectData(cachedValue.data as TData)
+            data.value = options.select(cachedValue.data as TData)
             error.value = null
-            isLoading.value = false
+            syncFetchState()
             return data.value
         }
 
-        isFetching.value = true
-
-        if (data.value === undefined) {
-            isLoading.value = true
-        }
+        const requestRevision = currentQueryCacheRevision(cacheKey)
+        activeExecutionIds.add(executionId)
+        syncFetchState()
 
         try {
             // Deduped even when forced: a request already in flight is by definition
@@ -241,21 +275,39 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
             // the load on the endpoint.
             const rawData = await dedupeRequest(cacheKey, fetchWithRetry)
 
+            if (!isCurrentQueryCacheRevision(cacheKey, requestRevision)) {
+                return data.value
+            }
+
             queryCache.set(cacheKey, {
                 data: rawData,
                 updatedAt: Date.now()
             })
 
-            data.value = selectData(rawData)
+            const selectedData = options.select(rawData)
+
+            if (executionId !== latestExecutionId || cacheKey !== resolveCacheKey()) {
+                return selectedData
+            }
+
+            data.value = selectedData
             error.value = null
             return data.value
         } catch (caughtError) {
+            if (!isCurrentQueryCacheRevision(cacheKey, requestRevision)) {
+                return data.value
+            }
+
             const mappedError = mapErrorWith(options.mapError, caughtError)
-            error.value = mappedError
+
+            if (executionId === latestExecutionId && cacheKey === resolveCacheKey()) {
+                error.value = mappedError
+            }
+
             throw mappedError
         } finally {
-            isLoading.value = false
-            isFetching.value = false
+            activeExecutionIds.delete(executionId)
+            syncFetchState()
         }
     }
 
@@ -265,9 +317,17 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
 
     watch(
         () => [resolveEnabled(options.enabled), resolveCacheKey()] as const,
-        ([enabled]) => {
+        ([enabled, cacheKey], previousState) => {
             if (!enabled) {
-                isLoading.value = false
+                const wasEnabled = previousState?.[0] === true
+                const hasActiveExecutionForPreviousKey = activeExecutionIds.has(latestExecutionId) && latestExecutionCacheKey !== cacheKey
+
+                if (wasEnabled || hasActiveExecutionForPreviousKey) {
+                    latestExecutionId += 1
+                    latestExecutionCacheKey = undefined
+                }
+
+                syncFetchState()
                 return
             }
 
@@ -293,6 +353,25 @@ export function useApiQuery<TData, TSelected = TData, TError = ApiError>(options
         isSuccess,
         refresh
     }
+}
+
+export function useApiQuery<TData, TSelected, TError = ApiError>(
+    options: UseSelectedApiQueryOptions<TData, TSelected, TError>
+): ReturnType<typeof createApiQuery<TData, TSelected, TError>>
+export function useApiQuery<TData, TSelected = TData, TError = ApiError>(
+    options: IsSameType<TData, TSelected> extends true ? UseIdentityApiQueryOptions<TData, TError> : never
+): ReturnType<typeof createApiQuery<TData, TData, TError>>
+export function useApiQuery<TData, TSelected, TError>(
+    options: UseSelectedApiQueryOptions<TData, TSelected, TError> | UseIdentityApiQueryOptions<TData, TError>
+): ReturnType<typeof createApiQuery<TData, TSelected, TError>> | ReturnType<typeof createApiQuery<TData, TData, TError>> {
+    if (options.select === undefined) {
+        return createApiQuery({
+            ...options,
+            select: (rawData: TData): TData => rawData
+        })
+    }
+
+    return createApiQuery(options)
 }
 
 export function useApiMutation<TVariables, TResult, TError = ApiError, TContext = unknown>(

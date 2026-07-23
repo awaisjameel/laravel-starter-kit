@@ -1,5 +1,5 @@
 import type { LucideIcon } from '@lucide/vue'
-import { Appearance, UserViewData } from './app-data'
+import type { Appearance, UserViewData } from './app-data'
 
 export interface Auth {
     user: UserViewData | null

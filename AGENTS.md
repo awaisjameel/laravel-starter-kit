@@ -120,11 +120,14 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - Node: `>=24.1.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
+- `composer.lock` and `package-lock.json` are committed application contracts; CI and local reproducible installs must honor them.
+- Published Sail Docker contexts are limited to `docker/8.4` and `docker/8.5`, matching the Composer PHP constraint.
 
 ### Version Constraints Worth Knowing
 
 - TypeScript must stay on `6.x`. TypeScript 7 (the native compiler) has no stable programmatic API yet, so `vue-tsc`/Volar cannot use it and `typescript-eslint` caps at `<6.1.0`.
 - `concurrently` 10 pins a vulnerable `shell-quote`. `package.json` carries an `overrides` entry forcing `shell-quote ^1.10.0`; drop it once upstream repins.
+- `@vue/test-utils` currently pins `js-beautify` 1, whose `glob` dependency is deprecated. `package.json` overrides `glob` to `^12.0.0`; remove the override once Test Utils updates its formatter dependency.
 - `optionalDependencies` pin the Linux x64 native binaries used by CI/Docker. Vite 8 bundles with Rolldown, so the binding is `@rolldown/binding-linux-x64-gnu` (not `@rollup/rollup-*`).
 - Those three entries must use exact versions that match the resolved core packages (`rolldown`, `lightningcss`, `@tailwindcss/oxide`). A caret range can hoist a newer binding than the core package expects and break the Linux build. Re-check them after any Vite or Tailwind bump.
 
@@ -393,7 +396,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Two scopes are deliberately exempt from the auto-import restriction:
     - files inside the auto-imported directories themselves (`autoImportSourceGlobs`), which wire up their own siblings with explicit imports instead of relying on auto-import resolving back into the directory being scanned
     - test files, which must be able to name real components and module namespaces for mounting and spying
-- Feature-module test files still enforce the cross-module boundary rule.
+- Feature-module source and test files still enforce the cross-module boundary rule, including type-only imports.
 
 ### Frontend Ownership Rules
 
@@ -532,8 +535,10 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `useApiQuery` semantics worth knowing before changing it:
     - Concurrent consumers of the same cache key share one request, including a forced `refresh()`. Only the raw fetch is shared; `select` and `mapError` stay per caller.
     - `queryCache` stores the raw `queryFn` result, never a `select` projection, so one entry can serve consumers that project the same key differently. `getApiQueryCacheData`/`setApiQueryCacheData` operate on that raw shape.
-    - `invalidateApiQueryCache` also drops the in-flight entry, so a request that started before the invalidation cannot be joined afterwards.
-    - A disabled query is never `isLoading`, and `isSuccess` additionally requires resolved data.
+    - Invalidations and explicit cache writes version the key and drop its in-flight entry, so a request that started earlier cannot be joined or overwrite newer/optimistic data when it settles.
+    - A request for an earlier reactive key may populate that key's cache, but it cannot overwrite the composable state for the current key.
+    - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
+    - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
 - Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
 - `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
 - `apiRequest` is the canonical place for `X-Socket-ID` propagation.

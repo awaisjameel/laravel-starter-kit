@@ -19,12 +19,17 @@ export function useAppearance() {
     const appearance = computed<Appearance>(() => clientAppearance.value ?? page.props.appearance)
 
     function updateAppearance(value: Appearance): void {
+        if (import.meta.env.SSR) {
+            return
+        }
+
         clientAppearance.value = value
         document.documentElement.classList.toggle('dark', value === Appearance.Dark)
 
         // Read back by `HandleAppearance` on the next full page load, which is what
         // lets the server put the class on `<html>` before any CSS is parsed.
-        document.cookie = `${APPEARANCE_COOKIE}=${value};path=/;max-age=${APPEARANCE_COOKIE_MAX_AGE_SECONDS};SameSite=Lax`
+        const secureAttribute = window.location.protocol === 'https:' ? ';Secure' : ''
+        document.cookie = `${APPEARANCE_COOKIE}=${value};path=/;max-age=${APPEARANCE_COOKIE_MAX_AGE_SECONDS};SameSite=Lax${secureAttribute}`
     }
 
     return {

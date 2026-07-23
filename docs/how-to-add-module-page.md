@@ -27,7 +27,7 @@ php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageNa
 
 1. Create page at `resources/js/modules/<module>/pages/<Page>.vue`.
 2. Use `<script setup lang="ts">`.
-3. Use typed props (`defineProps<...>()`) and generated route helpers (`route(...)` + wayfinder actions).
+3. Use typed props (`defineProps<...>()`) and generated Wayfinder route/action helpers.
 4. Use shared layout (`AppLayout`, `AuthLayout`, etc.) and shared primitives from `components/base/**`.
 
 ## 3. Forms (if page has form inputs)
