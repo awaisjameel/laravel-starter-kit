@@ -89,6 +89,25 @@ It exports two contracts:
   tests exactly as it does at runtime. Only stub children that need a live runtime dependency
   (for example `Link`, which needs the Inertia router).
 
+### Generated declarations
+
+Vite writes the following committed declaration files from this configuration:
+
+- `resources/js/types/auto-imports.d.ts`
+- `resources/js/types/components.d.ts`
+
+Do not edit these files manually. After changing auto-import configuration or component files,
+run the complete generated-artifact check:
+
+```bash
+composer generate
+npm run build:ssr
+npm run check:generated
+```
+
+CI verifies backend contracts immediately after `composer generate`, then verifies both backend
+and frontend generated artifacts after the Vite client and SSR build.
+
 ### Import rules
 
 `eslint.config.js` uses `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`:

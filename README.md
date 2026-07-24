@@ -47,9 +47,10 @@ Realtime dev dependencies are included in `composer dev`; this starts Laravel Re
     - `npm run test:unit`
 - Non-mutating QA check:
     - `composer qa:check`
-- Generated artifact sync check (mutating):
+- Generated artifact sync check:
     - `composer generate`
-    - `git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts`
+    - `npm run build:ssr`
+    - `npm run check:generated`
 
 ## Architecture
 
@@ -128,6 +129,10 @@ Generated route/action helpers:
 
 - `resources/js/routes/**`
 - `resources/js/actions/**`
+
+Vite also generates the auto-import and component declarations at
+`resources/js/types/auto-imports.d.ts` and `resources/js/types/components.d.ts`.
+All generated artifacts are committed and validated by CI; do not hand-edit them.
 
 Never hand-edit generated files.
 

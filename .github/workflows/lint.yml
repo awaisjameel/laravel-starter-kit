@@ -48,8 +48,8 @@ jobs:
       - name: Generate Types and Routes
         run: composer generate
 
-      - name: Verify Generated Files Are Committed
-        run: git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts
+      - name: Verify Backend Generated Files Are Committed
+        run: npm run check:backend-generated
 
       - name: Run Pint
         run: vendor/bin/pint --test

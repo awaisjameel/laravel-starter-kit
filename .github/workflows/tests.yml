@@ -49,14 +49,14 @@ jobs:
       - name: Generate Types and Routes
         run: composer generate
 
-      - name: Verify Generated Files Are Committed
-        run: git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts
-
       - name: Typecheck Frontend
         run: npm run typecheck
 
       - name: Build Client And SSR Assets
         run: npm run build:ssr
+
+      - name: Verify Generated Files Are Committed
+        run: npm run check:generated
 
       - name: Frontend Tests
         run: npm run test:unit
