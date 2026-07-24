@@ -165,6 +165,7 @@ final class GenerateModuleCommandTest extends TestCase
             'module' => 'Billing',
             '--scaffold' => 'api',
             '--api-route-profile' => 'protected',
+            '--roles' => 'admin',
             '--no-file-prompts' => true,
             '--base-path' => $basePath,
         ])->assertExitCode(0);
@@ -190,8 +191,16 @@ final class GenerateModuleCommandTest extends TestCase
         $apiRouteFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/api.php');
         $apiRouteFileContents = is_string($apiRouteFileContents) ? $apiRouteFileContents : '';
 
-        $this->assertStringContainsString("Route::prefix('api/v1/admin/billing')", $apiRouteFileContents);
+        $this->assertStringContainsString("Route::prefix('v1/admin/billing')", $apiRouteFileContents);
         $this->assertStringContainsString("->as('api.v1.admin.billing.')", $apiRouteFileContents);
+        $this->assertStringContainsString("'can:manage-billing'", $apiRouteFileContents);
+        $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/gates.php');
+
+        $apiFeatureTestContents = file_get_contents($basePath.'/tests/Feature/Billing/IndexApiTest.php');
+        $apiFeatureTestContents = is_string($apiFeatureTestContents) ? $apiFeatureTestContents : '';
+        $this->assertStringContainsString("getJson('/api/v1/admin/billing')", $apiFeatureTestContents);
+        $this->assertStringContainsString('test_users_without_required_role_cannot_list_billing_api_results', $apiFeatureTestContents);
+        $this->assertStringContainsString("create(['role' => UserRole::Admin])", $apiFeatureTestContents);
 
         $queryFileContents = file_get_contents($basePath.'/app/Modules/Billing/Queries/BillingQueries.php');
         $queryFileContents = is_string($queryFileContents) ? $queryFileContents : '';
@@ -308,7 +317,7 @@ return [
     'api' => [
         'enabled' => false,
         'route_profile' => 'protected',
-        'route_prefix' => 'api/v1/admin/billing',
+        'route_prefix' => 'v1/admin/billing',
         'route_name_prefix' => 'api.v1.admin.billing',
         'middleware' => ['auth:sanctum'],
         'generates_resource' => false,
@@ -476,6 +485,7 @@ PHP,
                 'protected',
                 ['protected', 'public', 'custom'],
             )
+            ->expectsQuestion('Select allowed roles for protected generated routes (all, admin, user)', 'admin')
             ->assertExitCode(0);
 
         $this->assertFileExists($basePath.'/app/Modules/Billing/Routes/api.php');
@@ -494,7 +504,7 @@ PHP,
             '--no-file-prompts' => true,
             '--base-path' => $basePath,
         ])
-            ->expectsOutputToContain('The --roles option is required for app CRUD scaffolding')
+            ->expectsOutputToContain('The --roles option is required for app CRUD or protected API scaffolding')
             ->assertExitCode(1);
     }
 
@@ -511,7 +521,7 @@ PHP,
             '--no-file-prompts' => true,
             '--base-path' => $basePath,
         ])
-            ->expectsOutputToContain('The --roles option is required for app CRUD scaffolding')
+            ->expectsOutputToContain('The --roles option is required for app CRUD or protected API scaffolding')
             ->assertExitCode(1);
     }
 
@@ -615,7 +625,7 @@ PHP,
             '--no-file-prompts' => true,
             '--base-path' => $basePath,
         ])
-            ->expectsQuestion('Select allowed roles for app CRUD routes (all, admin, user)', 'admin')
+            ->expectsQuestion('Select allowed roles for protected generated routes (all, admin, user)', 'admin')
             ->assertExitCode(0);
 
         $routeFileContents = file_get_contents($basePath.'/app/Modules/Billing/Routes/web.php');

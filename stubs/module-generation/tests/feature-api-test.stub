@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\{{ moduleNamespace }};
 
+{{ userRoleImportLine }}
 use App\Models\{{ modelClass }};
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,8 +12,6 @@ use Tests\TestCase;
 
 final class {{ pagePascalName }}ApiTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_guests_access_behavior_for_{{ routeTestName }}_api_index(): void
     {
         $testResponse = $this->getJson('{{ apiRouteUri }}');
@@ -20,6 +19,7 @@ final class {{ pagePascalName }}ApiTest extends TestCase
         {{ apiGuestAssertion }}
     }
 
+{{ forbiddenRoleTest }}
     public function test_authenticated_users_can_list_{{ routeTestName }}_api_results(): void
     {
         {{ apiAuthRequestLine }}

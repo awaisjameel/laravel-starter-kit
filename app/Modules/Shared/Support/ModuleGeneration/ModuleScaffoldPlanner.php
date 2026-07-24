@@ -48,12 +48,11 @@ final readonly class ModuleScaffoldPlanner
 
         if ($generateModuleInput->generateCrud) {
             $this->appendCrudBackendScaffold($generateModuleInput, $directories, $files);
-
-            if ($this->shouldGenerateRoleGateFile($generateModuleInput)) {
-                $this->appendCrudRoleGateScaffold($generateModuleInput, $directories, $files);
-            }
-
             $this->appendFeatureTestScaffold($generateModuleInput, $directories, $files);
+        }
+
+        if ($this->shouldGenerateRoleGateFile($generateModuleInput)) {
+            $this->appendCrudRoleGateScaffold($generateModuleInput, $directories, $files);
         }
 
         if ($generateModuleInput->generateApi) {
@@ -736,8 +735,11 @@ final readonly class ModuleScaffoldPlanner
 
     private function shouldGenerateRoleGateFile(GenerateModuleInput $generateModuleInput): bool
     {
-        return $generateModuleInput->routeProfile === RouteProfile::APP
-            && $this->isRoleRestricted($generateModuleInput);
+        return $this->isRoleRestricted($generateModuleInput)
+            && (
+                ($generateModuleInput->generateCrud && $generateModuleInput->routeProfile === RouteProfile::APP)
+                || ($generateModuleInput->generateApi && $generateModuleInput->apiRouteProfile === ApiRouteProfile::PROTECTED)
+            );
     }
 
     private function isRoleRestricted(GenerateModuleInput $generateModuleInput): bool
@@ -754,7 +756,9 @@ final readonly class ModuleScaffoldPlanner
         $testsDirectory = $generateModuleInput->basePath.'/tests/Feature/'.$generateModuleInput->moduleName->path;
         $directories[] = $testsDirectory;
 
-        $apiRouteUri = $generateModuleInput->apiRoutePrefix === '' ? '/' : '/'.$generateModuleInput->apiRoutePrefix;
+        $apiRouteUri = $generateModuleInput->apiRoutePrefix === ''
+            ? '/api'
+            : '/api/'.$generateModuleInput->apiRoutePrefix;
         $routeLabel = str_replace('-', ' ', $generateModuleInput->moduleName->frontendKebab);
         $routeTestName = str_replace(' ', '_', $routeLabel);
         $apiRequiresAuth = in_array('auth:sanctum', $generateModuleInput->apiMiddleware, true);
@@ -762,14 +766,18 @@ final readonly class ModuleScaffoldPlanner
         $apiGuestAssertion = $apiRequiresAuth
             ? '$testResponse->assertUnauthorized();'
             : '$testResponse->assertOk();';
+        $allowedRoleFactoryState = $this->allowedRoleFactoryState($generateModuleInput->allowedRoles);
 
         $apiAuthRequestLine = $apiRequiresAuth
-            ? "\$user = User::factory()->create();\n\n        \$testResponse = \$this->actingAs(\$user)->getJson('{$apiRouteUri}');"
+            ? "\$user = User::factory()->create({$allowedRoleFactoryState});\n\n        \$testResponse = \$this->actingAs(\$user)->getJson('{$apiRouteUri}');"
             : sprintf("\$testResponse = \$this->getJson('%s');", $apiRouteUri);
 
         $apiAuthFollowUpLine = $apiRequiresAuth
             ? sprintf("\$this->actingAs(\$user)->getJson('%s')", $apiRouteUri)
             : sprintf("\$this->getJson('%s')", $apiRouteUri);
+        $restrictedByRoles = $this->isRoleRestricted($generateModuleInput)
+            && $generateModuleInput->apiRouteProfile === ApiRouteProfile::PROTECTED;
+        $deniedRoleCase = $restrictedByRoles ? $this->deniedRoleCase($generateModuleInput->allowedRoles) : null;
 
         $tokens = [
             'moduleNamespace' => $generateModuleInput->moduleName->namespace,
@@ -781,6 +789,10 @@ final readonly class ModuleScaffoldPlanner
             'apiGuestAssertion' => $apiGuestAssertion,
             'apiAuthRequestLine' => $apiAuthRequestLine,
             'apiAuthFollowUpLine' => $apiAuthFollowUpLine,
+            'userRoleImportLine' => $restrictedByRoles ? "use App\\Enums\\UserRole;\n" : '',
+            'forbiddenRoleTest' => $deniedRoleCase !== null
+                ? $this->forbiddenApiRoleTest($routeLabel, $apiRouteUri, $deniedRoleCase)
+                : '',
         ];
 
         $files[] = new PlannedFile(
@@ -1028,6 +1040,21 @@ final readonly class ModuleScaffoldPlanner
             "    {\n".
             "        \$user = User::factory()->create(['role' => %s]);\n\n".
             "        \$testResponse = \$this->actingAs(\$user)->get('%s');\n\n".
+            "        \$testResponse->assertForbidden();\n".
+            "    }\n",
+            str_replace(' ', '_', $routeLabel),
+            $deniedRoleCase,
+            $routeUri,
+        );
+    }
+
+    private function forbiddenApiRoleTest(string $routeLabel, string $routeUri, string $deniedRoleCase): string
+    {
+        return sprintf(
+            "    public function test_users_without_required_role_cannot_list_%s_api_results(): void\n".
+            "    {\n".
+            "        \$user = User::factory()->create(['role' => %s]);\n\n".
+            "        \$testResponse = \$this->actingAs(\$user)->getJson('%s');\n\n".
             "        \$testResponse->assertForbidden();\n".
             "    }\n",
             str_replace(' ', '_', $routeLabel),

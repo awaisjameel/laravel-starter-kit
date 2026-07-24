@@ -736,7 +736,7 @@ Do not shadow them with manual duplicates.
 - Use `--base-path` only for tests or isolated generation scenarios.
 - Command options contract:
     - `--route-profile=app|public|custom` (non-interactive defaults to `app`)
-    - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
+    - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes or protected API routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
     - `--route-prefix=...` and `--route-name-prefix=...`
     - `--middleware=auth,verified`
     - `--api-route-profile=protected|public|custom` (non-interactive defaults to `protected`)
@@ -793,7 +793,7 @@ Do not shadow them with manual duplicates.
 - `app/Modules/<Module>/Commands/<Model>Commands.php`
 - `app/Modules/<Module>/Manifests/<Page>Resource.php`
 - `app/Modules/<Module>/Routes/web.php`
-- `app/Modules/<Module>/Routes/gates.php` when app CRUD routes are role-restricted
+- `app/Modules/<Module>/Routes/gates.php` when generated app CRUD or protected API routes are role-restricted
 - `tests/Feature/<Module>/<Page>PageTest.php`
 - `app/Models/<Model>.php` unless skipped
 - `database/migrations/*_create_<table>_table.php` unless skipped
@@ -820,11 +820,11 @@ Do not shadow them with manual duplicates.
     - default name prefix: `<module-kebab>`
     - default middleware: none
 - API `protected` profile:
-    - default prefix: `api/v1/admin/<module-kebab>`
+    - default module route prefix: `v1/admin/<module-kebab>` (Laravel applies the external `/api` prefix)
     - default name prefix: `api.v1.admin.<module-kebab>`
-    - default middleware: `auth:sanctum`
+    - default middleware: `auth:sanctum`, plus `can:manage-<module-kebab>` for role-restricted scopes
 - API `public` profile:
-    - default prefix: `api/v1/<module-kebab>`
+    - default module route prefix: `v1/<module-kebab>` (Laravel applies the external `/api` prefix)
     - default name prefix: `api.v1.<module-kebab>`
     - default middleware: none
 

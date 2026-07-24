@@ -32,7 +32,7 @@ final class GenerateModuleCommand extends Command
         {--route-prefix= : URI prefix for generated web routes}
         {--route-name-prefix= : Route name prefix for generated web routes}
         {--middleware= : Comma-separated middleware for generated web routes}
-        {--roles= : Allowed user roles for app CRUD routes [all|comma-separated UserRole values]}
+        {--roles= : Allowed user roles for app CRUD and protected API routes [all|comma-separated UserRole values]}
         {--api-route-profile= : API route profile [protected|public|custom]}
         {--api-route-prefix= : URI prefix for generated API routes}
         {--api-route-name-prefix= : Route name prefix for generated API routes}
@@ -122,14 +122,21 @@ final class GenerateModuleCommand extends Command
         $routeProfile = $generateCrud
             ? $this->resolveRouteProfile($crudResourceManifest?->routeProfile)
             : RouteProfile::APP;
-        $allowedRoles = $this->resolveAllowedRoles($generateCrud, $routeProfile, $crudResourceManifest?->allowedRoles);
+        [$apiRouteProfile, $apiRoutePrefix, $apiRouteNamePrefix, $apiMiddleware] = $generateApi
+            ? $this->resolveApiRouteConfiguration($moduleName, $crudResourceManifest)
+            : $this->defaultApiRouteConfiguration($moduleName);
+        $allowedRoles = $this->resolveAllowedRoles(
+            requiresRoleScope: ($generateCrud && $routeProfile === RouteProfile::APP)
+            || ($generateApi && $apiRouteProfile === ApiRouteProfile::PROTECTED),
+            defaultRoles: $crudResourceManifest?->allowedRoles,
+        );
         [$routePrefix, $routeNamePrefix, $middleware] = $generateCrud
             ? $this->resolveRouteConfiguration($moduleName, $routeProfile, $allowedRoles, $crudResourceManifest)
             : $this->defaultWebRouteConfiguration($moduleName);
 
-        [$apiRouteProfile, $apiRoutePrefix, $apiRouteNamePrefix, $apiMiddleware] = $generateApi
-            ? $this->resolveApiRouteConfiguration($moduleName, $crudResourceManifest)
-            : $this->defaultApiRouteConfiguration($moduleName);
+        if ($generateApi && $apiRouteProfile === ApiRouteProfile::PROTECTED) {
+            $apiMiddleware = $this->buildProtectedApiMiddleware($moduleName, $apiMiddleware, $allowedRoles);
+        }
 
         $generatePage = $this->resolveGeneratePage($generateCrud || $scaffoldType === ScaffoldType::PAGE);
         $generateModel = $this->resolveGenerateModel(
@@ -151,16 +158,16 @@ final class GenerateModuleCommand extends Command
                     allowedRoles: $allowedRoles,
                     middleware: $middleware,
                     api: $crudResourceManifest->api->enabled || $generateApi
-                        ? new CrudApiManifest(
-                            enabled: $generateApi,
-                            routeProfile: $apiRouteProfile,
-                            routePrefix: $apiRoutePrefix,
-                            routeNamePrefix: $apiRouteNamePrefix,
-                            middleware: $apiMiddleware,
-                            generatesResource: $generateApiResource,
-                            generatesFeatureTest: $generateApiFeatureTest,
-                        )
-                        : $crudResourceManifest->api,
+                    ? new CrudApiManifest(
+                        enabled: $generateApi,
+                        routeProfile: $apiRouteProfile,
+                        routePrefix: $apiRoutePrefix,
+                        routeNamePrefix: $apiRouteNamePrefix,
+                        middleware: $apiMiddleware,
+                        generatesResource: $generateApiResource,
+                        generatesFeatureTest: $generateApiFeatureTest,
+                    )
+                    : $crudResourceManifest->api,
                     tableColumns: $crudResourceManifest->tableColumns,
                     mobileFields: $crudResourceManifest->mobileFields,
                     formFields: $crudResourceManifest->formFields,
@@ -290,16 +297,16 @@ final class GenerateModuleCommand extends Command
             ]
             : match ($routeProfile) {
                 RouteProfile::APP => $this->isAdminOnlyRoleScope($allowedRoles)
-                    ? [
-                        'app/admin/'.$moduleName->frontendKebab,
-                        'app.admin.'.$moduleName->frontendKebab,
-                        $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
-                    ]
-                    : [
-                        'app/'.$moduleName->frontendKebab,
-                        'app.'.$moduleName->frontendKebab,
-                        $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
-                    ],
+                ? [
+                    'app/admin/'.$moduleName->frontendKebab,
+                    'app.admin.'.$moduleName->frontendKebab,
+                    $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
+                ]
+                : [
+                    'app/'.$moduleName->frontendKebab,
+                    'app.'.$moduleName->frontendKebab,
+                    $this->buildAppRoleAwareMiddleware($moduleName, $allowedRoles),
+                ],
                 RouteProfile::PUBLIC => [
                     $moduleName->frontendKebab,
                     $moduleName->frontendKebab,
@@ -351,9 +358,9 @@ final class GenerateModuleCommand extends Command
      * @param  list<string>|null  $defaultRoles
      * @return list<string>
      */
-    private function resolveAllowedRoles(bool $generateCrud, string $routeProfile, ?array $defaultRoles = null): array
+    private function resolveAllowedRoles(bool $requiresRoleScope, ?array $defaultRoles = null): array
     {
-        if (! $generateCrud || $routeProfile !== RouteProfile::APP) {
+        if (! $requiresRoleScope) {
             return [];
         }
 
@@ -366,19 +373,19 @@ final class GenerateModuleCommand extends Command
                 }
 
                 throw new RuntimeException(sprintf(
-                    'The --roles option is required for app CRUD scaffolding. Use --roles=all or comma-separated values: %s.',
+                    'The --roles option is required for app CRUD or protected API scaffolding. Use --roles=all or comma-separated values: %s.',
                     implode(', ', $this->availableUserRoleValues()),
                 ));
             }
 
             $roleOption = mb_strtolower($this->askString(
                 sprintf(
-                    'Select allowed roles for app CRUD routes (%s)',
+                    'Select allowed roles for protected generated routes (%s)',
                     implode(', ', array_merge(['all'], $this->availableUserRoleValues())),
                 ),
                 $defaultRoles === null || $defaultRoles === []
-                    ? 'all'
-                    : implode(',', $defaultRoles),
+                ? 'all'
+                : implode(',', $defaultRoles),
             ));
         }
 
@@ -457,6 +464,20 @@ final class GenerateModuleCommand extends Command
      * @param  list<string>  $allowedRoles
      * @return list<string>
      */
+    private function buildProtectedApiMiddleware(ModuleName $moduleName, array $middleware, array $allowedRoles): array
+    {
+        if (! in_array('auth:sanctum', $middleware, true)) {
+            $middleware[] = 'auth:sanctum';
+        }
+
+        return $this->appendRoleMiddlewareIfNeeded($moduleName, $middleware, $allowedRoles);
+    }
+
+    /**
+     * @param  list<string>  $middleware
+     * @param  list<string>  $allowedRoles
+     * @return list<string>
+     */
     private function appendRoleMiddlewareIfNeeded(ModuleName $moduleName, array $middleware, array $allowedRoles): array
     {
         if ($allowedRoles === []) {
@@ -505,8 +526,8 @@ final class GenerateModuleCommand extends Command
                     question: 'Select an API route profile for the generated module',
                     choices: ApiRouteProfile::values(),
                     default: $manifestApi instanceof CrudApiManifest
-                        ? $manifestApi->routeProfile
-                        : ApiRouteProfile::PROTECTED,
+                    ? $manifestApi->routeProfile
+                    : ApiRouteProfile::PROTECTED,
                 );
 
                 $providedApiProfile = $selectedApiProfile;
@@ -582,17 +603,17 @@ final class GenerateModuleCommand extends Command
     {
         return match ($apiRouteProfile) {
             ApiRouteProfile::PROTECTED => [
-                'api/v1/admin/'.$moduleName->frontendKebab,
+                'v1/admin/'.$moduleName->frontendKebab,
                 'api.v1.admin.'.$moduleName->frontendKebab,
                 ['auth:sanctum'],
             ],
             ApiRouteProfile::PUBLIC => [
-                'api/v1/'.$moduleName->frontendKebab,
+                'v1/'.$moduleName->frontendKebab,
                 'api.v1.'.$moduleName->frontendKebab,
                 [],
             ],
             ApiRouteProfile::CUSTOM => [
-                'api/v1/admin/'.$moduleName->frontendKebab,
+                'v1/admin/'.$moduleName->frontendKebab,
                 'api.v1.admin.'.$moduleName->frontendKebab,
                 ['auth:sanctum'],
             ],
