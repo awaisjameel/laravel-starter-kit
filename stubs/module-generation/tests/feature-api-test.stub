@@ -12,6 +12,8 @@ use Tests\TestCase;
 
 final class {{ pagePascalName }}ApiTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_guests_access_behavior_for_{{ routeTestName }}_api_index(): void
     {
         $testResponse = $this->getJson('{{ apiRouteUri }}');
