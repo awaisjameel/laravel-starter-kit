@@ -46,7 +46,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Generate Types and Routes
-        run: composer generate
+        run: composer generate-and-cleanup
 
       - name: Verify Backend Generated Files Are Committed
         run: npm run check:backend-generated

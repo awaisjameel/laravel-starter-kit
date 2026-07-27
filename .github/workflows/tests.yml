@@ -47,7 +47,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Generate Types and Routes
-        run: composer generate
+        run: composer generate-and-cleanup
 
       - name: Typecheck Frontend
         run: npm run typecheck
