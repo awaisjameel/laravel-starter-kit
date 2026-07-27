@@ -1,35 +1,30 @@
 import { createInertiaApp } from '@inertiajs/vue3'
-import createServer from '@inertiajs/vue3/server'
-import { renderToString } from '@vue/server-renderer'
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
-import { createSSRApp, DefineComponent, h } from 'vue'
-import { ZiggyVue } from 'ziggy-js'
+import { createSSRApp, h } from 'vue'
+import { createAppInstance } from './create-app'
+import { configureRealtime } from './lib/realtime/config'
 import type { AppPageProps } from './types'
-import { bindGlobalRouteHelper, toZiggyVueConfig } from './utils/ziggy'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
-createServer(
-    (page) =>
-        createInertiaApp({
-            page,
-            render: renderToString,
-            title: (title) => `${title} - ${appName}`,
-            resolve: resolvePage,
-            setup: ({ App, props, plugin }) => {
-                const ziggy = page.props.ziggy as AppPageProps['ziggy']
-                bindGlobalRouteHelper(ziggy)
+// Resolves to the `null` broadcaster during SSR, so pages using realtime
+// composables render on the server without opening any connection.
+configureRealtime()
 
-                return createSSRApp({ render: () => h(App, props) })
-                    .use(plugin)
-                    .use(ZiggyVue, toZiggyVueConfig(ziggy))
-            }
-        }),
-    { cluster: true }
-)
-
-function resolvePage(name: string) {
-    const pages = import.meta.glob<DefineComponent>('./modules/**/*.vue')
-
-    return resolvePageComponent<DefineComponent>(`./${name}.vue`, pages)
-}
+// `@inertiajs/vite` wraps this call: it exports the render function for the
+// dev-server SSR endpoint and boots `createServer` for production builds.
+createInertiaApp<AppPageProps>({
+    // Rewritten into an `import.meta.glob` resolver by `@inertiajs/vite`, so
+    // this literal has to stay inline here as well as in `app.ts`.
+    pages: {
+        path: './modules',
+        extension: '.vue',
+        transform: (name) => name.replace(/^modules\//, '')
+    },
+    title: (title) => (title ? `${title} - ${appName}` : appName),
+    setup: ({ App, props, plugin }) =>
+        createAppInstance({
+            create: createSSRApp,
+            page: () => h(App, props),
+            plugin
+        })
+})

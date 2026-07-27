@@ -24,7 +24,9 @@ export function useNavigation() {
     const user = useAuthUser()
     const isAuthenticated = computed(() => Boolean(user.value?.id))
     const isAdmin = computed(() => user.value?.role === UserRole.Admin)
-    const baseLocation = computed(() => page.props.ziggy?.location ?? 'http://localhost')
+    // `page.url` is relative, so resolving it needs an origin. `HandleInertiaRequests`
+    // shares `location` on every response, which is why this has no fallback.
+    const baseLocation = computed(() => page.props.location)
     const currentPath = computed(() => normalizePath(new URL(page.url, baseLocation.value).pathname))
 
     const context = computed(() => ({

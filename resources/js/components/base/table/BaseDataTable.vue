@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TData, TSort extends string = string">
     import type { DataTableColumn, DataTableRowAction, SortDirection } from '@/types/base-ui'
-    import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next'
+    import { ArrowDown, ArrowUp, ArrowUpDown } from '@lucide/vue'
 
     interface Props {
         rows: TData[]

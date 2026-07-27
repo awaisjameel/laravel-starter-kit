@@ -1,21 +1,13 @@
+import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, h } from 'vue'
 import NavMain from '../NavMain.vue'
 
-const passthroughStub = defineComponent({
-    setup(_, { slots }) {
-        return () => h('div', slots.default?.())
-    }
-})
-
-const menuButtonStub = defineComponent({
-    inheritAttrs: false,
-    setup(_, { attrs, slots }) {
-        return () => h('button', attrs, slots.default?.())
-    }
-})
-
+// `Link` is the one child that cannot render for real here: it needs a live
+// Inertia router. Every other child (`UiSidebar*`) is resolved by the shared
+// `unplugin-vue-components` config in `vitest.config.ts`, exactly as at runtime,
+// which is why the real `SidebarProvider` has to supply the sidebar context.
 const linkStub = defineComponent({
     props: {
         href: {
@@ -31,32 +23,37 @@ const linkStub = defineComponent({
 
 describe('NavMain', () => {
     it('uses centralized item isActive state for aria-current', () => {
-        const wrapper = mount(NavMain, {
-            props: {
-                items: [
-                    {
-                        title: 'Dashboard',
-                        href: '/app/dashboard',
-                        isActive: true
-                    },
-                    {
-                        title: 'Users',
-                        href: '/app/admin/users',
-                        isActive: false
+        const wrapper = mount(
+            defineComponent({
+                components: { NavMain, SidebarProvider },
+                template: `
+                    <SidebarProvider>
+                        <NavMain :items="items" />
+                    </SidebarProvider>
+                `,
+                data: () => ({
+                    items: [
+                        {
+                            title: 'Dashboard',
+                            href: '/app/dashboard',
+                            isActive: true
+                        },
+                        {
+                            title: 'Users',
+                            href: '/app/admin/users',
+                            isActive: false
+                        }
+                    ]
+                })
+            }),
+            {
+                global: {
+                    stubs: {
+                        Link: linkStub
                     }
-                ]
-            },
-            global: {
-                stubs: {
-                    UiSidebarGroup: passthroughStub,
-                    UiSidebarGroupLabel: passthroughStub,
-                    UiSidebarMenu: passthroughStub,
-                    UiSidebarMenuItem: passthroughStub,
-                    UiSidebarMenuButton: menuButtonStub,
-                    Link: linkStub
                 }
             }
-        })
+        )
 
         const links = wrapper.findAll('a')
 

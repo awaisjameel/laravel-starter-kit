@@ -1,5 +1,5 @@
 import type { AppPageProps } from '@/types'
-import { UserRole } from '@/types/app-data'
+import { Appearance, UserRole } from '@/types/app-data'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useNavigation } from '../useNavigation'
 
@@ -84,10 +84,9 @@ function createMockPage({ url, role }: { url: string; role: UserRole | null }): 
                 user: role === null ? null : createUser(role)
             },
             flash: {},
-            ziggy: {
-                location: `http://localhost${url}`
-            } as AppPageProps['ziggy'],
-            sidebarOpen: true
+            location: `http://localhost${url}`,
+            sidebarOpen: true,
+            appearance: Appearance.Light
         }
     }
 }

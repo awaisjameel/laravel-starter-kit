@@ -34,6 +34,7 @@ If code and docs disagree, trust the code, then fix the docs in the same task wh
 - Remove dead code, duplicate logic, stale comments, unused scaffolding, and compatibility shims when they are no longer justified.
 - Never leave a feature half-finished. If a change requires backend, frontend, generated artifacts, tests, docs, or cleanup, complete all of them in the same task.
 - Match the existing architecture precisely. If the architecture must change, update this file in the same change.
+- No unnecessary code comments. Code should be self-documenting. Use comments only to explain why something is done, not what is done.
 
 ## Mandatory Workflow
 
@@ -98,21 +99,37 @@ For every non-trivial change, explicitly verify all affected layers before consi
 ## Current Stack
 
 - PHP: `^8.4`
-- Laravel: `^13.0`
-- Inertia Laravel: `^2.0.21`
-- Reverb: `^1.8`
-- Sanctum: `^4.3.1`
-- Wayfinder: `^0.1.14`
-- Ziggy: `^2.6.1`
-- Spatie Laravel Data: `^4.20`
-- Spatie TypeScript Transformer: `^2.6`
-- Vue: `^3.5.29`
-- TypeScript: `^5.9.3`
-- Vite: `^7.3.1`
-- Tailwind CSS: `^4.2.1`
+- Laravel: `^13.21`
+- Inertia Laravel: `^3.1`
+- Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.6`
+- Reverb: `^1.11`
+- Sanctum: `^4.3.3`
+- Wayfinder: `^0.1.20` (sole route surface; Ziggy is deliberately not installed)
+- Spatie Laravel Data: `^4.23`
+- Spatie TypeScript Transformer: `^3.3`
+- PHPUnit: `^13.2`
+- PHPStan/Larastan: `^2.2` / `^3.10`
+- Rector: `^2.5`
+- Vue: `^3.5.40`
+- TypeScript: `^6.0`
+- Vite: `^8.1` (Rolldown bundler)
+- `laravel-vite-plugin`: `^3.1`
+- Tailwind CSS: `^4.3`
+- Pinia: `^4.0`
+- Icons: `@lucide/vue` `^1.25` (the `lucide-vue-next` package is deprecated)
 - Node: `>=24.1.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
+- `composer.lock` and `package-lock.json` are committed application contracts; CI and local reproducible installs must honor them.
+- Published Sail Docker contexts are limited to `docker/8.4` and `docker/8.5`, matching the Composer PHP constraint.
+
+### Version Constraints Worth Knowing
+
+- TypeScript must stay on `6.x`. TypeScript 7 (the native compiler) has no stable programmatic API yet, so `vue-tsc`/Volar cannot use it and `typescript-eslint` caps at `<6.1.0`.
+- `concurrently` 10 pins a vulnerable `shell-quote`. `package.json` carries an `overrides` entry forcing `shell-quote ^1.10.0`; drop it once upstream repins.
+- `@vue/test-utils` currently pins `js-beautify` 1, whose `glob` dependency is deprecated. `package.json` overrides `glob` to `^12.0.0`; remove the override once Test Utils updates its formatter dependency.
+- `optionalDependencies` pin the Linux x64 native binaries used by CI/Docker. Vite 8 bundles with Rolldown, so the binding is `@rolldown/binding-linux-x64-gnu` (not `@rollup/rollup-*`).
+- Those three entries must use exact versions that match the resolved core packages (`rolldown`, `lightningcss`, `@tailwindcss/oxide`). A caret range can hoist a newer binding than the core package expects and break the Linux build. Re-check them after any Vite or Tailwind bump.
 
 ## Current Runtime And Tooling
 
@@ -128,7 +145,11 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `php artisan pail --timeout=0`
     - `php artisan inertia:start-ssr`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
-- `pm2.config.cjs` currently manages production-style queue workers, Reverb, and the scheduler.
+- `pm2.config.cjs` currently manages production-style queue workers, Reverb, the Inertia SSR server, and the scheduler.
+- SSR is served two different ways and both are wired up:
+    - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
+    - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/ssr.js` and `php artisan inertia:start-ssr` serves it.
+- `INERTIA_SSR_ENABLED` in `.env.example` toggles both paths.
 
 ## Canonical Architecture
 
@@ -138,6 +159,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - `bootstrap/providers.php` only lists:
     - `App\Providers\AppServiceProvider`
     - `App\Providers\AuthServiceProvider`
+    - `App\Providers\TypeScriptTransformerServiceProvider`
 - Module providers are not added there manually; they are auto-registered during app boot through `App\Modules\Shared\Support\ModuleRegistry::providerClasses(...)`.
 - Web middleware appended in `bootstrap/app.php`:
     - `App\Http\Middleware\HandleAppearance`
@@ -289,8 +311,26 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 - App entry points:
     - `resources/js/app.ts` - Client-side entry
-    - `resources/js/ssr.ts` - SSR entry (do not initialize Echo here)
-- Inertia page resolution currently loads Vue files from `resources/js/modules/**/*.vue`.
+    - `resources/js/ssr.ts` - SSR entry
+    - `resources/js/create-app.ts` - Root tree and plugins shared by both entries
+- Both entries call `createInertiaApp<AppPageProps>` with the same `pages` shorthand. `@inertiajs/vite` compiles it into an `import.meta.glob` resolver over `resources/js/modules/**/*.vue`, and the `transform` strips the leading `modules/` from the backend-supplied component name (`modules/users/pages/Index`).
+- That `pages` object is rewritten by a static AST transform, so it must stay an inline object literal in each entry. It cannot be hoisted into a shared constant, and the duplication between the two entries is intentional.
+- Passing `AppPageProps` as the type argument is what keeps `props.initialPage.props` typed; do not fall back to casting individual shared props.
+- Both entries build their Vue app through `resources/js/create-app.ts`, so the root tree (`App` plus `AppToaster`) and the installed plugins are declared once and cannot drift apart. Register new plugins and root-level components there, never in a single entry.
+- Pinia is created per app instance rather than at module scope, so the long-lived SSR process never shares store state between requests.
+- Nothing request-scoped may be written to a module-level binding or to `globalThis`. The SSR process is long-lived and serves concurrent requests, so a per-request global is overwritten by whichever request rendered last. Current applications of this rule:
+    - Pinia is per app instance (`create-app.ts`)
+    - `useToast` drops toasts under SSR
+    - `useApiQuery` never reads, writes, or fetches into its module-level cache or in-flight request map under SSR
+    - `useAppearance` keeps only a client override at module scope, seeded from the `appearance` page prop and written solely from a browser interaction
+- `app.ts` hydrates when Inertia marks the root element with `data-server-rendered` and mounts a fresh app otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
+- `resources/js/ssr.ts` must stay a bare top-level `createInertiaApp(...)` statement. `@inertiajs/vite` rewrites it into the render function used by the dev SSR endpoint and the `createServer` boot used by production builds. Do not reintroduce a manual `createServer` wrapper.
+- `app.ts` passes Inertia a CSP `nonce` read from the `meta[name="csp-nonce"]` tag rendered by `resources/views/app.blade.php`, so Inertia's injected style elements satisfy `SecurityHeaders`.
+- The root Blade template uses `data-inertia` (not `inertia`) on head elements, per Inertia v3.
+- `resources/css/app.css` is a Vite entry of its own (`vite.config.ts` `input`, first in the `@vite` array) and must never be imported from `app.ts`. SSR ships a fully rendered document, so the browser paints as soon as the HTML lands; CSS reaching it through the JS module graph would render that markup unstyled and reflow when the bundle evaluated. As a separate entry it is a render-blocking `<link rel="stylesheet">` in dev and production alike — the Vite dev server serves it as real `text/css` because a `<link>` sends `Accept: text/css`.
+- The color scheme is server-rendered. `HandleAppearance` normalizes the `appearance` cookie through `App\Enums\Appearance` and shares it with the root view, which puts `class="dark"` on `<html>` directly; there is no boot script and nothing for the client to re-apply. `HandleInertiaRequests` shares the same value as a page prop so `useAppearance` seeds the appearance UI from it and hydrates without a mismatch. `useAppearance` holds only a client override (`null` until the visitor toggles), which is what keeps this module-level state out of the shared SSR process.
+- Nothing that renders into markup may be nondeterministic. `Math.random()`, `Date.now()`, and `crypto.randomUUID()` produce one value in the SSR process and a different one during hydration, so Vue reports a mismatch and the server's value is the one that stays in the DOM. Use `useId()` for generated element ids and `url(#…)` references (`PlaceholderPattern`, `SidebarMenuSkeleton`); it is stable across both renders. This applies to vendored `components/ui/**` primitives too — upstream shadcn-vue does not assume SSR.
+- `SecurityHeaders` allows the `http:`/`https:` scheme sources in `style-src` only when `App::isLocal()`, because the dev stylesheet is a `<link>` to the Vite dev server origin rather than to `'self'`. Production keeps the nonce-based policy, where every asset is same-origin.
 - Feature pages live in `resources/js/modules/**/pages`.
 - Feature forms live in `resources/js/modules/**/forms`.
 - Feature-specific components live in `resources/js/modules/**/components`.
@@ -314,6 +354,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
+- Icons come from `@lucide/vue`. It exports unsuffixed names only, so use `ChevronLeft`, not `ChevronLeftIcon`. The `LucideIcon` type backs `NavItem.icon` in `resources/js/types/index.d.ts`.
+- Iconify sets are also available through `unplugin-icons` using the `Icon*` component prefix.
 
 ### Frontend Automation Contracts
 
@@ -330,20 +372,31 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/modules/**/composables/**`
     - `resources/js/modules/**/helpers/**`
 - Module-local `forms/**` and `contracts/**` are not auto-imported.
+- `frontend-auto-import.config.mjs` owns two contracts:
+    - symbol auto-import (`autoImportDirs`, `autoImportImports`, restricted paths/patterns)
+    - component auto-registration (`componentAutoImportOptions`, `inertiaComponentResolver`, `iconComponentPrefix`)
 - Vue components are auto-registered from:
     - `resources/js/components`
     - `resources/js/layouts`
     - `resources/js/modules`
+- `vitest.config.ts` installs the same `unplugin-vue-components` and `unplugin-icons` setup as `vite.config.ts`, so a mounted component resolves `Ui*`, `Base*`, and module components exactly as it does at runtime. Only stub children that need a live runtime dependency, such as `Link`.
+- Component auto-registration only rewrites compiled SFC templates. A runtime `template` string in a spec still needs an explicit component reference.
+- Auto-imported symbols used only inside a `<template>` are not typed by `vue-tsc`, because the generated `declare module 'vue'` augmentation does not merge into `@vue/runtime-core`. Derive a `computed` in `<script setup>` rather than calling an auto-imported helper directly in markup.
 - Module Vue components are namespace-registered; use tags like `<UsersTable />` and `<UsersDeleteUserDialog />` instead of manual imports.
 - `Link` and `Head` are resolver-provided; do not manually import them.
 - The ESLint config currently enforces:
-    - no direct imports of auto-imported composables/libs/helpers/components
+    - no direct imports of auto-imported composables/stores/libs/utils/helpers/components
     - no cross-module imports between feature modules
     - no inline `fields = [...]` form arrays in pages/components
     - no duplicated navigation arrays in pages/layouts/composables
     - no `fetch(...)` calls inside feature page files
     - no `as unknown as Record<string, unknown>`
     - no explicit any type (`@typescript-eslint/no-explicit-any`)
+- Restricted imports use `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`. Auto-import only provides runtime values, so `import type { ... }` from a restricted path stays legal everywhere.
+- Two scopes are deliberately exempt from the auto-import restriction:
+    - files inside the auto-imported directories themselves (`autoImportSourceGlobs`), which wire up their own siblings with explicit imports instead of relying on auto-import resolving back into the directory being scanned
+    - test files, which must be able to name real components and module namespaces for mounting and spying
+- Feature-module source and test files still enforce the cross-module boundary rule, including type-only imports.
 
 ### Frontend Ownership Rules
 
@@ -448,7 +501,14 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Use DTOs and enums instead of untyped arrays or bounded strings whenever data crosses layers.
 - Any backend DTO or enum consumed by the frontend must be exported through the TypeScript transformer.
 - Prefer Spatie Data classes for payload/query/page contracts.
-- Annotate frontend-facing DTOs/enums with `#[TypeScript]`.
+- Annotate frontend-facing DTOs/enums with `#[TypeScript]`. Enums under `app/**` are collected regardless of the attribute.
+- TypeScript generation is configured in `app/Providers/TypeScriptTransformerServiceProvider.php`. Transformer v3 has no config file; do not reintroduce `config/typescript-transformer.php`.
+- That provider is the single place that owns the generated contract surface. Current settings:
+    - `DataClassTransformer(nullableAsOptional: true)` so nullable DTO properties stay `foo?: T` rather than `T | null`
+    - `EnumTransformer(useUnionEnums: false)` so PHP enums become native TypeScript enums
+    - `FlatModuleWriter('app-data.ts')` into `resources/js/types`, keeping one flat ES module
+    - `withoutManifest()` so no transformer manifest file lands in `resources/js/types`
+- Route and controller type generation from the transformer stays off. Wayfinder owns that surface.
 - Current shared auth user contract is `App\Modules\Shared\Data\UserViewData|null`; do not serialize the raw user model into Inertia props.
 - Request DTO hydration must be the canonical transport boundary.
 - Services, queries, commands, and handlers must accept DTOs or explicit typed parameters, never mixed arrays.
@@ -467,10 +527,19 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Consume backend-generated contracts from `resources/js/types/app-data.ts`.
 - Do not recreate backend-owned DTOs, enums, realtime payloads, or route payload shapes manually.
 - Prefer `FormValuesFromData<...>` from `resources/js/lib/forms.ts` when form values come from backend DTOs.
-- Prefer `defineFormContract(...)` and `defineFormFields(...)` for all form schemas.
+- Prefer `defineFormContract(...)` and `defineFormFields(...)` for all form schemas. Both live in `resources/js/lib/forms.ts` and are auto-imported; do not import them manually. `resources/js/types/base-ui.ts` keeps the field/schema _types_ only.
 - Prefer `useSchemaResourceForm(...)` over hand-wired form state in page/components when the form matches the shared resource pattern.
 - Use generated route/action helpers rather than hardcoded URLs.
 - Use `useApiQuery`, `useApiMutation`, and `apiRequest` for API-driven state.
+- `useApiQuery` is client-only by design: it never fetches or touches its shared cache during SSR. Server-rendered page data must arrive through Inertia props.
+- `useApiQuery` semantics worth knowing before changing it:
+    - Concurrent consumers of the same cache key share one request, including a forced `refresh()`. Only the raw fetch is shared; `select` and `mapError` stay per caller.
+    - `queryCache` stores the raw `queryFn` result, never a `select` projection, so one entry can serve consumers that project the same key differently. `getApiQueryCacheData`/`setApiQueryCacheData` operate on that raw shape.
+    - Invalidations and explicit cache writes version the key and drop its in-flight entry, so a request that started earlier cannot be joined or overwrite newer/optimistic data when it settles.
+    - A request for an earlier reactive key may populate that key's cache, but it cannot overwrite the composable state for the current key.
+    - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
+    - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
+- Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
 - `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
 - `apiRequest` is the canonical place for `X-Socket-ID` propagation.
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
@@ -508,8 +577,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 ### Frontend
 
-- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts` which is called from `resources/js/app.ts`.
-- Do not initialize Echo in `resources/js/ssr.ts`.
+- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts`. Both `resources/js/app.ts` and `resources/js/ssr.ts` call it.
+- `configureRealtime()` is SSR-aware: under `import.meta.env.SSR` it configures the `null` broadcaster, so realtime composables resolve to inert channels instead of throwing or opening a WebSocket while the server renders. Never make a realtime composable depend on a live connection at `setup()` time.
 - Shared realtime frontend helpers live in:
     - `resources/js/lib/realtime/config.ts`
     - `resources/js/lib/realtime/channels.ts`
@@ -545,6 +614,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/composables/useServerDataTable.ts`
     - `resources/js/components/base/table/**`
 - Initial query state must be derived via `resolveServerTableInitialQuery(...)`.
+- That derivation reads the request URL from the shared `location` prop, which `HandleInertiaRequests::share()` sets from `$request->fullUrl()`. It must stay absolute and keep the query string: Inertia's own `page.url` is relative, and `$request->url()` would drop the query and silently reset a shared or bookmarked listing URL to the default sort.
 - Current standard server-table query contract:
     - `page: number`
     - `perPage: number`
@@ -561,6 +631,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 - Global toasts are handled via `useToast` + `AppToaster`.
 - Inertia flash props (`message`, `error`, `status`) are bridged to toasts through `useFlashToasts`.
+- Toasts are client-only: `useToast` drops them during SSR and `AppToaster` renders none until it is mounted, which keeps the server output and the first client render identical. Do not remove either guard without moving the toast state out of module scope.
 - Use inline messages only for persistent instructional content that should not be transient.
 
 ## Error And Exception Contract
@@ -665,7 +736,7 @@ Do not shadow them with manual duplicates.
 - Use `--base-path` only for tests or isolated generation scenarios.
 - Command options contract:
     - `--route-profile=app|public|custom` (non-interactive defaults to `app`)
-    - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
+    - `--roles=all|admin,user` (required when scaffolding includes app CRUD web routes or protected API routes; supports `all` or comma-separated values from `App\Enums\UserRole`)
     - `--route-prefix=...` and `--route-name-prefix=...`
     - `--middleware=auth,verified`
     - `--api-route-profile=protected|public|custom` (non-interactive defaults to `protected`)
@@ -722,7 +793,7 @@ Do not shadow them with manual duplicates.
 - `app/Modules/<Module>/Commands/<Model>Commands.php`
 - `app/Modules/<Module>/Manifests/<Page>Resource.php`
 - `app/Modules/<Module>/Routes/web.php`
-- `app/Modules/<Module>/Routes/gates.php` when app CRUD routes are role-restricted
+- `app/Modules/<Module>/Routes/gates.php` when generated app CRUD or protected API routes are role-restricted
 - `tests/Feature/<Module>/<Page>PageTest.php`
 - `app/Models/<Model>.php` unless skipped
 - `database/migrations/*_create_<table>_table.php` unless skipped
@@ -749,11 +820,11 @@ Do not shadow them with manual duplicates.
     - default name prefix: `<module-kebab>`
     - default middleware: none
 - API `protected` profile:
-    - default prefix: `api/v1/admin/<module-kebab>`
+    - default module route prefix: `v1/admin/<module-kebab>` (Laravel applies the external `/api` prefix)
     - default name prefix: `api.v1.admin.<module-kebab>`
-    - default middleware: `auth:sanctum`
+    - default middleware: `auth:sanctum`, plus `can:manage-<module-kebab>` for role-restricted scopes
 - API `public` profile:
-    - default prefix: `api/v1/<module-kebab>`
+    - default module route prefix: `v1/<module-kebab>` (Laravel applies the external `/api` prefix)
     - default name prefix: `api.v1.<module-kebab>`
     - default middleware: none
 

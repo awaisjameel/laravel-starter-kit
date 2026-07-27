@@ -1,25 +1,34 @@
 <script setup lang="ts">
-    import { Moon, Sun } from 'lucide-vue-next'
+    import { Moon, Sun } from '@lucide/vue'
+    import { Appearance } from '@/types/app-data'
 
     const { appearance, updateAppearance } = useAppearance()
 
     const isDarkMode = computed({
-        get: () => appearance.value === 'dark',
+        get: () => appearance.value === Appearance.Dark,
         set: (value: boolean) => {
-            updateAppearance(value ? 'dark' : 'light')
+            updateAppearance(value ? Appearance.Dark : Appearance.Light)
         }
     })
+
+    // The tab triggers only ever carry the two enum values, but the emitted type is
+    // widened by the primitive, so narrow rather than cast.
+    const selectAppearance = (value: unknown): void => {
+        if (value === Appearance.Light || value === Appearance.Dark) {
+            updateAppearance(value)
+        }
+    }
 </script>
 
 <template>
     <div class="space-y-4">
-        <UiTabs :model-value="appearance" @update:model-value="(value: 'light' | 'dark') => updateAppearance(value)" class="space-y-3">
+        <UiTabs :model-value="appearance" @update:model-value="selectAppearance" class="space-y-3">
             <UiTabsList class="w-full sm:w-auto">
-                <UiTabsTrigger value="light" class="min-w-28">
+                <UiTabsTrigger :value="Appearance.Light" class="min-w-28">
                     <Sun class="mr-2 size-4" />
                     Light
                 </UiTabsTrigger>
-                <UiTabsTrigger value="dark" class="min-w-28">
+                <UiTabsTrigger :value="Appearance.Dark" class="min-w-28">
                     <Moon class="mr-2 size-4" />
                     Dark
                 </UiTabsTrigger>

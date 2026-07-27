@@ -1,6 +1,6 @@
 # Laravel Modular Inertia Starter Kit
 
-A Laravel 13 + Inertia + Vue 3 starter kit with strict typed contracts from backend DTOs to frontend TypeScript.
+A Laravel 13 + Inertia 3 + Vue 3 starter kit with strict typed contracts from backend DTOs to frontend TypeScript.
 
 ## Requirements
 
@@ -8,33 +8,49 @@ A Laravel 13 + Inertia + Vue 3 starter kit with strict typed contracts from back
 - Node 24+ and npm 11+
 - Composer 2+
 
+Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Composer runtime constraint.
+
+## Stack
+
+- Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
+- Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
+- Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, `@lucide/vue`
+- PHPUnit 13, Vitest 4, Pint, PHPStan/Larastan, Rector, ESLint 10, Prettier 3
+
+TypeScript is intentionally pinned to 6.x: TypeScript 7 does not yet expose the programmatic API that `vue-tsc` and `typescript-eslint` need.
+
+`composer.lock` and `package-lock.json` are committed application contracts. Use Composer and npm install commands that honor them; npm is the only supported JavaScript package manager.
+
 ## Quick Start
 
 ```bash
 cp .env.example .env
 composer install
-npm install
+npm ci
 php artisan key:generate
 php artisan migrate
 composer dev
 ```
 
-Realtime dev dependencies are included in `composer dev`; this now starts Laravel Reverb alongside the web server, queue worker, logs, and Vite.
+Realtime dev dependencies are included in `composer dev`; this starts Laravel Reverb alongside the web server, queue worker, logs, and Vite.
+
+`composer dev` also gives you server-side rendering: `@inertiajs/vite` renders pages through the Vite dev server, so no separate SSR process is needed while developing. Use `composer dev:ssr` to exercise the production SSR path (built assets + `php artisan inertia:start-ssr`), and set `INERTIA_SSR_ENABLED=false` to turn SSR off.
 
 ## Core Commands
 
 - Generate routes/types:
-  - `composer generate`
+    - `composer generate`
 - Full quality gate (mandatory after edits):
-  - `composer generate-and-cleanup`
-  - `npm run typecheck`
-  - `php artisan test`
-  - `npm run test:unit`
+    - `composer generate-and-cleanup`
+    - `npm run typecheck`
+    - `php artisan test`
+    - `npm run test:unit`
 - Non-mutating QA check:
-  - `composer qa:check`
-- Generated artifact sync check (mutating):
-  - `composer generate`
-  - `git diff --exit-code -- resources/js/actions resources/js/routes resources/js/types/app-data.ts resources/js/wayfinder/index.ts`
+    - `composer qa:check`
+- Generated artifact sync check:
+    - `composer generate`
+    - `npm run build:ssr`
+    - `npm run check:generated`
 
 ## Architecture
 
@@ -54,6 +70,7 @@ Shared core model/enum:
 
 - `app/Models/User.php`
 - `app/Enums/UserRole.php`
+- `app/Enums/Appearance.php`
 
 Shared realtime infrastructure:
 
@@ -102,7 +119,7 @@ Shared UI primitives and layouts remain in:
 
 ## Type-Safe Data Contracts
 
-The project uses Spatie Data + TypeScript transformer.
+The project uses Spatie Data + TypeScript Transformer 3, configured in `app/Providers/TypeScriptTransformerServiceProvider.php` (v3 has no config file).
 
 Generated output:
 
@@ -113,6 +130,10 @@ Generated route/action helpers:
 - `resources/js/routes/**`
 - `resources/js/actions/**`
 
+Vite also generates the auto-import and component declarations at
+`resources/js/types/auto-imports.d.ts` and `resources/js/types/components.d.ts`.
+All generated artifacts are committed and validated by CI; do not hand-edit them.
+
 Never hand-edit generated files.
 
 Realtime channel pattern enums, event-name enums, presence payloads, and broadcast payload DTOs are generated into the same `resources/js/types/app-data.ts` contract surface.
@@ -120,15 +141,24 @@ Realtime channel pattern enums, event-name enums, presence payloads, and broadca
 ## Realtime
 
 - Reverb is the default broadcaster in `.env.example`.
-- The app initializes Echo through `configureRealtime()` in `resources/js/app.ts`.
+- Echo is initialized through `configureRealtime()`, called from both `resources/js/app.ts` and `resources/js/ssr.ts`. Under SSR it falls back to Echo's `null` broadcaster, so realtime pages render on the server without opening a connection.
 - Channel authorization is module-local in `app/Modules/*/Routes/channels.php` and aggregated by the root `routes/channels.php`.
 - Frontend modules should use shared realtime composables plus module-local `contracts/realtime.ts` helpers instead of using Echo directly.
 - `apiRequest()` automatically forwards `X-Socket-ID` so broadcast listeners can call `toOthers()` safely.
 - Queue workers should process `realtime,high,default` in that order.
 
+## Rendering and Visual Stability
+
+SSR delivers a fully rendered document, so anything the browser needs for the first
+paint has to arrive as markup rather than as a side effect of the JS bundle:
+
+- `resources/css/app.css` is its own Vite entry and is listed first in `@vite`, so it is a render-blocking stylesheet in dev and production. Importing it from `app.ts` instead would paint the server-rendered HTML unstyled and reflow once the bundle evaluated.
+- The color scheme comes from the `appearance` cookie and is rendered onto `<html>` by Blade — no boot script, and no post-hydration re-apply. The same value is shared as an Inertia prop so the appearance controls render identically on both sides.
+- Web fonts use `display=swap` and a pair of preconnects (the stylesheet fetch is same-origin to the font host, the font files are CORS, and they use separate connections).
+
 ## Security Defaults
 
-- CSP + nonce-based security headers.
+- CSP + nonce-based security headers. The nonce is exposed to the client through a `meta[name="csp-nonce"]` tag and handed to Inertia so its injected style elements pass the policy.
 - Hardened browser/security headers middleware.
 - Throttling for sensitive auth endpoints.
 - Server-side authorization via policies and gates.

@@ -40,6 +40,13 @@ const scheduleDismiss = (id: string, duration: number): void => {
 }
 
 const create = (variant: ToastVariant, input: CreateToastInput): void => {
+    // Toasts are transient client-side UI. Dropping them on the server is what
+    // keeps this module-level state and its timers empty in the long-lived SSR
+    // process, so nothing can leak between requests.
+    if (import.meta.env.SSR) {
+        return
+    }
+
     const toast = buildToast(variant, input)
     toasts.value = [toast, ...toasts.value]
     scheduleDismiss(toast.id, toast.duration)

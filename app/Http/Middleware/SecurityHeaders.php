@@ -24,8 +24,11 @@ final class SecurityHeaders
         $scriptSrc = $isLocalEnvironment
             ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' http: https:"
             : sprintf("script-src 'self' 'nonce-%s'", $nonce);
+        // Locally the stylesheet is a `<link>` to the Vite dev server rather than to
+        // this origin, so the scheme sources are needed for the same reason `script-src`
+        // needs them. In production every asset is served from `'self'`.
         $styleSrc = $isLocalEnvironment
-            ? "style-src 'self' 'unsafe-inline' https://fonts.bunny.net"
+            ? "style-src 'self' 'unsafe-inline' http: https:"
             : sprintf("style-src 'self' 'nonce-%s' https://fonts.bunny.net", $nonce);
         $fontSrc = "font-src 'self' https://fonts.bunny.net data:";
 

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-    const patternId = computed(() => `pattern-${Math.random().toString(36).substring(2, 9)}`)
+    // `useId()` yields the same value on the server and on the client, so the `url(#…)`
+    // reference hydrates without a mismatch. `Math.random()` cannot: the SSR render and
+    // the client render each roll their own, and every page here is server-rendered.
+    const patternId = `pattern-${useId()}`
 </script>
 
 <template>

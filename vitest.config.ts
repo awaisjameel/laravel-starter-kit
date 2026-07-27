@@ -1,8 +1,17 @@
-import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
-import { autoImportDirs, autoImportImports } from './frontend-auto-import.config.mjs'
+import { fileURLToPath, URL } from 'node:url'
 import AutoImport from 'unplugin-auto-import/vite'
+import IconsResolver from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
+import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vitest/config'
+import {
+    autoImportDirs,
+    autoImportImports,
+    componentAutoImportOptions,
+    iconComponentPrefix,
+    inertiaComponentResolver
+} from './frontend-auto-import.config.mjs'
 
 export default defineConfig({
     plugins: [
@@ -11,6 +20,22 @@ export default defineConfig({
             dts: false,
             imports: autoImportImports,
             dirs: autoImportDirs
+        }),
+        Icons({
+            compiler: 'vue3'
+        }),
+        // Mirrors `vite.config.ts` so a mounted component resolves `Ui*`, `Base*`,
+        // and module components exactly like it does at runtime. Without this a
+        // test has to hand-stub every auto-registered child just to render.
+        Components({
+            ...componentAutoImportOptions,
+            dts: false,
+            resolvers: [
+                inertiaComponentResolver,
+                IconsResolver({
+                    prefix: iconComponentPrefix
+                })
+            ]
         })
     ],
     resolve: {

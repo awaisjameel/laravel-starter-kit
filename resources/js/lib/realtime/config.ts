@@ -95,7 +95,20 @@ export const createRealtimeConfig = (options: ConfigureRealtimeOptions = {}): Ec
     }
 }
 
+/**
+ * Configures the single Echo instance used by every realtime composable.
+ *
+ * Both app entries call this. Under SSR the `null` broadcaster is used so
+ * realtime composables resolve to inert channels instead of throwing or
+ * opening a WebSocket while the server renders a page.
+ */
 export const configureRealtime = (options: ConfigureRealtimeOptions = {}): void => {
+    if (import.meta.env.SSR) {
+        configureEcho<'null'>({ broadcaster: 'null' })
+
+        return
+    }
+
     configureEcho(createRealtimeConfig(options))
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { FileQuestion, FolderOpen, Inbox, Search } from 'lucide-vue-next'
+    import { FileQuestionMark, FolderOpen, Inbox, Search } from '@lucide/vue'
 
     export interface EmptyStateProps {
         title?: string
@@ -22,7 +22,7 @@
         inbox: Inbox,
         search: Search,
         folder: FolderOpen,
-        question: FileQuestion
+        question: FileQuestionMark
     }
 </script>
 

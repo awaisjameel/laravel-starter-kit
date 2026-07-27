@@ -1,7 +1,6 @@
 <script setup lang="ts">
     import type { ButtonVariants } from '@/components/ui/button'
-    import { cn } from '@/lib/utils'
-    import { LoaderCircle } from 'lucide-vue-next'
+    import { LoaderCircle } from '@lucide/vue'
     import type { Component, HTMLAttributes } from 'vue'
 
     interface Props {
@@ -29,10 +28,11 @@
     })
 
     const isDisabled = computed(() => props.disabled || props.loading)
+    const buttonClass = computed(() => cn(props.fullWidth && 'w-full', props.class))
 </script>
 
 <template>
-    <UiButton :type="type" :variant="variant" :size="size" :disabled="isDisabled" :class="cn(props.fullWidth && 'w-full', props.class)">
+    <UiButton :type="type" :variant="variant" :size="size" :disabled="isDisabled" :class="buttonClass">
         <LoaderCircle v-if="loading" class="size-4 animate-spin" />
         <component v-else-if="iconLeft !== undefined" :is="iconLeft" class="size-4" />
         <span v-if="label !== undefined">

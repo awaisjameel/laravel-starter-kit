@@ -1,5 +1,4 @@
 <script setup lang="ts">
-    import { capitalize, formatDate } from '@/lib/utils'
     import type { UserViewData } from '@/types/app-data'
     import type { DataTableColumn, DataTableRowAction, MobileCardField } from '@/types/base-ui'
     import type { UserSortColumn } from '../contracts/types'

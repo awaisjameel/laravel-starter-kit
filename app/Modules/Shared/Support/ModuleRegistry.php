@@ -1057,7 +1057,7 @@ final class ModuleRegistry
      */
     private static function hasMissingFiles(string $basePath, array $entries): bool
     {
-        return array_any(self::resolveEntries($basePath, $entries), fn ($entry): bool => ! is_file($entry));
+        return array_any(self::resolveEntries($basePath, $entries), fn (string $entry): bool => ! is_file($entry));
     }
 
     /**
@@ -1065,7 +1065,7 @@ final class ModuleRegistry
      */
     private static function hasMissingDirectories(string $basePath, array $entries): bool
     {
-        return array_any(self::resolveEntries($basePath, $entries), fn ($entry): bool => ! is_dir($entry));
+        return array_any(self::resolveEntries($basePath, $entries), fn (string $entry): bool => ! is_dir($entry));
     }
 
     /**

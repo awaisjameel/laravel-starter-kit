@@ -33,3 +33,5 @@ export const mapInertiaFormErrors = <TForm extends object>(errors: unknown): For
 }
 
 export const defineFormContract = <TForm extends FormDataType<TForm>>(contract: FormContract<TForm>): FormContract<TForm> => contract
+
+export const defineFormFields = <TForm extends object>(fields: Array<FormFieldSchema<TForm>>): Array<FormFieldSchema<TForm>> => fields

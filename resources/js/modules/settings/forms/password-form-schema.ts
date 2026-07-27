@@ -1,6 +1,5 @@
 import type { FormValuesFromData } from '@/lib/forms'
 import type { PasswordUpdateData } from '@/types/app-data'
-import { defineFormFields } from '@/types/base-ui'
 
 export type PasswordFormValues = FormValuesFromData<
     PasswordUpdateData,

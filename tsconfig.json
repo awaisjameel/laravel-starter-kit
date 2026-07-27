@@ -2,7 +2,7 @@
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig to read more about this file */
         "paths": {
-            "@/*": ["resources/js/*"]
+            "@/*": ["./resources/js/*"]
         },
 
         /* Projects */
@@ -35,13 +35,9 @@
         "module": "ESNext" /* Specify what module code is generated. */,
         // "rootDir": "./",                                  /* Specify the root folder within your source files. */
         "moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
-        "baseUrl": ".", //"./",                                  /* Specify the base directory to resolve non-relative module names. */
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
         // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
-        "types": [
-            "vite/client",
-            "unplugin-icons/types"
-        ] /* Specify type package names to be included without being referenced in a source file. */,
+        "types": ["vite/client", "unplugin-icons/types"] /* Specify type package names to be included without being referenced in a source file. */,
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
         // "allowImportingTsExtensions": true,               /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
@@ -124,11 +120,7 @@
         "resources/js/types/auto-imports.d.ts",
         "resources/js/types/globals.d.ts",
         "resources/js/types/index.d.ts",
-        "resources/js/types/ziggy.d.ts",
         "env.d.ts" // Custom environment declaration file for Vite
     ],
-    "exclude": [
-        "resources/js/components/ui/**",
-        "resources/js/types/components.d.ts"
-    ]
+    "exclude": ["resources/js/components/ui/**", "resources/js/types/components.d.ts"]
 }

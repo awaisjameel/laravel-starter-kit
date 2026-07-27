@@ -1,6 +1,5 @@
 import type { {{ storeDataClass }} } from '@/types/app-data'
 import type { FormValuesFromData } from '@/lib/forms'
-import { defineFormFields } from '@/types/base-ui'
 
 export type {{ pagePascalName }}FormValues = FormValuesFromData<{{ storeDataClass }}>
 

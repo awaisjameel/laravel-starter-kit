@@ -1,64 +1,35 @@
-export type Appearance = 'light' | 'dark'
+import { Appearance } from '@/types/app-data'
 
-export function updateTheme(value: Appearance) {
-    if (typeof window === 'undefined') {
-        return
-    }
+const APPEARANCE_COOKIE = 'appearance'
+const APPEARANCE_COOKIE_MAX_AGE_SECONDS = 365 * 24 * 60 * 60
 
-    document.documentElement.classList.toggle('dark', value === 'dark')
-}
-
-const setCookie = (name: string, value: string, days = 365) => {
-    if (typeof document === 'undefined') {
-        return
-    }
-
-    const maxAge = days * 24 * 60 * 60
-
-    document.cookie = `${name}=${value};path=/;max-age=${maxAge};SameSite=Lax`
-}
-
-const getStoredAppearance = () => {
-    if (typeof window === 'undefined') {
-        return null
-    }
-
-    return localStorage.getItem('appearance') as Appearance | null
-}
-
-export function initializeTheme() {
-    if (typeof window === 'undefined') {
-        return
-    }
-
-    // Initialize theme from saved preference or default to light mode...
-    const savedAppearance = getStoredAppearance()
-    updateTheme(savedAppearance || 'light')
-}
-
-const appearance = ref<Appearance>('light')
+// The visitor's own choice, `null` until they actually toggle. Module scope is shared
+// by every request the long-lived SSR process renders, so it has to stay null there —
+// and it does, because `updateAppearance` only ever runs from a browser interaction.
+const clientAppearance = ref<Appearance | null>(null)
 
 export function useAppearance() {
-    onMounted(() => {
-        const savedAppearance = localStorage.getItem('appearance') as Appearance | null
+    const page = useAppPage()
 
-        if (savedAppearance) {
-            appearance.value = savedAppearance
-        } else {
-            updateAppearance('light')
+    // Seeded from the shared prop rather than from the DOM or localStorage, so the
+    // server renders the appearance UI in the state the document is already painted
+    // in and the first client render hydrates it without a mismatch. The override
+    // takes over from the first toggle, since a client-only change never round-trips
+    // through Inertia's shared props.
+    const appearance = computed<Appearance>(() => clientAppearance.value ?? page.props.appearance)
+
+    function updateAppearance(value: Appearance): void {
+        if (import.meta.env.SSR) {
+            return
         }
-    })
 
-    function updateAppearance(value: Appearance) {
-        appearance.value = value
+        clientAppearance.value = value
+        document.documentElement.classList.toggle('dark', value === Appearance.Dark)
 
-        // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', value)
-
-        // Store in cookie for SSR...
-        setCookie('appearance', value)
-
-        updateTheme(value)
+        // Read back by `HandleAppearance` on the next full page load, which is what
+        // lets the server put the class on `<html>` before any CSS is parsed.
+        const secureAttribute = window.location.protocol === 'https:' ? ';Secure' : ''
+        document.cookie = `${APPEARANCE_COOKIE}=${value};path=/;max-age=${APPEARANCE_COOKIE_MAX_AGE_SECONDS};SameSite=Lax${secureAttribute}`
     }
 
     return {

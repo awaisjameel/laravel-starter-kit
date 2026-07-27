@@ -1,7 +1,7 @@
 import { resolveDashboardCrudNavigationItems } from '@/config/dashboard-crud-navigation'
 import type { NavItem } from '@/types'
 import type { UserRole } from '@/types/app-data'
-import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from 'lucide-vue-next'
+import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from '@lucide/vue'
 import appRoutes from '../routes/app'
 import authRoutes from '../routes/auth'
 import marketingRoutes from '../routes/marketing'
