@@ -1,5 +1,4 @@
 import Http from './Http'
-
 const Users = {
     Http: Object.assign(Http, Http),
 }
