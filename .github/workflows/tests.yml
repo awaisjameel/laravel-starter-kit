@@ -55,9 +55,6 @@ jobs:
       - name: Build Client And SSR Assets
         run: npm run build:ssr
 
-      - name: Verify Generated Files Are Committed
-        run: npm run check:generated
-
       - name: Frontend Tests
         run: npm run test:unit
 

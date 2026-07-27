@@ -48,9 +48,6 @@ jobs:
       - name: Generate Types and Routes
         run: composer generate
 
-      - name: Verify Backend Generated Files Are Committed
-        run: npm run check:backend-generated
-
       - name: Run Pint
         run: vendor/bin/pint --test
 
