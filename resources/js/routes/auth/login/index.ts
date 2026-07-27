@@ -1,9 +1,9 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::create
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
+* @route '/auth/login'
+*/
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
     method: 'get',
@@ -16,27 +16,28 @@ create.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::create
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
+* @route '/auth/login'
+*/
 create.url = (options?: RouteQueryOptions) => {
     return create.definition.url + queryParams(options)
 }
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::create
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
+* @route '/auth/login'
+*/
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: create.url(options),
     method: 'get',
 })
+
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::create
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:23
+* @route '/auth/login'
+*/
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: create.url(options),
     method: 'head',
@@ -44,9 +45,9 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::store
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:37
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:37
+* @route '/auth/login'
+*/
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
@@ -59,25 +60,26 @@ store.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::store
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:37
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:37
+* @route '/auth/login'
+*/
 store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options)
 }
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\AuthenticatedSessionController::store
- * @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:37
- * @route '/auth/login'
- */
+* @see app/Modules/Auth/Http/Controllers/AuthenticatedSessionController.php:37
+* @route '/auth/login'
+*/
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 })
+
 const login = {
     create: Object.assign(create, create),
-store: Object.assign(store, store),
+    store: Object.assign(store, store),
 }
 
 export default login
