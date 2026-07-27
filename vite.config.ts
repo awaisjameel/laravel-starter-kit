@@ -84,7 +84,7 @@ export default defineConfig({
         }
     },
     build: {
-        rollupOptions: {
+        rolldownOptions: {
             checks: {
                 // These transforms intentionally own most of this small app's build
                 // work. Rolldown's percentage-based advisory is therefore noisy even
