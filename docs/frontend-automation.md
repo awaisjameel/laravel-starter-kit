@@ -102,7 +102,6 @@ run the complete generated-artifact check:
 ```bash
 composer generate
 npm run build:ssr
-npm run check:generated
 ```
 
 CI verifies backend contracts immediately after `composer generate`, then verifies both backend

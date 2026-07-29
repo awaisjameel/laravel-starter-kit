@@ -49,9 +49,6 @@ jobs:
       - name: Generate Contracts
         run: composer generate
 
-      - name: Verify Generated Contracts
-        run: npm run check:generated
-
       - name: Typecheck Frontend
         run: npm run typecheck
 

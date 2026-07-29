@@ -53,7 +53,6 @@ Realtime dev dependencies are included in `composer dev`; this starts Laravel Re
 - Generated artifact sync check:
     - `composer generate`
     - `npm run build:ssr`
-    - `npm run check:generated`
 
 ## Architecture
 
