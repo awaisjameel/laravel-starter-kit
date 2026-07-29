@@ -40,6 +40,6 @@ final class UserChanged extends RealtimeEvent
      */
     protected function payload(): array
     {
-        return $this->userChangedBroadcastData->toArray();
+        return $this->userChangedBroadcastData->transform();
     }
 }

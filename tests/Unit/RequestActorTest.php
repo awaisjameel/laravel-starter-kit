@@ -1,44 +1,32 @@
 <?php
 
 declare(strict_types=1);
-
-namespace Tests\Unit;
-
 use App\Models\User;
 use App\Modules\Shared\Auth\RequestActor;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\GenericUser;
 use Illuminate\Http\Request;
-use Tests\TestCase;
 
-final class RequestActorTest extends TestCase
-{
-    public function test_it_returns_the_authenticated_application_user(): void
-    {
-        $user = User::factory()->make();
-        $request = Request::create('/app/dashboard');
-        $request->setUserResolver(static fn (): User => $user);
+test('it returns the authenticated application user', function (): void {
+    $user = User::factory()->make();
+    $request = Request::create('/app/dashboard');
+    $request->setUserResolver(static fn (): User => $user);
 
-        $this->assertSame($user, RequestActor::from($request));
-    }
+    expect(RequestActor::from($request))->toBe($user);
+});
+test('it throws when no authenticated application user is available', function (): void {
+    $request = Request::create('/app/dashboard');
+    $request->setUserResolver(static fn (): null => null);
 
-    public function test_it_throws_when_no_authenticated_application_user_is_available(): void
-    {
-        $request = Request::create('/app/dashboard');
-        $request->setUserResolver(static fn (): null => null);
+    $this->expectException(AuthenticationException::class);
 
-        $this->expectException(AuthenticationException::class);
+    RequestActor::from($request);
+});
+test('it throws when the authenticated user is not the application user model', function (): void {
+    $request = Request::create('/app/dashboard');
+    $request->setUserResolver(static fn (): GenericUser => new GenericUser(['id' => 1, 'email' => 'generic@example.com']));
 
-        RequestActor::from($request);
-    }
+    $this->expectException(AuthenticationException::class);
 
-    public function test_it_throws_when_the_authenticated_user_is_not_the_application_user_model(): void
-    {
-        $request = Request::create('/app/dashboard');
-        $request->setUserResolver(static fn (): GenericUser => new GenericUser(['id' => 1, 'email' => 'generic@example.com']));
-
-        $this->expectException(AuthenticationException::class);
-
-        RequestActor::from($request);
-    }
-}
+    RequestActor::from($request);
+});

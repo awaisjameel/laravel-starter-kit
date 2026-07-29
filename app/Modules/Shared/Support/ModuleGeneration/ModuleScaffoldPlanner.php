@@ -702,7 +702,6 @@ final readonly class ModuleScaffoldPlanner
 
         $routeUri = $generateModuleInput->routePrefix === '' ? '/' : '/'.$generateModuleInput->routePrefix;
         $routeLabel = str_replace('-', ' ', $generateModuleInput->moduleName->frontendKebab);
-        $routeTestName = str_replace(' ', '_', $routeLabel);
         $guestAssertion = in_array('auth', $generateModuleInput->middleware, true)
             ? "\$testResponse->assertRedirect('/auth/login');"
             : '$testResponse->assertOk();';
@@ -715,7 +714,6 @@ final readonly class ModuleScaffoldPlanner
             'moduleKebab' => $generateModuleInput->moduleName->frontendKebab,
             'routeUri' => $routeUri,
             'routeLabel' => $routeLabel,
-            'routeTestName' => $routeTestName,
             'guestAssertion' => $guestAssertion,
             'userRoleImportLine' => $restrictedByRoles ? "use App\\Enums\\UserRole;\n" : '',
             'forbiddenRoleTest' => $deniedRoleCase !== null
@@ -760,7 +758,6 @@ final readonly class ModuleScaffoldPlanner
             ? '/api'
             : '/api/'.$generateModuleInput->apiRoutePrefix;
         $routeLabel = str_replace('-', ' ', $generateModuleInput->moduleName->frontendKebab);
-        $routeTestName = str_replace(' ', '_', $routeLabel);
         $apiRequiresAuth = in_array('auth:sanctum', $generateModuleInput->apiMiddleware, true);
 
         $apiGuestAssertion = $apiRequiresAuth
@@ -784,7 +781,6 @@ final readonly class ModuleScaffoldPlanner
             'pagePascalName' => $generateModuleInput->pagePascalName,
             'modelClass' => $this->modelClassName($generateModuleInput->moduleName),
             'routeLabel' => $routeLabel,
-            'routeTestName' => $routeTestName,
             'apiRouteUri' => $apiRouteUri,
             'apiGuestAssertion' => $apiGuestAssertion,
             'apiAuthRequestLine' => $apiAuthRequestLine,
@@ -1036,13 +1032,12 @@ final readonly class ModuleScaffoldPlanner
     private function forbiddenRoleTest(string $routeLabel, string $routeUri, string $deniedRoleCase): string
     {
         return sprintf(
-            "    public function test_users_without_required_role_cannot_visit_%s_page(): void\n".
-            "    {\n".
-            "        \$user = User::factory()->create(['role' => %s]);\n\n".
-            "        \$testResponse = \$this->actingAs(\$user)->get('%s');\n\n".
-            "        \$testResponse->assertForbidden();\n".
-            "    }\n",
-            str_replace(' ', '_', $routeLabel),
+            "test('users without required role cannot visit %s page', function (): void {\n".
+            "    \$user = User::factory()->create(['role' => %s]);\n\n".
+            "    \$testResponse = \$this->actingAs(\$user)->get('%s');\n\n".
+            "    \$testResponse->assertForbidden();\n".
+            "});\n",
+            $routeLabel,
             $deniedRoleCase,
             $routeUri,
         );
@@ -1051,13 +1046,12 @@ final readonly class ModuleScaffoldPlanner
     private function forbiddenApiRoleTest(string $routeLabel, string $routeUri, string $deniedRoleCase): string
     {
         return sprintf(
-            "    public function test_users_without_required_role_cannot_list_%s_api_results(): void\n".
-            "    {\n".
-            "        \$user = User::factory()->create(['role' => %s]);\n\n".
-            "        \$testResponse = \$this->actingAs(\$user)->getJson('%s');\n\n".
-            "        \$testResponse->assertForbidden();\n".
-            "    }\n",
-            str_replace(' ', '_', $routeLabel),
+            "test('users without required role cannot list %s api results', function (): void {\n".
+            "    \$user = User::factory()->create(['role' => %s]);\n\n".
+            "    \$testResponse = \$this->actingAs(\$user)->getJson('%s');\n\n".
+            "    \$testResponse->assertForbidden();\n".
+            "});\n",
+            $routeLabel,
             $deniedRoleCase,
             $routeUri,
         );

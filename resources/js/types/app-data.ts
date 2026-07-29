@@ -151,11 +151,11 @@ export enum UserSortBy {
 }
 export type UserViewData = {
     id: number
-    created_at: string
-    updated_at: string
     name: string
     email: string
     role: UserRole
+    created_at: string
+    updated_at: string
     email_verified_at?: string
 }
 export type UsersIndexPageData = {

@@ -58,7 +58,7 @@ Run after changes:
 ```bash
 npm run test:unit
 composer generate-and-cleanup
-php artisan test
+composer test
 ```
 
 ## 7. Generated files rule

@@ -2,35 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\{{ moduleNamespace }};
-
 use App\Models\User;
 {{ userRoleImportLine }}
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
-use Tests\TestCase;
 
-final class {{ pagePascalName }}PageTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_guests_access_behavior_for_{{ routeTestName }}_page(): void
-    {
-        $testResponse = $this->get('{{ routeUri }}');
+test('guests access behavior for {{ routeLabel }} page', function (): void {
+    $testResponse = $this->get('{{ routeUri }}');
 
-        {{ guestAssertion }}
-    }
+    {{ guestAssertion }}
+});
 
 {{ forbiddenRoleTest }}
-    public function test_authenticated_users_can_visit_{{ routeTestName }}_page(): void
-    {
-        $user = User::factory()->create({{ allowedRoleFactoryState }});
+test('authenticated users can visit {{ routeLabel }} page', function (): void {
+    $user = User::factory()->create({{ allowedRoleFactoryState }});
 
-        $testResponse = $this->actingAs($user)->get('{{ routeUri }}');
+    $testResponse = $this->actingAs($user)->get('{{ routeUri }}');
 
-        $testResponse->assertOk();
-        $testResponse->assertInertia(fn (Assert $assert): Assert => $assert
-            ->component('modules/{{ moduleKebab }}/pages/{{ pagePascalName }}')
-        );
-    }
-}
+    $testResponse->assertOk();
+    $testResponse->assertInertia(fn (Assert $assert): Assert => $assert
+        ->component('modules/{{ moduleKebab }}/pages/{{ pagePascalName }}')
+    );
+});

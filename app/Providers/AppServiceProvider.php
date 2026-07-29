@@ -38,7 +38,7 @@ final class AppServiceProvider extends ServiceProvider
             now()->addMinutes(60),
             [
                 'id' => $user->getKey(),
-                'hash' => sha1((string) $user->getEmailForVerification()),
+                'hash' => sha1($user->getEmailForVerification()),
             ],
         ));
     }

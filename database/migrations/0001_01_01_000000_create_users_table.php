@@ -14,7 +14,7 @@ return new class extends Migration
 {
     public static function seedUsers(): void
     {
-        if (! config('database.seed_users')) {
+        if (config('database.seed_users') !== true) {
             return;
         }
 
@@ -37,7 +37,7 @@ return new class extends Migration
             User::updateOrCreate(
                 ['email' => $userDataList->email],
                 [
-                    ...$userDataList->toArray(),
+                    ...$userDataList->transform(),
                     'email_verified_at' => $userDataList->role === UserRole::Admin ? CarbonImmutable::now() : null,
                 ]
             );

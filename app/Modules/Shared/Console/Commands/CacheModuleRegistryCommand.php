@@ -23,7 +23,12 @@ final class CacheModuleRegistryCommand extends Command
 
     public function handle(): int
     {
-        $basePath = mb_trim((string) ($this->option('base-path') ?: base_path()));
+        $basePathOption = $this->option('base-path');
+        $basePath = mb_trim(
+            $basePathOption !== null && $basePathOption !== ''
+                ? $basePathOption
+                : base_path(),
+        );
         $cachePath = ModuleRegistry::cachePath($basePath);
         $cacheDirectory = dirname($cachePath);
 

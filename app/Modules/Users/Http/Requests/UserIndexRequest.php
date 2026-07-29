@@ -10,6 +10,7 @@ use App\Modules\Shared\Http\Requests\DataQueryRequest;
 use App\Modules\Users\Data\UserIndexData;
 use App\Modules\Users\Enums\UserSortBy;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Override;
 
 /**
  * @extends DataQueryRequest<UserIndexData>
@@ -42,6 +43,7 @@ final class UserIndexRequest extends DataQueryRequest
     /**
      * @return array<string, int|SortDirection|UserSortBy|string|null>
      */
+    #[Override]
     protected function dtoDefaults(): array
     {
         return [

@@ -2,32 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-final class RegistrationTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_registration_screen_can_be_rendered(): void
-    {
-        $testResponse = $this->get('/auth/register');
+test('registration screen can be rendered', function (): void {
+    $testResponse = $this->get('/auth/register');
 
-        $testResponse->assertStatus(200);
-    }
+    $testResponse->assertStatus(200);
+});
+test('new users can register', function (): void {
+    $testResponse = $this->post('/auth/register', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
 
-    public function test_new_users_can_register(): void
-    {
-        $testResponse = $this->post('/auth/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
-
-        $this->assertAuthenticated();
-        $testResponse->assertRedirect(route('app.dashboard', absolute: false));
-    }
-}
+    $this->assertAuthenticated();
+    $testResponse->assertRedirect(route('app.dashboard', absolute: false));
+});

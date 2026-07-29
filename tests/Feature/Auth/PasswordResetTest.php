@@ -2,84 +2,71 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
-
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
-use Tests\TestCase;
 
-final class PasswordResetTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_reset_password_link_screen_can_be_rendered(): void
-    {
-        $testResponse = $this->get('/auth/forgot-password');
+test('reset password link screen can be rendered', function (): void {
+    $testResponse = $this->get('/auth/forgot-password');
+
+    $testResponse
+        ->assertStatus(200)
+        ->assertInertia(fn (Assert $assert): Assert => $assert
+            ->where('status', null)
+        );
+});
+test('reset password link can be requested', function (): void {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $this->post('/auth/forgot-password', ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class);
+});
+test('reset password screen can be rendered', function (): void {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $this->post('/auth/forgot-password', ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $resetPassword): true {
+        $testResponse = $this->get('/auth/reset-password/'.$resetPassword->token);
 
         $testResponse
             ->assertStatus(200)
             ->assertInertia(fn (Assert $assert): Assert => $assert
-                ->where('status', null)
+                ->where('email', '')
+                ->where('token', $resetPassword->token)
             );
-    }
 
-    public function test_reset_password_link_can_be_requested(): void
-    {
-        Notification::fake();
+        return true;
+    });
+});
+test('password can be reset with valid token', function (): void {
+    Notification::fake();
 
-        $user = User::factory()->create();
+    $user = User::factory()->create();
 
-        $this->post('/auth/forgot-password', ['email' => $user->email]);
+    $this->post('/auth/forgot-password', ['email' => $user->email]);
 
-        Notification::assertSentTo($user, ResetPassword::class);
-    }
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $resetPassword) use ($user): true {
+        $testResponse = $this->post('/auth/reset-password', [
+            'token' => $resetPassword->token,
+            'email' => $user->email,
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
 
-    public function test_reset_password_screen_can_be_rendered(): void
-    {
-        Notification::fake();
+        $testResponse
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('auth.login.create', absolute: false));
 
-        $user = User::factory()->create();
-
-        $this->post('/auth/forgot-password', ['email' => $user->email]);
-
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification): true {
-            $testResponse = $this->get('/auth/reset-password/'.$notification->token);
-
-            $testResponse
-                ->assertStatus(200)
-                ->assertInertia(fn (Assert $assert): Assert => $assert
-                    ->where('email', '')
-                    ->where('token', $notification->token)
-                );
-
-            return true;
-        });
-    }
-
-    public function test_password_can_be_reset_with_valid_token(): void
-    {
-        Notification::fake();
-
-        $user = User::factory()->create();
-
-        $this->post('/auth/forgot-password', ['email' => $user->email]);
-
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user): true {
-            $testResponse = $this->post('/auth/reset-password', [
-                'token' => $notification->token,
-                'email' => $user->email,
-                'password' => 'password',
-                'password_confirmation' => 'password',
-            ]);
-
-            $testResponse
-                ->assertSessionHasNoErrors()
-                ->assertRedirect(route('auth.login.create', absolute: false));
-
-            return true;
-        });
-    }
-}
+        return true;
+    });
+});

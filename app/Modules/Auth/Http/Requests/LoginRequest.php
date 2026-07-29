@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Override;
 
 /**
  * @extends DataFormRequest<LoginData>
@@ -104,6 +105,7 @@ final class LoginRequest extends DataFormRequest
     /**
      * @return array<string, mixed>
      */
+    #[Override]
     protected function dtoPayload(): array
     {
         return array_merge($this->validated(), [

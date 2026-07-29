@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\Config\RectorConfig;
-use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -29,7 +28,6 @@ return RectorConfig::configure()
         cacheClass: FileCacheStorage::class,
     )
     ->withSkip([
-        AddOverrideAttributeToOverriddenMethodsRector::class,
         __DIR__.'/config/database.php',
     ])
     ->withPreparedSets(
@@ -42,5 +40,7 @@ return RectorConfig::configure()
         naming: true,
         instanceOf: true,
         earlyReturn: true,
+        phpunitCodeQuality: true,
+        phpunitNarrowAsserts: true,
     )
     ->withPhpSets();

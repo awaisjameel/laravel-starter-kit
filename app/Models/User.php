@@ -14,10 +14,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Override;
 
 /**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
  * @property UserRole $role
  * @property Carbon|null $email_verified_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class User extends Authenticatable implements MustVerifyEmailContract
 {
@@ -46,6 +53,7 @@ final class User extends Authenticatable implements MustVerifyEmailContract
     /**
      * @return array<string, class-string<UserRole>|string>
      */
+    #[Override]
     protected function casts(): array
     {
         return [

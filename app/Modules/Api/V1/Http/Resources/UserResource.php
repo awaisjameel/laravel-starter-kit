@@ -7,6 +7,7 @@ namespace App\Modules\Api\V1\Http\Resources;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 use RuntimeException;
 
 /**
@@ -17,6 +18,7 @@ final class UserResource extends JsonResource
     /**
      * @return array<string, mixed>
      */
+    #[Override]
     public function toArray(Request $request): array
     {
         if (! $this->resource instanceof User) {

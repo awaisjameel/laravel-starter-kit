@@ -590,11 +590,16 @@ final class ModuleRegistry
                 continue;
             }
 
-            if ($file->getPathInfo()->getFilename() !== 'Policies') {
+            $pathInfo = $file->getPathInfo();
+            if (! $pathInfo instanceof SplFileInfo) {
                 continue;
             }
 
-            $entries[] = self::relativePath($basePath, $file->getRealPath() ?: $file->getPathname());
+            if ($pathInfo->getFilename() !== 'Policies') {
+                continue;
+            }
+
+            $entries[] = self::relativePath($basePath, self::resolvedFilePath($file));
         }
 
         $entries = array_values(array_unique($entries));
@@ -624,11 +629,16 @@ final class ModuleRegistry
                 continue;
             }
 
-            if ($file->getPathInfo()->getFilename() !== $directoryName) {
+            $pathInfo = $file->getPathInfo();
+            if (! $pathInfo instanceof SplFileInfo) {
                 continue;
             }
 
-            $entries[] = self::relativePath($basePath, $file->getRealPath() ?: $file->getPathname());
+            if ($pathInfo->getFilename() !== $directoryName) {
+                continue;
+            }
+
+            $entries[] = self::relativePath($basePath, self::resolvedFilePath($file));
         }
 
         $entries = array_values(array_unique($entries));
@@ -659,7 +669,7 @@ final class ModuleRegistry
                 continue;
             }
 
-            $entries[] = self::relativePath($basePath, $file->getRealPath() ?: $file->getPathname());
+            $entries[] = self::relativePath($basePath, self::resolvedFilePath($file));
         }
 
         $entries = array_values(array_unique($entries));
@@ -687,7 +697,7 @@ final class ModuleRegistry
             $path = $modulesRoot.DIRECTORY_SEPARATOR.$modulePath.DIRECTORY_SEPARATOR.$directoryName.DIRECTORY_SEPARATOR.$filename;
 
             if (is_file($path)) {
-                $entries[] = self::relativePath($basePath, realpath($path) ?: $path);
+                $entries[] = self::relativePath($basePath, self::resolvedPath($path));
             }
         }
 
@@ -713,7 +723,7 @@ final class ModuleRegistry
             $path = $modulesRoot.DIRECTORY_SEPARATOR.$modulePath.DIRECTORY_SEPARATOR.$directoryName;
 
             if (is_dir($path)) {
-                $entries[] = self::relativePath($basePath, realpath($path) ?: $path);
+                $entries[] = self::relativePath($basePath, self::resolvedPath($path));
             }
         }
 
@@ -748,7 +758,7 @@ final class ModuleRegistry
 
             foreach ($files as $file) {
                 if (is_file($file)) {
-                    $entries[] = self::relativePath($basePath, realpath($file) ?: $file);
+                    $entries[] = self::relativePath($basePath, self::resolvedPath($file));
                 }
             }
         }
@@ -784,6 +794,20 @@ final class ModuleRegistry
         }
 
         return $normalizedAbsolutePath;
+    }
+
+    private static function resolvedFilePath(SplFileInfo $file): string
+    {
+        $realPath = $file->getRealPath();
+
+        return is_string($realPath) ? $realPath : $file->getPathname();
+    }
+
+    private static function resolvedPath(string $path): string
+    {
+        $realPath = realpath($path);
+
+        return is_string($realPath) ? $realPath : $path;
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Modules\Auth\Data\ResetPasswordData;
 use App\Modules\Shared\Http\Requests\DataFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Password;
+use Override;
 
 /**
  * @extends DataFormRequest<ResetPasswordData>
@@ -39,6 +40,7 @@ final class ResetPasswordRequest extends DataFormRequest
     /**
      * @return array<string, mixed>
      */
+    #[Override]
     protected function dtoPayload(): array
     {
         return array_merge($this->validated(), [

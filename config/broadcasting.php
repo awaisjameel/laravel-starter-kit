@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+$pusherHost = env('PUSHER_HOST');
+$pusherHost = is_string($pusherHost) && $pusherHost !== ''
+    ? $pusherHost
+    : 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com';
+
 return [
 
     'default' => env('BROADCAST_CONNECTION', 'null'),
@@ -31,7 +36,7 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'host' => env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com',
+                'host' => $pusherHost,
                 'port' => env('PUSHER_PORT', 443),
                 'scheme' => env('PUSHER_SCHEME', 'https'),
                 'encrypted' => true,
