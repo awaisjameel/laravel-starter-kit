@@ -41,5 +41,5 @@ test('paginate applies search sort and pagination', function (): void {
     expect($lengthAwarePaginator->perPage())->toBe(1);
     expect($lengthAwarePaginator->total())->toBe(2);
     expect($lengthAwarePaginator->items())->toHaveCount(1);
-    expect($lengthAwarePaginator->items()[0]->email)->toBe('zulu-query@example.com');
+    expect($lengthAwarePaginator->getCollection()->sole()->email)->toBe('zulu-query@example.com');
 });

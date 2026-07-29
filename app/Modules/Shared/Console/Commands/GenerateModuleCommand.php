@@ -108,9 +108,14 @@ final class GenerateModuleCommand extends Command
 
     private function resolveInput(): GenerateModuleInput
     {
-        $moduleName = ModuleName::fromString((string) $this->argument('module'));
+        $moduleName = ModuleName::fromString($this->argument('module'));
         $pageName = (string) $this->option('page');
-        $basePath = mb_trim((string) ($this->option('base-path') ?: base_path()));
+        $basePathOption = $this->option('base-path');
+        $basePath = mb_trim(
+            $basePathOption !== null && $basePathOption !== ''
+                ? $basePathOption
+                : base_path(),
+        );
         $pagePascalName = $this->toPascalCase($pageName);
         $scaffoldType = $this->resolveScaffoldType();
         $generateCrud = ScaffoldType::includesCrud($scaffoldType);
@@ -182,7 +187,7 @@ final class GenerateModuleCommand extends Command
             scaffoldType: $scaffoldType,
             generateCrud: $generateCrud,
             generateApi: $generateApi,
-            extend: (bool) $this->option('extend'),
+            extend: $this->option('extend'),
             generatePage: $generatePage,
             routeProfile: $routeProfile,
             routePrefix: $routePrefix,
@@ -196,8 +201,8 @@ final class GenerateModuleCommand extends Command
             generateModel: $generateModel,
             generateApiResource: $generateApiResource,
             generateApiFeatureTest: $generateApiFeatureTest,
-            force: (bool) $this->option('force'),
-            dryRun: (bool) $this->option('dry-run'),
+            force: $this->option('force'),
+            dryRun: $this->option('dry-run'),
             basePath: $basePath,
             crudResourceManifest: $resolvedCrudResourceManifest,
         );
@@ -208,7 +213,7 @@ final class GenerateModuleCommand extends Command
         $providedScaffoldType = mb_strtolower(mb_trim((string) $this->option('scaffold')));
 
         if ($providedScaffoldType === '') {
-            $defaultScaffoldType = (bool) $this->option('extend')
+            $defaultScaffoldType = $this->option('extend')
                 ? ScaffoldType::PAGE
                 : ScaffoldType::CRUD;
 
@@ -643,16 +648,16 @@ final class GenerateModuleCommand extends Command
 
     private function resolveGeneratePage(bool $generateCrud): bool
     {
-        return $generateCrud && ! (bool) $this->option('no-page');
+        return $generateCrud && ! $this->option('no-page');
     }
 
     private function resolveGenerateModel(bool $hasBackendScaffold, ModuleName $moduleName, string $basePath): bool
     {
-        if (! $hasBackendScaffold || (bool) $this->option('no-model')) {
+        if (! $hasBackendScaffold || $this->option('no-model')) {
             return false;
         }
 
-        if (! (bool) $this->option('extend')) {
+        if (! $this->option('extend')) {
             return true;
         }
 
@@ -678,14 +683,14 @@ final class GenerateModuleCommand extends Command
     private function resolveGenerateApiResource(bool $generateApi, ?CrudResourceManifest $crudResourceManifest = null): bool
     {
         return $generateApi
-            && ! (bool) $this->option('no-api-resource')
+            && ! $this->option('no-api-resource')
             && ($crudResourceManifest?->api->generatesResource ?? true);
     }
 
     private function resolveGenerateApiFeatureTest(bool $generateApi, ?CrudResourceManifest $crudResourceManifest = null): bool
     {
         return $generateApi
-            && ! (bool) $this->option('no-api-test')
+            && ! $this->option('no-api-test')
             && ($crudResourceManifest?->api->generatesFeatureTest ?? true);
     }
 
@@ -768,7 +773,7 @@ final class GenerateModuleCommand extends Command
 
     private function shouldPromptPerFile(): bool
     {
-        return $this->input->isInteractive() && ! (bool) $this->option('no-file-prompts');
+        return $this->input->isInteractive() && ! $this->option('no-file-prompts');
     }
 
     /**

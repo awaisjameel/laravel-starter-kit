@@ -13,9 +13,11 @@ use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
+use Override;
 
 final class ModuleServiceProvider extends ServiceProvider
 {
+    #[Override]
     public function register(): void
     {
         $this->app->singleton(RealtimeDispatcher::class, LaravelRealtimeDispatcher::class);

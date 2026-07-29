@@ -56,13 +56,18 @@ test('update dispatches management event with audited changes', function (): voi
         $this->userActionContext($actor),
     );
 
-    Event::assertDispatched(UserManagementEvent::class, static fn (UserManagementEvent $userManagementEvent): bool => $userManagementEvent->context->action === 'update'
-        && $userManagementEvent->context->actor->is($actor)
-        && $userManagementEvent->context->target?->is($target) === true
-        && $userManagementEvent->context->changes['name'] === ['before' => 'Before Name', 'after' => 'After Name']
-        && $userManagementEvent->context->changes['email'] === ['before' => 'before@example.com', 'after' => 'after@example.com']
-        && $userManagementEvent->context->changes['role'] === ['before' => 'user', 'after' => 'admin']
-        && $userManagementEvent->context->changes['password'] === ['before' => '[REDACTED]', 'after' => '[REDACTED]']);
+    Event::assertDispatched(UserManagementEvent::class, static function (UserManagementEvent $userManagementEvent) use ($actor, $target): bool {
+        expect($userManagementEvent->context->changes)->toBe([
+            'name' => ['before' => 'Before Name', 'after' => 'After Name'],
+            'email' => ['before' => 'before@example.com', 'after' => 'after@example.com'],
+            'role' => ['before' => 'user', 'after' => 'admin'],
+            'password' => ['before' => '[REDACTED]', 'after' => '[REDACTED]'],
+        ]);
+
+        return $userManagementEvent->context->action === 'update'
+            && $userManagementEvent->context->actor->is($actor)
+            && $userManagementEvent->context->target?->is($target) === true;
+    });
 });
 test('delete dispatches management event before removing user', function (): void {
     Event::fake([UserManagementEvent::class]);

@@ -11,8 +11,7 @@ test('it resolves channel patterns with scalar parameters', function (): void {
     expect($resolved)->toBe('users.42.notifications');
 });
 test('it throws when a parameter is missing', function (): void {
-    $this->expectException(InvalidArgumentException::class);
-    $this->expectExceptionMessage('Missing channel parameter "userId".');
-
-    ChannelPatternResolver::resolve('users.{userId}');
+    expect(
+        fn (): string => ChannelPatternResolver::resolve('users.{userId}'),
+    )->toThrow(InvalidArgumentException::class, 'Missing channel parameter "userId".');
 });

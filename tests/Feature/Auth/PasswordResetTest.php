@@ -35,14 +35,14 @@ test('reset password screen can be rendered', function (): void {
 
     $this->post('/auth/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification): true {
-        $testResponse = $this->get('/auth/reset-password/'.$notification->token);
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $resetPassword): true {
+        $testResponse = $this->get('/auth/reset-password/'.$resetPassword->token);
 
         $testResponse
             ->assertStatus(200)
             ->assertInertia(fn (Assert $assert): Assert => $assert
                 ->where('email', '')
-                ->where('token', $notification->token)
+                ->where('token', $resetPassword->token)
             );
 
         return true;
@@ -55,9 +55,9 @@ test('password can be reset with valid token', function (): void {
 
     $this->post('/auth/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user): true {
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $resetPassword) use ($user): true {
         $testResponse = $this->post('/auth/reset-password', [
-            'token' => $notification->token,
+            'token' => $resetPassword->token,
             'email' => $user->email,
             'password' => 'password',
             'password_confirmation' => 'password',

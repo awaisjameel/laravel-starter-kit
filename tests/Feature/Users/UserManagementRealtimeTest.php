@@ -30,21 +30,24 @@ test('creating a user dispatches realtime events and notifications', function ()
         ])
         ->assertRedirect('/app/admin/users');
 
-    Event::assertDispatched(UsersListChanged::class, static function (UsersListChanged $usersListChanged) use ($admin): bool {
-        $payload = $usersListChanged->broadcastWith();
+    Event::assertDispatched(UsersListChanged::class, static function (UsersListChanged $usersListChanged) use ($admin): true {
+        expect($usersListChanged->broadcastAs())->toBe('users.list.changed')
+            ->and($usersListChanged->broadcastWith())->toMatchArray([
+                'action' => 'create',
+                'actorUserId' => $admin->id,
+            ]);
 
-        return $usersListChanged->broadcastAs() === 'users.list.changed'
-            && $payload['action'] === 'create'
-            && $payload['actorUserId'] === $admin->id;
+        return true;
     });
 
-    Event::assertDispatched(UserChanged::class, static function (UserChanged $userChanged): bool {
+    Event::assertDispatched(UserChanged::class, static function (UserChanged $userChanged): true {
         $payload = $userChanged->broadcastWith();
 
-        return $userChanged->broadcastAs() === 'users.user.changed'
-            && $payload['action'] === 'create'
-            && is_array($payload['user'])
-            && $payload['user']['email'] === 'realtime-user@example.com';
+        expect($userChanged->broadcastAs())->toBe('users.user.changed')
+            ->and($payload)->toMatchArray(['action' => 'create'])
+            ->and(data_get($payload, 'user.email'))->toBe('realtime-user@example.com');
+
+        return true;
     });
 
     Notification::assertSentTo($otherAdmin, UserManagementBroadcastNotification::class);
@@ -65,8 +68,16 @@ test('updating a user dispatches realtime events', function (): void {
         ])
         ->assertRedirect('/app/admin/users');
 
-    Event::assertDispatched(UsersListChanged::class, static fn (UsersListChanged $usersListChanged): bool => $usersListChanged->broadcastWith()['action'] === 'update');
-    Event::assertDispatched(UserChanged::class, static fn (UserChanged $userChanged): bool => $userChanged->broadcastWith()['action'] === 'update');
+    Event::assertDispatched(UsersListChanged::class, static function (UsersListChanged $usersListChanged): true {
+        expect($usersListChanged->broadcastWith())->toMatchArray(['action' => 'update']);
+
+        return true;
+    });
+    Event::assertDispatched(UserChanged::class, static function (UserChanged $userChanged): true {
+        expect($userChanged->broadcastWith())->toMatchArray(['action' => 'update']);
+
+        return true;
+    });
 });
 test('deleting a user dispatches realtime events', function (): void {
     Event::fake([UsersListChanged::class, UserChanged::class]);
@@ -79,6 +90,14 @@ test('deleting a user dispatches realtime events', function (): void {
         ->delete('/app/admin/users/'.$target->id)
         ->assertRedirect('/app/admin/users');
 
-    Event::assertDispatched(UsersListChanged::class, static fn (UsersListChanged $usersListChanged): bool => $usersListChanged->broadcastWith()['action'] === 'delete');
-    Event::assertDispatched(UserChanged::class, static fn (UserChanged $userChanged): bool => $userChanged->broadcastWith()['action'] === 'delete');
+    Event::assertDispatched(UsersListChanged::class, static function (UsersListChanged $usersListChanged): true {
+        expect($usersListChanged->broadcastWith())->toMatchArray(['action' => 'delete']);
+
+        return true;
+    });
+    Event::assertDispatched(UserChanged::class, static function (UserChanged $userChanged): true {
+        expect($userChanged->broadcastWith())->toMatchArray(['action' => 'delete']);
+
+        return true;
+    });
 });

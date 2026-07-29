@@ -11,7 +11,7 @@ final readonly class CrudResourceManifest
     /**
      * @param  list<string>  $allowedRoles
      * @param  list<string>  $middleware
-     * @param  list<array{
+     * @param  non-empty-list<array{
      *     key: string,
      *     label: string,
      *     type: string,
@@ -262,7 +262,7 @@ final readonly class CrudResourceManifest
 
     /**
      * @param  array<string, mixed>  $table
-     * @return list<array{key: string, label: string, type: string, sortable: bool}>
+     * @return non-empty-list<array{key: string, label: string, type: string, sortable: bool}>
      */
     private static function requireTableColumns(array $table): array
     {

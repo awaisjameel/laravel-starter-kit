@@ -33,6 +33,8 @@
         "pestphp/pest-plugin-laravel": "^5.0",
         "pestphp/pest-plugin-phpstan": "^5.0",
         "phpstan/phpstan": "^2.2.5",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
         "rector/rector": "^2.5.8"
     },
     "autoload": {
@@ -74,28 +76,41 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php vendor/bin/pest --compact"
+            "@php vendor/bin/pest"
         ],
         "test:parallel": [
             "@php artisan config:clear --ansi",
-            "@php vendor/bin/pest --parallel --compact"
+            "@php vendor/bin/pest --parallel"
         ],
         "test:fast": [
             "@php artisan config:clear --ansi",
-            "@php vendor/bin/pest --parallel --tia --compact"
+            "@php vendor/bin/pest --parallel --tia"
+        ],
+        "format": [
+            "@php vendor/bin/pint --parallel"
+        ],
+        "format:check": [
+            "@php vendor/bin/pint --test"
+        ],
+        "refactor": [
+            "@php vendor/bin/rector process"
+        ],
+        "refactor:check": [
+            "@php vendor/bin/rector process --dry-run"
         ],
         "cleanup": [
-            "@php vendor/bin/pint --parallel",
-            "@php vendor/bin/rector process",
-            "@php vendor/bin/phpstan analyse --ansi",
+            "@refactor",
+            "@format",
+            "@analyse",
             "npm run cleanup"
         ],
         "analyse": [
             "@php vendor/bin/phpstan analyse --ansi"
         ],
         "qa:check": [
-            "@php vendor/bin/pint --test",
-            "@php vendor/bin/phpstan analyse --ansi",
+            "@refactor:check",
+            "@format:check",
+            "@analyse",
             "npm run format:check",
             "npm run lint:check",
             "npm run typecheck"
@@ -106,12 +121,10 @@
             "@php artisan wayfinder:generate"
         ],
         "generate-and-cleanup": [
-            "@php artisan modules:cache --no-interaction",
-            "@php artisan typescript:transform",
-            "@php artisan wayfinder:generate",
-            "@php vendor/bin/pint --parallel",
-            "@php vendor/bin/rector process",
-            "@php vendor/bin/phpstan analyse --ansi",
+            "@generate",
+            "@refactor",
+            "@format",
+            "@analyse",
             "npm run cleanup"
         ]
     },

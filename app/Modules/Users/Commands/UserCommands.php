@@ -26,7 +26,11 @@ final class UserCommands
 
     public function update(User $user, UpdateUserData $updateUserData): UserCommandResult
     {
-        $before = $user->only(['name', 'email', 'role']);
+        $before = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+        ];
 
         $user->name = $updateUserData->name;
         $user->email = $updateUserData->email;
@@ -52,7 +56,7 @@ final class UserCommands
     }
 
     /**
-     * @param  array<string, mixed>  $before
+     * @param  array{name: mixed, email: mixed, role: mixed}  $before
      * @return array<string, array<string, string>>
      */
     private function computeChanges(array $before, User $user, bool $passwordChanged): array

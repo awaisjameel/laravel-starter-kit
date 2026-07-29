@@ -45,20 +45,11 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Generate Types and Routes
-        run: composer generate-and-cleanup
+      - name: Generate Contracts
+        run: composer generate
 
-      - name: Run Pint
-        run: vendor/bin/pint --test
+      - name: Verify Generated Contracts
+        run: npm run check:generated
 
-      - name: Check Frontend Format
-        run: npm run format:check
-
-      - name: Lint Frontend
-        run: npm run lint:check
-
-      - name: Typecheck Frontend
-        run: npm run typecheck
-
-      - name: Run Static Analysis
-        run: composer analyse
+      - name: Run Quality Checks
+        run: composer qa:check
