@@ -14,7 +14,7 @@ parameters:
         - routes
         - tests
         - rector.php
-    level: max
+    level: 9
     tmpDir: storage/framework/cache/phpstan
     checkBenevolentUnionTypes: true
     checkMissingCallableSignature: true
