@@ -29,9 +29,11 @@
         "laravel/sail": "^1.64.0",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.9.5",
+        "pestphp/pest": "^5.0",
+        "pestphp/pest-plugin-laravel": "^5.0",
+        "pestphp/pest-plugin-phpstan": "^5.0",
         "phpstan/phpstan": "^2.2.5",
-        "phpunit/phpunit": "^13.2.4",
-        "rector/rector": "^2.5.7"
+        "rector/rector": "^2.5.8"
     },
     "autoload": {
         "psr-4": {
@@ -72,7 +74,15 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "@php vendor/bin/pest --compact"
+        ],
+        "test:parallel": [
+            "@php artisan config:clear --ansi",
+            "@php vendor/bin/pest --parallel --compact"
+        ],
+        "test:fast": [
+            "@php artisan config:clear --ansi",
+            "@php vendor/bin/pest --parallel --tia --compact"
         ],
         "cleanup": [
             "@php vendor/bin/pint --parallel",

@@ -1,53 +1,33 @@
 <?php
 
 declare(strict_types=1);
-
-namespace Tests\Feature;
-
 use App\Enums\Appearance;
 use Inertia\Testing\AssertableInertia;
-use Tests\TestCase;
 
-final class AppearancePreferenceTest extends TestCase
-{
-    public function test_default_appearance_is_light_when_cookie_is_missing(): void
-    {
-        $testResponse = $this->get('/');
+test('default appearance is light when cookie is missing', function (): void {
+    $testResponse = $this->get('/');
 
-        $testResponse->assertViewHas('appearance', 'light');
-    }
+    $testResponse->assertViewHas('appearance', 'light');
+});
+test('cookie appearance value is shared with the root view', function (): void {
+    $testResponse = $this->withUnencryptedCookies(['appearance' => 'dark'])->get('/');
 
-    public function test_cookie_appearance_value_is_shared_with_the_root_view(): void
-    {
-        $testResponse = $this->withUnencryptedCookies(['appearance' => 'dark'])->get('/');
+    $testResponse->assertViewHas('appearance', 'dark');
+});
+test('unrecognised cookie value falls back to light', function (): void {
+    $testResponse = $this->withUnencryptedCookies(['appearance' => 'sepia'])->get('/');
 
-        $testResponse->assertViewHas('appearance', 'dark');
-    }
+    $testResponse->assertViewHas('appearance', 'light');
+});
+test('appearance is shared with inertia as well as the root view', function (): void {
+    $testResponse = $this->withUnencryptedCookies(['appearance' => 'dark'])->get('/');
 
-    public function test_unrecognised_cookie_value_falls_back_to_light(): void
-    {
-        $testResponse = $this->withUnencryptedCookies(['appearance' => 'sepia'])->get('/');
+    $testResponse->assertInertia(
+        fn (AssertableInertia $assertableInertia): AssertableInertia => $assertableInertia->where('appearance', Appearance::Dark->value)
+    );
+});
+test('root element carries the dark class before any script runs', function (): void {
+    $testResponse = $this->withUnencryptedCookies(['appearance' => 'dark'])->get('/');
 
-        $testResponse->assertViewHas('appearance', 'light');
-    }
-
-    /**
-     * The root element and the appearance UI must agree, or the server renders one
-     * theme while the client hydrates the controls in the other.
-     */
-    public function test_appearance_is_shared_with_inertia_as_well_as_the_root_view(): void
-    {
-        $testResponse = $this->withUnencryptedCookies(['appearance' => 'dark'])->get('/');
-
-        $testResponse->assertInertia(
-            fn (AssertableInertia $assertableInertia): AssertableInertia => $assertableInertia->where('appearance', Appearance::Dark->value)
-        );
-    }
-
-    public function test_root_element_carries_the_dark_class_before_any_script_runs(): void
-    {
-        $testResponse = $this->withUnencryptedCookies(['appearance' => 'dark'])->get('/');
-
-        $testResponse->assertSee('class="dark"', escape: false);
-    }
-}
+    $testResponse->assertSee('class="dark"', escape: false);
+});

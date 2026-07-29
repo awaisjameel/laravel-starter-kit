@@ -2,77 +2,64 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Users;
-
 use App\Enums\UserRole;
 use App\Models\User;
-use App\Modules\Users\Commands\UserCommandResult;
 use App\Modules\Users\Commands\UserCommands;
 use App\Modules\Users\Data\CreateUserData;
 use App\Modules\Users\Data\UpdateUserData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-final class UserCommandsTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_create_persists_user_and_returns_command_result(): void
-    {
-        $userCommandResult = new UserCommands()->create(
-            new CreateUserData(
-                name: 'Created User',
-                email: 'created-user@example.com',
-                role: UserRole::User,
-                password: 'Password123!@#',
-            ),
-        );
+test('create persists user and returns command result', function (): void {
+    $userCommandResult = new UserCommands()->create(
+        new CreateUserData(
+            name: 'Created User',
+            email: 'created-user@example.com',
+            role: UserRole::User,
+            password: 'Password123!@#',
+        ),
+    );
 
-        $this->assertInstanceOf(UserCommandResult::class, $userCommandResult);
-        $this->assertDatabaseHas('users', [
-            'id' => $userCommandResult->user->id,
-            'email' => 'created-user@example.com',
-            'role' => UserRole::User->value,
-        ]);
-        $this->assertSame([], $userCommandResult->changes);
-    }
+    $this->assertDatabaseHas('users', [
+        'id' => $userCommandResult->user->id,
+        'email' => 'created-user@example.com',
+        'role' => UserRole::User->value,
+    ]);
+    expect($userCommandResult->changes)->toBe([]);
+});
+test('update persists changes and returns audited command result', function (): void {
+    $user = User::factory()->create([
+        'name' => 'Before Name',
+        'email' => 'before@example.com',
+        'role' => UserRole::User,
+    ]);
 
-    public function test_update_persists_changes_and_returns_audited_command_result(): void
-    {
-        $user = User::factory()->create([
-            'name' => 'Before Name',
-            'email' => 'before@example.com',
-            'role' => UserRole::User,
-        ]);
+    $userCommandResult = new UserCommands()->update(
+        $user,
+        new UpdateUserData(
+            name: 'After Name',
+            email: 'after@example.com',
+            role: UserRole::Admin,
+            password: 'Password456!@#',
+        ),
+    );
 
-        $userCommandResult = new UserCommands()->update(
-            $user,
-            new UpdateUserData(
-                name: 'After Name',
-                email: 'after@example.com',
-                role: UserRole::Admin,
-                password: 'Password456!@#',
-            ),
-        );
+    $this->assertDatabaseHas('users', [
+        'id' => $userCommandResult->user->id,
+        'name' => 'After Name',
+        'email' => 'after@example.com',
+        'role' => UserRole::Admin->value,
+    ]);
+    expect($userCommandResult->changes['name'])->toBe(['before' => 'Before Name', 'after' => 'After Name']);
+    expect($userCommandResult->changes['email'])->toBe(['before' => 'before@example.com', 'after' => 'after@example.com']);
+    expect($userCommandResult->changes['role'])->toBe(['before' => 'user', 'after' => 'admin']);
+    expect($userCommandResult->changes['password'])->toBe(['before' => '[REDACTED]', 'after' => '[REDACTED]']);
+});
+test('delete removes user', function (): void {
+    $user = User::factory()->create(['role' => UserRole::User]);
 
-        $this->assertDatabaseHas('users', [
-            'id' => $userCommandResult->user->id,
-            'name' => 'After Name',
-            'email' => 'after@example.com',
-            'role' => UserRole::Admin->value,
-        ]);
-        $this->assertSame(['before' => 'Before Name', 'after' => 'After Name'], $userCommandResult->changes['name']);
-        $this->assertSame(['before' => 'before@example.com', 'after' => 'after@example.com'], $userCommandResult->changes['email']);
-        $this->assertSame(['before' => 'user', 'after' => 'admin'], $userCommandResult->changes['role']);
-        $this->assertSame(['before' => '[REDACTED]', 'after' => '[REDACTED]'], $userCommandResult->changes['password']);
-    }
+    new UserCommands()->delete($user);
 
-    public function test_delete_removes_user(): void
-    {
-        $user = User::factory()->create(['role' => UserRole::User]);
-
-        new UserCommands()->delete($user);
-
-        $this->assertDatabaseMissing('users', ['id' => $user->id]);
-    }
-}
+    $this->assertDatabaseMissing('users', ['id' => $user->id]);
+});

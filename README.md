@@ -15,7 +15,7 @@ Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Comp
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
 - Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
 - Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, `@lucide/vue`
-- PHPUnit 13, Vitest 4, Pint, PHPStan/Larastan, Rector, ESLint 10, Prettier 3
+- Pest 5 (PHPUnit 13 engine), Vitest 4, Pint, PHPStan/Larastan, Rector, ESLint 10, Prettier 3
 
 TypeScript is intentionally pinned to 6.x: TypeScript 7 does not yet expose the programmatic API that `vue-tsc` and `typescript-eslint` need.
 
@@ -43,7 +43,7 @@ Realtime dev dependencies are included in `composer dev`; this starts Laravel Re
 - Full quality gate (mandatory after edits):
     - `composer generate-and-cleanup`
     - `npm run typecheck`
-    - `php artisan test`
+    - `composer test`
     - `npm run test:unit`
 - Non-mutating QA check:
     - `composer qa:check`
@@ -168,10 +168,12 @@ paint has to arrive as markup rather than as a side effect of the JS bundle:
 Run full suite:
 
 ```bash
-php artisan test
+composer test
 ```
 
-Includes feature coverage for:
+Backend tests use native Pest syntax with strict issue handling, level-9 PHPStan integration, and architecture checks. CI runs the same suite in parallel through `composer test:parallel`.
+
+Includes coverage for:
 
 - auth flows
 - settings flows
@@ -179,6 +181,8 @@ Includes feature coverage for:
 - API v1 user endpoints
 - security headers
 - dashboard + marketing rendering
+- module discovery and generator behavior
+- strict-types and security architecture rules
 
 ## Notes
 

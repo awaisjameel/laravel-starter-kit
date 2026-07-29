@@ -1,120 +1,58 @@
 <?php
 
 declare(strict_types=1);
-
-namespace Tests\Feature\Console;
-
 use App\Modules\Shared\Support\ModuleRegistry;
 use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
-use Tests\TestCase;
 
-final class CacheModuleRegistryCommandTest extends TestCase
-{
-    /**
-     * @var list<string>
-     */
-    private array $temporaryBasePaths = [];
+test('command writes cached module manifest', function (): void {
+    $basePath = $this->createTemporaryModuleBasePath('module-cache-command');
 
-    protected function tearDown(): void
-    {
-        $filesystem = app(Filesystem::class);
+    $this->createModuleFile($basePath, 'Marketing', 'Routes/web.php');
+    $this->createModuleFile($basePath, 'Users', 'Routes/gates.php');
+    $this->createModuleFile($basePath, 'Users', 'Policies/UserPolicy.php');
+    $this->createModuleFile($basePath, 'Shared', 'Routes/channels.php');
+    $this->createModuleDirectory($basePath, 'Users', 'Listeners');
+    $this->createModuleFile($basePath, 'Users', 'Providers/ModuleServiceProvider.php');
 
-        foreach ($this->temporaryBasePaths as $temporaryBasePath) {
-            if ($filesystem->isDirectory($temporaryBasePath)) {
-                $filesystem->deleteDirectory($temporaryBasePath);
-            }
-        }
+    $exitCode = app(Kernel::class)->call('modules:cache', [
+        '--base-path' => $basePath,
+    ]);
 
-        parent::tearDown();
+    expect($exitCode)->toBe(0);
+
+    $cachePath = ModuleRegistry::cachePath($basePath);
+
+    expect($cachePath)->toBeFile();
+
+    /** @var array<string, mixed> $payload */
+    $payload = require $cachePath;
+    $routes = $payload['routes'] ?? [];
+
+    if (! is_array($routes)) {
+        $routes = [];
     }
 
-    public function test_command_writes_cached_module_manifest(): void
-    {
-        $basePath = $this->createTemporaryBasePath();
+    expect($routes['web'] ?? [])->toBe([
+        'app/Modules/Marketing/Routes/web.php',
+    ]);
 
-        $this->createModuleFile($basePath, 'Marketing', 'Routes/web.php');
-        $this->createModuleFile($basePath, 'Users', 'Routes/gates.php');
-        $this->createModuleFile($basePath, 'Users', 'Policies/UserPolicy.php');
-        $this->createModuleFile($basePath, 'Shared', 'Routes/channels.php');
-        $this->createModuleDirectory($basePath, 'Users', 'Listeners');
-        $this->createModuleFile($basePath, 'Users', 'Providers/ModuleServiceProvider.php');
+    expect($payload['gates'] ?? [])->toBe([
+        'app/Modules/Users/Routes/gates.php',
+    ]);
 
-        $exitCode = app(Kernel::class)->call('modules:cache', [
-            '--base-path' => $basePath,
-        ]);
+    expect($payload['policies'] ?? [])->toBe([
+        'app/Modules/Users/Policies/UserPolicy.php',
+    ]);
 
-        $this->assertSame(0, $exitCode);
+    expect($payload['channels'] ?? [])->toBe([
+        'app/Modules/Shared/Routes/channels.php',
+    ]);
 
-        $cachePath = ModuleRegistry::cachePath($basePath);
+    expect($payload['listeners'] ?? [])->toBe([
+        'app/Modules/Users/Listeners',
+    ]);
 
-        $this->assertFileExists($cachePath);
-
-        /** @var array<string, mixed> $payload */
-        $payload = require $cachePath;
-        $routes = $payload['routes'] ?? [];
-
-        if (! is_array($routes)) {
-            $routes = [];
-        }
-
-        $this->assertSame([
-            'app/Modules/Marketing/Routes/web.php',
-        ], $routes['web'] ?? []);
-
-        $this->assertSame([
-            'app/Modules/Users/Routes/gates.php',
-        ], $payload['gates'] ?? []);
-
-        $this->assertSame([
-            'app/Modules/Users/Policies/UserPolicy.php',
-        ], $payload['policies'] ?? []);
-
-        $this->assertSame([
-            'app/Modules/Shared/Routes/channels.php',
-        ], $payload['channels'] ?? []);
-
-        $this->assertSame([
-            'app/Modules/Users/Listeners',
-        ], $payload['listeners'] ?? []);
-
-        $this->assertSame([
-            'app/Modules/Users/Providers/ModuleServiceProvider.php',
-        ], $payload['providers'] ?? []);
-    }
-
-    private function createTemporaryBasePath(): string
-    {
-        $basePath = storage_path('framework/testing/module-cache-command-'.Str::uuid()->toString());
-        $this->temporaryBasePaths[] = $basePath;
-
-        $filesystem = app(Filesystem::class);
-        $filesystem->makeDirectory($basePath.'/app/Modules', 0755, true);
-
-        return $basePath;
-    }
-
-    private function createModuleDirectory(string $basePath, string $modulePath, string $relativePath): void
-    {
-        $filesystem = app(Filesystem::class);
-        $path = $basePath.'/app/Modules/'.str_replace('\\', '/', $modulePath).'/'.$relativePath;
-
-        if (! $filesystem->isDirectory($path)) {
-            $filesystem->makeDirectory($path, 0755, true);
-        }
-    }
-
-    private function createModuleFile(string $basePath, string $modulePath, string $relativePath): void
-    {
-        $filesystem = app(Filesystem::class);
-        $path = $basePath.'/app/Modules/'.str_replace('\\', '/', $modulePath).'/'.$relativePath;
-        $directory = dirname($path);
-
-        if (! $filesystem->isDirectory($directory)) {
-            $filesystem->makeDirectory($directory, 0755, true);
-        }
-
-        $filesystem->put($path, '<?php');
-    }
-}
+    expect($payload['providers'] ?? [])->toBe([
+        'app/Modules/Users/Providers/ModuleServiceProvider.php',
+    ]);
+});

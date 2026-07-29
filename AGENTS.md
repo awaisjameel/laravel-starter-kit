@@ -107,7 +107,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - Wayfinder: `^0.1.20` (sole route surface; Ziggy is deliberately not installed)
 - Spatie Laravel Data: `^4.23`
 - Spatie TypeScript Transformer: `^3.3`
-- PHPUnit: `^13.2`
+- Pest: `^5.0` with Laravel and PHPStan plugins `^5.0` (PHPUnit 13 engine)
 - PHPStan/Larastan: `^2.2` / `^3.10`
 - Rector: `^2.5`
 - Vue: `^3.5.40`
@@ -855,6 +855,12 @@ Do not shadow them with manual duplicates.
 
 ## Testing Standards
 
+- Pest 5 is the canonical backend test runner. Write backend tests in native Pest functional syntax.
+- `tests/Pest.php` binds both `Feature` and `Unit` suites to `Tests\TestCase`.
+- PHPStan analyzes native Pest closures through `pestphp/pest-plugin-phpstan`; keep its extension registered in `phpstan.neon.dist`.
+- Apply `RefreshDatabase` only in files that need database isolation; do not make it global.
+- Reusable backend test setup and fixture behavior belongs under `tests/Support/**`, not in duplicated file-local functions.
+- Module generator backend test stubs must generate native Pest tests.
 - Every behavior change must include tests for:
     - happy path
     - failure path
@@ -896,7 +902,7 @@ Always run after changes:
 
 ```bash
 composer generate-and-cleanup
-php artisan test
+composer test
 ```
 
 For frontend behavior or composable changes, also run:
@@ -925,7 +931,7 @@ Local changes must remain compatible with the existing CI expectations:
 - Prettier
 - ESLint
 - TypeScript typecheck
-- PHPUnit / `php artisan test`
+- Pest / `composer test`
 - Vitest for frontend logic changes
 
 ## Laravel Boost MCP Workflow

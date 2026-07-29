@@ -2,45 +2,34 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
-
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-final class PasswordConfirmationTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_confirm_password_screen_can_be_rendered(): void
-    {
-        $user = User::factory()->create();
+test('confirm password screen can be rendered', function (): void {
+    $user = User::factory()->create();
 
-        $testResponse = $this->actingAs($user)->get('/auth/confirm-password');
+    $testResponse = $this->actingAs($user)->get('/auth/confirm-password');
 
-        $testResponse->assertStatus(200);
-    }
+    $testResponse->assertStatus(200);
+});
+test('password can be confirmed', function (): void {
+    $user = User::factory()->create();
 
-    public function test_password_can_be_confirmed(): void
-    {
-        $user = User::factory()->create();
+    $testResponse = $this->actingAs($user)->post('/auth/confirm-password', [
+        'password' => 'password',
+    ]);
 
-        $testResponse = $this->actingAs($user)->post('/auth/confirm-password', [
-            'password' => 'password',
-        ]);
+    $testResponse->assertRedirect();
+    $testResponse->assertSessionHasNoErrors();
+});
+test('password is not confirmed with invalid password', function (): void {
+    $user = User::factory()->create();
 
-        $testResponse->assertRedirect();
-        $testResponse->assertSessionHasNoErrors();
-    }
+    $testResponse = $this->actingAs($user)->post('/auth/confirm-password', [
+        'password' => 'wrong-password',
+    ]);
 
-    public function test_password_is_not_confirmed_with_invalid_password(): void
-    {
-        $user = User::factory()->create();
-
-        $testResponse = $this->actingAs($user)->post('/auth/confirm-password', [
-            'password' => 'wrong-password',
-        ]);
-
-        $testResponse->assertSessionHasErrors();
-    }
-}
+    $testResponse->assertSessionHasErrors();
+});
