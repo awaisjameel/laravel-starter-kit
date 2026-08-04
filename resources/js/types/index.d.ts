@@ -1,4 +1,4 @@
-import type { LucideIcon } from '@lucide/vue'
+import type { Component } from 'vue'
 import type { Appearance, UserViewData } from './app-data'
 
 export interface Auth {
@@ -15,7 +15,7 @@ export type NavItemActiveMatch = 'exact' | 'prefix'
 export interface NavItem {
     title: string
     href: string
-    icon?: LucideIcon
+    icon?: Component
     isActive?: boolean
     activeMatch?: NavItemActiveMatch
     external?: boolean

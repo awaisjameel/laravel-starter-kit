@@ -55,7 +55,7 @@
                 v-for="action in props.actions"
                 v-show="isVisible(action)"
                 :key="action.key"
-                :class="action.destructive ? 'text-destructive focus:bg-destructive/10 focus:text-destructive' : undefined"
+                :variant="action.destructive ? 'destructive' : 'default'"
                 :disabled="isDisabled(action)"
                 @click="handleAction(action)"
             >

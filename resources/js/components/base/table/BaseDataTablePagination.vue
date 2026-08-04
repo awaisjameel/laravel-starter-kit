@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const theme = appTheme
+
     interface Props {
         currentPage: number
         totalPages: number
@@ -29,7 +31,7 @@
 </script>
 
 <template>
-    <div v-if="props.totalPages > 1" class="mt-2 w-full overflow-x-auto pb-1">
+    <div v-if="props.totalPages > 1" :class="theme.pagination.wrapper">
         <UiPagination
             class="min-w-max"
             :total="props.totalItems"
@@ -53,7 +55,7 @@
                 <template v-for="page in pageNumbers" :key="page">
                     <UiPaginationItem :value="page" as-child>
                         <UiButton
-                            class="h-9 w-9 p-0 sm:h-10 sm:w-10"
+                            :class="theme.pagination.page"
                             :variant="page === props.currentPage ? 'outline' : 'ghost'"
                             :aria-current="page === props.currentPage ? 'page' : undefined"
                             :disabled="page === props.currentPage"

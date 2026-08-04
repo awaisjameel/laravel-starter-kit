@@ -1,11 +1,11 @@
+<script setup lang="ts">
+    const theme = appTheme
+</script>
+
 <template>
     <div class="relative min-h-svh overflow-hidden bg-background text-foreground">
-        <div
-            class="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top,_hsl(221_83%_53%_/_0.16)_0%,_transparent_70%)]"
-        />
-        <div
-            class="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[radial-gradient(circle_at_bottom,_var(--color-muted)_0%,_transparent_70%)]"
-        />
+        <div :class="['pointer-events-none absolute inset-x-0 top-0 h-[30rem]', theme.marketing.glowTop]" />
+        <div :class="['pointer-events-none absolute inset-x-0 bottom-0 h-72', theme.marketing.glowBottom]" />
 
         <div class="relative flex min-h-svh flex-col">
             <MarketingHeader />

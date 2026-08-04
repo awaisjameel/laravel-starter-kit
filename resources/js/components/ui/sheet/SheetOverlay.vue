@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
+import { appTheme } from '@/lib/theme'
 import { DialogOverlay, type DialogOverlayProps } from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 
@@ -15,7 +16,7 @@ const delegatedProps = computed(() => {
 <template>
   <DialogOverlay
     data-slot="sheet-overlay"
-    :class="cn('data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80', props.class)"
+    :class="cn(appTheme.overlay, props.class)"
     v-bind="delegatedProps"
   >
     <slot />

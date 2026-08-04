@@ -1,6 +1,8 @@
 <script setup lang="ts" generic="TForm extends object">
     import type { FormFieldSchema, FormOption } from '@/types/base-ui'
 
+    const theme = appTheme
+
     interface Props {
         id: string
         field: FormFieldSchema<TForm>
@@ -105,7 +107,7 @@
             :id="props.id"
             multiple
             :disabled="isFieldDisabled"
-            class="min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            :class="[theme.field.control, theme.field.multiselect]"
             @change="onMultiSelectChange"
         >
             <option
@@ -138,7 +140,7 @@
             <UiLabel :for="props.id">{{ props.field.placeholder ?? props.field.label }}</UiLabel>
         </div>
 
-        <div v-else-if="props.field.type === 'toggle'" class="flex items-center justify-between gap-4 rounded-lg border p-3">
+        <div v-else-if="props.field.type === 'toggle'" :class="theme.field.toggle">
             <div class="space-y-0.5">
                 <p class="text-sm font-medium">{{ props.field.placeholder ?? props.field.label }}</p>
                 <p v-if="props.field.description !== undefined" class="text-xs text-muted-foreground">{{ props.field.description }}</p>
