@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const theme = appTheme
+
     defineProps<{
         message?: string
     }>()
@@ -6,7 +8,7 @@
 
 <template>
     <div v-show="message">
-        <p class="text-sm text-red-600 dark:text-red-500">
+        <p :class="theme.field.error">
             {{ message }}
         </p>
     </div>

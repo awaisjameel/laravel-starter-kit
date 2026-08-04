@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import { useSidebar } from '@/components/ui/sidebar/utils'
-    import { ChevronsUpDown } from '@lucide/vue'
 
     const user = useAuthUser({ required: true, context: 'NavUser' })
 
@@ -14,7 +13,7 @@
                 <UiDropdownMenuTrigger as-child>
                     <UiSidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                         <UserInfo :user="user" />
-                        <ChevronsUpDown class="ml-auto size-4" />
+                        <IconLucideChevronsUpDown class="ml-auto size-4" />
                     </UiSidebarMenuButton>
                 </UiDropdownMenuTrigger>
                 <UiDropdownMenuContent

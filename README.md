@@ -14,7 +14,7 @@ Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Comp
 
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
 - Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
-- Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, `@lucide/vue`
+- Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, Iconify through `unplugin-icons`
 - Pest 5 (PHPUnit 13 engine), Vitest 4, Pint, PHPStan/Larastan at `max` with strict/deprecation rules, Rector, ESLint 10, Prettier 3
 
 TypeScript is intentionally pinned to 6.x: TypeScript 7 does not yet expose the programmatic API that `vue-tsc` and `typescript-eslint` need.
@@ -94,6 +94,13 @@ Shared UI primitives and layouts remain in:
 
 - `resources/js/components`
 - `resources/js/layouts`
+
+Canonical frontend presentation contracts:
+
+- `resources/css/theme.css` owns semantic light/dark colors, status tones, radii, shadows, glass/overlay values, gradients, and motion accessibility defaults.
+- `resources/js/lib/theme.ts` owns typed reusable recipes for controls, surfaces, dialogs, sheets, menus, fields, tables, pagination, feedback, navigation, and animation.
+- `resources/js/components/ui/**` owns low-level mechanics, while `resources/js/components/base/**` adds reusable application behavior.
+- Icons resolve from Iconify collections through `unplugin-icons`; do not add runtime icon component packages or hand-authored replacements for library icons.
 
 ## Route Contract
 

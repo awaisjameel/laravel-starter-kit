@@ -2,7 +2,6 @@
 import type { PaginationEllipsisProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import { Ellipsis } from "@lucide/vue"
 import { PaginationEllipsis } from "reka-ui"
 import { cn } from "@/lib/utils"
 
@@ -18,7 +17,7 @@ const delegatedProps = reactiveOmit(props, "class") as Record<string, unknown>
     :class="cn('flex size-9 items-center justify-center', props.class)"
   >
     <slot>
-      <Ellipsis class="size-4" />
+      <IconLucideEllipsis class="size-4" />
       <span class="sr-only">More pages</span>
     </slot>
   </PaginationEllipsis>

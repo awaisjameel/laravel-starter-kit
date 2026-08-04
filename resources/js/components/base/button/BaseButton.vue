@@ -1,6 +1,5 @@
 <script setup lang="ts">
     import type { ButtonVariants } from '@/components/ui/button'
-    import { LoaderCircle } from '@lucide/vue'
     import type { Component, HTMLAttributes } from 'vue'
 
     interface Props {
@@ -33,7 +32,7 @@
 
 <template>
     <UiButton :type="type" :variant="variant" :size="size" :disabled="isDisabled" :class="buttonClass">
-        <LoaderCircle v-if="loading" class="size-4 animate-spin" />
+        <IconLucideLoaderCircle v-if="loading" class="size-4 animate-spin" />
         <component v-else-if="iconLeft !== undefined" :is="iconLeft" class="size-4" />
         <span v-if="label !== undefined">
             {{ loading ? loadingText : label }}

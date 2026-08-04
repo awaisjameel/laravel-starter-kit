@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import UserController from '@/actions/App/Modules/Users/Http/Controllers/UserController'
     import { SortDirection, UserSortBy, type UsersIndexPageData, type UserViewData } from '@/types/app-data'
-    import { Plus } from '@lucide/vue'
+    import IconLucidePlus from '~icons/lucide/plus'
     import { useUsersIndexRealtime } from '../contracts/realtime'
     import type { UserSortColumn } from '../contracts/types'
 
@@ -114,7 +114,7 @@
                         title="Users"
                         :description="`Manage user accounts${activeCollaboratorCount > 0 ? ` - ${activeCollaboratorCount} admin${activeCollaboratorCount === 1 ? '' : 's'} online` : ''}`"
                     />
-                    <BaseButton class="w-full sm:w-auto" label="Add User" :icon-left="Plus" @click="openCreateUserDialog" />
+                    <BaseButton class="w-full sm:w-auto" label="Add User" :icon-left="IconLucidePlus" @click="openCreateUserDialog" />
                 </div>
 
                 <BaseTableBaseDataTableToolbar

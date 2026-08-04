@@ -1,3 +1,4 @@
+import type { ToastVariant as ThemeToastVariant } from '@/lib/theme'
 import type { Component } from 'vue'
 
 export type FormFieldType = 'text' | 'email' | 'password' | 'textarea' | 'select' | 'multiselect' | 'file' | 'checkbox' | 'radio' | 'toggle' | 'tabs'
@@ -69,7 +70,7 @@ export interface DataTableRowAction<TData> {
     onClick: (row: TData) => void
 }
 
-export type ToastVariant = 'default' | 'success' | 'error' | 'info' | 'warning'
+export type ToastVariant = ThemeToastVariant
 
 export interface ToastMessage {
     id: string

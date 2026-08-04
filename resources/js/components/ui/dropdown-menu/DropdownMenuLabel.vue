@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes } from 'vue'
 import { cn, omitUndefinedProps } from '@/lib/utils'
+import { appTheme } from '@/lib/theme'
 import { reactiveOmit } from '@vueuse/core'
 import { DropdownMenuLabel, type DropdownMenuLabelProps, useForwardProps } from 'reka-ui'
 
@@ -15,7 +16,7 @@ const forwardedProps = useForwardProps(computed(() => omitUndefinedProps(delegat
     data-slot="dropdown-menu-label"
     :data-inset="inset ? '' : undefined"
     v-bind="forwardedProps"
-    :class="cn('px-2 py-1.5 text-sm font-medium data-[inset]:pl-8', props.class)"
+    :class="cn(appTheme.floating.label, props.class)"
   >
     <slot />
   </DropdownMenuLabel>

@@ -2,6 +2,8 @@
     import ProfileController from '@/actions/App/Modules/Settings/Http/Controllers/ProfileController'
     import { deleteAccountFormContract, type DeleteAccountFormValues } from '../forms/delete-account-form-schema'
 
+    const theme = appTheme
+
     const isOpen = ref(false)
 
     const { form, fields, submit } = useSchemaResourceForm<DeleteAccountFormValues>(deleteAccountFormContract)
@@ -31,7 +33,7 @@
 <template>
     <div class="space-y-6">
         <HeadingSmall title="Delete account" description="Delete your account and all of its resources" />
-        <div class="space-y-4 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+        <div :class="[theme.surface.danger, 'space-y-4 p-4']">
             <div class="relative space-y-0.5 text-destructive">
                 <p class="font-medium">Warning</p>
                 <p class="text-sm">Please proceed with caution, this cannot be undone.</p>

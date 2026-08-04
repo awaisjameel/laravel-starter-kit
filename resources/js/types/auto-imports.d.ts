@@ -11,12 +11,14 @@ declare global {
   const Method: typeof import('@inertiajs/core').Method
   const apiRequest: typeof import('../composables/useApiClient').apiRequest
   const appRoutes: typeof import('@/routes/app').default
+  const appTheme: typeof import('../lib/theme').appTheme
   const authRoutes: typeof import('@/routes/auth').default
   const buildDashboardBreadcrumbs: typeof import('@/config/breadcrumbs').buildDashboardBreadcrumbs
   const buildSettingsAppearanceBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsAppearanceBreadcrumbs
   const buildSettingsPasswordBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsPasswordBreadcrumbs
   const buildSettingsProfileBreadcrumbs: typeof import('@/config/breadcrumbs').buildSettingsProfileBreadcrumbs
   const buildUsersBreadcrumbs: typeof import('@/config/breadcrumbs').buildUsersBreadcrumbs
+  const buttonStyles: typeof import('../lib/theme').buttonStyles
   const capitalize: typeof import('../lib/utils').capitalize
   const clearApiQueryCache: typeof import('../composables/useApiQuery').clearApiQueryCache
   const cn: typeof import('../lib/utils').cn
@@ -86,11 +88,13 @@ declare global {
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
+  const sidebarButtonStyles: typeof import('../lib/theme').sidebarButtonStyles
   const toInertiaRouteDefinition: typeof import('../utils/route').toInertiaRouteDefinition
   const toRaw: typeof import('vue').toRaw
   const toRef: typeof import('vue').toRef
   const toRefs: typeof import('vue').toRefs
   const toValue: typeof import('vue').toValue
+  const toastStyles: typeof import('../lib/theme').toastStyles
   const triggerRef: typeof import('vue').triggerRef
   const unref: typeof import('vue').unref
   const useApiMutation: typeof import('../composables/useApiQuery').useApiMutation
@@ -159,6 +163,9 @@ declare global {
   export type { RealtimeAuthMode, RealtimeAuthStrategy, ConfigureRealtimeOptions } from '../lib/realtime/config'
   import('../lib/realtime/config')
   // @ts-ignore
+  export type { ButtonVariant, ButtonSize, SidebarButtonVariant, SidebarButtonSize, ToastVariant, StatusTone } from '../lib/theme'
+  import('../lib/theme')
+  // @ts-ignore
   export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
   import('../utils/route')
 }
@@ -173,12 +180,14 @@ declare module 'vue' {
     readonly Method: UnwrapRef<typeof import('@inertiajs/core')['Method']>
     readonly apiRequest: UnwrapRef<typeof import('../composables/useApiClient')['apiRequest']>
     readonly appRoutes: UnwrapRef<typeof import('@/routes/app')['default']>
+    readonly appTheme: UnwrapRef<typeof import('../lib/theme')['appTheme']>
     readonly authRoutes: UnwrapRef<typeof import('@/routes/auth')['default']>
     readonly buildDashboardBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildDashboardBreadcrumbs']>
     readonly buildSettingsAppearanceBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsAppearanceBreadcrumbs']>
     readonly buildSettingsPasswordBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsPasswordBreadcrumbs']>
     readonly buildSettingsProfileBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildSettingsProfileBreadcrumbs']>
     readonly buildUsersBreadcrumbs: UnwrapRef<typeof import('@/config/breadcrumbs')['buildUsersBreadcrumbs']>
+    readonly buttonStyles: UnwrapRef<typeof import('../lib/theme')['buttonStyles']>
     readonly capitalize: UnwrapRef<typeof import('../lib/utils')['capitalize']>
     readonly clearApiQueryCache: UnwrapRef<typeof import('../composables/useApiQuery')['clearApiQueryCache']>
     readonly cn: UnwrapRef<typeof import('../lib/utils')['cn']>
@@ -248,11 +257,13 @@ declare module 'vue' {
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
+    readonly sidebarButtonStyles: UnwrapRef<typeof import('../lib/theme')['sidebarButtonStyles']>
     readonly toInertiaRouteDefinition: UnwrapRef<typeof import('../utils/route')['toInertiaRouteDefinition']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
+    readonly toastStyles: UnwrapRef<typeof import('../lib/theme')['toastStyles']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly useApiMutation: UnwrapRef<typeof import('../composables/useApiQuery')['useApiMutation']>

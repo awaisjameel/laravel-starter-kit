@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const theme = appTheme
+
     defineProps<{
         show: boolean
         label?: string
@@ -12,6 +14,6 @@
         leave-active-class="transition ease-in-out"
         leave-to-class="opacity-0"
     >
-        <p v-show="show" class="text-sm text-neutral-600">{{ label ?? 'Saved.' }}</p>
+        <p v-show="show" :class="[theme.feedback.status, theme.status.success]">{{ label ?? 'Saved.' }}</p>
     </Transition>
 </template>

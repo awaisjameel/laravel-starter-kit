@@ -1,6 +1,10 @@
 <script setup lang="ts" generic="TData, TSort extends string = string">
     import type { DataTableColumn, DataTableRowAction, SortDirection } from '@/types/base-ui'
-    import { ArrowDown, ArrowUp, ArrowUpDown } from '@lucide/vue'
+    import IconLucideArrowDown from '~icons/lucide/arrow-down'
+    import IconLucideArrowUp from '~icons/lucide/arrow-up'
+    import IconLucideArrowUpDown from '~icons/lucide/arrow-up-down'
+
+    const theme = appTheme
 
     interface Props {
         rows: TData[]
@@ -31,10 +35,10 @@
         }
 
         if (props.sortBy !== column.sortKey) {
-            return ArrowUpDown
+            return IconLucideArrowUpDown
         }
 
-        return props.sortDirection === 'asc' ? ArrowUp : ArrowDown
+        return props.sortDirection === 'asc' ? IconLucideArrowUp : IconLucideArrowDown
     }
 
     const resolveAriaSort = (column: DataTableColumn<TData, TSort>): 'ascending' | 'descending' | 'none' => {
@@ -51,7 +55,7 @@
 </script>
 
 <template>
-    <UiCard>
+    <UiCard :class="theme.surface.panel">
         <UiCardContent class="p-0">
             <div class="hidden md:block">
                 <div class="relative overflow-x-auto">
@@ -61,14 +65,13 @@
                                 <th
                                     v-for="column in props.columns"
                                     :key="column.key"
-                                    class="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
-                                    :class="column.headerClass"
+                                    :class="[theme.table.headerCell, column.headerClass]"
                                     :aria-sort="resolveAriaSort(column)"
                                 >
                                     <button
                                         v-if="isSortable(column)"
                                         type="button"
-                                        class="inline-flex items-center gap-1 rounded-sm focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+                                        :class="theme.table.sortableHeader"
                                         @click="emit('sort', column.sortKey as TSort)"
                                     >
                                         {{ column.label }}
@@ -76,29 +79,24 @@
                                     </button>
                                     <span v-else>{{ column.label }}</span>
                                 </th>
-                                <th v-if="props.actions.length > 0" class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
-                                    Actions
-                                </th>
+                                <th v-if="props.actions.length > 0" :class="[theme.table.headerCell, 'text-right']">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in props.rows" :key="props.rowKey(row)" class="border-b transition-colors hover:bg-muted/50">
-                                <td v-for="column in props.columns" :key="column.key" class="p-4" :class="column.class">
+                            <tr v-for="row in props.rows" :key="props.rowKey(row)" :class="theme.table.row">
+                                <td v-for="column in props.columns" :key="column.key" :class="[theme.table.cell, column.class]">
                                     <slot :name="`cell-${column.key}`" :row="row">
                                         {{ column.value(row) }}
                                     </slot>
                                 </td>
-                                <td v-if="props.actions.length > 0" class="p-4 text-right">
+                                <td v-if="props.actions.length > 0" :class="[theme.table.cell, 'text-right']">
                                     <slot name="actions" :row="row">
                                         <BaseMenuBaseActionMenu :actions="props.actions" :row="row" />
                                     </slot>
                                 </td>
                             </tr>
                             <tr v-if="props.rows.length === 0">
-                                <td
-                                    :colspan="props.columns.length + (props.actions.length > 0 ? 1 : 0)"
-                                    class="p-8 text-center text-muted-foreground"
-                                >
+                                <td :colspan="props.columns.length + (props.actions.length > 0 ? 1 : 0)" :class="theme.table.empty">
                                     {{ props.emptyMessage }}
                                 </td>
                             </tr>

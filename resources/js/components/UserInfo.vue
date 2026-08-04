@@ -15,7 +15,7 @@
 
 <template>
     <UiAvatar class="h-8 w-8 overflow-hidden rounded-lg">
-        <UiAvatarFallback class="rounded-lg text-black dark:text-white">
+        <UiAvatarFallback class="rounded-lg text-foreground">
             {{ getInitials(user.name) }}
         </UiAvatarFallback>
     </UiAvatar>

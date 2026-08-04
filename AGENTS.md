@@ -116,7 +116,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - `laravel-vite-plugin`: `^3.1`
 - Tailwind CSS: `^4.3`
 - Pinia: `^4.0`
-- Icons: `@lucide/vue` `^1.25` (the `lucide-vue-next` package is deprecated)
+- Icons: Iconify collections compiled by `unplugin-icons` `^23.0`; runtime icon component packages are deliberately not installed
 - Node: `>=24.1.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
@@ -347,6 +347,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 ### Frontend UI Layering
 
+- `resources/css/theme.css` is the sole owner of raw visual values: semantic colors, light/dark mappings, status tones, radii, shadows, glass/overlay values, gradients, and reduced-motion defaults.
+- `resources/js/lib/theme.ts` is the sole owner of reusable class recipes and typed style variants for shared controls, surfaces, dialogs, sheets, menus, inputs, tables, pagination, feedback, status, navigation, and animation.
 - `resources/js/components/ui/**` = low-level primitive wrappers (reka-ui, icons, etc.).
 - UI primitives (`resources/js/components/ui/**`) are built using shadcn-vue style components on top of Reka UI.
 - Base UI component names use the `Ui*` prefix (for example `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`). Use these existing primitives before building custom elements.
@@ -354,8 +356,10 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
-- Icons come from `@lucide/vue`. It exports unsuffixed names only, so use `ChevronLeft`, not `ChevronLeftIcon`. The `LucideIcon` type backs `NavItem.icon` in `resources/js/types/index.d.ts`.
-- Iconify sets are also available through `unplugin-icons` using the `Icon*` component prefix.
+- Icons come only from Iconify through `unplugin-icons` using the `Icon*` component prefix. Use auto-resolved tags such as `<IconLucideChevronLeft />` in templates and virtual imports such as `~icons/lucide/chevron-left` when a component value is required in TypeScript.
+- Icon-bearing contracts use Vue's generic `Component` type so they remain collection-agnostic.
+- `components.json` points the shadcn-vue CLI at `resources/css/theme.css` and declares no `iconLibrary`. Newly vendored primitives must be rewritten onto `appTheme` recipes and `~icons/*` before they are committed.
+- Do not introduce raw color literals, Tailwind palette colors, local `<style>` blocks, duplicated shared recipes, or runtime icon component packages in frontend source. Extend the canonical theme contracts instead.
 
 ### Frontend Automation Contracts
 

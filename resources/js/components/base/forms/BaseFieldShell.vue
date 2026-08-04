@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const theme = appTheme
+
     interface Props {
         id: string
         label: string
@@ -19,7 +21,7 @@
             <span v-if="props.required" class="text-destructive">*</span>
         </UiLabel>
         <slot />
-        <p v-if="props.description !== undefined && props.description !== ''" class="text-xs text-muted-foreground">
+        <p v-if="props.description !== undefined && props.description !== ''" :class="theme.field.description">
             {{ props.description }}
         </p>
         <InputError :message="props.error" />

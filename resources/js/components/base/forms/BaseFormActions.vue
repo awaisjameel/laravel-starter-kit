@@ -1,6 +1,8 @@
 <script setup lang="ts">
     import type { ButtonVariants } from '@/components/ui/button'
 
+    const theme = appTheme
+
     interface Props {
         processing?: boolean
         submitLabel?: string
@@ -23,7 +25,7 @@
 </script>
 
 <template>
-    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <div :class="theme.dialog.footer">
         <BaseButton
             v-if="props.showCancel"
             type="button"
