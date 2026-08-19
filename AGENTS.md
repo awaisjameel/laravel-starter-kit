@@ -108,7 +108,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - Spatie Laravel Data: `^4.23`
 - Spatie TypeScript Transformer: `^3.3`
 - Pest: `^5.0` with Laravel and PHPStan plugins `^5.0` (PHPUnit 13 engine)
-- PHPStan/Larastan: `^2.2` / `^3.10` at `max` level with official strict and deprecation rules
+- PHPStan/Larastan: `^2.2` / `^3.10` at level 9 with official strict and deprecation rules
 - Rector: `^2.5`
 - Vue: `^3.5.40`
 - TypeScript: `^6.0`
@@ -696,10 +696,14 @@ Do not shadow them with manual duplicates.
     ```
 - `composer generate-and-cleanup` currently runs:
     - route/type/helper generation
-    - `vendor/bin/rector process`
-    - `vendor/bin/pint --parallel`
-    - `vendor/bin/phpstan analyse --ansi`
+    - `composer cleanup`
+- `composer cleanup` runs two pipelines concurrently and groups their output:
+    - `composer cleanup:php`
     - `npm run cleanup`
+- `composer cleanup:php` currently runs, in order:
+    - `vendor/bin/rector process`
+    - `vendor/bin/pint`
+    - `vendor/bin/phpstan analyse --ansi`
 - PHP quality tools have canonical Composer entry points:
     - `composer refactor` / `composer refactor:check`
     - `composer format` / `composer format:check`
@@ -713,7 +717,15 @@ Do not shadow them with manual duplicates.
     ```bash
     composer qa:check
     ```
-- `composer qa:check` runs Rector in dry-run mode, Pint in test mode, PHPStan at `max`, then frontend format, lint, and type checks. It must never rewrite source files.
+- `composer qa:check` runs `composer qa:php`, `npm run format:check`, `npm run lint:check`, and `npm run typecheck` concurrently. It must never rewrite source files.
+- `composer qa:php` runs Rector in dry-run mode, Pint in test mode, then PHPStan.
+
+### Script Performance Rules
+
+- The PHP pipelines stay ordered because Rector, Pint, and PHPStan share the same files; only independent pipelines are parallelized.
+- Aggregate scripts orchestrate through `concurrently` and reference the canonical single-tool scripts. Never inline a tool invocation that already has an entry point.
+- Every tool that supports a result cache must keep one: Rector and PHPStan under `storage/framework/cache/**`, Prettier, ESLint, and `vue-tsc` under `node_modules/.cache/**`. Frontend caches use the content strategy so they survive branch switches and CI checkouts.
+- Pint runs single-process. `--parallel` spawns a worker per core and is slower than a single process at this repository's file count; only revisit it if the PHP file count grows by an order of magnitude.
 
 ## Dependency Addition Policy
 
@@ -864,9 +876,12 @@ Do not shadow them with manual duplicates.
 - Pest 5 is the canonical backend test runner. Write backend tests in native Pest functional syntax.
 - `tests/Pest.php` binds both `Feature` and `Unit` suites to `Tests\TestCase`.
 - Pest's compact printer is configured centrally in `tests/Pest.php`; do not duplicate `--compact` across scripts.
+- `composer test` runs the suite in parallel. `composer test:serial` is the single-process escape hatch for debugging output, and `composer test:fast` adds test impact analysis when `pcov` or Xdebug is installed.
+- Each test script is a single command, so extra arguments reach Pest directly: `composer test -- --filter=Registration`.
+- `phpunit.xml` redirects `APP_CONFIG_CACHE`, `APP_EVENTS_CACHE`, and `APP_ROUTES_CACHE` to paths that never exist, so a locally cached boot manifest can never override the declared test environment. Do not reintroduce a cache-clearing step in the test scripts.
 - PHPUnit is configured to fail on every reported issue and to detect unexpected global-state changes or test output.
 - PHPStan analyzes native Pest closures through `pestphp/pest-plugin-phpstan`; keep its extension registered in `phpstan.neon.dist`.
-- PHPStan runs at `max` with `phpstan/phpstan-strict-rules` and `phpstan/phpstan-deprecation-rules`, with no baseline or ignored-error escape hatch.
+- PHPStan runs at level 9 with `phpstan/phpstan-strict-rules` and `phpstan/phpstan-deprecation-rules`, with no baseline or ignored-error escape hatch.
 - The strict rule forbidding dynamic calls to static methods is disabled because Pest/PHPUnit assertions and Laravel fluent builders intentionally expose instance syntax over methods declared static. Keep all other strict rules enabled.
 - Apply `RefreshDatabase` only in files that need database isolation; do not make it global.
 - Reusable backend test setup and fixture behavior belongs under `tests/Support/**`, not in duplicated file-local functions.
@@ -937,7 +952,7 @@ Local changes must remain compatible with the existing CI expectations:
 
 - Pint
 - Rector dry-run
-- PHPStan `max` with strict and deprecation rules
+- PHPStan level 9 with strict and deprecation rules
 - Prettier
 - ESLint
 - TypeScript typecheck

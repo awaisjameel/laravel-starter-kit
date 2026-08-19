@@ -15,7 +15,7 @@ Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Comp
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
 - Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
 - Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, `@lucide/vue`
-- Pest 5 (PHPUnit 13 engine), Vitest 4, Pint, PHPStan/Larastan at `max` with strict/deprecation rules, Rector, ESLint 10, Prettier 3
+- Pest 5 (PHPUnit 13 engine), Vitest 4, Pint, PHPStan/Larastan at level 9 with strict/deprecation rules, Rector, ESLint 10, Prettier 3
 
 TypeScript is intentionally pinned to 6.x: TypeScript 7 does not yet expose the programmatic API that `vue-tsc` and `typescript-eslint` need.
 
@@ -46,6 +46,9 @@ Realtime dev dependencies are included in `composer dev`; this starts Laravel Re
     - `npm run test:unit`
 - Non-mutating QA check:
     - `composer qa:check`
+- Single-stack pipelines (useful when a change only touches one side):
+    - `composer cleanup:php` / `composer qa:php`
+    - `npm run cleanup`
 - Focused PHP tooling:
     - `composer refactor` / `composer refactor:check`
     - `composer format` / `composer format:check`
@@ -53,6 +56,16 @@ Realtime dev dependencies are included in `composer dev`; this starts Laravel Re
 - Generated artifact sync check:
     - `composer generate`
     - `npm run build:ssr`
+
+`composer run-script --list` prints a description for every script.
+
+### Command Performance
+
+Repeated runs are meant to be cheap, so the aggregate scripts are built for the edit-check loop:
+
+- `composer cleanup` and `composer qa:check` fan their PHP and frontend pipelines out over `concurrently` and group each tool's output, so the slowest tool sets the wall time instead of the sum of all of them.
+- `composer test` runs Pest in parallel by default. Use `composer test:serial` when a single-process run makes debugging output easier to read.
+- Rector, PHPStan, Prettier, ESLint, and `vue-tsc` all persist content-keyed result caches (`storage/framework/cache/**` and `node_modules/.cache/**`), so an unchanged file is never analysed twice. CI restores the same caches.
 
 ## Architecture
 
@@ -173,9 +186,11 @@ Run full suite:
 composer test
 ```
 
-Backend tests use native Pest syntax with centrally configured compact output, fail-on-all-issues PHPUnit handling, maximum-level PHPStan integration, official strict/deprecation rules, and architecture checks. CI runs the same suite in parallel through `composer test:parallel`.
+Backend tests use native Pest syntax with centrally configured compact output, fail-on-all-issues PHPUnit handling, level 9 PHPStan integration, official strict/deprecation rules, and architecture checks. `composer test` runs the suite in parallel, and CI runs the same command.
 
-The mutating PHP cleanup order is Rector, then Pint, then PHPStan. `composer qa:check` mirrors that pipeline without changing files by using Rector dry-run and Pint test mode. CI generates backend-owned contracts, rejects any generated diff, and runs only non-mutating quality checks.
+`phpunit.xml` points Laravel's configuration, route, and event cache paths at locations that never exist, so a locally cached boot manifest can never override the test environment. Extra arguments reach Pest directly, for example `composer test -- --filter=Registration`.
+
+The mutating PHP cleanup order is Rector, then Pint, then PHPStan. `composer qa:check` mirrors that pipeline without changing files by using Rector dry-run and Pint test mode. CI generates backend-owned contracts before running the same checks.
 
 Includes coverage for:
 
