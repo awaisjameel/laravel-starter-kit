@@ -1,0 +1,17 @@
+{
+    "_hash": "5a02ec7559119791b1e390c3b287bc9a21c18b9e341e4f5a234ee91e6028c9c0",
+    "patches": {
+        "laravel/wayfinder": [
+            {
+                "package": "laravel/wayfinder",
+                "description": "Generate identical LF output on Windows and Linux",
+                "url": "patches/wayfinder-portable-newlines.patch",
+                "sha256": "2d6a203a13dd201d0ef7bce5e3189759bfcbbfbf96810fa13eca3c6e9373ab2c",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}

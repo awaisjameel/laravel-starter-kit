@@ -34,7 +34,7 @@ final class TypeScriptTransformerServiceProvider extends TypeScriptTransformerAp
             // Data objects take precedence over the attribute transformer so
             // laravel-data name mapping, Lazy/Optional props, and nullable
             // properties are resolved with laravel-data semantics.
-            ->prependTransformer(new DataClassTransformer(nullableAsOptional: true))
+            ->prependTransformer(new DataClassTransformer())
             ->provider(LaravelDataTransformedProvider::class)
             ->transformDirectories(app_path())
             ->outputDirectory(resource_path('js/types'))

@@ -57,6 +57,18 @@ test('admin users can create users', function (): void {
         'role' => UserRole::User->value,
     ]);
 });
+
+test('empty user pages retain explicit null pagination boundaries', function (): void {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+    $this->actingAs($admin)->get('/app/admin/users?search=nonexistent-user')
+        ->assertOk()
+        ->assertInertia(fn (Assert $assert): Assert => $assert
+            ->has('users.data', 0)
+            ->where('users.from', null)
+            ->where('users.to', null)
+            ->where('users.total', 0));
+});
 test('admin users cannot create invalid users', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 

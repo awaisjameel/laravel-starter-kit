@@ -1,4 +1,5 @@
 import UserController from './UserController'
+
 const Controllers = {
     UserController: Object.assign(UserController, UserController),
 }

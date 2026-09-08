@@ -30,7 +30,7 @@ export type CursorPaginator<TKey, TValue> = {
 }
 export type CursorPaginatorInterface<TKey, TValue> = CursorPaginator<TKey, TValue>
 export type ForgotPasswordPageData = {
-    status?: string
+    status: string | null
 }
 export type LengthAwarePaginator<TKey, TValue> = {
     data: TKey extends string ? Record<TKey, TValue> : TValue[]
@@ -61,7 +61,7 @@ export type LoginData = {
 }
 export type LoginPageData = {
     canResetPassword: boolean
-    status?: string
+    status: string | null
 }
 export type PaginatedDataCollection<TKey, TValue> = LengthAwarePaginator<TKey, TValue>
 export type PasswordResetLinkData = {
@@ -82,7 +82,7 @@ export type ProfileDestroyData = {
 }
 export type ProfilePageData = {
     mustVerifyEmail: boolean
-    status?: string
+    status: string | null
 }
 export type ProfileUpdateData = {
     name: string
@@ -114,19 +114,19 @@ export type UpdateUserData = {
     name: string
     email: string
     role: UserRole
-    password?: string
+    password: string | null
 }
 export type UserChangedBroadcastData = {
     action: UsersRealtimeAction
     actorUserId: number
     targetUserId: number
-    user?: UserViewData
+    user: UserViewData | null
     occurredAt: string
 }
 export type UserIndexData = {
     page: number
     perPage: number
-    search?: string
+    search: string | null
     sortBy: UserSortBy
     sortDirection: SortDirection
 }
@@ -136,7 +136,7 @@ export type UserManagementNotificationData = {
     action: UsersRealtimeAction
     actorUserId: number
     actorName: string
-    targetUserId?: number
+    targetUserId: number | null
     occurredAt: string
 }
 export enum UserRole {
@@ -156,7 +156,7 @@ export type UserViewData = {
     role: UserRole
     created_at: string
     updated_at: string
-    email_verified_at?: string
+    email_verified_at: string | null
 }
 export type UsersIndexPageData = {
     users: UsersPaginationData
@@ -164,15 +164,15 @@ export type UsersIndexPageData = {
 export type UsersListChangedBroadcastData = {
     action: UsersRealtimeAction
     actorUserId: number
-    targetUserId?: number
+    targetUserId: number | null
     occurredAt: string
 }
 export type UsersPaginationData = {
     data: UserViewData[]
     per_page: number
     current_page: number
-    from?: number
-    to?: number
+    from: number | null
+    to: number | null
     last_page: number
     total: number
 }
@@ -191,5 +191,5 @@ export enum UsersRealtimeEvent {
     UserChanged = 'users.user.changed'
 }
 export type VerifyEmailPageData = {
-    status?: string
+    status: string | null
 }

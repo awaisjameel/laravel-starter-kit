@@ -29,6 +29,17 @@ test('non admin users cannot access admin users api', function (): void {
 
     $this->getJson('/api/v1/admin/users')->assertForbidden();
 });
+
+test('unverified users retain an explicit null verification date in api responses', function (): void {
+    $user = User::factory()->unverified()->create();
+
+    Sanctum::actingAs($user);
+
+    $this->getJson('/api/v1/me')
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['email_verified_at']])
+        ->assertJsonPath('data.email_verified_at', null);
+});
 test('admin users can manage users via api', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
     Sanctum::actingAs($admin);
