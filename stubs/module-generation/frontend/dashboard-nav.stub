@@ -1,5 +1,5 @@
 import type { DashboardCrudNavigationContract } from '@/config/dashboard-crud-navigation'
-{{ dashboardNavRoleImportLine }}import { Shapes } from '@lucide/vue'
+{{ dashboardNavRoleImportLine }}import IconLucideShapes from '~icons/lucide/shapes'
 
 const dashboardNavigation: DashboardCrudNavigationContract = {
     key: '{{ moduleKebab }}',
@@ -7,7 +7,7 @@ const dashboardNavigation: DashboardCrudNavigationContract = {
         title: '{{ moduleNavigationTitle }}',
         href: {{ dashboardNavHrefExpression }},
         activeMatch: 'prefix',
-        icon: Shapes
+        icon: IconLucideShapes
     },
     roles: {{ dashboardNavRoles }}
 }

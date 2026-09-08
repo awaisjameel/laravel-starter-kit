@@ -3,10 +3,10 @@ import type { PaginationFirstProps } from "reka-ui"
 import { computed, type HTMLAttributes } from "vue"
 import type { ButtonVariants } from '@/components/ui/button'
 import { reactiveOmit } from "@vueuse/core"
-import { ChevronLeft } from '@lucide/vue'
 import { PaginationFirst, useForwardProps } from "reka-ui"
 import { cn, omitUndefinedProps } from "@/lib/utils"
-import { buttonVariants } from '@/components/ui/button'
+import { buttonStyles } from '@/components/ui/button'
+import { appTheme } from '@/lib/theme'
 
 const props = withDefaults(defineProps<PaginationFirstProps & {
   size?: ButtonVariants["size"]
@@ -22,11 +22,11 @@ const forwarded = useForwardProps(computed(() => omitUndefinedProps(delegatedPro
 <template>
   <PaginationFirst
     data-slot="pagination-first"
-    :class="cn(buttonVariants({ variant: 'ghost', size }), 'gap-1 px-2.5 sm:pr-2.5', props.class)"
+    :class="cn(buttonStyles({ variant: 'ghost', size }), appTheme.pagination.navigation, props.class)"
     v-bind="forwarded"
   >
     <slot>
-      <ChevronLeft />
+      <IconLucideChevronsLeft />
       <span class="hidden sm:block">First</span>
     </slot>
   </PaginationFirst>

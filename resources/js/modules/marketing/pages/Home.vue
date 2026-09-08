@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const theme = appTheme
+
     const appName = import.meta.env.VITE_APP_NAME || 'Laravel Starter Kit'
     const { marketingPrimaryAction, marketingSecondaryAction } = useNavigation()
 </script>
@@ -9,11 +11,7 @@
     <MarketingPageLayout>
         <section class="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center">
             <div class="space-y-6 sm:space-y-8">
-                <span
-                    class="inline-flex w-fit items-center rounded-full border border-border/80 bg-card/80 px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground"
-                >
-                    Premium Laravel + Vue starter kit
-                </span>
+                <span :class="theme.marketing.badge"> Premium Laravel + Vue starter kit </span>
 
                 <div class="space-y-4">
                     <h1 class="max-w-2xl text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-5xl lg:text-6xl">
@@ -40,7 +38,7 @@
             </div>
 
             <div class="grid gap-4">
-                <UiCard class="border-border/80 bg-card/90 shadow-sm">
+                <UiCard :class="theme.marketing.featureCard">
                     <UiCardHeader class="space-y-1 pb-2">
                         <UiCardTitle class="text-base">Design-system first</UiCardTitle>
                         <UiCardDescription>Consistent colors, spacing, typography, and component behavior by default.</UiCardDescription>
@@ -50,7 +48,7 @@
                     </UiCardContent>
                 </UiCard>
 
-                <UiCard class="border-border/80 bg-card/90 shadow-sm">
+                <UiCard :class="theme.marketing.featureCard">
                     <UiCardHeader class="space-y-1 pb-2">
                         <UiCardTitle class="text-base">Scale-ready architecture</UiCardTitle>
                         <UiCardDescription>Clear boundaries between marketing, auth, and dashboard domains.</UiCardDescription>
@@ -60,7 +58,7 @@
                     </UiCardContent>
                 </UiCard>
 
-                <UiCard class="border-border/80 bg-card/90 shadow-sm">
+                <UiCard :class="theme.marketing.featureCard">
                     <UiCardHeader class="space-y-1 pb-2">
                         <UiCardTitle class="text-base">Secure and typed by default</UiCardTitle>
                         <UiCardDescription>Laravel policies and DTO-driven frontend types stay in sync.</UiCardDescription>

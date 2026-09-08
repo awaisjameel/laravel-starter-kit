@@ -128,11 +128,16 @@ test('fresh crud mode scaffolds backend frontend and tests', function (): void {
     $dashboardNavContents = file_get_contents($basePath.'/resources/js/modules/billing/contracts/dashboard-nav.ts');
     $dashboardNavContents = is_string($dashboardNavContents) ? $dashboardNavContents : '';
     $this->assertStringContainsString('href: appRoutes.billing.index.url()', $dashboardNavContents);
-    $this->assertStringContainsString("from '@lucide/vue'", $dashboardNavContents);
+    $this->assertStringContainsString("import IconLucideShapes from '~icons/lucide/shapes'", $dashboardNavContents);
+    $this->assertStringContainsString('icon: IconLucideShapes', $dashboardNavContents);
 
     $crudPageContents = file_get_contents($basePath.'/resources/js/modules/billing/pages/Index.vue');
     $crudPageContents = is_string($crudPageContents) ? $crudPageContents : '';
-    $this->assertStringContainsString("from '@lucide/vue'", $crudPageContents);
+    $this->assertStringContainsString("import IconLucidePlus from '~icons/lucide/plus'", $crudPageContents);
+    $this->assertStringContainsString(':icon-left="IconLucidePlus"', $crudPageContents);
+    $this->assertStringContainsString('const theme = appTheme', $crudPageContents);
+    $this->assertStringContainsString(':class="theme.layout.pageHeader"', $crudPageContents);
+    $this->assertStringNotContainsString('sm:flex-row sm:items-center sm:justify-between', $crudPageContents);
 });
 test('api mode scaffolds api assets and skips frontend assets', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();

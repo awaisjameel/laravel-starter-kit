@@ -1,5 +1,9 @@
 import type { Component } from 'vue'
 
+// The toast palette lives with the rest of the visual contract; re-exported here so
+// base-ui consumers keep one import surface.
+export type { ToastVariant } from '@/lib/theme'
+
 export type FormFieldType = 'text' | 'email' | 'password' | 'textarea' | 'select' | 'multiselect' | 'file' | 'checkbox' | 'radio' | 'toggle' | 'tabs'
 export type FormValues = Record<string, unknown>
 
@@ -68,8 +72,6 @@ export interface DataTableRowAction<TData> {
     visible?: boolean | ((row: TData) => boolean)
     onClick: (row: TData) => void
 }
-
-export type ToastVariant = 'default' | 'success' | 'error' | 'info' | 'warning'
 
 export interface ToastMessage {
     id: string

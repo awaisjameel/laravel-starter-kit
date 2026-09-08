@@ -1,6 +1,8 @@
 <script setup lang="ts">
     import { type NavItem } from '@/types'
 
+    const theme = appTheme
+
     interface Props {
         items: NavItem[]
         class?: string
@@ -14,11 +16,7 @@
         <UiSidebarGroupContent>
             <UiSidebarMenu>
                 <UiSidebarMenuItem v-for="item in items" :key="item.title">
-                    <UiSidebarMenuButton
-                        class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
-                        :is-active="item.isActive === true"
-                        as-child
-                    >
+                    <UiSidebarMenuButton :class="theme.navigation.footerItem" :is-active="item.isActive === true" as-child>
                         <a v-if="item.external" :href="item.href" target="_blank" rel="noopener noreferrer">
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>

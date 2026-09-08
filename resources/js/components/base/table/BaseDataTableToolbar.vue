@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    const theme = appTheme
+
     interface Props {
         searchValue: string
         searchPlaceholder?: string
@@ -22,7 +24,7 @@
 </script>
 
 <template>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div :class="theme.table.toolbar">
         <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <UiInput
                 :model-value="props.searchValue"

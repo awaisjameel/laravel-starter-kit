@@ -10,13 +10,7 @@ import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 
-import {
-    autoImportDirs,
-    autoImportImports,
-    componentAutoImportOptions,
-    iconComponentPrefix,
-    inertiaComponentResolver
-} from './frontend-auto-import.config.mjs'
+import { autoImportOptions, componentAutoImportOptions, iconComponentPrefix, inertiaComponentResolver } from './frontend-auto-import.config.mjs'
 
 const ssrEntry = 'resources/js/ssr.ts'
 // The stylesheet is its own entry rather than an import inside `app.ts`. SSR ships
@@ -55,12 +49,10 @@ export default defineConfig({
             }
         }),
         AutoImport({
-            vueTemplate: true,
+            ...autoImportOptions,
             viteOptimizeDeps: true,
             dts: 'resources/js/types/auto-imports.d.ts',
-            dtsMode: 'overwrite',
-            imports: autoImportImports,
-            dirs: autoImportDirs
+            dtsMode: 'overwrite'
         }),
         Icons({
             compiler: 'vue3',

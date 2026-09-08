@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import type { ToastCloseProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
-import { X } from '@lucide/vue'
+import { appTheme } from '@/lib/theme'
 import { ToastClose, useForwardProps } from 'reka-ui'
 import { computed } from 'vue'
 
@@ -24,10 +24,10 @@ const forwarded = useForwardProps(delegatedProps)
     <ToastClose
         data-slot="toast-close"
         v-bind="forwarded"
-        :class="cn('absolute top-2 right-2 rounded-md p-1 text-foreground/70 transition-colors hover:text-foreground', props.class)"
+        :class="cn(appTheme.toast.close, props.class)"
     >
         <slot>
-            <X class="size-4" />
+            <IconLucideX class="size-4" />
         </slot>
     </ToastClose>
 </template>

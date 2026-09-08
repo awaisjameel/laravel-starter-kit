@@ -5,7 +5,7 @@ import type { ButtonVariants } from '@/components/ui/button'
 import { reactiveOmit } from "@vueuse/core"
 import { PaginationListItem } from "reka-ui"
 import { cn } from "@/lib/utils"
-import { buttonVariants } from '@/components/ui/button'
+import { buttonStyles } from '@/components/ui/button'
 
 const props = withDefaults(defineProps<PaginationListItemProps & {
   size?: ButtonVariants["size"]
@@ -24,7 +24,7 @@ const delegatedProps = reactiveOmit(props, "class", "size", "isActive", "value")
     :value="props.value"
     v-bind="delegatedProps"
     :class="cn(
-      buttonVariants({
+      buttonStyles({
         variant: isActive ? 'outline' : 'ghost',
         size,
       }),

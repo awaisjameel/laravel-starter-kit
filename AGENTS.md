@@ -116,7 +116,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - `laravel-vite-plugin`: `^3.1`
 - Tailwind CSS: `^4.3`
 - Pinia: `^4.0`
-- Icons: `@lucide/vue` `^1.25` (the `lucide-vue-next` package is deprecated)
+- Icons: Iconify collections compiled by `unplugin-icons` `^23.0`; runtime icon component packages are deliberately not installed
 - Node: `>=24.1.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
@@ -347,6 +347,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 ### Frontend UI Layering
 
+- `resources/css/theme.css` is the sole owner of raw visual values: semantic colors, light/dark mappings, status tones, radii, shadows, glass/overlay values, gradients, and reduced-motion defaults.
+- `resources/js/lib/theme.ts` is the sole owner of reusable class recipes and typed style variants for shared controls, surfaces, dialogs, sheets, menus, inputs, tables, pagination, feedback, status, navigation, and animation.
 - `resources/js/components/ui/**` = low-level primitive wrappers (reka-ui, icons, etc.).
 - UI primitives (`resources/js/components/ui/**`) are built using shadcn-vue style components on top of Reka UI.
 - Base UI component names use the `Ui*` prefix (for example `UiButton`, `UiInput`, `UiSelect`, `UiCard`, `UiDialog`). Use these existing primitives before building custom elements.
@@ -354,8 +356,12 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
-- Icons come from `@lucide/vue`. It exports unsuffixed names only, so use `ChevronLeft`, not `ChevronLeftIcon`. The `LucideIcon` type backs `NavItem.icon` in `resources/js/types/index.d.ts`.
-- Iconify sets are also available through `unplugin-icons` using the `Icon*` component prefix.
+- `appTheme` is auto-imported but must be aliased in `<script setup>` (`const theme = appTheme`) before a template uses it. `vue-tsc` cannot resolve an auto-imported symbol that appears only in markup, so `appTheme.` written directly in a template compiles and then fails typecheck. `resources/js/components/ui/**` is exempt because it is excluded from typecheck and imports the theme explicitly.
+- Icons come only from Iconify through `unplugin-icons` using the `Icon*` component prefix. Use auto-resolved tags such as `<IconLucideChevronLeft />` in templates and virtual imports such as `~icons/lucide/chevron-left` when a component value is required in TypeScript. Application chrome uses the `lucide` collection; a multi-word collection needs the explicit `<Icon-<collection>:<name> />` form, as in `<Icon-icon-park-outline:system />`.
+- Icon-bearing contracts use Vue's generic `Component` type so they remain collection-agnostic.
+- `components.json` points the shadcn-vue CLI at `resources/css/theme.css` and declares no `iconLibrary`. Newly vendored primitives must be rewritten onto `appTheme` recipes and `~icons/*` before they are committed.
+- Do not introduce raw color literals, Tailwind palette colors, local `<style>` blocks, duplicated shared recipes, or runtime icon component packages in frontend source. Extend the canonical theme contracts instead.
+- `stubs/module-generation/frontend/**` emits real frontend source, so it follows every rule above. Generated icons use `~icons/*` virtual imports, and `resources/js/lib/__tests__/theme.test.ts` enforces the theme contracts across both `resources/js/**` and the stubs: no raw colors or palette utilities, no local `<style>` blocks, no runtime icon packages, no literal re-declaration of a canonical recipe, and no bare `appTheme.` inside a template.
 
 ### Frontend Automation Contracts
 
@@ -379,7 +385,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/components`
     - `resources/js/layouts`
     - `resources/js/modules`
-- `vitest.config.ts` installs the same `unplugin-vue-components` and `unplugin-icons` setup as `vite.config.ts`, so a mounted component resolves `Ui*`, `Base*`, and module components exactly as it does at runtime. Only stub children that need a live runtime dependency, such as `Link`.
+- `vitest.config.ts` installs the same `unplugin-auto-import`, `unplugin-vue-components`, and `unplugin-icons` setup as `vite.config.ts`, so a mounted component resolves auto-imported symbols and `Ui*`, `Base*`, and module components exactly as it does at runtime. Both spread `autoImportOptions` and `componentAutoImportOptions` from `frontend-auto-import.config.mjs`; do not inline either option set. Only stub children that need a live runtime dependency, such as `Link`.
 - Component auto-registration only rewrites compiled SFC templates. A runtime `template` string in a spec still needs an explicit component reference.
 - Auto-imported symbols used only inside a `<template>` are not typed by `vue-tsc`, because the generated `declare module 'vue'` augmentation does not merge into `@vue/runtime-core`. Derive a `computed` in `<script setup>` rather than calling an auto-imported helper directly in markup.
 - Module Vue components are namespace-registered; use tags like `<UsersTable />` and `<UsersDeleteUserDialog />` instead of manual imports.

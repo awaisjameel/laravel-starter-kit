@@ -5,21 +5,14 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vitest/config'
-import {
-    autoImportDirs,
-    autoImportImports,
-    componentAutoImportOptions,
-    iconComponentPrefix,
-    inertiaComponentResolver
-} from './frontend-auto-import.config.mjs'
+import { autoImportOptions, componentAutoImportOptions, iconComponentPrefix, inertiaComponentResolver } from './frontend-auto-import.config.mjs'
 
 export default defineConfig({
     plugins: [
         vue(),
         AutoImport({
-            dts: false,
-            imports: autoImportImports,
-            dirs: autoImportDirs
+            ...autoImportOptions,
+            dts: false
         }),
         Icons({
             compiler: 'vue3'

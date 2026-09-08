@@ -1,7 +1,12 @@
 import { resolveDashboardCrudNavigationItems } from '@/config/dashboard-crud-navigation'
 import type { NavItem } from '@/types'
 import type { UserRole } from '@/types/app-data'
-import { LayoutGrid, LockKeyhole, LogIn, Settings, UserPlus, Users } from '@lucide/vue'
+import IconLucideLayoutGrid from '~icons/lucide/layout-grid'
+import IconLucideLockKeyhole from '~icons/lucide/lock-keyhole'
+import IconLucideLogIn from '~icons/lucide/log-in'
+import IconLucideSettings from '~icons/lucide/settings'
+import IconLucideUserPlus from '~icons/lucide/user-plus'
+import IconLucideUsers from '~icons/lucide/users'
 import appRoutes from '../routes/app'
 import authRoutes from '../routes/auth'
 import marketingRoutes from '../routes/marketing'
@@ -49,7 +54,7 @@ export const buildDashboardPrimaryItems = (context: NavigationContext): NavItem[
             title: 'Dashboard',
             href: navRoutes.appDashboard(),
             activeMatch: 'prefix',
-            icon: LayoutGrid
+            icon: IconLucideLayoutGrid
         }
     ]
 
@@ -58,7 +63,7 @@ export const buildDashboardPrimaryItems = (context: NavigationContext): NavItem[
             title: 'Users',
             href: navRoutes.adminUsers(),
             activeMatch: 'prefix',
-            icon: Users
+            icon: IconLucideUsers
         })
     }
 
@@ -71,12 +76,12 @@ export const buildDashboardFooterItems = (): NavItem[] => [
     {
         title: 'Settings',
         href: navRoutes.settingsProfile(),
-        icon: Settings
+        icon: IconLucideSettings
     },
     {
         title: 'Security',
         href: navRoutes.settingsPassword(),
-        icon: LockKeyhole
+        icon: IconLucideLockKeyhole
     }
 ]
 
@@ -113,14 +118,14 @@ export const buildMarketingPrimaryAction = (context: NavigationContext): NavItem
             title: 'Open dashboard',
             href: navRoutes.appDashboard(),
             activeMatch: 'prefix',
-            icon: LayoutGrid
+            icon: IconLucideLayoutGrid
         }
     }
 
     return {
         title: 'Get started',
         href: navRoutes.authRegister(),
-        icon: UserPlus
+        icon: IconLucideUserPlus
     }
 }
 
@@ -129,14 +134,14 @@ export const buildMarketingSecondaryAction = (context: NavigationContext): NavIt
         return {
             title: 'Settings',
             href: navRoutes.settingsProfile(),
-            icon: Settings
+            icon: IconLucideSettings
         }
     }
 
     return {
         title: 'Log in',
         href: navRoutes.authLogin(),
-        icon: LogIn
+        icon: IconLucideLogIn
     }
 }
 

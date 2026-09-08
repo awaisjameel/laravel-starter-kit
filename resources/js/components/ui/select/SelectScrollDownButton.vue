@@ -2,7 +2,6 @@
 import type { SelectScrollDownButtonProps } from "reka-ui"
 import { computed, type HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import { ChevronDown } from '@lucide/vue'
 import { SelectScrollDownButton, useForwardProps } from "reka-ui"
 import { cn, omitUndefinedProps } from "@/lib/utils"
 
@@ -20,7 +19,7 @@ const forwardedProps = useForwardProps(computed(() => omitUndefinedProps(delegat
     :class="cn('flex cursor-default items-center justify-center py-1', props.class)"
   >
     <slot>
-      <ChevronDown class="size-4" />
+      <IconLucideChevronDown class="size-4" />
     </slot>
   </SelectScrollDownButton>
 </template>

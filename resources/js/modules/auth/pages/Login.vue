@@ -3,6 +3,8 @@
     import type { LoginPageData } from '@/types/app-data'
     import { loginFormContract, type LoginFormValues } from '../forms/login-form-schema'
 
+    const theme = appTheme
+
     defineProps<LoginPageData>()
 
     const { form, fields, submit } = useSchemaResourceForm<LoginFormValues>(loginFormContract)
@@ -21,7 +23,7 @@
     <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
+        <div v-if="status" :class="['mb-4 text-center', theme.feedback.status, theme.status.success]">
             {{ status }}
         </div>
 

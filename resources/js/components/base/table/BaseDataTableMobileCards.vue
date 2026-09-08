@@ -1,6 +1,8 @@
 <script setup lang="ts" generic="TData">
     import type { DataTableRowAction, MobileCardField } from '@/types/base-ui'
 
+    const theme = appTheme
+
     interface Props {
         rows: TData[]
         rowKey: (row: TData) => string | number
@@ -16,8 +18,8 @@
 </script>
 
 <template>
-    <div class="grid gap-3 md:hidden">
-        <article v-for="row in props.rows" :key="props.rowKey(row)" class="rounded-lg border border-border/70 bg-card p-3 shadow-xs">
+    <div :class="theme.table.mobileGrid">
+        <article v-for="row in props.rows" :key="props.rowKey(row)" :class="theme.table.mobileCard">
             <div class="flex items-start gap-3">
                 <div class="min-w-0 flex-1">
                     <slot name="mobile-header" :row="row" />
@@ -33,7 +35,7 @@
             </dl>
         </article>
 
-        <div v-if="props.rows.length === 0" class="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+        <div v-if="props.rows.length === 0" :class="theme.table.mobileEmpty">
             {{ props.emptyMessage }}
         </div>
     </div>
