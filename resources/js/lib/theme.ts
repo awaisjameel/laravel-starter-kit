@@ -7,6 +7,17 @@ const slideFromSide =
     'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2'
 const overlayMotion = `${enterExit} ${fade}`
 const popoverMotion = `${overlayMotion} ${zoom} ${slideFromSide}`
+// Reka's tooltip content reports `delayed-open`/`instant-open` instead of `open`,
+// so `data-[state=open]` never matches there. The enter animation therefore has to
+// run unconditionally on mount and only the exit keys off `data-[state=closed]`.
+const tooltipMotion = `animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 ${slideFromSide}`
+// One canonical trailing action row, shared by dialog footers and form actions.
+const actionRow = 'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'
+// One canonical split row that stacks on small screens, shared by page headers and table toolbars.
+const splitRow = 'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'
+// Table head and body cells differ only in text alignment, so the shared half lives here.
+const tableHeadCell = 'h-12 px-4 align-middle font-medium text-muted-foreground'
+const tableBodyCell = 'p-4'
 
 export const appTheme = {
     animation: {
@@ -14,7 +25,7 @@ export const appTheme = {
         fadeHidden: 'opacity-0'
     },
     button: {
-        base: "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20",
+        base: "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity] outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20",
         variant: {
             default: 'bg-primary text-primary-foreground shadow-surface hover:bg-primary/90',
             destructive: 'bg-destructive text-destructive-foreground shadow-surface hover:bg-destructive/90 focus-visible:ring-destructive/25',
@@ -42,7 +53,7 @@ export const appTheme = {
         scrollContent:
             'relative z-50 my-8 grid w-full max-w-lg gap-4 rounded-panel border border-border bg-background p-6 text-foreground shadow-floating duration-200 md:w-full',
         close: "absolute top-4 right-4 rounded-control opacity-70 transition-opacity hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        footer: 'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'
+        footer: actionRow
     },
     sheet: {
         content: `fixed z-50 flex flex-col gap-4 bg-background text-foreground shadow-floating transition ease-in-out ${enterExit} data-[state=closed]:duration-300 data-[state=open]:duration-500`,
@@ -75,6 +86,12 @@ export const appTheme = {
         description: 'text-xs text-muted-foreground',
         error: 'text-sm text-destructive'
     },
+    form: {
+        actions: actionRow
+    },
+    layout: {
+        pageHeader: splitRow
+    },
     select: {
         trigger:
             "flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-control border border-input bg-transparent px-3 py-2 text-sm shadow-surface transition-[color,box-shadow] outline-none data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground",
@@ -93,12 +110,14 @@ export const appTheme = {
         mobileGrid: 'grid gap-3 md:hidden',
         mobileCard: 'rounded-panel border border-border bg-card p-3 text-card-foreground shadow-surface',
         mobileEmpty: 'rounded-panel border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted-foreground',
-        headerCell: 'h-12 px-4 text-left align-middle font-medium text-muted-foreground',
+        headerCell: `${tableHeadCell} text-left`,
+        actionsHeaderCell: `${tableHeadCell} text-right`,
+        actionsCell: `${tableBodyCell} text-right`,
         sortableHeader: 'inline-flex items-center gap-1 rounded-control focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none',
         row: 'border-b border-border transition-colors hover:bg-muted/50',
-        cell: 'p-4',
+        cell: tableBodyCell,
         empty: 'p-8 text-center text-muted-foreground',
-        toolbar: 'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'
+        toolbar: splitRow
     },
     toast: {
         base: 'group pointer-events-auto relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-panel border p-4 pr-8 text-foreground shadow-floating transition-all',
@@ -163,7 +182,7 @@ export const appTheme = {
         }
     },
     link: 'text-foreground underline decoration-border underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!',
-    tooltip: `z-50 w-fit rounded-control bg-primary px-3 py-1.5 text-xs text-balance text-primary-foreground ${popoverMotion}`,
+    tooltip: `z-50 w-fit rounded-control bg-primary px-3 py-1.5 text-xs text-balance text-primary-foreground ${tooltipMotion}`,
     marketing: {
         glowTop: 'bg-[image:var(--marketing-glow-top)]',
         glowBottom: 'bg-[image:var(--marketing-glow-bottom)]',

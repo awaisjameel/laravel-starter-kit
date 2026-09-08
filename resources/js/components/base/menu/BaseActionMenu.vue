@@ -47,7 +47,7 @@
                 :title="props.triggerLabel"
             >
                 <span class="sr-only">{{ props.triggerLabel }}</span>
-                <Icon-mdi-dots-vertical class="h-4 w-4" />
+                <IconLucideEllipsisVertical class="size-4" />
             </BaseButton>
         </UiDropdownMenuTrigger>
         <UiDropdownMenuContent align="end">

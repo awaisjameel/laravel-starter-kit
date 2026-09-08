@@ -25,7 +25,7 @@
 </script>
 
 <template>
-    <div :class="theme.dialog.footer">
+    <div :class="theme.form.actions">
         <BaseButton
             v-if="props.showCancel"
             type="button"

@@ -55,7 +55,7 @@
 </script>
 
 <template>
-    <UiCard :class="theme.surface.panel">
+    <UiCard>
         <UiCardContent class="p-0">
             <div class="hidden md:block">
                 <div class="relative overflow-x-auto">
@@ -79,7 +79,7 @@
                                     </button>
                                     <span v-else>{{ column.label }}</span>
                                 </th>
-                                <th v-if="props.actions.length > 0" :class="[theme.table.headerCell, 'text-right']">Actions</th>
+                                <th v-if="props.actions.length > 0" :class="theme.table.actionsHeaderCell">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,7 +89,7 @@
                                         {{ column.value(row) }}
                                     </slot>
                                 </td>
-                                <td v-if="props.actions.length > 0" :class="[theme.table.cell, 'text-right']">
+                                <td v-if="props.actions.length > 0" :class="theme.table.actionsCell">
                                     <slot name="actions" :row="row">
                                         <BaseMenuBaseActionMenu :actions="props.actions" :row="row" />
                                     </slot>

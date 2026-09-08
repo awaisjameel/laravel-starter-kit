@@ -5,6 +5,8 @@
     import { useUsersIndexRealtime } from '../contracts/realtime'
     import type { UserSortColumn } from '../contracts/types'
 
+    const theme = appTheme
+
     const userSortColumns = [UserSortBy.Name, UserSortBy.Email, UserSortBy.Role, UserSortBy.CreatedAt] as const
 
     const page = useAppPage()
@@ -109,7 +111,7 @@
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full min-w-0 flex-1 flex-col gap-4 rounded-xl p-3 sm:p-4">
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div :class="theme.layout.pageHeader">
                     <Heading
                         title="Users"
                         :description="`Manage user accounts${activeCollaboratorCount > 0 ? ` - ${activeCollaboratorCount} admin${activeCollaboratorCount === 1 ? '' : 's'} online` : ''}`"

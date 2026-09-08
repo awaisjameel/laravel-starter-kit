@@ -114,6 +114,7 @@ Canonical frontend presentation contracts:
 - `resources/js/lib/theme.ts` owns typed reusable recipes for controls, surfaces, dialogs, sheets, menus, fields, tables, pagination, feedback, navigation, and animation.
 - `resources/js/components/ui/**` owns low-level mechanics, while `resources/js/components/base/**` adds reusable application behavior.
 - Icons resolve from Iconify collections through `unplugin-icons`; do not add runtime icon component packages or hand-authored replacements for library icons.
+- Templates read the theme through a `const theme = appTheme` alias declared in `<script setup>`, because `vue-tsc` only typechecks auto-imported symbols that are bound in script.
 
 ## Route Contract
 

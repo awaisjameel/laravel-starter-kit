@@ -28,6 +28,17 @@ export const autoImportImports = [
     }
 ]
 
+// Plugin-agnostic half of the `unplugin-auto-import` contract. `vite.config.ts` and
+// `vitest.config.ts` both spread this so a symbol that resolves in a template at
+// runtime resolves the same way when a component test mounts that template.
+// `vueTemplate` is the load-bearing option here: without it an auto-imported value
+// used directly inside `<template>` is undefined at render time.
+export const autoImportOptions = {
+    vueTemplate: true,
+    imports: autoImportImports,
+    dirs: autoImportDirs
+}
+
 export const componentDirs = ['resources/js/components', 'resources/js/layouts', 'resources/js/modules']
 
 // Plugin-agnostic half of the `unplugin-vue-components` contract. `vite.config.ts`

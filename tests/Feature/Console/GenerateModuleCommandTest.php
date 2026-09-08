@@ -135,6 +135,9 @@ test('fresh crud mode scaffolds backend frontend and tests', function (): void {
     $crudPageContents = is_string($crudPageContents) ? $crudPageContents : '';
     $this->assertStringContainsString("import IconLucidePlus from '~icons/lucide/plus'", $crudPageContents);
     $this->assertStringContainsString(':icon-left="IconLucidePlus"', $crudPageContents);
+    $this->assertStringContainsString('const theme = appTheme', $crudPageContents);
+    $this->assertStringContainsString(':class="theme.layout.pageHeader"', $crudPageContents);
+    $this->assertStringNotContainsString('sm:flex-row sm:items-center sm:justify-between', $crudPageContents);
 });
 test('api mode scaffolds api assets and skips frontend assets', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();

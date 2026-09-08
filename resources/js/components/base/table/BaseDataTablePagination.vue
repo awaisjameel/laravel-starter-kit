@@ -48,7 +48,7 @@
                     :disabled="props.currentPage === 1"
                     aria-label="Go to previous page"
                 >
-                    <Icon-mdi-chevron-left class="size-4" />
+                    <IconLucideChevronLeft class="size-4" />
                     <span class="sr-only">Previous page</span>
                 </UiPaginationPrevious>
 
@@ -71,7 +71,7 @@
                     :disabled="props.currentPage === props.totalPages"
                     aria-label="Go to next page"
                 >
-                    <Icon-mdi-chevron-right class="size-4" />
+                    <IconLucideChevronRight class="size-4" />
                     <span class="sr-only">Next page</span>
                 </UiPaginationNext>
             </UiPaginationContent>

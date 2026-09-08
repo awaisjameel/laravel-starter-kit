@@ -1,8 +1,6 @@
 <script setup lang="ts">
     import type { ButtonVariants } from '@/components/ui/button'
 
-    const theme = appTheme
-
     interface Props {
         open: boolean
         title: string
@@ -49,7 +47,7 @@
 
             <slot />
 
-            <UiDialogFooter v-if="props.showFooter" :class="theme.dialog.footer">
+            <UiDialogFooter v-if="props.showFooter">
                 <BaseButton
                     v-if="props.showCancel"
                     type="button"
