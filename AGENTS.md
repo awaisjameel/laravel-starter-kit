@@ -128,6 +128,8 @@ For every non-trivial change, explicitly verify all affected layers before consi
 
 ### Version Constraints Worth Knowing
 
+- Wayfinder 0.1.21 has platform-dependent newline cleanup. `cweagans/composer-patches` applies `patches/wayfinder-portable-newlines.patch` during installation so Artisan, Composer, and Vite emit identical LF helpers. Commit `patches.lock.json` with the patch; do not edit vendor files or format generated helpers separately. Remove the patch after an upstream release passes the portability regression tests on Windows and Linux.
+- After changing a Composer patch, run `composer patches-relock`, `composer patches-repatch`, and the generation/quality gates. CI vendor caches include the patch lock and patch files so an older unpatched vendor directory cannot be restored.
 - `typescript` is an exact npm alias to `typescript-native-bridge`, with `overrides.typescript = "$typescript"` so Vue, ESLint, and Prettier share the TypeScript 7 checker and classic API adapter. The version's `6.0.3` prefix identifies the API facade; `tsgo.7.0.2` identifies the checker. Do not replace it with stock `typescript@7` until Vue and the compiler-API consumers support it. Never use forced installs or disable strict checks to upgrade.
 - Keep the bridge exactly pinned and revalidate compiler diagnostics, formatting, lint, client/SSR builds, and clean `npm ci` when changing it. `resources/js/types/__tests__/compiler.test.ts` checks TypeScript 7 Unicode inference and rejection of invalid Vue props, template methods, and nullable backend fields.
 - The bridge supports Windows/macOS and glibc Linux (2.31+), including the Ubuntu 24.04 Sail images and Ubuntu CI. Alpine/musl is unsupported; run frontend tooling in a glibc build stage. Platform binaries come from its locked optional dependencies; do not omit optional dependencies during installation.
@@ -963,6 +965,8 @@ If backend route, enum, DTO, channel, provider, gate, listener, or module-regist
 Local changes must remain compatible with the existing CI expectations:
 
 The test workflow checks generated types, auto-import/component declarations, routes, and actions after the client/SSR build. Both modified tracked files and untracked generated files fail the gate; regenerate and commit the complete contract surface together.
+
+The shared setup uses `actions/cache@v6` with the Node 24 action runtime. Dependency and patch locks are part of the cache identity.
 
 - Pint
 - Rector dry-run

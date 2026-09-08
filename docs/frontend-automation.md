@@ -138,6 +138,19 @@ npm run build:ssr
 CI regenerates the same contracts as part of its shared setup step, then runs the quality checks
 and the Vite client and SSR build against the regenerated artifacts.
 
+Wayfinder 0.1.21 mixes platform line separators with LF Blade templates, which otherwise produces
+different indentation and blank lines on Windows and Linux. The locked Composer patch in
+`patches/wayfinder-portable-newlines.patch` normalizes generation to LF at the source. It applies
+to all existing generation commands, including Vite's automatic regeneration. Keep generated
+helpers excluded from manual formatting and keep the CI drift check strict.
+
+`composer install` applies the patch to a fresh dependency installation and requires Git.
+For an existing vendor installation, run `composer patches-repatch` after adopting the patch.
+If the patch changes, run `composer patches-relock` followed by `composer patches-repatch`, then
+regenerate and run the quality gates. Commit the patch, `patches.lock.json`, and regenerated
+helpers together. Remove this patch when the upstream generator passes the portability tests
+on both Windows and Linux.
+
 ### Import rules
 
 `eslint.config.js` uses `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`:

@@ -1,9 +1,9 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
- * @route '/auth/verify-email'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
+* @route '/auth/verify-email'
+*/
 export const notice = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: notice.url(options),
     method: 'get',
@@ -16,27 +16,28 @@ notice.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
- * @route '/auth/verify-email'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
+* @route '/auth/verify-email'
+*/
 notice.url = (options?: RouteQueryOptions) => {
     return notice.definition.url + queryParams(options)
 }
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
- * @route '/auth/verify-email'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
+* @route '/auth/verify-email'
+*/
 notice.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: notice.url(options),
     method: 'get',
 })
+
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationPromptController::__invoke
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
- * @route '/auth/verify-email'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationPromptController.php:21
+* @route '/auth/verify-email'
+*/
 notice.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: notice.url(options),
     method: 'head',
@@ -44,9 +45,9 @@ notice.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
- * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
- * @route '/auth/verify-email/{id}/{hash}'
- */
+* @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
+* @route '/auth/verify-email/{id}/{hash}'
+*/
 export const verify = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: verify.url(args, options),
     method: 'get',
@@ -59,23 +60,23 @@ verify.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
- * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
- * @route '/auth/verify-email/{id}/{hash}'
- */
+* @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
+* @route '/auth/verify-email/{id}/{hash}'
+*/
 verify.url = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
-                    id: args[0],
-                    hash: args[1],
-                }
+            id: args[0],
+            hash: args[1],
+        }
     }
 
     args = applyUrlDefaults(args)
 
     const parsedArgs = {
-                        id: args.id,
-                                hash: args.hash,
-                }
+        id: args.id,
+        hash: args.hash,
+    }
 
     return verify.definition.url
             .replace('{id}', parsedArgs.id.toString())
@@ -85,18 +86,19 @@ verify.url = (args: { id: string | number, hash: string | number } | [id: string
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
- * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
- * @route '/auth/verify-email/{id}/{hash}'
- */
+* @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
+* @route '/auth/verify-email/{id}/{hash}'
+*/
 verify.get = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: verify.url(args, options),
     method: 'get',
 })
+
 /**
 * @see \App\Modules\Auth\Http\Controllers\VerifyEmailController::__invoke
- * @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
- * @route '/auth/verify-email/{id}/{hash}'
- */
+* @see app/Modules/Auth/Http/Controllers/VerifyEmailController.php:18
+* @route '/auth/verify-email/{id}/{hash}'
+*/
 verify.head = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: verify.url(args, options),
     method: 'head',
@@ -104,9 +106,9 @@ verify.head = (args: { id: string | number, hash: string | number } | [id: strin
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationNotificationController::send
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
- * @route '/auth/email/verification-notification'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
+* @route '/auth/email/verification-notification'
+*/
 export const send = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: send.url(options),
     method: 'post',
@@ -119,26 +121,27 @@ send.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationNotificationController::send
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
- * @route '/auth/email/verification-notification'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
+* @route '/auth/email/verification-notification'
+*/
 send.url = (options?: RouteQueryOptions) => {
     return send.definition.url + queryParams(options)
 }
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\EmailVerificationNotificationController::send
- * @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
- * @route '/auth/email/verification-notification'
- */
+* @see app/Modules/Auth/Http/Controllers/EmailVerificationNotificationController.php:17
+* @route '/auth/email/verification-notification'
+*/
 send.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: send.url(options),
     method: 'post',
 })
+
 const verification = {
     notice: Object.assign(notice, notice),
-verify: Object.assign(verify, verify),
-send: Object.assign(send, send),
+    verify: Object.assign(verify, verify),
+    send: Object.assign(send, send),
 }
 
 export default verification

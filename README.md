@@ -157,6 +157,8 @@ Vite also generates the auto-import and component declarations at
 `resources/js/types/auto-imports.d.ts` and `resources/js/types/components.d.ts`.
 All generated artifacts are committed and validated by CI; do not hand-edit them.
 
+Wayfinder's Windows/Linux newline handling is fixed by a local Composer patch, applied automatically by `composer install` (Git must be available). Commit `patches.lock.json` and `patches/**` alongside the dependency locks. When changing the patch, run `composer patches-relock` and `composer patches-repatch` before regeneration. Existing checkouts that already have Wayfinder installed should run `composer patches-repatch` once after pulling this change.
+
 Nullable PHP properties generate required `T | null` fields, matching their serialized values. Use backend `Optional` or `Lazy` types for fields that may be absent; do not hide nulls by making every nullable property optional.
 
 Realtime channel pattern enums, event-name enums, presence payloads, and broadcast payload DTOs are generated into the same `resources/js/types/app-data.ts` contract surface.

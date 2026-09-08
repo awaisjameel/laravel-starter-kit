@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "cweagans/composer-patches": "^2.0",
         "inertiajs/inertia-laravel": "^3.3.3",
         "laravel/framework": "^13.31.0",
         "laravel/reverb": "^1.11.1",
@@ -151,6 +152,11 @@
         "generate-and-cleanup": "Regenerate backend-owned contracts, then run the mutating cleanup pipelines."
     },
     "extra": {
+        "patches": {
+            "laravel/wayfinder": {
+                "Generate identical LF output on Windows and Linux": "patches/wayfinder-portable-newlines.patch"
+            }
+        },
         "laravel": {
             "dont-discover": []
         }
@@ -161,7 +167,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "cweagans/composer-patches": true
         }
     },
     "minimum-stability": "stable",
