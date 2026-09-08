@@ -104,8 +104,8 @@ composer generate
 npm run build:ssr
 ```
 
-CI verifies backend contracts immediately after `composer generate`, then verifies both backend
-and frontend generated artifacts after the Vite client and SSR build.
+CI regenerates the same contracts as part of its shared setup step, then runs the quality checks
+and the Vite client and SSR build against the regenerated artifacts.
 
 ### Import rules
 

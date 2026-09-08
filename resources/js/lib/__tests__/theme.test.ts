@@ -6,16 +6,22 @@ import { appTheme, buttonStyles, sidebarButtonStyles, toastStyles } from '../the
 
 const projectRoot = process.cwd()
 
-const sourceFiles = (directory: string): string[] =>
+const sourceExtensions = /\.(css|ts|vue)$/
+const stubExtensions = /\.stub$/
+
+const sourceFiles = (directory: string, extensions: RegExp = sourceExtensions): string[] =>
     readdirSync(directory).flatMap((entry) => {
         const path = join(directory, entry)
 
         if (statSync(path).isDirectory()) {
-            return entry === '__tests__' ? [] : sourceFiles(path)
+            return entry === '__tests__' ? [] : sourceFiles(path, extensions)
         }
 
-        return /\.(css|ts|vue)$/.test(entry) ? [path] : []
+        return extensions.test(entry) ? [path] : []
     })
+
+// Stubs are the source of generated modules, so they must honor the same contracts as hand-written source.
+const isVueSource = (path: string, contents: string): boolean => path.endsWith('.vue') || (path.endsWith('.stub') && contents.includes('<template'))
 
 describe('theme contracts', () => {
     it('resolves typed control variants from the canonical recipes', () => {
@@ -47,14 +53,14 @@ describe('theme contracts', () => {
         expect(readFileSync(join(projectRoot, 'resources/css/app.css'), 'utf8')).toContain("@import './theme.css';")
     })
 
-    it('keeps presentation dependencies and local style blocks out of frontend source', () => {
-        const candidates = sourceFiles(join(projectRoot, 'resources/js'))
+    it('keeps presentation dependencies and local style blocks out of frontend source and generator stubs', () => {
+        const candidates = [...sourceFiles(join(projectRoot, 'resources/js')), ...sourceFiles(join(projectRoot, 'stubs'), stubExtensions)]
         const bannedDependency = /@lucide\/vue|class-variance-authority/
         const violations = candidates
             .filter((path) => {
                 const contents = readFileSync(path, 'utf8')
 
-                return bannedDependency.test(contents) || (path.endsWith('.vue') && contents.includes('<style'))
+                return bannedDependency.test(contents) || (isVueSource(path, contents) && contents.includes('<style'))
             })
             .map((path) => relative(projectRoot, path))
 

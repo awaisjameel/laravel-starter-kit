@@ -26,6 +26,12 @@
         </include>
     </source>
     <php>
+        <!-- Point the boot-time manifests Laravel only ever reads at paths that never
+             exist, so a locally cached configuration, route table, or event map can
+             never leak into a test run and override the environment declared below. -->
+        <env name="APP_CONFIG_CACHE" value="bootstrap/cache/testing/config.php"/>
+        <env name="APP_EVENTS_CACHE" value="bootstrap/cache/testing/events.php"/>
+        <env name="APP_ROUTES_CACHE" value="bootstrap/cache/testing/routes.php"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

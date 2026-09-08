@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { Plus } from '@lucide/vue'
+    import IconLucidePlus from '~icons/lucide/plus'
     import type { {{ pageDataClass }} } from '@/types/app-data'
     import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
 
@@ -43,7 +43,7 @@
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Heading :title="'{{ pagePascalName }}'" description="Manage records" />
-                    <BaseButton label="Create" :icon-left="Plus" class="w-full sm:w-auto" @click="openCreateDialog" />
+                    <BaseButton label="Create" :icon-left="IconLucidePlus" class="w-full sm:w-auto" @click="openCreateDialog" />
                 </div>
 
                 <{{ moduleComponentPrefix }}Table :items="props.items" @view="openDetailsDialog" @edit="openEditDialog" @delete="openDeleteDialog" />
