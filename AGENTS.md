@@ -99,35 +99,37 @@ For every non-trivial change, explicitly verify all affected layers before consi
 ## Current Stack
 
 - PHP: `^8.4`
-- Laravel: `^13.21`
-- Inertia Laravel: `^3.1`
-- Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.6`
-- Reverb: `^1.11`
+- Laravel: `^13.31`
+- Inertia Laravel: `^3.3`
+- Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.7`
+- Reverb: `^1.11.1`
 - Sanctum: `^4.3.3`
-- Wayfinder: `^0.1.20` (sole route surface; Ziggy is deliberately not installed)
+- Wayfinder: `^0.1.21` (sole route surface; Ziggy is deliberately not installed)
 - Spatie Laravel Data: `^4.23`
 - Spatie TypeScript Transformer: `^3.3`
 - Pest: `^5.0` with Laravel and PHPStan plugins `^5.0` (PHPUnit 13 engine)
-- PHPStan/Larastan: `^2.2` / `^3.10` at level 9 with official strict and deprecation rules
-- Rector: `^2.5`
-- Vue: `^3.5.40`
+- PHPStan/Larastan: `^2.2` / `^3.11` at level 9 with official strict and deprecation rules
+- Rector: `^2.6`
+- Vue: `^3.5.42`
 - TypeScript: `^6.0`
-- Vite: `^8.1` (Rolldown bundler)
-- `laravel-vite-plugin`: `^3.1`
+- Vitest: `^5.0`
+- Vite: `^8.2` (Rolldown bundler)
+- `laravel-vite-plugin`: `^3.2`
 - Tailwind CSS: `^4.3`
 - Pinia: `^4.0`
 - Icons: Iconify collections compiled by `unplugin-icons` `^23.0`; runtime icon component packages are deliberately not installed
-- Node: `>=24.1.0`
+- Node: `>=24.15.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
+- `.npmrc` enables `engine-strict` so installs reject incompatible dependency runtimes. Node 24.15+ is required by jsdom 30; CI uses the latest Node 24 release.
+- npm's `allowScripts` pins the reviewed `vue-demi` postinstall that selects its Vue 3 adapter. Review and update that entry when the transitive package changes; do not allow all dependency scripts globally.
 - `composer.lock` and `package-lock.json` are committed application contracts; CI and local reproducible installs must honor them.
 - Published Sail Docker contexts are limited to `docker/8.4` and `docker/8.5`, matching the Composer PHP constraint.
 
 ### Version Constraints Worth Knowing
 
-- TypeScript must stay on `6.x`. TypeScript 7 (the native compiler) has no stable programmatic API yet, so `vue-tsc`/Volar cannot use it and `typescript-eslint` caps at `<6.1.0`.
+- TypeScript stays on `6.0.3`: `typescript-eslint` 8.70 requires `>=4.8.4 <6.1.0`. Recheck the published peer constraint before moving to TypeScript 7; never force an incompatible install.
 - `concurrently` 10 pins a vulnerable `shell-quote`. `package.json` carries an `overrides` entry forcing `shell-quote ^1.10.0`; drop it once upstream repins.
-- `@vue/test-utils` currently pins `js-beautify` 1, whose `glob` dependency is deprecated. `package.json` overrides `glob` to `^12.0.0`; remove the override once Test Utils updates its formatter dependency.
 - `optionalDependencies` pin the Linux x64 native binaries used by CI/Docker. Vite 8 bundles with Rolldown, so the binding is `@rolldown/binding-linux-x64-gnu` (not `@rollup/rollup-*`).
 - Those three entries must use exact versions that match the resolved core packages (`rolldown`, `lightningcss`, `@tailwindcss/oxide`). A caret range can hoist a newer binding than the core package expects and break the Linux build. Re-check them after any Vite or Tailwind bump.
 
@@ -378,6 +380,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `resources/js/modules/**/composables/**`
     - `resources/js/modules/**/helpers/**`
 - Module-local `forms/**` and `contracts/**` are not auto-imported.
+- Inertia owns routing; do not enable the Vue Router auto-import preset without a Vue Router runtime. Type-only imports such as `Method` remain explicit.
 - `frontend-auto-import.config.mjs` owns two contracts:
     - symbol auto-import (`autoImportDirs`, `autoImportImports`, restricted paths/patterns)
     - component auto-registration (`componentAutoImportOptions`, `inertiaComponentResolver`, `iconComponentPrefix`)
@@ -510,7 +513,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Annotate frontend-facing DTOs/enums with `#[TypeScript]`. Enums under `app/**` are collected regardless of the attribute.
 - TypeScript generation is configured in `app/Providers/TypeScriptTransformerServiceProvider.php`. Transformer v3 has no config file; do not reintroduce `config/typescript-transformer.php`.
 - That provider is the single place that owns the generated contract surface. Current settings:
-    - `DataClassTransformer(nullableAsOptional: true)` so nullable DTO properties stay `foo?: T` rather than `T | null`
+    - `DataClassTransformer()` so nullable DTO properties remain `foo: T | null`, matching serialized responses; optional fields must use explicit backend `Optional`/`Lazy` semantics
     - `EnumTransformer(useUnionEnums: false)` so PHP enums become native TypeScript enums
     - `FlatModuleWriter('app-data.ts')` into `resources/js/types`, keeping one flat ES module
     - `withoutManifest()` so no transformer manifest file lands in `resources/js/types`
@@ -955,6 +958,8 @@ If backend route, enum, DTO, channel, provider, gate, listener, or module-regist
 ## CI Compatibility
 
 Local changes must remain compatible with the existing CI expectations:
+
+The test workflow checks generated types, auto-import/component declarations, routes, and actions after the client/SSR build. Both modified tracked files and untracked generated files fail the gate; regenerate and commit the complete contract surface together.
 
 - Pint
 - Rector dry-run

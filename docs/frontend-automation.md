@@ -73,6 +73,8 @@ Generated backend additions (fresh module mode):
 
 `frontend-auto-import.config.mjs` is the canonical definition for auto-import symbols and directories.
 
+Routing uses Inertia and generated Wayfinder helpers. The Vue Router preset is not enabled. Type-only symbols such as Inertia's `Method` use explicit `import type` declarations.
+
 The following files consume it and must stay aligned:
 
 - `vite.config.ts`

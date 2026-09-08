@@ -5,7 +5,7 @@ A Laravel 13 + Inertia 3 + Vue 3 starter kit with strict typed contracts from ba
 ## Requirements
 
 - PHP 8.4+
-- Node 24+ and npm 11+
+- Node 24.15+ and npm 11.2.1+
 - Composer 2+
 
 Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Composer runtime constraint.
@@ -15,9 +15,9 @@ Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Comp
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
 - Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
 - Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, Iconify through `unplugin-icons`
-- Pest 5 (PHPUnit 13 engine), Vitest 4, Pint, PHPStan/Larastan at level 9 with strict/deprecation rules, Rector, ESLint 10, Prettier 3
+- Pest 5 (PHPUnit 13 engine), Vitest 5, Pint, PHPStan/Larastan at level 9 with strict/deprecation rules, Rector, ESLint 10, Prettier 3
 
-TypeScript is intentionally pinned to 6.x: TypeScript 7 does not yet expose the programmatic API that `vue-tsc` and `typescript-eslint` need.
+TypeScript stays on 6.0.3 because `typescript-eslint` 8.70 requires `>=4.8.4 <6.1.0`. Recheck its peer dependency before upgrading to TypeScript 7; do not bypass it with forced installs.
 
 `composer.lock` and `package-lock.json` are committed application contracts. Use Composer and npm install commands that honor them; npm is the only supported JavaScript package manager.
 
@@ -157,7 +157,7 @@ Vite also generates the auto-import and component declarations at
 `resources/js/types/auto-imports.d.ts` and `resources/js/types/components.d.ts`.
 All generated artifacts are committed and validated by CI; do not hand-edit them.
 
-Never hand-edit generated files.
+Nullable PHP properties generate required `T | null` fields, matching their serialized values. Use backend `Optional` or `Lazy` types for fields that may be absent; do not hide nulls by making every nullable property optional.
 
 Realtime channel pattern enums, event-name enums, presence payloads, and broadcast payload DTOs are generated into the same `resources/js/types/app-data.ts` contract surface.
 

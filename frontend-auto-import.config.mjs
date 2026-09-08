@@ -11,10 +11,8 @@ export const autoImportDirs = [
 
 export const autoImportImports = [
     'vue',
-    'vue-router',
     {
         '@inertiajs/vue3': ['usePage', 'useForm', 'useRemember', 'usePoll', 'router', 'Deferred'],
-        '@inertiajs/core': ['Method'],
         '@/routes/app': [['default', 'appRoutes']],
         '@/routes/auth': [['default', 'authRoutes']],
         '@/routes/marketing': [['default', 'marketingRoutes']],

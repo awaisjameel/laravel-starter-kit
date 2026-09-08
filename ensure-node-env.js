@@ -15,7 +15,7 @@ const parseMinimumVersion = (engineName, constraint) => {
     const match = typeof constraint === 'string' ? minimumVersionPattern.exec(constraint) : null
 
     if (match === null) {
-        throw new Error(`Unsupported ${engineName} engine constraint: ${String(constraint)}. Expected a minimum version such as ">=24.1.0".`)
+        throw new Error(`Unsupported ${engineName} engine constraint: ${String(constraint)}. Expected a minimum version such as ">=24.15.0".`)
     }
 
     return match.slice(1).map(Number)

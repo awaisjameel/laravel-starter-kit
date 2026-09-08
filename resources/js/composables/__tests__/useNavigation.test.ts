@@ -98,6 +98,7 @@ function createUser(role: UserRole): NonNullable<AppPageProps['auth']['user']> {
         email: 'test@example.com',
         role,
         created_at: '2026-01-01T00:00:00+00:00',
-        updated_at: '2026-01-01T00:00:00+00:00'
+        updated_at: '2026-01-01T00:00:00+00:00',
+        email_verified_at: null
     }
 }
