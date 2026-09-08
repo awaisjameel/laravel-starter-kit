@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { omitUndefinedProps } from '@/lib/utils'
 import type { PaginationListProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
@@ -7,7 +9,8 @@ import { cn } from "@/lib/utils"
 
 const props = defineProps<PaginationListProps & { class?: HTMLAttributes["class"] }>()
 
-const delegatedProps = reactiveOmit(props, "class") as Record<string, unknown>
+const delegated = reactiveOmit(props, "class")
+const delegatedProps = computed(() => omitUndefinedProps(delegated))
 </script>
 
 <template>

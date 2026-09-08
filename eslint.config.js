@@ -134,7 +134,6 @@ export default defineConfigWithVueTs(
             'public/**',
             'bootstrap/ssr/**',
             'tailwind.config.js',
-            'resources/js/components/ui/**',
             'resources/js/actions/**',
             'resources/js/routes/**',
             'resources/js/wayfinder/**',
@@ -157,5 +156,12 @@ export default defineConfigWithVueTs(
     ...moduleAutoImportSourceBoundaryConfigs,
     testFileConfig,
     ...moduleTestBoundaryConfigs,
+    {
+        files: ['resources/js/components/ui/**/*.{ts,vue}'],
+        rules: {
+            '@typescript-eslint/no-restricted-imports': 'off',
+            '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_' }]
+        }
+    },
     prettier
 )

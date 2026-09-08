@@ -274,6 +274,86 @@ describe('useApiMutation', () => {
         clearApiQueryCache()
     })
 
+    it.each(['onSuccess', 'onSettled'] as const)('does not roll back a successful mutation when %s throws', async (callback) => {
+        setApiQueryCacheData('callback-users', [1])
+        const callbackError = new Error('Callback failed')
+        const onError = vi.fn()
+        const onSuccess = vi.fn(() => {
+            if (callback === 'onSuccess') throw callbackError
+        })
+        const onSettled = vi.fn(() => {
+            if (callback === 'onSettled') throw callbackError
+        })
+        const mutation = useApiMutation({
+            mutationFn: async () => 2,
+            invalidateKeys: ['callback-users'],
+            onSuccess,
+            onError,
+            onSettled
+        })
+
+        await expect(mutation.mutate(undefined)).rejects.toBe(callbackError)
+        expect(mutation.data.value).toBe(2)
+        expect(mutation.error.value).toBeNull()
+        expect(mutation.isPending.value).toBe(false)
+        expect(getApiQueryCacheData('callback-users')).toBeUndefined()
+        expect(onError).not.toHaveBeenCalled()
+        expect(onSettled).toHaveBeenCalledExactlyOnceWith(2, null, undefined, undefined)
+    })
+
+    it('settles a failed mutation even when its error callback throws', async () => {
+        const callbackError = new Error('Rollback failed')
+        const onSettled = vi.fn()
+        const mutation = useApiMutation({
+            mutationFn: async () => {
+                throw new Error('Write failed')
+            },
+            onError: () => {
+                throw callbackError
+            },
+            onSettled
+        })
+
+        await expect(mutation.mutate(undefined)).rejects.toBe(callbackError)
+        expect(mutation.error.value?.message).toBe('Write failed')
+        expect(mutation.isPending.value).toBe(false)
+        expect(onSettled).toHaveBeenCalledTimes(1)
+    })
+
+    it('requires a mapper for a custom error shape', () => {
+        // @ts-expect-error Normalized API errors cannot be returned as strings.
+        useApiMutation<number, number, string>({ mutationFn: async (value) => value })
+        // @ts-expect-error Query errors need the same explicit mapping boundary.
+        useApiQuery<number, number, string>({ key: 'custom-error', queryFn: async () => 1, enabled: false })
+    })
+
+    it('tracks overlapping requests and prevents older results from replacing the latest result', async () => {
+        const first = Promise.withResolvers<number>()
+        const second = Promise.withResolvers<number>()
+        const mutation = useApiMutation({ mutationFn: (value: number) => (value === 1 ? first.promise : second.promise) })
+        const earlier = mutation.mutate(1)
+        const later = mutation.mutate(2)
+        second.resolve(2)
+        await later
+        expect(mutation.isPending.value).toBe(true)
+        first.resolve(1)
+        await earlier
+        expect(mutation.isPending.value).toBe(false)
+        expect(mutation.data.value).toBe(2)
+    })
+
+    it('does not restore reset state when an outstanding mutation completes', async () => {
+        const pending = Promise.withResolvers<number>()
+        const mutation = useApiMutation({ mutationFn: () => pending.promise })
+        const request = mutation.mutate(undefined)
+        mutation.reset()
+        expect(mutation.isPending.value).toBe(true)
+        pending.resolve(1)
+        await request
+        expect(mutation.data.value).toBeUndefined()
+        expect(mutation.isPending.value).toBe(false)
+    })
+
     it('supports optimistic updates with rollback on error', async () => {
         setApiQueryCacheData<number[]>('users:list', [1])
 

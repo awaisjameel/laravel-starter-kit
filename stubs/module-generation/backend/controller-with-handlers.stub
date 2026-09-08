@@ -11,6 +11,7 @@ use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}CommandHandler;
 use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use App\Modules\Shared\Http\Requests\PaginationQueryRequest;
 use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
@@ -22,9 +23,9 @@ final class {{ pagePascalName }}Controller extends Controller
         private readonly {{ modelClass }}CommandHandler ${{ modelVariable }}CommandHandler,
     ) {}
 
-    public function index(): Response
+    public function index(PaginationQueryRequest $request): Response
     {
-        $lengthAwarePaginator = $this->{{ modelVariable }}QueryHandler->index();
+        $lengthAwarePaginator = $this->{{ modelVariable }}QueryHandler->index($request->toDto());
 
         return PageResponder::render(
             'modules/{{ moduleKebab }}/pages/{{ pagePascalName }}',

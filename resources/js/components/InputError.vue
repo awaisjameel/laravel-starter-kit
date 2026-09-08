@@ -2,7 +2,7 @@
     const theme = appTheme
 
     defineProps<{
-        message?: string
+        message?: string | undefined
     }>()
 </script>
 

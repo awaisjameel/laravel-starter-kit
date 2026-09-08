@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { omitUndefinedProps } from '@/lib/utils'
 import type { HTMLAttributes } from 'vue'
 import type { ToastDescriptionProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
@@ -16,7 +17,8 @@ const delegatedProps = computed(() => {
     return delegated
 })
 
-const forwarded = useForwardProps(delegatedProps)
+const rawForwardedProps = useForwardProps(delegatedProps)
+const forwarded = computed(() => omitUndefinedProps(rawForwardedProps.value))
 </script>
 
 <template>

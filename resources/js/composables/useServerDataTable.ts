@@ -1,3 +1,4 @@
+import type { PaginationData } from '@/types/app-data'
 import type { ServerTableQuery, SortDirection } from '@/types/base-ui'
 import type { QueryParams, RouteDefinition } from '@/wayfinder'
 import { useDebounceFn } from '@vueuse/core'
@@ -6,6 +7,7 @@ import type { UnwrapRef } from 'vue'
 interface ServerDataTableOptions<TSort extends string> {
     endpoint: (options?: { query?: QueryParams }) => RouteDefinition<'get'>
     initialQuery: ServerTableQuery<TSort>
+    pagination?: () => Pick<PaginationData, 'current_page' | 'per_page'>
     debounceMs?: number
 }
 
@@ -174,6 +176,16 @@ export function useServerDataTable<TSort extends string>(options: ServerDataTabl
     const query = ref<ServerTableQuery<TSort>>(initialQuery)
 
     const searchValue = ref(query.value.search ?? '')
+
+    watch(
+        () => options.pagination?.(),
+        (pagination) => {
+            if (pagination === undefined) return
+            query.value.page = pagination.current_page
+            query.value.perPage = pagination.per_page
+        },
+        { flush: 'sync' }
+    )
 
     const visit = () => {
         const definition = options.endpoint({

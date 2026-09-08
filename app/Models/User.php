@@ -50,6 +50,15 @@ final class User extends Authenticatable implements MustVerifyEmailContract
         return UserViewData::fromModel($this);
     }
 
+    protected static function booted(): void
+    {
+        self::updating(function (self $user): void {
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
+        });
+    }
+
     /**
      * @return array<string, class-string<UserRole>|string>
      */

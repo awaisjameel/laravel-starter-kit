@@ -1,5 +1,17 @@
-import { describe, expect, it } from 'vitest'
-import { capitalize, formatDate, getInitials, isObjectRecord } from '../utils'
+import { describe, expect, expectTypeOf, it } from 'vitest'
+import { capitalize, formatDate, getInitials, isObjectRecord, omitUndefinedProps } from '../utils'
+
+it('omits undefined props while preserving required keys, false, and null', () => {
+    const input: { value: string; name: string | undefined; disabled: boolean; modelValue: string | null } = {
+        value: 'required',
+        name: undefined,
+        disabled: false,
+        modelValue: null
+    }
+    const forwarded = omitUndefinedProps(input)
+    expectTypeOf(forwarded).toExtend<{ value: string; name?: string; disabled: boolean; modelValue: string | null }>()
+    expect(forwarded).toEqual({ value: 'required', disabled: false, modelValue: null })
+})
 
 describe('isObjectRecord', () => {
     it('returns true for plain objects', () => {

@@ -27,6 +27,11 @@ jobs:
       - name: Build Client And SSR Assets
         run: npm run build:ssr
 
+      - name: Audit Locked Dependencies
+        run: |
+          composer audit --locked
+          npm audit
+
       - name: Verify Generated Contracts
         run: |
           git diff --exit-code -- resources/js/types resources/js/routes resources/js/actions resources/js/wayfinder

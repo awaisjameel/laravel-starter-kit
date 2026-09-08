@@ -1,5 +1,41 @@
-import { describe, expect, it } from 'vitest'
-import { resolveServerTableInitialQuery } from '../useServerDataTable'
+import { router } from '@inertiajs/vue3'
+import { describe, expect, it, vi } from 'vitest'
+import { effectScope, ref } from 'vue'
+import { resolveServerTableInitialQuery, useServerDataTable } from '../useServerDataTable'
+
+it('synchronizes pagination after a preserved-state mutation redirect without issuing another visit', () => {
+    const visit = vi.spyOn(router, 'get').mockImplementation(() => undefined)
+    const pagination = ref({ current_page: 2, per_page: 5 })
+    const scope = effectScope()
+
+    try {
+        scope.run(() => {
+            const table = useServerDataTable({
+                endpoint: ({ query } = {}) => ({ url: `/records?page=${query?.page}&perPage=${query?.perPage}`, method: 'get' }),
+                initialQuery: { page: 2, perPage: 5 },
+                pagination: () => pagination.value
+            })
+
+            pagination.value = { current_page: 1, per_page: 15 }
+            expect(table.query.value).toEqual({ page: 1, perPage: 15 })
+            expect(visit).not.toHaveBeenCalled()
+
+            table.setPage(2)
+            expect(visit).toHaveBeenCalledExactlyOnceWith(
+                '/records?page=2&perPage=15',
+                {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true
+                }
+            )
+        })
+    } finally {
+        scope.stop()
+        visit.mockRestore()
+    }
+})
 
 type SortColumn = 'name' | 'email' | 'role' | 'created_at'
 

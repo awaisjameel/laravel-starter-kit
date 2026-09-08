@@ -22,6 +22,58 @@ const toNoContentResponse = (): Response => {
 describe('apiRequest', () => {
     afterEach(() => {
         vi.restoreAllMocks()
+        vi.unstubAllGlobals()
+        document.cookie = 'XSRF-TOKEN=; Max-Age=0; path=/'
+    })
+
+    it('reads the current CSRF cookie for mutations, including after session rotation', async () => {
+        const fetchMock = vi.fn(async () => toJsonResponse({ ok: true }))
+        vi.stubGlobal('fetch', fetchMock)
+
+        for (const token of ['first/token=', 'rotated/token=']) {
+            document.cookie = `XSRF-TOKEN=${encodeURIComponent(token)}; path=/`
+            await apiRequest({ url: '/app/settings/profile', method: 'PATCH', body: {} })
+            expect(fetchMock).toHaveBeenLastCalledWith(
+                '/app/settings/profile',
+                expect.objectContaining({
+                    credentials: 'same-origin',
+                    headers: expect.objectContaining({ 'X-XSRF-TOKEN': token })
+                })
+            )
+        }
+    })
+
+    it('does not send session or socket headers to another origin', async () => {
+        document.cookie = 'XSRF-TOKEN=secret; path=/'
+        vi.spyOn(realtimeConfig, 'getRealtimeSocketId').mockReturnValue('private-socket')
+        const fetchMock = vi.fn(async () => toJsonResponse({ ok: true }))
+        vi.stubGlobal('fetch', fetchMock)
+
+        await apiRequest({ url: 'https://external.example/test', method: 'POST' })
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://external.example/test',
+            expect.objectContaining({
+                headers: { Accept: 'application/json' }
+            })
+        )
+    })
+
+    it('merges query parameters before the fragment without corrupting an existing query', async () => {
+        const fetchMock = vi.fn(async () => toJsonResponse({ ok: true }))
+        vi.stubGlobal('fetch', fetchMock)
+
+        await apiRequest({ url: '/api/v1/users?page=1&role=admin#results', query: { page: 2, search: 'A & B', ignored: null } })
+        expect(fetchMock).toHaveBeenCalledWith('/api/v1/users?page=2&role=admin&search=A+%26+B#results', expect.any(Object))
+    })
+
+    it('handles missing and malformed CSRF cookies without breaking requests', async () => {
+        const fetchMock = vi.fn(async () => toJsonResponse({ ok: true }))
+        vi.stubGlobal('fetch', fetchMock)
+
+        await apiRequest({ url: '/api/v1/ping', method: 'POST' })
+        document.cookie = 'XSRF-TOKEN=%invalid; path=/'
+        await apiRequest({ url: '/api/v1/ping', method: 'POST' })
+        expect(fetchMock).toHaveBeenCalledTimes(2)
     })
 
     it('returns unknown payload when no parser is provided', async () => {

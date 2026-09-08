@@ -43,11 +43,7 @@
             @update:page="emit('pageChange', $event)"
         >
             <UiPaginationContent>
-                <UiPaginationPrevious
-                    @click="emit('pageChange', props.currentPage - 1)"
-                    :disabled="props.currentPage === 1"
-                    aria-label="Go to previous page"
-                >
+                <UiPaginationPrevious :disabled="props.currentPage === 1" aria-label="Go to previous page">
                     <IconLucideChevronLeft class="size-4" />
                     <span class="sr-only">Previous page</span>
                 </UiPaginationPrevious>
@@ -59,18 +55,13 @@
                             :variant="page === props.currentPage ? 'outline' : 'ghost'"
                             :aria-current="page === props.currentPage ? 'page' : undefined"
                             :disabled="page === props.currentPage"
-                            @click="emit('pageChange', page)"
                         >
                             {{ page }}
                         </UiButton>
                     </UiPaginationItem>
                 </template>
 
-                <UiPaginationNext
-                    @click="emit('pageChange', props.currentPage + 1)"
-                    :disabled="props.currentPage === props.totalPages"
-                    aria-label="Go to next page"
-                >
+                <UiPaginationNext :disabled="props.currentPage === props.totalPages" aria-label="Go to next page">
                     <IconLucideChevronRight class="size-4" />
                     <span class="sr-only">Next page</span>
                 </UiPaginationNext>

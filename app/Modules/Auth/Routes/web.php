@@ -43,7 +43,9 @@ Route::prefix('auth')->as('auth.')->group(function (): void {
             ->name('verification.send');
 
         Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
-        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('password.confirm.store');
+        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
+            ->middleware('throttle:auth-sensitive')
+            ->name('password.confirm.store');
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     });

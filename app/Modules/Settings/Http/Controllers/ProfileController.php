@@ -48,10 +48,6 @@ final class ProfileController extends Controller
             'email' => $profileUpdateData->email,
         ]);
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
         $user->save();
 
         return to_route('app.settings.profile.edit');

@@ -45,6 +45,7 @@
     const { query, searchValue, setPage, setPerPage, setSort } = useServerDataTable<UserSortColumn>({
         endpoint: UserController.index,
         initialQuery,
+        pagination: () => props.users,
         debounceMs: 300
     })
 

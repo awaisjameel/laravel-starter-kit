@@ -11,6 +11,7 @@ use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Resources\{{ pagePascalName }}Resource;
+use App\Modules\Shared\Http\Requests\PaginationQueryRequest;
 use App\Modules\Shared\Http\Responders\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -22,9 +23,9 @@ final class {{ pagePascalName }}ApiController extends Controller
         private readonly {{ modelClass }}CommandHandler ${{ modelVariable }}CommandHandler,
     ) {}
 
-    public function index(): AnonymousResourceCollection
+    public function index(PaginationQueryRequest $request): AnonymousResourceCollection
     {
-        return ApiResponder::collection({{ pagePascalName }}Resource::collection($this->{{ modelVariable }}QueryHandler->index()));
+        return ApiResponder::collection({{ pagePascalName }}Resource::collection($this->{{ modelVariable }}QueryHandler->index($request->toDto())->withQueryString()));
     }
 
     public function store({{ pagePascalName }}StoreRequest $request): JsonResponse

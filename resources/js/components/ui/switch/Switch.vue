@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { omitUndefinedProps } from '@/lib/utils'
 import type { HTMLAttributes } from 'vue'
 import type { SwitchRootEmits, SwitchRootProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
@@ -15,7 +17,8 @@ const props = defineProps<
 const emits = defineEmits<SwitchRootEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const rawForwardedProps = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = computed(() => omitUndefinedProps(rawForwardedProps.value))
 </script>
 
 <template>

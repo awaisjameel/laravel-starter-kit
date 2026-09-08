@@ -9,6 +9,7 @@ use App\Modules\Users\Data\UpdateUserData;
 use App\Modules\Users\Events\UserManagementEvent;
 use App\Modules\Users\Handlers\UserCommandHandler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
@@ -69,7 +70,7 @@ test('update dispatches management event with audited changes', function (): voi
             && $userManagementEvent->context->target?->is($target) === true;
     });
 });
-test('delete dispatches management event before removing user', function (): void {
+test('delete dispatches management event after removing user', function (): void {
     Event::fake([UserManagementEvent::class]);
 
     $actor = User::factory()->create(['role' => UserRole::Admin]);
@@ -82,4 +83,38 @@ test('delete dispatches management event before removing user', function (): voi
         && $userManagementEvent->context->target?->id === $target->id
         && $userManagementEvent->context->socketId() === '1234.5678'
         && $userManagementEvent->context->changes === []);
+
+    expect($target->exists)->toBeFalse();
+    $this->assertDatabaseMissing('users', ['id' => $target->id]);
+});
+
+test('failed deletion does not announce a successful mutation', function (): void {
+    Event::fake([UserManagementEvent::class]);
+    $actor = User::factory()->create(['role' => UserRole::Admin]);
+    $target = User::factory()->create();
+    User::deleting(static function (): never {
+        throw new RuntimeException('Deletion failed');
+    });
+
+    expect(fn () => app(UserCommandHandler::class)->delete($target, $this->userActionContext($actor)))
+        ->toThrow(RuntimeException::class, 'Deletion failed');
+
+    Event::assertNotDispatched(UserManagementEvent::class);
+    $this->assertDatabaseHas('users', ['id' => $target->id]);
+});
+
+test('rolled back mutations do not dispatch side effects', function (): void {
+    Event::fake([UserManagementEvent::class]);
+    $actor = User::factory()->create(['role' => UserRole::Admin]);
+
+    DB::beginTransaction();
+    app(UserCommandHandler::class)->create(
+        new CreateUserData('Rolled Back', 'rollback@example.com', UserRole::User, 'Password123!@#'),
+        $this->userActionContext($actor),
+    );
+    Event::assertNotDispatched(UserManagementEvent::class);
+    DB::rollBack();
+
+    Event::assertNotDispatched(UserManagementEvent::class);
+    $this->assertDatabaseMissing('users', ['email' => 'rollback@example.com']);
 });

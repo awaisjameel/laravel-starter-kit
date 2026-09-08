@@ -64,6 +64,16 @@ export type LoginPageData = {
     status: string | null
 }
 export type PaginatedDataCollection<TKey, TValue> = LengthAwarePaginator<TKey, TValue>
+export type PaginationData = {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+}
+export type PaginationQueryData = {
+    page: number
+    perPage: number
+}
 export type PasswordResetLinkData = {
     email: string
 }

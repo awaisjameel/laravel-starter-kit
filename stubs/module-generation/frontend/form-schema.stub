@@ -1,7 +1,6 @@
-import type { {{ storeDataClass }} } from '@/types/app-data'
-import type { FormValuesFromData } from '@/lib/forms'
+{{ formTypeImports }}
 
-export type {{ pagePascalName }}FormValues = FormValuesFromData<{{ storeDataClass }}>
+export type {{ pagePascalName }}FormValues = {{ formValuesType }}
 
 export const {{ pageCamelName }}FormContract = defineFormContract<{{ pagePascalName }}FormValues>({
     defaults: () => ({

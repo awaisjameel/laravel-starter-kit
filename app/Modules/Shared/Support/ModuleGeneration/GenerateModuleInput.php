@@ -6,6 +6,7 @@ namespace App\Modules\Shared\Support\ModuleGeneration;
 
 use App\Enums\UserRole;
 use InvalidArgumentException;
+use PhpToken;
 
 final readonly class GenerateModuleInput
 {
@@ -74,8 +75,17 @@ final readonly class GenerateModuleInput
         $pagePascalName = self::toPascalCase($pageName);
         $pageKebabName = self::toKebabCase($pageName);
 
-        if ($pagePascalName === '' || $pageKebabName === '') {
+        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $pagePascalName) !== 1 || $pageKebabName === '') {
             throw new InvalidArgumentException('Could not derive a valid page name from the provided value.');
+        }
+
+        if ($generateCrud || $generateApi) {
+            $modelName = implode('', $moduleName->namespaceSegments);
+            $modelToken = PhpToken::tokenize('<?php '.$modelName)[1] ?? null;
+
+            if ($modelToken?->id !== T_STRING || in_array(mb_strtolower($modelName), ['bool', 'int', 'float', 'string', 'object', 'mixed', 'never', 'void', 'iterable', 'null', 'true', 'false', 'self', 'parent', 'enum'], true)) {
+                throw new InvalidArgumentException('The derived model name is reserved by PHP: '.$modelName);
+            }
         }
 
         $normalizedRoutePrefix = mb_trim($routePrefix, " \t\n\r\0\x0B/");

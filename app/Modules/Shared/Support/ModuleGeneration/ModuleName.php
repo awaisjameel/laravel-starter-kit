@@ -39,7 +39,12 @@ final readonly class ModuleName
                 continue;
             }
 
-            $namespaceSegments[] = self::toPascal($parts);
+            $segment = self::toPascal($parts);
+            if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $segment) !== 1) {
+                throw new InvalidArgumentException('Module namespace segments must start with a letter.');
+            }
+
+            $namespaceSegments[] = $segment;
 
             foreach ($parts as $part) {
                 $frontendParts[] = mb_strtolower($part);

@@ -79,7 +79,7 @@ update.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::destroy
-* @see app/Modules/Settings/Http/Controllers/ProfileController.php:63
+* @see app/Modules/Settings/Http/Controllers/ProfileController.php:59
 * @route '/app/settings/profile'
 */
 export const destroy = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -94,7 +94,7 @@ destroy.definition = {
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::destroy
-* @see app/Modules/Settings/Http/Controllers/ProfileController.php:63
+* @see app/Modules/Settings/Http/Controllers/ProfileController.php:59
 * @route '/app/settings/profile'
 */
 destroy.url = (options?: RouteQueryOptions) => {
@@ -103,7 +103,7 @@ destroy.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Settings\Http\Controllers\ProfileController::destroy
-* @see app/Modules/Settings/Http/Controllers/ProfileController.php:63
+* @see app/Modules/Settings/Http/Controllers/ProfileController.php:59
 * @route '/app/settings/profile'
 */
 destroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({

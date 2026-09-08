@@ -153,6 +153,16 @@ on both Windows and Linux.
 
 ### Import rules
 
+Vue typechecking and ESLint cover UI primitives as well as application components. Primitives keep explicit imports. When forwarding optional props, use the shared `omitUndefinedProps` helper to preserve required keys and omit undefined values without losing null or false. Do not cast forwarded props to an untyped record.
+
+Server listing pages pass a reactive `pagination` getter to `useServerDataTable`. Returned metadata synchronizes page and page size after preserved-state mutation redirects without issuing an extra visit.
+
+The app root clears client query caches when authenticated identity changes. SSR never fetches into these caches. Custom query/mutation error types require a mapper when they cannot represent `ApiError`, and mutation pending state accounts for overlapping requests.
+
+Mutation callbacks run once per invocation. A successful write invalidates its cache keys before success callbacks run. Callback failures propagate to the caller without marking the write as failed or invoking rollback; settlement still runs if a success or error callback throws.
+
+`apiRequest` reads Laravel's current CSRF cookie for same-origin mutations, merges existing query parameters, and keeps URL fragments intact. Automatic CSRF and socket headers remain on the same origin.
+
 `eslint.config.js` uses `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`:
 
 - Runtime values from `@/composables/**`, `@/stores/**`, `@/lib/**`, `@/utils/**`,

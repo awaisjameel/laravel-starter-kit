@@ -2,6 +2,29 @@
 
 declare(strict_types=1);
 
+use App\Modules\Shared\Support\ModuleGeneration\TemplateRenderer;
+
+test('unresolved template tokens fail before scaffolding writes files', function (): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $stub = $basePath.'/missing.stub';
+    file_put_contents($stub, '{{ supplied }} {{ missing }}');
+    expect(fn () => app(TemplateRenderer::class)->render($stub, ['supplied' => 'value']))
+        ->toThrow(RuntimeException::class, 'Missing template token "missing"');
+});
+
+test('invalid namespace page and model names are rejected before writing files', function (string $module, string $page): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $this->runGenerateCommand([
+        'module' => $module,
+        '--page' => $page,
+        '--scaffold' => 'crud',
+        '--route-profile' => 'public',
+        '--no-file-prompts' => true,
+        '--base-path' => $basePath,
+    ])->assertExitCode(1);
+    expect(glob($basePath.'/app/Modules/*'))->toBe([]);
+})->with([['123Billing', 'Index'], ['Billing/123Invoices', 'Index'], ['Billing', '123Index'], ['Class', 'Index'], ['String', 'Index'], ['Match', 'Index']]);
+
 test('fresh crud mode scaffolds backend frontend and tests', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();
 

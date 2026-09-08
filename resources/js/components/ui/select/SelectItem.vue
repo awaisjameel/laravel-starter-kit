@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { omitUndefinedProps } from '@/lib/utils'
 import type { SelectItemProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
@@ -16,7 +18,8 @@ const props = defineProps<SelectItemProps & { class?: HTMLAttributes["class"] }>
 
 const delegatedProps = reactiveOmit(props, "class")
 
-const forwardedProps = useForwardProps(delegatedProps)
+const rawForwardedProps = useForwardProps(delegatedProps)
+const forwardedProps = computed(() => omitUndefinedProps(rawForwardedProps.value))
 </script>
 
 <template>

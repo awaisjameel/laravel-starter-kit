@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { omitUndefinedProps } from '@/lib/utils'
 import type { HTMLAttributes } from 'vue'
 import type { ToastRootEmits, ToastRootProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
@@ -18,7 +20,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emits = defineEmits<ToastRootEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'variant')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const rawForwardedProps = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = computed(() => omitUndefinedProps(rawForwardedProps.value))
 </script>
 
 <template>

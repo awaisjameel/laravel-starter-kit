@@ -436,6 +436,7 @@ final readonly class ModuleScaffoldPlanner
             'moduleNamespace' => $moduleNamespace,
             'pagePascalName' => $pagePascalName,
             'modelClass' => $modelClass,
+            'storeDataClass' => $this->storeDataClassName($generateModuleInput),
             'tableName' => $tableName,
         ];
 
@@ -509,9 +510,14 @@ final readonly class ModuleScaffoldPlanner
         $pageKebabName = $generateModuleInput->pageKebabName;
         $pageCamelName = lcfirst($pagePascalName);
 
+        $crudResourceManifest = CrudResourceManifest::fromGenerateModuleInput($generateModuleInput);
         $schemaTokens = [
             'pagePascalName' => $pagePascalName,
             'pageCamelName' => $pageCamelName,
+            'formTypeImports' => '',
+            'formValuesType' => "{\n".$this->renderFormValueFields($crudResourceManifest)."\n}",
+            'formDefaultValues' => $this->renderFormDefaultValues($crudResourceManifest),
+            'formFieldDefinitions' => $this->renderFormFieldDefinitions($crudResourceManifest),
         ];
 
         $pageTokens = [
@@ -598,8 +604,8 @@ final readonly class ModuleScaffoldPlanner
         $schemaTokens = [
             'pagePascalName' => $pagePascalName,
             'pageCamelName' => lcfirst($pagePascalName),
-            'storeDataClass' => $this->storeDataClassName($generateModuleInput),
-            'formValueFields' => $this->renderFormValueFields($crudResourceManifest),
+            'formTypeImports' => sprintf("import type { %s } from '@/types/app-data'\nimport type { FormValuesFromData } from '@/lib/forms'", $this->storeDataClassName($generateModuleInput)),
+            'formValuesType' => sprintf('FormValuesFromData<%s>', $this->storeDataClassName($generateModuleInput)),
             'formDefaultValues' => $this->renderFormDefaultValues($crudResourceManifest),
             'formFieldDefinitions' => $this->renderFormFieldDefinitions($crudResourceManifest),
         ];

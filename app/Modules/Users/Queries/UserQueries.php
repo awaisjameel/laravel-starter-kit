@@ -22,6 +22,7 @@ final class UserQueries
         $this->applySearch($query, $userIndexData->search);
 
         return $query->orderBy($userIndexData->sortBy->value, $userIndexData->sortDirection->value)
+            ->orderBy('id', $userIndexData->sortDirection->value)
             ->paginate(
                 perPage: $userIndexData->perPage,
                 page: $userIndexData->page,

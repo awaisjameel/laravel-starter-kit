@@ -33,3 +33,18 @@ test('password is not confirmed with invalid password', function (): void {
 
     $testResponse->assertSessionHasErrors();
 });
+
+test('password confirmation throttles repeated guesses and recovers after the window', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    foreach (range(1, 5) as $attempt) {
+        $this->post('/auth/confirm-password', ['password' => 'wrong-password'])->assertSessionHasErrors('password');
+    }
+
+    $this->post('/auth/confirm-password', ['password' => 'password'])
+        ->assertTooManyRequests()
+        ->assertSessionMissing('auth.password_confirmed_at');
+
+    $this->travel(61)->seconds();
+    $this->post('/auth/confirm-password', ['password' => 'password'])->assertRedirect();
+});

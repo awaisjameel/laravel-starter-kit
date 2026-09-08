@@ -186,7 +186,11 @@ paint has to arrive as markup rather than as a side effect of the JS bundle:
 - CSP + nonce-based security headers. The nonce is exposed to the client through a `meta[name="csp-nonce"]` tag and handed to Inertia so its injected style elements pass the policy.
 - Hardened browser/security headers middleware.
 - Throttling for sensitive auth endpoints.
+- Email changes invalidate verification consistently across profile and admin updates.
+- API mutations use Laravel's rotating CSRF cookie; automatic session headers stay on the same origin.
 - Server-side authorization via policies and gates.
+
+User-management side effects dispatch after successful persistence and transaction commit. The client clears cached account data when identity changes.
 
 ## Testing
 
@@ -212,6 +216,16 @@ Includes coverage for:
 - dashboard + marketing rendering
 - module discovery and generator behavior
 - strict-types and security architecture rules
+
+UI primitives participate in Vue typechecking and ESLint. Generator tests execute standalone and combined APIs with and without resources, including later pages and invalid pagination. Generated CRUD pages retain pagination metadata and controls.
+
+CI also runs `composer audit --locked` and `npm audit`. The production PM2 example runs one scheduler and restarts services after graceful deployment exits.
+
+## Working With Coding Agents
+
+[AGENTS.md](AGENTS.md) is the canonical guide, with an entry map for each kind of change. `CLAUDE.md` imports the same guidance. Agents should trace the owning module and generated consumers, repair the complete flow, and finish with the documented quality gate and relevant tests.
+
+See the [audit record](docs/starter-kit-audit.md) for verified repairs, coverage, and the limits of local validation.
 
 ## Notes
 

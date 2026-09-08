@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { omitUndefinedProps } from '@/lib/utils'
 import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
@@ -6,7 +8,8 @@ import { NavigationMenuItem, type NavigationMenuItemProps } from 'reka-ui'
 
 const props = defineProps<NavigationMenuItemProps & { class?: HTMLAttributes['class'] }>()
 
-const delegatedProps = reactiveOmit(props, 'class') as Record<string, unknown>
+const delegated = reactiveOmit(props, 'class')
+const delegatedProps = computed(() => omitUndefinedProps(delegated))
 </script>
 
 <template>

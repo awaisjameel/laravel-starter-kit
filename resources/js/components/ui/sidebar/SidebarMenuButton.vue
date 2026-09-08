@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { omitUndefinedProps } from '@/lib/utils'
 import { type Component, computed } from 'vue'
 import SidebarMenuButtonChild, { type SidebarMenuButtonProps } from './SidebarMenuButtonChild.vue'
 import { useSidebar } from './utils'
@@ -19,8 +20,8 @@ const props = withDefaults(defineProps<SidebarMenuButtonProps & {
 const { isMobile, state } = useSidebar()
 
 const delegatedProps = computed(() => {
-  const { tooltip, ...delegated } = props
-  return delegated as Partial<SidebarMenuButtonProps>
+  const { tooltip: _tooltip, ...delegated } = props
+  return omitUndefinedProps(delegated)
 })
 </script>
 

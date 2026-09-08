@@ -16,6 +16,7 @@ type QueryCacheRevision = {
 }
 
 type ErrorMapper<TError> = (error: unknown) => TError
+type ErrorMappingRequirement<TError> = ApiError extends TError ? { mapError?: ErrorMapper<TError> } : { mapError: ErrorMapper<TError> }
 type IsSameType<TLeft, TRight> = [TLeft] extends [TRight] ? ([TRight] extends [TLeft] ? true : false) : false
 
 interface UseApiQueryBaseOptions<TData, TError> {
@@ -129,7 +130,7 @@ const resolveEnabled = (enabled: UseApiQueryBaseOptions<unknown, unknown>['enabl
         return true
     }
 
-    return Boolean(toValue(enabled as never))
+    return toValue(enabled)
 }
 
 const mapErrorWith = <TError>(mapper: ErrorMapper<TError> | undefined, error: unknown): TError => {
@@ -356,10 +357,10 @@ function createApiQuery<TData, TSelected, TError>(options: UseSelectedApiQueryOp
 }
 
 export function useApiQuery<TData, TSelected, TError = ApiError>(
-    options: UseSelectedApiQueryOptions<TData, TSelected, TError>
+    options: UseSelectedApiQueryOptions<TData, TSelected, TError> & ErrorMappingRequirement<TError>
 ): ReturnType<typeof createApiQuery<TData, TSelected, TError>>
 export function useApiQuery<TData, TSelected = TData, TError = ApiError>(
-    options: IsSameType<TData, TSelected> extends true ? UseIdentityApiQueryOptions<TData, TError> : never
+    options: IsSameType<TData, TSelected> extends true ? UseIdentityApiQueryOptions<TData, TError> & ErrorMappingRequirement<TError> : never
 ): ReturnType<typeof createApiQuery<TData, TData, TError>>
 export function useApiQuery<TData, TSelected, TError>(
     options: UseSelectedApiQueryOptions<TData, TSelected, TError> | UseIdentityApiQueryOptions<TData, TError>
@@ -375,47 +376,59 @@ export function useApiQuery<TData, TSelected, TError>(
 }
 
 export function useApiMutation<TVariables, TResult, TError = ApiError, TContext = unknown>(
-    options: UseApiMutationOptions<TVariables, TResult, TError, TContext>
+    options: UseApiMutationOptions<TVariables, TResult, TError, TContext> & ErrorMappingRequirement<TError>
 ) {
     const data = ref<TResult | undefined>()
     const error = ref<TError | null>(null)
-    const isPending = ref(false)
+    const pendingCount = ref(0)
+    const isPending = computed(() => pendingCount.value > 0)
+    let latestMutationId = 0
 
     const mutate = async (variables: TVariables): Promise<TResult> => {
-        isPending.value = true
+        const mutationId = ++latestMutationId
+        pendingCount.value += 1
         error.value = null
 
         let context: TContext | undefined
 
         try {
-            context = (await options.onMutate?.(variables)) as TContext | undefined
-            const result = await options.mutationFn(variables)
+            let result: TResult
+            try {
+                context = await options.onMutate?.(variables)
+                result = await options.mutationFn(variables)
+            } catch (caughtError) {
+                const mappedError = mapErrorWith(options.mapError, caughtError)
+                if (mutationId === latestMutationId) error.value = mappedError
 
-            data.value = result
-            await options.onSuccess?.(result, variables, context)
+                try {
+                    await options.onError?.(mappedError, variables, context)
+                } finally {
+                    await options.onSettled?.(undefined, mappedError, variables, context)
+                }
+                throw mappedError
+            }
+
+            if (mutationId === latestMutationId) data.value = result
 
             if (options.invalidateKeys !== undefined && options.invalidateKeys.length > 0) {
                 invalidateApiQueryCache(...options.invalidateKeys)
             }
 
-            await options.onSettled?.(result, null, variables, context)
+            try {
+                await options.onSuccess?.(result, variables, context)
+            } finally {
+                await options.onSettled?.(result, null, variables, context)
+            }
             return result
-        } catch (caughtError) {
-            const mappedError = mapErrorWith(options.mapError, caughtError)
-            error.value = mappedError
-
-            await options.onError?.(mappedError, variables, context)
-            await options.onSettled?.(undefined, mappedError, variables, context)
-            throw mappedError
         } finally {
-            isPending.value = false
+            pendingCount.value -= 1
         }
     }
 
     const reset = (): void => {
+        latestMutationId += 1
         data.value = undefined
         error.value = null
-        isPending.value = false
     }
 
     return {

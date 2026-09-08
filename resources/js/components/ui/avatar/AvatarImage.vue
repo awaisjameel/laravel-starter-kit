@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { omitUndefinedProps } from '@/lib/utils'
 import type { AvatarImageProps } from 'reka-ui'
 import { AvatarImage } from 'reka-ui'
 import { computed } from 'vue'
@@ -8,7 +9,7 @@ const props = defineProps<AvatarImageProps>()
 const forwardedProps = computed(() => {
   const { src: _, ...delegated } = props
 
-  return delegated as Record<string, unknown>
+  return omitUndefinedProps(delegated)
 })
 </script>
 

@@ -12,6 +12,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+test('pagination uses a stable tie breaker when primary sort values match', function (): void {
+    $users = User::factory()->count(3)->create(['name' => 'Same Name']);
+    $query = new UserIndexData(page: 2, perPage: 1, search: 'Same Name', sortBy: UserSortBy::Name, sortDirection: SortDirection::Desc);
+    $lengthAwarePaginator = new UserQueries()->paginate($query);
+    expect($lengthAwarePaginator->getCollection()->modelKeys())->toBe([$users->get(1)?->id]);
+});
+
 test('paginate applies search sort and pagination', function (): void {
     User::factory()->create([
         'name' => 'Alpha Query',

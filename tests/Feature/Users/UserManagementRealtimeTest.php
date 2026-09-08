@@ -96,7 +96,7 @@ test('deleting a user dispatches realtime events', function (): void {
         return true;
     });
     Event::assertDispatched(UserChanged::class, static function (UserChanged $userChanged): true {
-        expect($userChanged->broadcastWith())->toMatchArray(['action' => 'delete']);
+        expect($userChanged->broadcastWith())->toMatchArray(['action' => 'delete', 'user' => null]);
 
         return true;
     });

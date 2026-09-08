@@ -24,13 +24,12 @@ final readonly class TemplateRenderer
 
         $contents = $this->filesystem->get($stubPath);
 
-        $replacements = [];
+        $rendered = preg_replace_callback('/{{\s*([A-Za-z][A-Za-z0-9]*)\s*}}/', static function (array $match) use ($tokens, $stubPath): string {
+            $key = $match[1];
 
-        foreach ($tokens as $key => $value) {
-            $replacements[sprintf('{{ %s }}', $key)] = $value;
-            $replacements[sprintf('{{%s}}', $key)] = $value;
-        }
+            return $tokens[$key] ?? throw new RuntimeException(sprintf('Missing template token "%s" in %s.', $key, $stubPath));
+        }, $contents);
 
-        return strtr($contents, $replacements);
+        return $rendered ?? throw new RuntimeException('Could not render stub: '.$stubPath);
     }
 }

@@ -1,5 +1,19 @@
 # AGENTS.md
 
+## Start Here
+
+Read the sections relevant to the task, then trace their reference implementations before editing. Keep a short record of findings, changed contracts, and remaining verification during broad tasks.
+
+| Task                          | First implementation to inspect                                                           | Verification                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| CRUD, requests, authorization | `app/Modules/Users`, `tests/Feature/Users`, `tests/Feature/Api`                           | PHP suite, generation                                                  |
+| Forms, tables, themes         | `resources/js/components/base`, `resources/js/lib`, `resources/js/modules/users`          | Vue typecheck, Vitest, client/SSR build                                |
+| Realtime and mutations        | `app/Modules/Shared/Realtime`, `app/Modules/Users/Listeners`, `resources/js/lib/realtime` | Realtime PHP/Vitest suites; live Reverb when relevant                  |
+| Discovery or scaffolding      | `app/Modules/Shared/Support`, `stubs/module-generation`                                   | Generator tests and a temporary generated module through the full gate |
+| Dependencies and CI           | `composer.json`, `package.json`, lock files, `.github/actions/setup-project`              | Locked audits, clean install for dependency changes, full gate         |
+
+`composer generate-and-cleanup` is the mandatory static completion gate. Run it separately from builds and tests that regenerate artifacts. Then run the affected suites and builds. Do not count passing static checks as browser, deployment, or load-test verification.
+
 ## Purpose
 
 This repository is a modular Laravel + Inertia + Vue starter kit with backend-owned contracts, strict typing, realtime support, and generator-backed conventions.
@@ -153,6 +167,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `php artisan inertia:start-ssr`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
 - `pm2.config.cjs` currently manages production-style queue workers, Reverb, the Inertia SSR server, and the scheduler.
+- Run one scheduler per host. Long-lived services restart after a successful exit so deployment commands such as `queue:restart` do not leave workers stopped. Multiple scheduler hosts require Laravel's shared-cache scheduling locks.
 - SSR is served two different ways and both are wired up:
     - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
     - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/ssr.js` and `php artisan inertia:start-ssr` serves it.
@@ -285,6 +300,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `UserManagementEvent`
     - listeners under `app/Modules/Users/Listeners/**`
 - Domain events should remain separate from broadcast events.
+- `UserManagementEvent` implements `ShouldDispatchAfterCommit`. Dispatch it after persistence succeeds; rolled-back transactions must not emit audit, notification, or realtime side effects. Deleted-user broadcasts carry `user: null`.
 - Listeners translate domain events into realtime broadcasts and notifications.
 - Realtime events should extend `app/Modules/Shared/Realtime/Events/RealtimeEvent`.
 - `RealtimeEvent` currently broadcasts:
@@ -363,7 +379,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
-- `appTheme` is auto-imported but must be aliased in `<script setup>` (`const theme = appTheme`) before a template uses it. `vue-tsc` cannot resolve an auto-imported symbol that appears only in markup, so `appTheme.` written directly in a template compiles and then fails typecheck. `resources/js/components/ui/**` is exempt because it is excluded from typecheck and imports the theme explicitly.
+- `appTheme` is auto-imported but must be aliased in `<script setup>` (`const theme = appTheme`) before a template uses it. `vue-tsc` cannot resolve an auto-imported symbol that appears only in markup. UI primitives import the theme explicitly and are included in typechecking and ESLint.
+- Reuse `omitUndefinedProps` for exact optional prop forwarding. It preserves required keys, null, and false; do not erase prop contracts with `as Record<string, unknown>`.
 - Icons come only from Iconify through `unplugin-icons` using the `Icon*` component prefix. Use auto-resolved tags such as `<IconLucideChevronLeft />` in templates and virtual imports such as `~icons/lucide/chevron-left` when a component value is required in TypeScript. Application chrome uses the `lucide` collection; a multi-word collection needs the explicit `<Icon-<collection>:<name> />` form, as in `<Icon-icon-park-outline:system />`.
 - Icon-bearing contracts use Vue's generic `Component` type so they remain collection-agnostic.
 - `components.json` points the shadcn-vue CLI at `resources/css/theme.css` and declares no `iconLibrary`. Newly vendored primitives must be rewritten onto `appTheme` recipes and `~icons/*` before they are committed.
@@ -407,9 +424,10 @@ When adding similar behavior, inspect and follow the nearest established referen
     - no `as unknown as Record<string, unknown>`
     - no explicit any type (`@typescript-eslint/no-explicit-any`)
 - Restricted imports use `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`. Auto-import only provides runtime values, so `import type { ... }` from a restricted path stays legal everywhere.
-- Two scopes are deliberately exempt from the auto-import restriction:
+- Three scopes are deliberately exempt from the auto-import restriction:
     - files inside the auto-imported directories themselves (`autoImportSourceGlobs`), which wire up their own siblings with explicit imports instead of relying on auto-import resolving back into the directory being scanned
     - test files, which must be able to name real components and module namespaces for mounting and spying
+    - UI primitives, which retain explicit imports while receiving all other lint and type checks
 - Feature-module source and test files still enforce the cross-module boundary rule, including type-only imports.
 
 ### Frontend Ownership Rules
@@ -553,9 +571,13 @@ When adding similar behavior, inspect and follow the nearest established referen
     - A request for an earlier reactive key may populate that key's cache, but it cannot overwrite the composable state for the current key.
     - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
     - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
+- The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `create-app.ts`; account data must not survive logout or account switching.
+- Query/mutation error types incompatible with `ApiError` require `mapError`. Mutation pending state covers all concurrent requests; the latest invocation owns displayed data/errors. Reset clears displayed state without pretending outstanding work has stopped.
+- Mutation callback failures propagate without reclassifying successful writes as failures. Cache invalidation precedes success callbacks, and settlement runs once even when a success or error callback throws.
 - Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
 - `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
 - `apiRequest` is the canonical place for `X-Socket-ID` propagation.
+- Same-origin mutations read the current `XSRF-TOKEN` cookie into `X-XSRF-TOKEN`; no static CSRF meta tag is needed. Automatic CSRF and socket headers must not be sent to another origin. Existing URL queries and fragments must survive added query options.
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
@@ -659,6 +681,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 - Enforce authorization through policies, gates, and route middleware.
 - Sensitive auth endpoints must use the `auth-sensitive` rate limiter.
+- Password confirmation uses this limiter in addition to registration, reset, and verification notification endpoints.
+- The `User` model invalidates email verification whenever its email changes through a model update, covering profile and admin transports. Bulk SQL updates bypass model events and must preserve this invariant explicitly.
 - `AppServiceProvider` currently defines `auth-sensitive` as `5` requests per minute per IP.
 - Security headers must continue to be set by `App\Http\Middleware\SecurityHeaders`.
 - Current headers include:
@@ -777,6 +801,13 @@ Do not shadow them with manual duplicates.
     - `--no-api-resource`, `--no-api-test`, `--no-model`, `--no-page`
 
 ### Current Generator Behavior
+
+- Template rendering rejects missing tokens before writes; module and page identifiers must start with a letter after normalization.
+- CRUD/API model names also reject PHP reserved names before files are written.
+- Generated listings use `PaginationQueryRequest` / `PaginationQueryData`, bounded to 100 rows per page, with stable ordering. CRUD page DTOs include shared `PaginationData` metadata and the page uses the shared pagination component.
+- Resource API pagination links preserve query parameters. Plain API metadata uses `PaginationData` too. Server tables pass a reactive `pagination` getter to `useServerDataTable` so preserved-state redirects synchronize the current page and page size without another visit.
+- A `page` scaffold has frontend-only form values until connected to a backend endpoint. When connecting it, derive form values from that endpoint's generated DTO. It must never import a DTO that the scaffold did not generate.
+- `GeneratedPaginationTest` executes all four API variants (standalone/combined, resource/plain) and checks later pages, invalid input, and CRUD page metadata.
 
 - `page` scaffolds frontend-only page contracts:
     - `resources/js/modules/<module>/forms/<page-kebab>-form-schema.ts`
@@ -967,6 +998,8 @@ Local changes must remain compatible with the existing CI expectations:
 The test workflow checks generated types, auto-import/component declarations, routes, and actions after the client/SSR build. Both modified tracked files and untracked generated files fail the gate; regenerate and commit the complete contract surface together.
 
 The shared setup uses `actions/cache@v6` with the Node 24 action runtime. Dependency and patch locks are part of the cache identity.
+
+The test workflow audits both locked dependency graphs. Both mutating and non-mutating ESLint commands fail on warnings.
 
 - Pint
 - Rector dry-run
