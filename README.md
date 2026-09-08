@@ -14,10 +14,10 @@ Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Comp
 
 - Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
 - Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
-- Vue 3.5, TypeScript 6, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, Iconify through `unplugin-icons`
+- Vue 3.5, TypeScript 7 checker via TypeScript Native Bridge, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, Iconify through `unplugin-icons`
 - Pest 5 (PHPUnit 13 engine), Vitest 5, Pint, PHPStan/Larastan at level 9 with strict/deprecation rules, Rector, ESLint 10, Prettier 3
 
-TypeScript stays on 6.0.3 because `typescript-eslint` 8.70 requires `>=4.8.4 <6.1.0`. Recheck its peer dependency before upgrading to TypeScript 7; do not bypass it with forced installs.
+TypeScript uses the 7.0.2 native checker through the exactly pinned `typescript-native-bridge` npm alias. Its classic API adapter keeps Vue, ESLint, and Prettier compatible. This is a third-party compiler bridge, not Microsoft's stock TypeScript package. See [frontend tooling and editor setup](docs/frontend-automation.md#typescript-compiler-and-editor) for platform requirements and upgrade guidance.
 
 `composer.lock` and `package-lock.json` are committed application contracts. Use Composer and npm install commands that honor them; npm is the only supported JavaScript package manager.
 

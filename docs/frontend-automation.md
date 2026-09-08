@@ -1,5 +1,34 @@
 # Frontend Automation
 
+## TypeScript compiler and editor
+
+`npm run typecheck` runs `vue-tsc --noEmit` with the TypeScript 7.0.2 native checker through
+[TypeScript Native Bridge](https://github.com/johnsoncodehk/typescript-native-bridge).
+The `typescript` dependency is an exact npm alias to `6.0.3-bridge.16.tsgo.7.0.2`, and
+`overrides.typescript = "$typescript"` keeps all compiler consumers on the same implementation.
+The `6.0.3` prefix describes the classic JavaScript API facade; `tsgo.7.0.2` describes the checker.
+The bridge prints `TNB ACTIVE` when its checker starts; this is an informational message.
+
+This third-party bridge preserves the API used by Vue's virtual files, ESLint, and Prettier's
+import organizer. [Microsoft's stock TypeScript 7 package](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
+does not provide that API. Replace the bridge with stock TypeScript only when all three consumers
+support it, then remove the npm override and revalidate the complete pipeline. Keep bridge upgrades
+exactly pinned and commit the regenerated lockfile. Do not use `--force` or `--legacy-peer-deps`.
+
+Run `npm ci` with optional dependencies enabled. The bridge ships native binaries for Windows,
+macOS, and glibc Linux 2.31+. The repository's Ubuntu CI and Sail images meet that requirement.
+Alpine/musl is unsupported; use a glibc frontend build stage if deploying to Alpine.
+
+In VS Code, enable Vue - Official and choose **TypeScript: Select TypeScript Version → Use Workspace Version**.
+The committed settings point the SDK at `node_modules/typescript/lib`. Editors using the older settings
+names can set `typescript.tsdk` to that same path and `typescript.enablePromptUseWorkspaceTsdk` to `true`.
+Use the classic language service with Vue's plugin; disable the separate TypeScript 7 language server
+if it takes over the workspace, since that server does not support the Vue plugin model.
+
+`resources/js/types/__tests__/compiler.test.ts` invokes the real Vue checker against temporary fixtures.
+It verifies TypeScript 7 Unicode inference and ensures invalid component props, template methods,
+and nullable backend contracts still produce compiler errors. It runs with `npm run test:unit` in CI.
+
 ## Module and page scaffolding
 
 Use the Artisan generator to scaffold a module with backend + frontend contracts:

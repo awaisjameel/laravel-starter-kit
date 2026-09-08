@@ -111,7 +111,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - PHPStan/Larastan: `^2.2` / `^3.11` at level 9 with official strict and deprecation rules
 - Rector: `^2.6`
 - Vue: `^3.5.42`
-- TypeScript: `^6.0`
+- TypeScript checker: `7.0.2` through `typescript-native-bridge` (`6.0.3-bridge.16.tsgo.7.0.2`), retaining the classic compiler API for Vue and ESLint
 - Vitest: `^5.0`
 - Vite: `^8.2` (Rolldown bundler)
 - `laravel-vite-plugin`: `^3.2`
@@ -128,7 +128,10 @@ For every non-trivial change, explicitly verify all affected layers before consi
 
 ### Version Constraints Worth Knowing
 
-- TypeScript stays on `6.0.3`: `typescript-eslint` 8.70 requires `>=4.8.4 <6.1.0`. Recheck the published peer constraint before moving to TypeScript 7; never force an incompatible install.
+- `typescript` is an exact npm alias to `typescript-native-bridge`, with `overrides.typescript = "$typescript"` so Vue, ESLint, and Prettier share the TypeScript 7 checker and classic API adapter. The version's `6.0.3` prefix identifies the API facade; `tsgo.7.0.2` identifies the checker. Do not replace it with stock `typescript@7` until Vue and the compiler-API consumers support it. Never use forced installs or disable strict checks to upgrade.
+- Keep the bridge exactly pinned and revalidate compiler diagnostics, formatting, lint, client/SSR builds, and clean `npm ci` when changing it. `resources/js/types/__tests__/compiler.test.ts` checks TypeScript 7 Unicode inference and rejection of invalid Vue props, template methods, and nullable backend fields.
+- The bridge supports Windows/macOS and glibc Linux (2.31+), including the Ubuntu 24.04 Sail images and Ubuntu CI. Alpine/musl is unsupported; run frontend tooling in a glibc build stage. Platform binaries come from its locked optional dependencies; do not omit optional dependencies during installation.
+- VS Code should use the workspace SDK in `node_modules/typescript/lib` with Vue - Official. Keep the classic language service for Vue plugin support; see `docs/frontend-automation.md` for editor setup and the bridge removal criteria.
 - `concurrently` 10 pins a vulnerable `shell-quote`. `package.json` carries an `overrides` entry forcing `shell-quote ^1.10.0`; drop it once upstream repins.
 - `optionalDependencies` pin the Linux x64 native binaries used by CI/Docker. Vite 8 bundles with Rolldown, so the binding is `@rolldown/binding-linux-x64-gnu` (not `@rollup/rollup-*`).
 - Those three entries must use exact versions that match the resolved core packages (`rolldown`, `lightningcss`, `@tailwindcss/oxide`). A caret range can hoist a newer binding than the core package expects and break the Linux build. Re-check them after any Vite or Tailwind bump.
