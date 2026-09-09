@@ -2,12 +2,13 @@
     const theme = appTheme
 
     defineProps<{
+        id?: string | undefined
         message?: string | undefined
     }>()
 </script>
 
 <template>
-    <div v-show="message">
+    <div :id="id" v-show="message">
         <p :class="theme.field.error">
             {{ message }}
         </p>

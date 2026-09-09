@@ -101,6 +101,21 @@ test('admin users can update users', function (): void {
         'role' => UserRole::Admin->value,
     ]);
 });
+
+test('admin user email updates reset verification status', function (): void {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    $target = User::factory()->create(['role' => UserRole::User]);
+    expect($target->email_verified_at)->not->toBeNull();
+
+    $this->actingAs($admin)->put('/app/admin/users/'.$target->id, [
+        'name' => 'Verified User Updated',
+        'email' => 'verified-updated@example.com',
+        'password' => '',
+        'role' => UserRole::User->value,
+    ])->assertRedirect('/app/admin/users');
+
+    expect($target->fresh()?->email_verified_at)->toBeNull();
+});
 test('admin users can delete other users', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
     $target = User::factory()->create(['role' => UserRole::User]);

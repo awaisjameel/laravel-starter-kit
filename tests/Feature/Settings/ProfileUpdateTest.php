@@ -60,6 +60,20 @@ test('email verification status is unchanged when the email address is unchanged
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
+
+test('email verification status can be explicitly provided when updating email address', function (): void {
+    $user = User::factory()->create();
+    $timestamp = now()->subDay();
+
+    $user->update([
+        'email' => 'explicit@example.com',
+        'email_verified_at' => $timestamp,
+    ]);
+
+    $fresh = $user->fresh();
+    expect($fresh?->email)->toBe('explicit@example.com');
+    expect($fresh?->email_verified_at?->timestamp)->toBe($timestamp->timestamp);
+});
 test('user can delete their account', function (): void {
     $user = User::factory()->create();
 

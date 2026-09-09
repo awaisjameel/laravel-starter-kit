@@ -199,6 +199,47 @@ of the canonical user DTO without frontend casts or a parallel data shape.
 date against the configured date format. It reproduced the null-value defect
 before the fix. The browser confirmed the warning is absent for the verified test account.
 
+### 11. Explicit verification updates were wiped on email changes — medium
+
+When updating a user model with both `email` and an explicit `email_verified_at`
+timestamp (such as seeders or administrative actions), the model's `updating`
+callback unconditionally reset `$user->email_verified_at = null;`, discarding
+the explicitly provided verification status.
+
+**Fix:** `app/Models/User.php` guards the invalidation with
+`! $user->isDirty('email_verified_at')`. Changing an email without explicitly
+providing a verification timestamp resets it to null, while explicit verification
+values are preserved.
+
+**Verification:** regression tests in `ProfileUpdateTest.php`, `UserManagementTest.php`,
+and `ApiV1UserEndpointsTest.php` cover both implicit invalidation and explicit
+timestamp preservation.
+
+### 12. InputError lacked an explicit ID prop contract — low
+
+`BaseFieldShell.vue` passes `:id="`${props.id}-error`"` for assistive technology
+linking via `aria-describedby`, but `InputError.vue` did not declare `id` in
+`defineProps`, relying on non-prop attribute fallthrough.
+
+**Fix:** `resources/js/components/InputError.vue` declares `id?: string | undefined`
+in `defineProps` and binds `:id="id"` directly on the root container.
+
+**Verification:** component rendering and form association tests in
+`BaseInputField.test.ts` and `theme.test.ts` pass with full type safety.
+
+### 13. API transport verification parity — medium
+
+Self-deletion prevention and verification reset on email updates were enforced
+by shared domain policies and model events, but direct assertions were only
+present in web feature tests. `ChannelPatternResolver` also lacked coverage
+for enum, boolean, and stringable parameters.
+
+**Fix:** extended `tests/Feature/Api/V1/ApiV1UserEndpointsTest.php`,
+`tests/Feature/Users/UserManagementTest.php`, and
+`tests/Unit/Realtime/ChannelPatternResolverTest.php` with direct test cases.
+
+**Verification:** all added assertions pass with zero failures.
+
 ## Actions Taken
 
 Additional authentication/date files modified:
@@ -254,7 +295,7 @@ runtime. System Node 24.10.0 does not satisfy the repository engine requirement.
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `composer generate-and-cleanup`               | Passed after repairs, with zero reported errors or warnings.                                                                                                                                                                                                                    |
 | `composer qa:check`                           | Passed: Rector, Pint, PHPStan, Prettier, ESLint, and Vue/TypeScript.                                                                                                                                                                                                            |
-| `composer test`                               | 179 passed, 1,013 assertions.                                                                                                                                                                                                                                                   |
+| `composer test`                               | 184 passed, 1,027 assertions.                                                                                                                                                                                                                                                   |
 | `npm run test:unit`                           | 113 passed in 22 files.                                                                                                                                                                                                                                                         |
 | `npm run build:ssr`                           | Client and production SSR builds passed.                                                                                                                                                                                                                                        |
 | `composer validate --strict`                  | Passed.                                                                                                                                                                                                                                                                         |
@@ -293,7 +334,7 @@ accepted by the server. Consumers with asynchronous callbacks must scope any wor
 they start themselves. Full cache clears reset mounted values and require an
 explicit refresh or a key/enabled transition to fetch again.
 
-All ten identified issues are repaired, with no known unresolved code blocker.
+All thirteen identified issues are repaired, with no known unresolved code blocker.
 The complete fix set is staged and ready to commit after successful final verification. Merge remains
 conditional on the required Linux CI checks for that commit; no commit, push, or
 merge was performed by this audit.

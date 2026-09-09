@@ -55,7 +55,7 @@ final class User extends Authenticatable implements MustVerifyEmailContract
     protected static function booted(): void
     {
         self::updating(function (self $user): void {
-            if ($user->isDirty('email')) {
+            if ($user->isDirty('email') && ! $user->isDirty('email_verified_at')) {
                 $user->email_verified_at = null;
             }
         });
