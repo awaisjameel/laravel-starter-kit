@@ -67,17 +67,17 @@ const queryCache = new Map<string, QueryCacheEntry<unknown>>()
 // under SSR for the same reason as `queryCache`: `execute` returns before it is read.
 const inFlightRequests = new Map<string, Promise<unknown>>()
 const queryCacheRevisions = new Map<string, number>()
-let queryCacheEpoch = 0
+const queryCacheEpoch = ref(0)
 
 const isServerRendering = (): boolean => import.meta.env.SSR === true
 
 const currentQueryCacheRevision = (cacheKey: string): QueryCacheRevision => ({
-    epoch: queryCacheEpoch,
+    epoch: queryCacheEpoch.value,
     key: queryCacheRevisions.get(cacheKey) ?? 0
 })
 
 const isCurrentQueryCacheRevision = (cacheKey: string, revision: QueryCacheRevision): boolean =>
-    revision.epoch === queryCacheEpoch && revision.key === (queryCacheRevisions.get(cacheKey) ?? 0)
+    revision.epoch === queryCacheEpoch.value && revision.key === (queryCacheRevisions.get(cacheKey) ?? 0)
 
 const invalidateQueryCacheKey = (cacheKey: string): void => {
     queryCacheRevisions.set(cacheKey, (queryCacheRevisions.get(cacheKey) ?? 0) + 1)
@@ -140,13 +140,17 @@ const isCacheFresh = (updatedAt: number, staleTimeMs: number): boolean => {
 }
 
 export const clearApiQueryCache = (): void => {
-    queryCacheEpoch += 1
+    if (isServerRendering()) return
+
     queryCache.clear()
     inFlightRequests.clear()
     queryCacheRevisions.clear()
+    queryCacheEpoch.value += 1
 }
 
 export const invalidateApiQueryCache = (...keys: ApiCacheKey[]): void => {
+    if (isServerRendering()) return
+
     if (keys.length === 0) {
         clearApiQueryCache()
         return
@@ -316,6 +320,18 @@ function createApiQuery<TData, TSelected, TError>(options: UseSelectedApiQueryOp
     }
 
     watch(
+        () => [queryCacheEpoch.value, resolveCacheKey()] as const,
+        () => {
+            latestExecutionId += 1
+            latestExecutionCacheKey = undefined
+            data.value = undefined
+            error.value = null
+            syncFetchState()
+        },
+        { flush: 'sync' }
+    )
+
+    watch(
         () => [resolveEnabled(options.enabled), resolveCacheKey()] as const,
         ([enabled, cacheKey], previousState) => {
             if (!enabled) {
@@ -385,6 +401,15 @@ export function useApiMutation<TVariables, TResult, TError = ApiError, TContext 
 
     const mutate = async (variables: TVariables): Promise<TResult> => {
         const mutationId = ++latestMutationId
+        const accountEpoch = queryCacheEpoch.value
+        const assertCurrentAccount = (): void => {
+            if (accountEpoch !== queryCacheEpoch.value) {
+                throw mapErrorWith(options.mapError, {
+                    message: 'The account changed before this mutation completed.',
+                    code: 'stale_auth_context'
+                })
+            }
+        }
         pendingCount.value += 1
         error.value = null
 
@@ -394,19 +419,24 @@ export function useApiMutation<TVariables, TResult, TError = ApiError, TContext 
             let result: TResult
             try {
                 context = await options.onMutate?.(variables)
+                assertCurrentAccount()
                 result = await options.mutationFn(variables)
             } catch (caughtError) {
+                assertCurrentAccount()
                 const mappedError = mapErrorWith(options.mapError, caughtError)
                 if (mutationId === latestMutationId) error.value = mappedError
 
                 try {
                     await options.onError?.(mappedError, variables, context)
                 } finally {
+                    assertCurrentAccount()
                     await options.onSettled?.(undefined, mappedError, variables, context)
                 }
+                assertCurrentAccount()
                 throw mappedError
             }
 
+            assertCurrentAccount()
             if (mutationId === latestMutationId) data.value = result
 
             if (options.invalidateKeys !== undefined && options.invalidateKeys.length > 0) {
@@ -416,8 +446,10 @@ export function useApiMutation<TVariables, TResult, TError = ApiError, TContext 
             try {
                 await options.onSuccess?.(result, variables, context)
             } finally {
+                assertCurrentAccount()
                 await options.onSettled?.(result, null, variables, context)
             }
+            assertCurrentAccount()
             return result
         } finally {
             pendingCount.value -= 1
@@ -429,6 +461,8 @@ export function useApiMutation<TVariables, TResult, TError = ApiError, TContext 
         data.value = undefined
         error.value = null
     }
+
+    watch(queryCacheEpoch, reset, { flush: 'sync' })
 
     return {
         data: readonly(data),

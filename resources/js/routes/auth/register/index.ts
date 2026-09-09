@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../../../wayfinder'
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::create
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:22
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:23
 * @route '/auth/register'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ create.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::create
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:22
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:23
 * @route '/auth/register'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::create
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:22
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:23
 * @route '/auth/register'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::create
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:22
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:23
 * @route '/auth/register'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::store
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:27
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:28
 * @route '/auth/register'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ store.definition = {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::store
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:27
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:28
 * @route '/auth/register'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Modules\Auth\Http\Controllers\RegisteredUserController::store
-* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:27
+* @see app/Modules/Auth/Http/Controllers/RegisteredUserController.php:28
 * @route '/auth/register'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({

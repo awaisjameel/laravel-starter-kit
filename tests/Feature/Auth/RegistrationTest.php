@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -21,4 +22,6 @@ test('new users can register', function (): void {
 
     $this->assertAuthenticated();
     $testResponse->assertRedirect(route('app.dashboard', absolute: false));
+    Auth::forgetGuards();
+    $this->followingRedirects()->get('/app/dashboard')->assertOk()->assertViewHas('page.clearHistory', true);
 });

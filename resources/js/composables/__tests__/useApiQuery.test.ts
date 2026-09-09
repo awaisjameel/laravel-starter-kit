@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick, ref } from 'vue'
+import { effectScope, nextTick, ref } from 'vue'
 import { clearApiQueryCache, getApiQueryCacheData, invalidateApiQueryCache, setApiQueryCacheData, useApiMutation, useApiQuery } from '../useApiQuery'
 
 // A macrotask boundary drains every pending microtask, so an assertion can observe
@@ -13,6 +13,71 @@ const flushPromises = async (): Promise<void> => {
 describe('useApiQuery', () => {
     beforeEach(() => {
         clearApiQueryCache()
+    })
+
+    it('clears mounted query state synchronously when the account cache is cleared', async () => {
+        const scope = effectScope()
+        const pending = Promise.withResolvers<string>()
+        const queryFn = vi
+            .fn<() => Promise<string>>()
+            .mockResolvedValueOnce('private account data')
+            .mockImplementationOnce(() => pending.promise)
+        const query = scope.run(() => useApiQuery({ key: 'account-state', queryFn, enabled: false }))!
+        try {
+            await query.refresh()
+            const request = query.refresh()
+            clearApiQueryCache()
+
+            expect(query.data.value).toBeUndefined()
+            expect(query.error.value).toBeNull()
+            expect(query.isFetching.value).toBe(false)
+            pending.resolve('stale account data')
+            await request
+            expect(query.data.value).toBeUndefined()
+        } finally {
+            scope.stop()
+        }
+    })
+
+    it('does not expose previous-key data while the next key is loading', async () => {
+        const scope = effectScope()
+        const key = ref('first-record')
+        const pending = Promise.withResolvers<string>()
+        const queryFn = vi
+            .fn<() => Promise<string>>()
+            .mockResolvedValueOnce('first record')
+            .mockImplementationOnce(() => pending.promise)
+        const query = scope.run(() => useApiQuery({ key, queryFn }))!
+        try {
+            await query.refresh()
+            key.value = 'second-record'
+            await nextTick()
+            expect(query.data.value).toBeUndefined()
+            expect(query.isLoading.value).toBe(true)
+            pending.resolve('second record')
+            await query.refresh()
+            expect(query.data.value).toBe('second record')
+        } finally {
+            scope.stop()
+        }
+    })
+
+    it('batches reactive key changes without fetching intermediate keys', async () => {
+        const scope = effectScope()
+        const key = ref('first')
+        const queryFn = vi.fn(async () => key.value)
+        scope.run(() => useApiQuery({ key, queryFn }))
+        try {
+            await flushPromises()
+            key.value = 'intermediate'
+            key.value = 'final'
+            await flushPromises()
+            expect(queryFn).toHaveBeenCalledTimes(2)
+            expect(getApiQueryCacheData('intermediate')).toBeUndefined()
+            expect(getApiQueryCacheData('final')).toBe('final')
+        } finally {
+            scope.stop()
+        }
     })
 
     it('keeps string keys distinct from structured keys in cache and in-flight requests', async () => {
@@ -313,6 +378,73 @@ describe('useApiQuery', () => {
 describe('useApiMutation', () => {
     beforeEach(() => {
         clearApiQueryCache()
+    })
+
+    it.each(['success', 'failure'] as const)('does not run old-account callbacks after a late mutation %s', async (outcome) => {
+        const pending = Promise.withResolvers<number>()
+        const onSuccess = vi.fn()
+        const onError = vi.fn(() => {
+            setApiQueryCacheData('account', 'old account')
+        })
+        const onSettled = vi.fn()
+        const mutation = useApiMutation({ mutationFn: () => pending.promise, onSuccess, onError, onSettled, invalidateKeys: ['account'] })
+        const result = mutation.mutate(undefined)
+        await nextTick()
+        clearApiQueryCache()
+        setApiQueryCacheData('account', 'new account')
+        const assertion = expect(result).rejects.toMatchObject({ code: 'stale_auth_context' })
+        if (outcome === 'success') pending.resolve(1)
+        else pending.reject(new Error('Old account write failed'))
+        await assertion
+
+        expect(mutation.data.value).toBeUndefined()
+        expect(mutation.error.value).toBeNull()
+        expect(mutation.isPending.value).toBe(false)
+        expect(onSuccess).not.toHaveBeenCalled()
+        expect(onError).not.toHaveBeenCalled()
+        expect(onSettled).not.toHaveBeenCalled()
+        expect(getApiQueryCacheData('account')).toBe('new account')
+    })
+
+    it('does not start a write if the account changes during optimistic preparation', async () => {
+        const preparation = Promise.withResolvers<void>()
+        const mutationFn = vi.fn(async () => 1)
+        const mutation = useApiMutation({ mutationFn, onMutate: () => preparation.promise })
+        const result = mutation.mutate(undefined)
+        clearApiQueryCache()
+        const assertion = expect(result).rejects.toMatchObject({ code: 'stale_auth_context' })
+        preparation.resolve()
+        await assertion
+        expect(mutationFn).not.toHaveBeenCalled()
+    })
+
+    it.each(['success', 'failure'] as const)('skips settlement if the account changes during a %s callback', async (outcome) => {
+        const callback = Promise.withResolvers<void>()
+        const callbackStarted = Promise.withResolvers<void>()
+        const handleResult = async () => {
+            callbackStarted.resolve()
+            await callback.promise
+        }
+        const onSettled = vi.fn()
+        const mutation = useApiMutation({
+            mutationFn: async () => {
+                if (outcome === 'failure') throw new Error('Write failed')
+                return 1
+            },
+            onSuccess: handleResult,
+            onError: handleResult,
+            onSettled
+        })
+        const result = mutation.mutate(undefined)
+        await callbackStarted.promise
+        clearApiQueryCache()
+        const assertion = expect(result).rejects.toMatchObject({ code: 'stale_auth_context' })
+        callback.resolve()
+        await assertion
+        expect(onSettled).not.toHaveBeenCalled()
+        expect(mutation.data.value).toBeUndefined()
+        expect(mutation.error.value).toBeNull()
+        expect(mutation.isPending.value).toBe(false)
     })
 
     it.each(['onSuccess', 'onSettled'] as const)('does not roll back a successful mutation when %s throws', async (callback) => {

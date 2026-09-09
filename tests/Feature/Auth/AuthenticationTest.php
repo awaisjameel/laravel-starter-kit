@@ -13,6 +13,7 @@ test('login screen can be rendered', function (): void {
 
     $testResponse
         ->assertStatus(200)
+        ->assertViewHas('page.encryptHistory', true)
         ->assertInertia(fn (Assert $assert): Assert => $assert
             ->where('canResetPassword', true)
             ->where('status', null)
@@ -28,6 +29,8 @@ test('users can authenticate using the login screen', function (): void {
 
     $this->assertAuthenticated();
     $testResponse->assertRedirect(route('app.dashboard', absolute: false));
+    $this->get('/app/dashboard')->assertViewHas('page.clearHistory', true);
+    $this->get('/app/dashboard')->assertViewMissing('page.clearHistory');
 });
 test('users can not authenticate with invalid password', function (): void {
     $user = User::factory()->create();
@@ -51,4 +54,6 @@ test('users can logout', function (): void {
 
     $this->assertGuest();
     $testResponse->assertRedirect('/');
+    $this->get('/')->assertViewHas('page.clearHistory', true);
+    $this->get('/')->assertViewMissing('page.clearHistory');
 });

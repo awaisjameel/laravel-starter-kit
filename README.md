@@ -194,7 +194,9 @@ paint has to arrive as markup rather than as a side effect of the JS bundle:
 - API mutations use Laravel's rotating CSRF cookie; automatic session headers stay on the same origin.
 - Server-side authorization via policies and gates.
 
-User-management side effects dispatch after successful persistence and transaction commit. The client clears cached account data when identity changes.
+User-management side effects dispatch after successful persistence and transaction commit. The client clears cached and mounted account data when identity changes; outstanding mutations skip subsequent callbacks and cache invalidations from the previous account.
+
+Inertia history encryption is enabled by default and its key rotates on login, registration, logout, and account deletion. Serve the app over HTTPS or localhost so the browser's Web Crypto API is available. An existing `INERTIA_ENCRYPT_HISTORY=false` override disables this protection. Unverified users are redirected to the namespaced verification page through the shared `verified` middleware alias.
 
 ## Testing
 
@@ -225,7 +227,7 @@ UI primitives participate in Vue typechecking and ESLint. Generator tests execut
 
 CI also runs `composer audit --locked` and `npm audit`. The production PM2 example runs one scheduler and restarts services after graceful deployment exits.
 
-`composer qa:generated` copies the current tracked changes and untracked source into an isolated checkout, installs the locked Composer and npm dependencies, and scaffolds a throwaway module. It runs the client/SSR build, mandatory generation and cleanup, all static checks, both suites, and whitespace verification. The source checkout, index, database, and build outputs stay untouched, including on failure. CI runs it as its own job. This verifies that generated modules compile and execute in the application, beyond the generator's template assertions.
+`composer qa:generated` copies the current tracked changes and untracked source into an isolated checkout, installs the locked Composer and npm dependencies, and scaffolds protected and public modules. It runs the client/SSR build, mandatory generation and cleanup, all static checks, both suites, a guest public-page SSR regression, and whitespace verification including new files. The source checkout, index, database, and build outputs stay untouched, including on failure. CI runs it as its own job. This verifies that generated modules compile and execute in the application, beyond the generator's template assertions.
 
 ## Working With Coding Agents
 

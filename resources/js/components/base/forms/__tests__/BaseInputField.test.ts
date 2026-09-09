@@ -1,7 +1,51 @@
 import { mount } from '@vue/test-utils'
 import { expect, it } from 'vitest'
+import { defineComponent, h } from 'vue'
 import BaseFormRenderer from '../BaseFormRenderer.vue'
 import BaseInputField from '../BaseInputField.vue'
+
+it('keeps labels and feedback local when two forms share field names', () => {
+    const Wrapper = defineComponent({
+        setup: () => () =>
+            h(
+                'div',
+                [1, 2].map(() =>
+                    h(BaseFormRenderer<{ name: string }>, {
+                        model: { name: '' },
+                        fields: [{ name: 'name', label: 'Name', type: 'text', description: 'Enter a name' }],
+                        errors: { name: 'Name is required' }
+                    })
+                )
+            )
+    })
+    const wrapper = mount(Wrapper)
+    try {
+        const ids = wrapper.findAll('[id]').map((element) => element.attributes('id'))
+        expect(new Set(ids).size).toBe(ids.length)
+        for (const form of wrapper.findAll('form')) {
+            const input = form.get('input')
+            expect(form.get('label').attributes('for')).toBe(input.attributes('id'))
+            for (const id of input.attributes('aria-describedby')!.split(' ')) {
+                expect(form.findAll('[id]').some((element) => element.attributes('id') === id)).toBe(true)
+            }
+        }
+    } finally {
+        wrapper.unmount()
+    }
+})
+
+it('does not emit another submission while processing', async () => {
+    const wrapper = mount(BaseFormRenderer<{ name: string }>, { props: { model: { name: '' }, processing: true } })
+    try {
+        await wrapper.get('form').trigger('submit')
+        expect(wrapper.emitted('submit')).toBeUndefined()
+        await wrapper.setProps({ processing: false })
+        await wrapper.get('form').trigger('submit')
+        expect(wrapper.emitted('submit')).toHaveLength(1)
+    } finally {
+        wrapper.unmount()
+    }
+})
 
 it('disables every field while the form is processing', () => {
     const wrapper = mount(BaseFormRenderer<{ name: string }>, {

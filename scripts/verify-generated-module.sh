@@ -71,6 +71,16 @@ echo "--- Generating ${MODULE} ---"
     --no-file-prompts \
     --no-interaction
 
+PUBLIC_MODULE="${MODULE}public"
+"${PHP}" artisan generate:module "${PUBLIC_MODULE}" \
+    --scaffold=crud-api \
+    --route-profile=public \
+    --api-route-profile=public \
+    --no-file-prompts \
+    --no-interaction
+sed "s/__PUBLIC_MODULE__/${PUBLIC_MODULE,,}/g" scripts/generated-public-page.test.stub \
+    > "resources/js/modules/${PUBLIC_MODULE,,}/pages/__tests__/public-render.test.ts"
+
 # Build first to discover the new components before typechecking. The canonical
 # cleanup also handles module-name-dependent formatting of generated markup.
 "${COMPOSER}" generate
@@ -79,6 +89,7 @@ npm run build:ssr
 "${COMPOSER}" qa:check
 "${COMPOSER}" test
 npm run test:unit
+git add --intent-to-add -- .
 git diff --check
 
 echo "Generated-module gate passed; source checkout was left untouched."

@@ -9,7 +9,7 @@
     }
 
     const props = defineProps<Props>()
-    const breadcrumbs = buildDashboardBreadcrumbs()
+    {{ pageBreadcrumbs }}
 
     const { form, fields, submit } = useSchemaResourceForm({{ pageCamelName }}FormContract)
 
@@ -21,7 +21,7 @@
 <template>
     <Head title="{{ pagePascalName }}" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <{{ pageLayout }}{{ pageLayoutAttributes }}>
         <div class="flex h-full min-w-0 flex-1 flex-col gap-4 rounded-xl p-3 sm:p-4">
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div class="mx-auto w-full max-w-3xl">
@@ -36,5 +36,5 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </{{ pageLayout }}>
 </template>

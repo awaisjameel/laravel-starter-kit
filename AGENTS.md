@@ -189,6 +189,8 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `App\Http\Middleware\SecurityHeaders`
     - `Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets`
 - Guest redirects are configured centrally in `bootstrap/app.php` to `route('auth.login.create')`.
+- The `verified` middleware alias is configured there with Laravel's `EnsureEmailIsVerified::redirectTo('auth.verification.notice')`. Keep this central default so existing and generated protected routes share the namespaced verification prompt; JSON requests retain Laravel's 403 response.
+- Inertia history encryption defaults to enabled (`INERTIA_ENCRYPT_HISTORY=true`) and requires HTTPS or localhost. Login, registration, logout, and account deletion call `Inertia::clearHistory()` after changing the session so the next page rotates the browser history key. Query-cache clearing does not replace this protection.
 - `statefulApi()` enables Sanctum session authentication and CSRF protection for API requests from configured first-party origins. Keep `SANCTUM_STATEFUL_DOMAINS` aligned with deployed frontend hosts, including ports. External clients use bearer tokens. Authentication regressions must exercise persisted cookies or real tokens; `actingAs` alone cannot verify middleware wiring.
 - Events are registered from `app/Listeners` and module-discovered listener directories via `ModuleRegistry::listenerDirectories(...)`.
 
@@ -253,6 +255,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - manifests
     - events (domain and broadcast)
 - Only truly shared domain primitives belong in `app/Models/**` and `app/Enums/**`.
+- Model date annotations use `CarbonInterface` to cover mutable and immutable casts. DTO boundaries normalize non-null dates with `CarbonImmutable::instance`; never discard an immutable date with an `instanceof Carbon` check. Essentials enables immutable dates by default.
 - If reuse spans multiple modules, move the code to `app/Modules/Shared/**` instead of duplicating it.
 - Do not place module-only code under global shared locations.
 - Backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery. Do not manually register module listener classes in `AppServiceProvider`.
@@ -575,7 +578,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - String and array keys have distinct serialized identities. Delayed retries stop after a key change, invalidation, or identity-driven cache clear so they cannot read new inputs under an old key.
     - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
     - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
-- The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `create-app.ts`; account data must not survive logout or account switching.
+- The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `create-app.ts`; account data must not survive logout or account switching. Full clears synchronously reset mounted query/mutation data and errors. Mutations check that context before sending a write and between asynchronous callbacks; stale contexts reject with `stale_auth_context` and skip subsequent callbacks and invalidations. Already running callbacks and server writes cannot be cancelled by a cache reset.
 - Query/mutation error types incompatible with `ApiError` require `mapError`. Mutation pending state covers all concurrent requests; the latest invocation owns displayed data/errors. Reset clears displayed state without pretending outstanding work has stopped.
 - Mutation callback failures propagate without reclassifying successful writes as failures. Cache invalidation precedes success callbacks, and settlement runs once even when a success or error callback throws.
 - Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
@@ -586,6 +589,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
 - Schema form checkboxes own their inline label; `BaseFieldShell` hides its duplicate label for those fields. Select triggers receive the field ID so the shell label targets the focusable control.
 - Schema controls associate descriptions and errors through `aria-describedby` and expose invalid/required state. Processing disables the form's fields. Read-only text remains selectable; choice/file controls disable interaction. Every choice variant honors disabled options.
+- Schema form IDs use a per-instance Vue `useId()` prefix so repeated field names retain unique, SSR-stable label and feedback targets. Processing also prevents another submit event.
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 
 ### Backend-Driven Contract Pipeline
@@ -810,6 +814,8 @@ Do not shadow them with manual duplicates.
 ### Current Generator Behavior
 
 - Template rendering rejects missing tokens before writes; module and page identifiers must start with a letter after normalization.
+- Rendered PHP stubs are syntax-checked and reject declaration/import name collisions before writes. Keep top-level class imports on individual lines so validation and import sorting share the same convention.
+- Frontend scaffolds use `AppLayout` only when their configured middleware contains `auth` or `auth:*`; otherwise they use `MarketingPageLayout`. The `page` scaffold honors explicit route-profile and middleware options for layout selection without generating backend routes.
 - CRUD/API model names also reject PHP reserved names before files are written.
 - Generated listings use `PaginationQueryRequest` / `PaginationQueryData`, bounded to 100 rows per page, with stable ordering. CRUD page DTOs include shared `PaginationData` metadata and the page uses the shared pagination component.
 - Every paginated page DTO exposes the same envelope: `items` plus a shared `PaginationData`. `UsersIndexPageData` follows it too, so the reference module and generator output have one shape. Do not redeclare paginator metadata per module.
@@ -1010,7 +1016,7 @@ The shared setup uses `actions/cache@v6` with the Node 24 action runtime. Depend
 
 The test workflow audits both locked dependency graphs. Both mutating and non-mutating ESLint commands fail on warnings.
 
-A second CI job runs `composer qa:generated` (`scripts/verify-generated-module.sh`). It snapshots tracked changes and untracked source into an isolated checkout, installs both locked dependency graphs, scaffolds a module, builds client/SSR assets, and runs `composer generate-and-cleanup`, `composer qa:check`, both suites, and whitespace verification. The source checkout and index remain untouched even on failure; only the temporary checkout is deleted. Run it after touching anything under `stubs/module-generation` or the scaffold planner. Name-dependent formatting is handled by the canonical cleanup inside the gate.
+A second CI job runs `composer qa:generated` (`scripts/verify-generated-module.sh`). It snapshots tracked changes and untracked source into an isolated checkout, installs both locked dependency graphs, scaffolds protected and public modules, builds client/SSR assets, and runs `composer generate-and-cleanup`, `composer qa:check`, both suites, and whitespace verification including new files. A generated public-page SSR regression uses the real layout and a guest Inertia page context. The source checkout and index remain untouched even on failure; only the temporary checkout is deleted. Run it after touching anything under `stubs/module-generation` or the scaffold planner. Name-dependent formatting is handled by the canonical cleanup inside the gate.
 
 - Pint
 - Rector dry-run

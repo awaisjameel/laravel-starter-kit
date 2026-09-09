@@ -8,7 +8,7 @@ use App\Enums\UserRole;
 use App\Modules\Shared\Data\UserViewData;
 use App\Modules\Shared\Enums\SharedRealtimeChannel;
 use App\Modules\Shared\Realtime\Support\ChannelPatternResolver;
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
@@ -24,9 +24,9 @@ use Override;
  * @property string $email
  * @property string $password
  * @property UserRole $role
- * @property Carbon|null $email_verified_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonInterface|null $email_verified_at
+ * @property CarbonInterface|null $created_at
+ * @property CarbonInterface|null $updated_at
  */
 final class User extends Authenticatable implements MustVerifyEmailContract
 {

@@ -20,6 +20,8 @@ php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageNa
 
 `page` scaffolding creates frontend-only values and requires a route contract from its caller. Once connected to a backend endpoint, replace those values with `FormValuesFromData` for the endpoint's generated DTO. CRUD scaffolding already does this. Missing template tokens fail generation before writing files.
 
+Both page and CRUD scaffolds select their layout from the configured middleware: `auth`/`auth:*` use `AppLayout`, while guest-accessible routes use `MarketingPageLayout`. A page-only scaffold accepts explicit route-profile/middleware options for this choice but still creates no backend routes. Custom profiles retain authenticated middleware by default. Generated PHP syntax and conflicting class/import names (for example, a model named `Model`) are rejected before any scaffold files are written.
+
 1. Add/extend controller in `app/Modules/<Module>/Http/Controllers`.
 2. Add route in module route file and ensure it is aggregated by `routes/web.php` or `routes/api.php`.
 3. Return Inertia page from controller using module page path, for example:

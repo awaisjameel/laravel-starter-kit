@@ -4,6 +4,49 @@ declare(strict_types=1);
 
 use App\Modules\Shared\Support\ModuleGeneration\TemplateRenderer;
 
+test('derived names that collide with generated php imports fail before writing files', function (string $module): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $this->runGenerateCommand([
+        'module' => $module,
+        '--scaffold' => 'crud-api',
+        '--route-profile' => 'public',
+        '--api-route-profile' => 'public',
+        '--no-file-prompts' => true,
+        '--base-path' => $basePath,
+    ])->assertExitCode(1);
+
+    expect($basePath.'/app/Modules/'.$module)->not->toBeDirectory();
+    expect($basePath.'/app/Models/'.$module.'.php')->not->toBeFile();
+})->with(['Model', 'Factory', 'RuntimeException', 'PaginationQueryData', 'JsonResponse', 'Controller']);
+
+test('frontend layouts follow route authentication for every page scaffold', function (string $scaffold, string $profile, string $middleware, string $layout): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $this->runGenerateCommand([
+        'module' => 'Guestcatalog',
+        '--scaffold' => $scaffold,
+        '--route-profile' => $profile,
+        '--route-prefix' => 'guestcatalog',
+        '--route-name-prefix' => 'guestcatalog',
+        '--middleware' => $middleware,
+        '--roles' => 'all',
+        '--no-interaction' => true,
+        '--no-file-prompts' => true,
+        '--base-path' => $basePath,
+    ])->assertExitCode(0);
+
+    $contents = (string) file_get_contents($basePath.'/resources/js/modules/guestcatalog/pages/Index.vue');
+    expect($contents)->toContain('<'.$layout)->toContain('</'.$layout.'>');
+    if ($layout === 'MarketingPageLayout') {
+        expect($contents)->not->toContain('AppLayout')->not->toContain('buildDashboardBreadcrumbs');
+    }
+})->with(['page', 'crud', 'crud-api'])->with([
+    ['public', '', 'MarketingPageLayout'],
+    ['app', 'auth,verified', 'AppLayout'],
+    ['custom', 'guest', 'MarketingPageLayout'],
+    ['custom', '', 'AppLayout'],
+    ['custom', 'auth:web', 'AppLayout'],
+]);
+
 test('unresolved template tokens fail before scaffolding writes files', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();
     $stub = $basePath.'/missing.stub';

@@ -521,6 +521,7 @@ final readonly class ModuleScaffoldPlanner
         ];
 
         $pageTokens = [
+            ...$this->frontendLayoutTokens($generateModuleInput),
             'pagePascalName' => $pagePascalName,
             'pageCamelName' => $pageCamelName,
             'pageKebabName' => $pageKebabName,
@@ -556,6 +557,23 @@ final readonly class ModuleScaffoldPlanner
         );
     }
 
+    private function requiresWebAuthentication(GenerateModuleInput $generateModuleInput): bool
+    {
+        return array_any($generateModuleInput->middleware, static fn (string $middleware): bool => $middleware === 'auth' || str_starts_with($middleware, 'auth:'));
+    }
+
+    /** @return array<string, string> */
+    private function frontendLayoutTokens(GenerateModuleInput $generateModuleInput): array
+    {
+        $authenticated = $this->requiresWebAuthentication($generateModuleInput);
+
+        return [
+            'pageLayout' => $authenticated ? 'AppLayout' : 'MarketingPageLayout',
+            'pageLayoutAttributes' => $authenticated ? ' :breadcrumbs="breadcrumbs"' : '',
+            'pageBreadcrumbs' => $authenticated ? 'const breadcrumbs = buildDashboardBreadcrumbs()' : '',
+        ];
+    }
+
     /**
      * @param  array<int, string>  $directories
      * @param  array<int, PlannedFile>  $files
@@ -586,6 +604,7 @@ final readonly class ModuleScaffoldPlanner
         );
 
         $commonTokens = [
+            ...$this->frontendLayoutTokens($generateModuleInput),
             'pagePascalName' => $pagePascalName,
             'pageKebabName' => $pageKebabName,
             'moduleComponentPrefix' => $moduleComponentPrefix,
@@ -708,7 +727,7 @@ final readonly class ModuleScaffoldPlanner
 
         $routeUri = $generateModuleInput->routePrefix === '' ? '/' : '/'.$generateModuleInput->routePrefix;
         $routeLabel = str_replace('-', ' ', $generateModuleInput->moduleName->frontendKebab);
-        $guestAssertion = in_array('auth', $generateModuleInput->middleware, true)
+        $guestAssertion = $this->requiresWebAuthentication($generateModuleInput)
             ? "\$testResponse->assertRedirect('/auth/login');"
             : '$testResponse->assertOk();';
         $restrictedByRoles = $this->isRoleRestricted($generateModuleInput);
