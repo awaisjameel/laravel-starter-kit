@@ -1,27 +1,17 @@
 <script setup lang="ts">
+import { useForwardedPropsEmits } from '@/lib/forward-props'
+import { reactiveOmit } from '@vueuse/core'
 import { cn } from '@/lib/utils'
 import { appTheme } from '@/lib/theme'
-import {
-  DialogClose,
-  DialogContent,
-  type DialogContentEmits,
-  type DialogContentProps,
-  DialogOverlay,
-  DialogPortal,
-  useForwardPropsEmits,
-} from 'reka-ui'
-import { computed, type HTMLAttributes } from 'vue'
+import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogOverlay, DialogPortal } from 'reka-ui'
+import { type HTMLAttributes } from 'vue'
 
 const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<DialogContentEmits>()
 
-const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+const delegatedProps = reactiveOmit(props, 'class')
 
-  return delegated as Partial<DialogContentProps>
-})
-
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardedPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

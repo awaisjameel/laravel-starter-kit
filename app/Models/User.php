@@ -6,7 +6,9 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Modules\Shared\Data\UserViewData;
-use Carbon\Carbon;
+use App\Modules\Shared\Enums\SharedRealtimeChannel;
+use App\Modules\Shared\Realtime\Support\ChannelPatternResolver;
+use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
@@ -22,9 +24,9 @@ use Override;
  * @property string $email
  * @property string $password
  * @property UserRole $role
- * @property Carbon|null $email_verified_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonInterface|null $email_verified_at
+ * @property CarbonInterface|null $created_at
+ * @property CarbonInterface|null $updated_at
  */
 final class User extends Authenticatable implements MustVerifyEmailContract
 {
@@ -42,12 +44,21 @@ final class User extends Authenticatable implements MustVerifyEmailContract
 
     public function receivesBroadcastNotificationsOn(): string
     {
-        return 'users.'.$this->id.'.notifications';
+        return ChannelPatternResolver::resolve(SharedRealtimeChannel::UserNotifications->value, ['userId' => $this->id]);
     }
 
     public function toViewData(): UserViewData
     {
         return UserViewData::fromModel($this);
+    }
+
+    protected static function booted(): void
+    {
+        self::updating(function (self $user): void {
+            if ($user->isDirty('email') && ! $user->isDirty('email_verified_at')) {
+                $user->email_verified_at = null;
+            }
+        });
     }
 
     /**

@@ -106,6 +106,8 @@ declare global {
   const useCssVars: typeof import('vue').useCssVars
   const useFlashToasts: typeof import('../composables/useFlashToasts').useFlashToasts
   const useForm: typeof import('@inertiajs/vue3').useForm
+  const useForwardedProps: typeof import('../lib/forward-props').useForwardedProps
+  const useForwardedPropsEmits: typeof import('../lib/forward-props').useForwardedPropsEmits
   const useId: typeof import('vue').useId
   const useInitials: typeof import('../composables/useInitials').useInitials
   const useModel: typeof import('vue').useModel
@@ -161,6 +163,9 @@ declare global {
   // @ts-ignore
   export type { ButtonVariant, ButtonSize, SidebarButtonVariant, SidebarButtonSize, ToastVariant, StatusTone } from '../lib/theme'
   import('../lib/theme')
+  // @ts-ignore
+  export type { OptionalWithoutUndefined } from '../lib/utils'
+  import('../lib/utils')
   // @ts-ignore
   export type { InertiaMethod, InertiaRouteDefinition } from '../utils/route'
   import('../utils/route')
@@ -269,6 +274,8 @@ declare module 'vue' {
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
     readonly useFlashToasts: UnwrapRef<typeof import('../composables/useFlashToasts')['useFlashToasts']>
     readonly useForm: UnwrapRef<typeof import('@inertiajs/vue3')['useForm']>
+    readonly useForwardedProps: UnwrapRef<typeof import('../lib/forward-props')['useForwardedProps']>
+    readonly useForwardedPropsEmits: UnwrapRef<typeof import('../lib/forward-props')['useForwardedPropsEmits']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useInitials: UnwrapRef<typeof import('../composables/useInitials')['useInitials']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>

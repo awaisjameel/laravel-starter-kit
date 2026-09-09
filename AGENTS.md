@@ -1,5 +1,19 @@
 # AGENTS.md
 
+## Start Here
+
+Read the sections relevant to the task, then trace their reference implementations before editing. Keep a short record of findings, changed contracts, and remaining verification during broad tasks.
+
+| Task                          | First implementation to inspect                                                           | Verification                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| CRUD, requests, authorization | `app/Modules/Users`, `tests/Feature/Users`, `tests/Feature/Api`                           | PHP suite, generation                                          |
+| Forms, tables, themes         | `resources/js/components/base`, `resources/js/lib`, `resources/js/modules/users`          | Vue typecheck, Vitest, client/SSR build                        |
+| Realtime and mutations        | `app/Modules/Shared/Realtime`, `app/Modules/Users/Listeners`, `resources/js/lib/realtime` | Realtime PHP/Vitest suites; live Reverb when relevant          |
+| Discovery or scaffolding      | `app/Modules/Shared/Support`, `stubs/module-generation`                                   | Generator tests plus `composer qa:generated`                   |
+| Dependencies and CI           | `composer.json`, `package.json`, lock files, `.github/actions/setup-project`              | Locked audits, clean install for dependency changes, full gate |
+
+`composer generate-and-cleanup` is the mandatory static completion gate. Run it separately from builds and tests that regenerate artifacts. Then run the affected suites and builds. Do not count passing static checks as browser, deployment, or load-test verification.
+
 ## Purpose
 
 This repository is a modular Laravel + Inertia + Vue starter kit with backend-owned contracts, strict typing, realtime support, and generator-backed conventions.
@@ -153,6 +167,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `php artisan inertia:start-ssr`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
 - `pm2.config.cjs` currently manages production-style queue workers, Reverb, the Inertia SSR server, and the scheduler.
+- Run one scheduler per host. Long-lived services restart after a successful exit so deployment commands such as `queue:restart` do not leave workers stopped. Multiple scheduler hosts require Laravel's shared-cache scheduling locks.
 - SSR is served two different ways and both are wired up:
     - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
     - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/ssr.js` and `php artisan inertia:start-ssr` serves it.
@@ -174,6 +189,9 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `App\Http\Middleware\SecurityHeaders`
     - `Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets`
 - Guest redirects are configured centrally in `bootstrap/app.php` to `route('auth.login.create')`.
+- The `verified` middleware alias is configured there with Laravel's `EnsureEmailIsVerified::redirectTo('auth.verification.notice')`. Keep this central default so existing and generated protected routes share the namespaced verification prompt; JSON requests retain Laravel's 403 response.
+- Inertia history encryption defaults to enabled (`INERTIA_ENCRYPT_HISTORY=true`) and requires HTTPS or localhost. Login, registration, logout, and account deletion call `Inertia::clearHistory()` after changing the session so the next page rotates the browser history key. Query-cache clearing does not replace this protection.
+- `statefulApi()` enables Sanctum session authentication and CSRF protection for API requests from configured first-party origins. Keep `SANCTUM_STATEFUL_DOMAINS` aligned with deployed frontend hosts, including ports. External clients use bearer tokens. Authentication regressions must exercise persisted cookies or real tokens; `actingAs` alone cannot verify middleware wiring.
 - Events are registered from `app/Listeners` and module-discovered listener directories via `ModuleRegistry::listenerDirectories(...)`.
 
 ### Module Discovery
@@ -237,6 +255,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - manifests
     - events (domain and broadcast)
 - Only truly shared domain primitives belong in `app/Models/**` and `app/Enums/**`.
+- Model date annotations use `CarbonInterface` to cover mutable and immutable casts. DTO boundaries normalize non-null dates with `CarbonImmutable::instance`; never discard an immutable date with an `instanceof Carbon` check. Essentials enables immutable dates by default.
 - If reuse spans multiple modules, move the code to `app/Modules/Shared/**` instead of duplicating it.
 - Do not place module-only code under global shared locations.
 - Backend event listeners under `app/Modules/**/Listeners/**` are auto-discovered through Laravel event discovery. Do not manually register module listener classes in `AppServiceProvider`.
@@ -285,6 +304,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `UserManagementEvent`
     - listeners under `app/Modules/Users/Listeners/**`
 - Domain events should remain separate from broadcast events.
+- `UserManagementEvent` implements `ShouldDispatchAfterCommit`. Dispatch it after persistence succeeds; rolled-back transactions must not emit audit, notification, or realtime side effects. `UserActionContext` snapshots actor and target models so later changes within the transaction cannot rewrite an earlier event. Deleted-user broadcasts carry `user: null`.
 - Listeners translate domain events into realtime broadcasts and notifications.
 - Realtime events should extend `app/Modules/Shared/Realtime/Events/RealtimeEvent`.
 - `RealtimeEvent` currently broadcasts:
@@ -363,7 +383,9 @@ When adding similar behavior, inspect and follow the nearest established referen
 - `resources/js/modules/**` = feature-specific screens, dialogs, tables, and contracts.
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
-- `appTheme` is auto-imported but must be aliased in `<script setup>` (`const theme = appTheme`) before a template uses it. `vue-tsc` cannot resolve an auto-imported symbol that appears only in markup, so `appTheme.` written directly in a template compiles and then fails typecheck. `resources/js/components/ui/**` is exempt because it is excluded from typecheck and imports the theme explicitly.
+- `appTheme` is auto-imported but must be aliased in `<script setup>` (`const theme = appTheme`) before a template uses it. `vue-tsc` cannot resolve an auto-imported symbol that appears only in markup. UI primitives import the theme explicitly and are included in typechecking and ESLint.
+- Forward props to a reka-ui primitive with `useForwardedProps` / `useForwardedPropsEmits` from `@/lib/forward-props`, narrowing with `reactiveOmit` where a prop is consumed locally. reka-ui already drops undefined values while forwarding; those adapters only restate that contract for `exactOptionalPropertyTypes`, so they cost nothing at runtime. Never assert `as Partial<...>` or `as Record<string, unknown>`: both hide missing required props, and re-filtering an already-forwarded object duplicates work reka-ui did.
+- `omitUndefinedProps` remains the tool for sanitising an object the component builds itself. The forwarding adapters read the calling component instance, so they only ever forward that component's own props.
 - Icons come only from Iconify through `unplugin-icons` using the `Icon*` component prefix. Use auto-resolved tags such as `<IconLucideChevronLeft />` in templates and virtual imports such as `~icons/lucide/chevron-left` when a component value is required in TypeScript. Application chrome uses the `lucide` collection; a multi-word collection needs the explicit `<Icon-<collection>:<name> />` form, as in `<Icon-icon-park-outline:system />`.
 - Icon-bearing contracts use Vue's generic `Component` type so they remain collection-agnostic.
 - `components.json` points the shadcn-vue CLI at `resources/css/theme.css` and declares no `iconLibrary`. Newly vendored primitives must be rewritten onto `appTheme` recipes and `~icons/*` before they are committed.
@@ -407,9 +429,10 @@ When adding similar behavior, inspect and follow the nearest established referen
     - no `as unknown as Record<string, unknown>`
     - no explicit any type (`@typescript-eslint/no-explicit-any`)
 - Restricted imports use `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`. Auto-import only provides runtime values, so `import type { ... }` from a restricted path stays legal everywhere.
-- Two scopes are deliberately exempt from the auto-import restriction:
+- Three scopes are deliberately exempt from the auto-import restriction:
     - files inside the auto-imported directories themselves (`autoImportSourceGlobs`), which wire up their own siblings with explicit imports instead of relying on auto-import resolving back into the directory being scanned
     - test files, which must be able to name real components and module namespaces for mounting and spying
+    - UI primitives, which retain explicit imports while receiving all other lint and type checks
 - Feature-module source and test files still enforce the cross-module boundary rule, including type-only imports.
 
 ### Frontend Ownership Rules
@@ -524,6 +547,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `withoutManifest()` so no transformer manifest file lands in `resources/js/types`
 - Route and controller type generation from the transformer stays off. Wayfinder owns that surface.
 - Current shared auth user contract is `App\Modules\Shared\Data\UserViewData|null`; do not serialize the raw user model into Inertia props.
+- `SharedPageData` and its nested `SharedAuthData`, `SharedFlashData`, and `SharedQuoteData` own application-wide Inertia props. `AppPageProps` composes the generated type with page-specific props. Flash fields are always present as `string|null`; do not redeclare these shapes in TypeScript.
 - Request DTO hydration must be the canonical transport boundary.
 - Services, queries, commands, and handlers must accept DTOs or explicit typed parameters, never mixed arrays.
 - Prefer module-prefixed DTO names for generated CRUD contracts:
@@ -551,13 +575,21 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `queryCache` stores the raw `queryFn` result, never a `select` projection, so one entry can serve consumers that project the same key differently. `getApiQueryCacheData`/`setApiQueryCacheData` operate on that raw shape.
     - Invalidations and explicit cache writes version the key and drop its in-flight entry, so a request that started earlier cannot be joined or overwrite newer/optimistic data when it settles.
     - A request for an earlier reactive key may populate that key's cache, but it cannot overwrite the composable state for the current key.
+    - String and array keys have distinct serialized identities. Delayed retries stop after a key change, invalidation, or identity-driven cache clear so they cannot read new inputs under an old key.
     - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
     - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
+- The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `create-app.ts`; account data must not survive logout or account switching. Full clears synchronously reset mounted query/mutation data and errors. Mutations check that context before sending a write and between asynchronous callbacks; stale contexts reject with `stale_auth_context` and skip subsequent callbacks and invalidations. Already running callbacks and server writes cannot be cancelled by a cache reset.
+- Query/mutation error types incompatible with `ApiError` require `mapError`. Mutation pending state covers all concurrent requests; the latest invocation owns displayed data/errors. Reset clears displayed state without pretending outstanding work has stopped.
+- Mutation callback failures propagate without reclassifying successful writes as failures. Cache invalidation precedes success callbacks, and settlement runs once even when a success or error callback throws.
 - Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
 - `apiRequest` callers must validate payloads with `parseResponse` when a typed runtime contract matters.
 - `apiRequest` is the canonical place for `X-Socket-ID` propagation.
+- Same-origin mutations read the current `XSRF-TOKEN` cookie into `X-XSRF-TOKEN`; no static CSRF meta tag is needed. Automatic CSRF and socket headers must not be sent to another origin. Existing URL queries and fragments must survive added query options.
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
+- Schema form checkboxes own their inline label; `BaseFieldShell` hides its duplicate label for those fields. Select triggers receive the field ID so the shell label targets the focusable control.
+- Schema controls associate descriptions and errors through `aria-describedby` and expose invalid/required state. Processing disables the form's fields. Read-only text remains selectable; choice/file controls disable interaction. Every choice variant honors disabled options.
+- Schema form IDs use a per-instance Vue `useId()` prefix so repeated field names retain unique, SSR-stable label and feedback targets. Processing also prevents another submit event.
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 
 ### Backend-Driven Contract Pipeline
@@ -587,6 +619,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Broadcast notification payload contract:
     - `App\Modules\Users/Data/UserManagementNotificationData`
 - Keep domain events separate from broadcast events.
+- Channel registration, broadcast destinations, notification routing, and frontend subscriptions must all consume the canonical channel enums. Resolve parameterized destinations through `ChannelPatternResolver`; do not repeat channel string literals outside their owning enums.
 - Let listeners translate domain events into realtime broadcasts and notifications.
 
 ### Frontend
@@ -659,6 +692,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 - Enforce authorization through policies, gates, and route middleware.
 - Sensitive auth endpoints must use the `auth-sensitive` rate limiter.
+- Password confirmation uses this limiter in addition to registration, reset, and verification notification endpoints.
+- The `User` model invalidates email verification whenever its email changes through a model update, covering profile and admin transports. Bulk SQL updates bypass model events and must preserve this invariant explicitly.
 - `AppServiceProvider` currently defines `auth-sensitive` as `5` requests per minute per IP.
 - Security headers must continue to be set by `App\Http\Middleware\SecurityHeaders`.
 - Current headers include:
@@ -777,6 +812,17 @@ Do not shadow them with manual duplicates.
     - `--no-api-resource`, `--no-api-test`, `--no-model`, `--no-page`
 
 ### Current Generator Behavior
+
+- Template rendering rejects missing tokens before writes; module and page identifiers must start with a letter after normalization.
+- Rendered PHP stubs are syntax-checked and reject declaration/import name collisions before writes. Keep top-level class imports on individual lines so validation and import sorting share the same convention.
+- Frontend scaffolds use `AppLayout` only when their configured middleware contains `auth` or `auth:*`; otherwise they use `MarketingPageLayout`. The `page` scaffold honors explicit route-profile and middleware options for layout selection without generating backend routes.
+- CRUD/API model names also reject PHP reserved names before files are written.
+- Generated listings use `PaginationQueryRequest` / `PaginationQueryData`, bounded to 100 rows per page, with stable ordering. CRUD page DTOs include shared `PaginationData` metadata and the page uses the shared pagination component.
+- Every paginated page DTO exposes the same envelope: `items` plus a shared `PaginationData`. `UsersIndexPageData` follows it too, so the reference module and generator output have one shape. Do not redeclare paginator metadata per module.
+- `TemplateRenderer` sorts the rendered `use` block through `PhpUseStatementSorter`. A stub cannot know whether `App\Modules\Shared\...` sorts before or after the module namespace, so imports are ordered after rendering instead. Stubs stay Rector- and Pint-clean by construction: name parameters after their type, and keep generated arrays free of trailing commas.
+- Resource API pagination links preserve query parameters. Plain API metadata uses `PaginationData` too. Server tables pass a reactive `initialQuery` to `useServerDataTable` so preserved-state redirects synchronize pagination, search, and sort without another visit. Users derives it from the current location and pagination props; generated pages derive it from pagination props.
+- A `page` scaffold has frontend-only form values until connected to a backend endpoint. When connecting it, derive form values from that endpoint's generated DTO. It must never import a DTO that the scaffold did not generate.
+- `GeneratedPaginationTest` executes all four API variants (standalone/combined, resource/plain) and checks later pages, invalid input, and CRUD page metadata.
 
 - `page` scaffolds frontend-only page contracts:
     - `resources/js/modules/<module>/forms/<page-kebab>-form-schema.ts`
@@ -967,6 +1013,10 @@ Local changes must remain compatible with the existing CI expectations:
 The test workflow checks generated types, auto-import/component declarations, routes, and actions after the client/SSR build. Both modified tracked files and untracked generated files fail the gate; regenerate and commit the complete contract surface together.
 
 The shared setup uses `actions/cache@v6` with the Node 24 action runtime. Dependency and patch locks are part of the cache identity.
+
+The test workflow audits both locked dependency graphs. Both mutating and non-mutating ESLint commands fail on warnings.
+
+A second CI job runs `composer qa:generated` (`scripts/verify-generated-module.sh`). It snapshots tracked changes and untracked source into an isolated checkout, installs both locked dependency graphs, scaffolds protected and public modules, builds client/SSR assets, and runs `composer generate-and-cleanup`, `composer qa:check`, both suites, and whitespace verification including new files. A generated public-page SSR regression uses the real layout and a guest Inertia page context. The source checkout and index remain untouched even on failure; only the temporary checkout is deleted. Run it after touching anything under `stubs/module-generation` or the scaffold planner. Name-dependent formatting is handled by the canonical cleanup inside the gate.
 
 - Pint
 - Rector dry-run

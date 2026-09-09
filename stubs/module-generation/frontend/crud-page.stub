@@ -1,4 +1,5 @@
 <script setup lang="ts">
+    import {{ pagePascalName }}Controller from '{{ controllerActionImportPath }}'
     import IconLucidePlus from '~icons/lucide/plus'
     import type { {{ pageDataClass }} } from '@/types/app-data'
     import type { {{ pagePascalName }}ListItem } from '../contracts/{{ pageKebabName }}-crud'
@@ -6,7 +7,12 @@
     const theme = appTheme
 
     const props = defineProps<{{ pageDataClass }}>()
-    const breadcrumbs = buildDashboardBreadcrumbs()
+
+    const { setPage } = useServerDataTable({
+        endpoint: {{ pagePascalName }}Controller.index,
+        initialQuery: () => ({ page: props.pagination.current_page, perPage: props.pagination.per_page })
+    })
+    {{ pageBreadcrumbs }}
 
     const isFormDialogOpen = ref(false)
     const isDeleteDialogOpen = ref(false)
@@ -40,7 +46,7 @@
 <template>
     <Head title="{{ pagePascalName }}" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <{{ pageLayout }}{{ pageLayoutAttributes }}>
         <div class="flex h-full min-w-0 flex-1 flex-col gap-4 rounded-xl p-3 sm:p-4">
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div :class="theme.layout.pageHeader">
@@ -49,6 +55,14 @@
                 </div>
 
                 <{{ moduleComponentPrefix }}Table :items="props.items" @view="openDetailsDialog" @edit="openEditDialog" @delete="openDeleteDialog" />
+
+                <BaseTableBaseDataTablePagination
+                    :current-page="props.pagination.current_page"
+                    :total-pages="props.pagination.last_page"
+                    :total-items="props.pagination.total"
+                    :items-per-page="props.pagination.per_page"
+                    @page-change="setPage"
+                />
 
                 <{{ moduleComponentPrefix }}{{ pagePascalName }}FormDialog
                     :open="isFormDialogOpen"
@@ -72,5 +86,5 @@
                 />
             </div>
         </div>
-    </AppLayout>
+    </{{ pageLayout }}>
 </template>

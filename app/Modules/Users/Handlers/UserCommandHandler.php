@@ -49,11 +49,11 @@ final readonly class UserCommandHandler
 
     public function delete(User $user, UserActionContext $userActionContext): void
     {
+        $this->userCommands->delete($user);
+
         Event::dispatch(new UserManagementEvent($userActionContext->mutation(
             action: 'delete',
             user: $user,
         )));
-
-        $this->userCommands->delete($user);
     }
 }

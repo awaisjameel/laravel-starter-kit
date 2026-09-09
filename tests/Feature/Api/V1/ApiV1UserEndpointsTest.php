@@ -73,6 +73,34 @@ test('admin users can manage users via api', function (): void {
 
     $this->deleteJson('/api/v1/admin/users/'.$createdUserId)->assertNoContent();
 });
+
+test('admin users cannot delete themselves via api', function (): void {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    Sanctum::actingAs($admin);
+
+    $this->deleteJson('/api/v1/admin/users/'.$admin->id)->assertForbidden();
+    $this->assertDatabaseHas('users', ['id' => $admin->id]);
+});
+
+test('admin user email updates reset verification status via api', function (): void {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    $target = User::factory()->create(['role' => UserRole::User]);
+    expect($target->email_verified_at)->not->toBeNull();
+
+    Sanctum::actingAs($admin);
+
+    $this->putJson('/api/v1/admin/users/'.$target->id, [
+        'name' => 'Verified User Updated',
+        'email' => 'verified-updated@example.com',
+        'password' => '',
+        'role' => UserRole::User->value,
+    ])
+        ->assertOk()
+        ->assertJsonPath('data.email', 'verified-updated@example.com')
+        ->assertJsonPath('data.email_verified_at', null);
+
+    expect($target->fresh()?->email_verified_at)->toBeNull();
+});
 test('admin user create validation errors are returned', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
     Sanctum::actingAs($admin);

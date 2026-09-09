@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import {
-  DropdownMenuSub,
-  type DropdownMenuSubEmits,
-  type DropdownMenuSubProps,
-  useForwardPropsEmits,
-} from 'reka-ui'
+import { useForwardedPropsEmits } from '@/lib/forward-props'
+import { DropdownMenuSub, type DropdownMenuSubEmits, type DropdownMenuSubProps } from 'reka-ui'
 
 const props = defineProps<DropdownMenuSubProps>()
 const emits = defineEmits<DropdownMenuSubEmits>()
 
-const forwarded = useForwardPropsEmits(computed(() => props as Partial<DropdownMenuSubProps>), emits)
+const forwarded = useForwardedPropsEmits(props, emits)
 </script>
 
 <template>

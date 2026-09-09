@@ -15,6 +15,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Inertia\Response;
 
 final class ProfileController extends Controller
@@ -48,10 +49,6 @@ final class ProfileController extends Controller
             'email' => $profileUpdateData->email,
         ]);
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
         $user->save();
 
         return to_route('app.settings.profile.edit');
@@ -70,6 +67,7 @@ final class ProfileController extends Controller
 
         $profileDestroyRequest->session()->invalidate();
         $profileDestroyRequest->session()->regenerateToken();
+        Inertia::clearHistory();
 
         return redirect('/');
     }

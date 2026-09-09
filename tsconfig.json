@@ -126,5 +126,5 @@
         "resources/js/types/index.d.ts",
         "env.d.ts" // Custom environment declaration file for Vite
     ],
-    "exclude": ["resources/js/components/ui/**", "resources/js/types/components.d.ts"]
+    "exclude": []
 }

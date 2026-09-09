@@ -5,20 +5,14 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-type OptionalWithoutUndefined<T> = {
-    [K in keyof T]?: Exclude<T[K], undefined>
+export type OptionalWithoutUndefined<T> = {
+    [K in keyof T as undefined extends T[K] ? never : K]: T[K]
+} & {
+    [K in keyof T as undefined extends T[K] ? K : never]?: Exclude<T[K], undefined>
 }
 
 export function omitUndefinedProps<T extends object>(input: T): OptionalWithoutUndefined<T> {
-    const result: OptionalWithoutUndefined<T> = {}
-
-    for (const [key, value] of Object.entries(input) as Array<[keyof T, T[keyof T]]>) {
-        if (value !== undefined) {
-            result[key] = value as OptionalWithoutUndefined<T>[keyof T]
-        }
-    }
-
-    return result
+    return Object.fromEntries(Object.entries(input).filter(([, value]) => value !== undefined)) as OptionalWithoutUndefined<T>
 }
 
 export function getYears() {

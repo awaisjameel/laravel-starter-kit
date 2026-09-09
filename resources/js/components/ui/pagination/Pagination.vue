@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { useForwardedPropsEmits } from '@/lib/forward-props'
 import type { PaginationRootEmits, PaginationRootProps } from "reka-ui"
-import { computed, type HTMLAttributes } from "vue"
+import { type HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import { PaginationRoot, useForwardPropsEmits } from "reka-ui"
-import { cn, omitUndefinedProps } from "@/lib/utils"
+import { PaginationRoot } from "reka-ui"
+import { cn } from "@/lib/utils"
 
 const props = defineProps<PaginationRootProps & {
   class?: HTMLAttributes["class"]
@@ -11,7 +12,7 @@ const props = defineProps<PaginationRootProps & {
 const emits = defineEmits<PaginationRootEmits>()
 
 const delegatedProps = reactiveOmit(props, "class", "itemsPerPage")
-const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(delegatedProps)), emits)
+const forwarded = useForwardedPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

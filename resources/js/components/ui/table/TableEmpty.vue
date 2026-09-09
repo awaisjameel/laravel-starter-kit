@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useForwardedProps } from '@/lib/forward-props'
 import type { HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
 import { cn } from "@/lib/utils"
@@ -12,7 +13,7 @@ const props = withDefaults(defineProps<{
   colspan: 1,
 })
 
-const delegatedProps = reactiveOmit(props, "class")
+const forwarded = useForwardedProps(reactiveOmit(props, "class"))
 </script>
 
 <template>
@@ -24,7 +25,7 @@ const delegatedProps = reactiveOmit(props, "class")
           props.class,
         )
       "
-      v-bind="delegatedProps"
+      v-bind="forwarded"
     >
       <div class="flex items-center justify-center py-10">
         <slot />

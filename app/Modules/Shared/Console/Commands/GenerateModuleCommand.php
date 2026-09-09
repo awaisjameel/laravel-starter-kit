@@ -120,11 +120,12 @@ final class GenerateModuleCommand extends Command
         $scaffoldType = $this->resolveScaffoldType();
         $generateCrud = ScaffoldType::includesCrud($scaffoldType);
         $generateApi = ScaffoldType::includesApi($scaffoldType);
+        $hasWebScaffold = $generateCrud || $scaffoldType === ScaffoldType::PAGE;
         $crudResourceManifest = $generateCrud
             ? CrudResourceManifest::load(CrudResourceManifest::filePath($basePath, $moduleName, $pagePascalName))
             : null;
 
-        $routeProfile = $generateCrud
+        $routeProfile = $generateCrud || ($hasWebScaffold && $this->option('route-profile') !== null)
             ? $this->resolveRouteProfile($crudResourceManifest?->routeProfile)
             : RouteProfile::APP;
         [$apiRouteProfile, $apiRoutePrefix, $apiRouteNamePrefix, $apiMiddleware] = $generateApi
@@ -135,7 +136,7 @@ final class GenerateModuleCommand extends Command
             || ($generateApi && $apiRouteProfile === ApiRouteProfile::PROTECTED),
             defaultRoles: $crudResourceManifest?->allowedRoles,
         );
-        [$routePrefix, $routeNamePrefix, $middleware] = $generateCrud
+        [$routePrefix, $routeNamePrefix, $middleware] = $hasWebScaffold
             ? $this->resolveRouteConfiguration($moduleName, $routeProfile, $allowedRoles, $crudResourceManifest)
             : $this->defaultWebRouteConfiguration($moduleName);
 

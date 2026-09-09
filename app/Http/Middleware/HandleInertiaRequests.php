@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Enums\Appearance;
+use App\Modules\Shared\Data\SharedAuthData;
+use App\Modules\Shared\Data\SharedFlashData;
+use App\Modules\Shared\Data\SharedPageData;
+use App\Modules\Shared\Data\SharedQuoteData;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -50,27 +54,15 @@ final class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
-            'quote' => ['message' => mb_trim($message), 'author' => mb_trim($author)],
-            'auth' => [
-                'user' => $request->user()?->toViewData(),
-            ],
-            'flash' => [
-                'message' => $request->session()->get('message'),
-                'error' => $request->session()->get('error'),
-                'status' => $request->session()->get('status'),
-            ],
-            // The absolute request URL. Inertia's own `page.url` is relative, so the
-            // frontend needs an origin to resolve it against, and `fullUrl()` keeps
-            // the query string: server-driven listing pages rehydrate their table
-            // state (page, search, sort) from it, and dropping the query would
-            // silently reset a shared or bookmarked URL to the default sort while
-            // the rendered rows stayed filtered.
-            'location' => $request->fullUrl(),
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            // Same value `HandleAppearance` puts on the root element, so the appearance
-            // UI renders correctly on the server and hydrates without a mismatch.
-            'appearance' => Appearance::fromCookie($request->cookie(Appearance::COOKIE)),
+            ...new SharedPageData(
+                name: config()->string('app.name'),
+                quote: new SharedQuoteData(mb_trim($message), mb_trim($author)),
+                auth: new SharedAuthData($request->user()?->toViewData()),
+                flash: SharedFlashData::fromSession($request->session()),
+                location: $request->fullUrl(),
+                sidebarOpen: ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+                appearance: Appearance::fromCookie($request->cookie(Appearance::COOKIE)),
+            )->toArray(),
         ];
     }
 }

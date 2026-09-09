@@ -2,6 +2,72 @@
 
 declare(strict_types=1);
 
+use App\Modules\Shared\Support\ModuleGeneration\TemplateRenderer;
+
+test('derived names that collide with generated php imports fail before writing files', function (string $module): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $this->runGenerateCommand([
+        'module' => $module,
+        '--scaffold' => 'crud-api',
+        '--route-profile' => 'public',
+        '--api-route-profile' => 'public',
+        '--no-file-prompts' => true,
+        '--base-path' => $basePath,
+    ])->assertExitCode(1);
+
+    expect($basePath.'/app/Modules/'.$module)->not->toBeDirectory();
+    expect($basePath.'/app/Models/'.$module.'.php')->not->toBeFile();
+})->with(['Model', 'Factory', 'RuntimeException', 'PaginationQueryData', 'JsonResponse', 'Controller']);
+
+test('frontend layouts follow route authentication for every page scaffold', function (string $scaffold, string $profile, string $middleware, string $layout): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $this->runGenerateCommand([
+        'module' => 'Guestcatalog',
+        '--scaffold' => $scaffold,
+        '--route-profile' => $profile,
+        '--route-prefix' => 'guestcatalog',
+        '--route-name-prefix' => 'guestcatalog',
+        '--middleware' => $middleware,
+        '--roles' => 'all',
+        '--no-interaction' => true,
+        '--no-file-prompts' => true,
+        '--base-path' => $basePath,
+    ])->assertExitCode(0);
+
+    $contents = (string) file_get_contents($basePath.'/resources/js/modules/guestcatalog/pages/Index.vue');
+    expect($contents)->toContain('<'.$layout)->toContain('</'.$layout.'>');
+    if ($layout === 'MarketingPageLayout') {
+        expect($contents)->not->toContain('AppLayout')->not->toContain('buildDashboardBreadcrumbs');
+    }
+})->with(['page', 'crud', 'crud-api'])->with([
+    ['public', '', 'MarketingPageLayout'],
+    ['app', 'auth,verified', 'AppLayout'],
+    ['custom', 'guest', 'MarketingPageLayout'],
+    ['custom', '', 'AppLayout'],
+    ['custom', 'auth:web', 'AppLayout'],
+]);
+
+test('unresolved template tokens fail before scaffolding writes files', function (): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $stub = $basePath.'/missing.stub';
+    file_put_contents($stub, '{{ supplied }} {{ missing }}');
+    expect(fn () => app(TemplateRenderer::class)->render($stub, ['supplied' => 'value']))
+        ->toThrow(RuntimeException::class, 'Missing template token "missing"');
+});
+
+test('invalid namespace page and model names are rejected before writing files', function (string $module, string $page): void {
+    $basePath = $this->createTemporaryModuleGenerationBasePath();
+    $this->runGenerateCommand([
+        'module' => $module,
+        '--page' => $page,
+        '--scaffold' => 'crud',
+        '--route-profile' => 'public',
+        '--no-file-prompts' => true,
+        '--base-path' => $basePath,
+    ])->assertExitCode(1);
+    expect(glob($basePath.'/app/Modules/*'))->toBe([]);
+})->with([['123Billing', 'Index'], ['Billing/123Invoices', 'Index'], ['Billing', '123Index'], ['Class', 'Index'], ['String', 'Index'], ['Match', 'Index']]);
+
 test('fresh crud mode scaffolds backend frontend and tests', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();
 
@@ -193,7 +259,7 @@ test('api mode scaffolds api assets and skips frontend assets', function (): voi
     $apiControllerContents = is_string($apiControllerContents) ? $apiControllerContents : '';
     $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\ApiResponder;', $apiControllerContents);
     $this->assertStringContainsString('return ApiResponder::collection(', $apiControllerContents);
-    $this->assertStringContainsString('return ApiResponder::resource(IndexResource::make($model), 201);', $apiControllerContents);
+    $this->assertStringContainsString('return ApiResponder::resource(IndexResource::make($billing), 201);', $apiControllerContents);
 });
 test('crud api mode scaffolds both backend route files', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();

@@ -24,6 +24,8 @@
         showCancel: false
     })
 
+    const formId = useId()
+
     const emit = defineEmits<{
         submit: []
         cancel: []
@@ -56,7 +58,7 @@
 </script>
 
 <template>
-    <form class="space-y-6" @submit.prevent="emit('submit')">
+    <form class="space-y-6" @submit.prevent="!props.processing && emit('submit')">
         <div class="space-y-6">
             <section v-for="section in normalizedSections" :key="section.key" class="space-y-4">
                 <div v-if="section.title !== undefined || section.description !== undefined" class="space-y-1">
@@ -67,11 +69,12 @@
                 <div class="grid gap-4">
                     <BaseFormsBaseInputField
                         v-for="field in section.fields"
-                        :id="field.name"
+                        :id="`${formId}-${field.name}`"
                         :key="field.name"
                         :field="field"
                         :model-value="getModelFieldValue(field.name)"
                         :error="props.errors[field.name] ?? ''"
+                        :disabled="props.processing"
                         @update:model-value="setValue(field.name, $event)"
                     />
                 </div>

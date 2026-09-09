@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Modules\Users\Data\CreateUserData;
 use App\Modules\Users\Data\UpdateUserData;
 use BackedEnum;
+use RuntimeException;
 use Stringable;
 
 final class UserCommands
@@ -20,6 +21,10 @@ final class UserCommands
             'role' => $createUserData->role,
             'password' => $createUserData->password,
         ]);
+
+        if (! $user->exists) {
+            throw new RuntimeException('User creation was cancelled.');
+        }
 
         return new UserCommandResult(user: $user);
     }
@@ -42,7 +47,9 @@ final class UserCommands
             $user->password = $updateUserData->password;
         }
 
-        $user->save();
+        if (! $user->save()) {
+            throw new RuntimeException('User update was cancelled.');
+        }
 
         return new UserCommandResult(
             user: $user,
@@ -52,7 +59,9 @@ final class UserCommands
 
     public function delete(User $user): void
     {
-        $user->delete();
+        if ($user->delete() !== true) {
+            throw new RuntimeException('User deletion was cancelled.');
+        }
     }
 
     /**

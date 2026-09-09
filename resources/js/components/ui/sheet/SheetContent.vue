@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import { computed, type HTMLAttributes } from 'vue'
-import { cn, omitUndefinedProps } from '@/lib/utils'
+import { useForwardedPropsEmits } from '@/lib/forward-props'
+import { type HTMLAttributes } from 'vue'
+import { cn } from '@/lib/utils'
 import { appTheme } from '@/lib/theme'
 import { reactiveOmit } from '@vueuse/core'
-import {
-  DialogClose,
-  DialogContent,
-  type DialogContentEmits,
-  type DialogContentProps,
-  DialogPortal,
-  useForwardPropsEmits,
-} from 'reka-ui'
+import { DialogClose, DialogContent, type DialogContentEmits, type DialogContentProps, DialogPortal } from 'reka-ui'
 import SheetOverlay from './SheetOverlay.vue'
 
 interface SheetContentProps extends DialogContentProps {
@@ -29,7 +23,7 @@ const emits = defineEmits<DialogContentEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'side')
 
-const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(delegatedProps)), emits)
+const forwarded = useForwardedPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

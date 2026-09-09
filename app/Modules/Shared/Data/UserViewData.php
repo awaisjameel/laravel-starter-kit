@@ -6,7 +6,6 @@ namespace App\Modules\Shared\Data;
 
 use App\Enums\UserRole;
 use App\Models\User;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\Rules\Enum;
 use Spatie\LaravelData\Attributes\Validation\Rule;
@@ -42,7 +41,6 @@ final class UserViewData extends Data
     public static function fromModel(User $user): self
     {
         $emailVerifiedAt = $user->email_verified_at;
-        $emailVerifiedAt = $emailVerifiedAt instanceof Carbon ? $emailVerifiedAt->toImmutable() : null;
 
         return new self(
             id: $user->id,
@@ -51,7 +49,7 @@ final class UserViewData extends Data
             role: $user->role,
             created_at: CarbonImmutable::parse($user->created_at),
             updated_at: CarbonImmutable::parse($user->updated_at),
-            email_verified_at: $emailVerifiedAt,
+            email_verified_at: $emailVerifiedAt === null ? null : CarbonImmutable::instance($emailVerifiedAt),
         );
     }
 }

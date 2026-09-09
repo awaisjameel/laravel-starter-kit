@@ -64,6 +64,16 @@ export type LoginPageData = {
     status: string | null
 }
 export type PaginatedDataCollection<TKey, TValue> = LengthAwarePaginator<TKey, TValue>
+export type PaginationData = {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+}
+export type PaginationQueryData = {
+    page: number
+    perPage: number
+}
 export type PasswordResetLinkData = {
     email: string
 }
@@ -102,6 +112,27 @@ export type ResetPasswordData = {
 export type ResetPasswordPageData = {
     email: string
     token: string
+}
+export type SharedAuthData = {
+    user: UserViewData | null
+}
+export type SharedFlashData = {
+    message: string | null
+    error: string | null
+    status: string | null
+}
+export type SharedPageData = {
+    name: string
+    quote: SharedQuoteData
+    auth: SharedAuthData
+    flash: SharedFlashData
+    location: string
+    sidebarOpen: boolean
+    appearance: Appearance
+}
+export type SharedQuoteData = {
+    message: string
+    author: string
 }
 export enum SharedRealtimeChannel {
     UserNotifications = 'users.{userId}.notifications'
@@ -159,22 +190,14 @@ export type UserViewData = {
     email_verified_at: string | null
 }
 export type UsersIndexPageData = {
-    users: UsersPaginationData
+    items: UserViewData[]
+    pagination: PaginationData
 }
 export type UsersListChangedBroadcastData = {
     action: UsersRealtimeAction
     actorUserId: number
     targetUserId: number | null
     occurredAt: string
-}
-export type UsersPaginationData = {
-    data: UserViewData[]
-    per_page: number
-    current_page: number
-    from: number | null
-    to: number | null
-    last_page: number
-    total: number
 }
 export enum UsersRealtimeAction {
     Create = 'create',

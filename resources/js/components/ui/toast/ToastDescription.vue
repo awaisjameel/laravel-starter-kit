@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { useForwardedProps } from '@/lib/forward-props'
+import { reactiveOmit } from '@vueuse/core'
 import type { HTMLAttributes } from 'vue'
 import type { ToastDescriptionProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
-import { ToastDescription, useForwardProps } from 'reka-ui'
-import { computed } from 'vue'
+import { ToastDescription } from 'reka-ui'
 
 const props = defineProps<
     ToastDescriptionProps & {
@@ -11,12 +12,9 @@ const props = defineProps<
     }
 >()
 
-const delegatedProps = computed(() => {
-    const { class: _class, ...delegated } = props
-    return delegated
-})
+const delegatedProps = reactiveOmit(props, 'class')
 
-const forwarded = useForwardProps(delegatedProps)
+const forwarded = useForwardedProps(delegatedProps)
 </script>
 
 <template>

@@ -134,7 +134,6 @@ export default defineConfigWithVueTs(
             'public/**',
             'bootstrap/ssr/**',
             'tailwind.config.js',
-            'resources/js/components/ui/**',
             'resources/js/actions/**',
             'resources/js/routes/**',
             'resources/js/wayfinder/**',
@@ -157,5 +156,14 @@ export default defineConfigWithVueTs(
     ...moduleAutoImportSourceBoundaryConfigs,
     testFileConfig,
     ...moduleTestBoundaryConfigs,
+    {
+        // Vendored primitives keep explicit imports instead of auto-import, because the
+        // shadcn-vue CLI regenerates them and would drop anything auto-import supplies.
+        // Every other rule, including unused-variable detection, applies unchanged.
+        files: ['resources/js/components/ui/**/*.{ts,vue}'],
+        rules: {
+            '@typescript-eslint/no-restricted-imports': 'off'
+        }
+    },
     prettier
 )

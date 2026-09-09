@@ -139,7 +139,7 @@ describe('theme contracts', () => {
                     return false
                 }
 
-                // `ui/**` is excluded from typecheck and imports the theme explicitly.
+                // Explicit imports are typed even when the theme is only used in markup.
                 if (contents.includes("from '@/lib/theme'")) {
                     return false
                 }

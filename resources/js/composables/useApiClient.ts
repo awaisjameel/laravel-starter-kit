@@ -31,18 +31,29 @@ const resolveCsrfToken = (): string | undefined => {
         return undefined
     }
 
-    const csrfMeta = document.querySelector('meta[name="csrf-token"]')
-    const token = csrfMeta?.getAttribute('content')
+    const cookie = document.cookie.split('; ').find((value) => value.startsWith('XSRF-TOKEN='))
+    if (cookie === undefined) return undefined
 
-    return token !== null && token !== undefined && token !== '' ? token : undefined
+    try {
+        return decodeURIComponent(cookie.slice('XSRF-TOKEN='.length)) || undefined
+    } catch {
+        return undefined
+    }
 }
 
 const resolveSocketId = (): string | undefined => {
     return getRealtimeSocketId()
 }
 
-const toQueryString = (query: Record<string, string | number | boolean | null | undefined>): string => {
-    const searchParams = new URLSearchParams()
+const withQuery = (url: string, query: ApiRequestOptions['query']): string => {
+    if (query === undefined) return url
+
+    const hashIndex = url.indexOf('#')
+    const fragment = hashIndex === -1 ? '' : url.slice(hashIndex)
+    const address = hashIndex === -1 ? url : url.slice(0, hashIndex)
+    const queryIndex = address.indexOf('?')
+    const pathname = queryIndex === -1 ? address : address.slice(0, queryIndex)
+    const searchParams = new URLSearchParams(queryIndex === -1 ? '' : address.slice(queryIndex + 1))
 
     Object.entries(query).forEach(([key, value]) => {
         if (value === undefined || value === null) {
@@ -53,7 +64,7 @@ const toQueryString = (query: Record<string, string | number | boolean | null | 
     })
 
     const serialized = searchParams.toString()
-    return serialized === '' ? '' : `?${serialized}`
+    return `${pathname}${serialized === '' ? '' : `?${serialized}`}${fragment}`
 }
 
 const resolveFieldErrors = (value: unknown): Record<string, string[]> | undefined => {
@@ -169,15 +180,16 @@ const buildResponseValidationError = (error: unknown, status: number): ApiError 
 export async function apiRequest<TParser extends ApiResponseParser<unknown> | undefined>(
     options: ApiRequestOptions & { parseResponse?: TParser }
 ): Promise<ApiRequestResult<TParser>> {
-    const requestUrl = `${options.url}${options.query !== undefined ? toQueryString(options.query) : ''}`
+    const requestUrl = withQuery(options.url, options.query)
     const hasBody = options.body !== undefined
     const method = options.method ?? 'GET'
-    const csrfToken = resolveCsrfToken()
-    const socketId = resolveSocketId()
+    const isSameOrigin = typeof window !== 'undefined' && new URL(requestUrl, window.location.href).origin === window.location.origin
+    const csrfToken = isSameOrigin ? resolveCsrfToken() : undefined
+    const socketId = isSameOrigin ? resolveSocketId() : undefined
     const headers: Record<string, string> = {
         Accept: 'application/json',
         ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-        ...(isMutatingMethod(method) && csrfToken !== undefined ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+        ...(isMutatingMethod(method) && csrfToken !== undefined ? { 'X-XSRF-TOKEN': csrfToken } : {}),
         ...options.headers
     }
 

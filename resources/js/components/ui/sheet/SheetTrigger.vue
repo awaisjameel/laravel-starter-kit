@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useForwardedProps } from '@/lib/forward-props'
 import { DialogTrigger, type DialogTriggerProps } from 'reka-ui'
 
 const props = defineProps<DialogTriggerProps>()
 
-const forwardedProps = computed(() => props as Partial<DialogTriggerProps>)
+const forwarded = useForwardedProps(props)
 </script>
 
 <template>
   <DialogTrigger
     data-slot="sheet-trigger"
-    v-bind="forwardedProps"
+    v-bind="forwarded"
   >
     <slot />
   </DialogTrigger>

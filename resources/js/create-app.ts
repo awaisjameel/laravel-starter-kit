@@ -14,6 +14,19 @@ interface CreateAppInstanceOptions {
 // cannot drift. Everything request-scoped is bound per instance because the SSR
 // process is long-lived: Pinia must not share store state between requests.
 export const createAppInstance = ({ create, page, plugin }: CreateAppInstanceOptions): VueApp =>
-    create({ render: () => h(Fragment, [page(), h(AppToaster)]) })
+    create({
+        setup() {
+            // Inertia initializes page state in the child App's setup.
+            onMounted(() => {
+                const appPage = useAppPage()
+                watch(
+                    () => appPage.props.auth.user?.id,
+                    () => clearApiQueryCache(),
+                    { flush: 'sync' }
+                )
+            })
+            return () => h(Fragment, [page(), h(AppToaster)])
+        }
+    })
         .use(plugin)
         .use(createPinia())

@@ -12,6 +12,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 use Inertia\Response;
 
 final class RegisteredUserController extends Controller
@@ -37,6 +38,7 @@ final class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+        Inertia::clearHistory();
 
         return to_route('app.dashboard');
     }

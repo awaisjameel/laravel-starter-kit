@@ -57,6 +57,17 @@ test('update persists changes and returns audited command result', function (): 
         'role' => ['before' => 'user', 'after' => 'admin'],
         'password' => ['before' => '[REDACTED]', 'after' => '[REDACTED]'],
     ]);
+    expect($user->fresh()?->email_verified_at)->toBeNull();
+});
+
+test('updating other user attributes preserves email verification', function (): void {
+    $user = User::factory()->create();
+    $verifiedAt = $user->email_verified_at;
+
+    new UserCommands()->update($user, new UpdateUserData('New Name', $user->email, $user->role));
+
+    expect($verifiedAt)->not->toBeNull()
+        ->and($user->fresh()?->email_verified_at)->toEqual($verifiedAt);
 });
 test('delete removes user', function (): void {
     $user = User::factory()->create(['role' => UserRole::User]);

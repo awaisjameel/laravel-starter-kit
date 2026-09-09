@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { reactiveOmit } from '@vueuse/core'
+import { useForwardedProps } from '@/lib/forward-props'
 import type { PaginationListItemProps } from "reka-ui"
 import type { HTMLAttributes } from "vue"
 import type { ButtonVariants } from '@/components/ui/button'
-import { reactiveOmit } from "@vueuse/core"
 import { PaginationListItem } from "reka-ui"
 import { cn } from "@/lib/utils"
 import { buttonStyles } from '@/components/ui/button'
@@ -15,14 +16,14 @@ const props = withDefaults(defineProps<PaginationListItemProps & {
   size: "icon",
 })
 
-const delegatedProps = reactiveOmit(props, "class", "size", "isActive", "value") as Record<string, unknown>
+const forwarded = useForwardedProps(reactiveOmit(props, "class", "size", "isActive", "value"))
 </script>
 
 <template>
   <PaginationListItem
     data-slot="pagination-item"
     :value="props.value"
-    v-bind="delegatedProps"
+    v-bind="forwarded"
     :class="cn(
       buttonStyles({
         variant: isActive ? 'outline' : 'ghost',

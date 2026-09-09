@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Inertia\Response;
 
 final class AuthenticatedSessionController extends Controller
@@ -39,6 +40,7 @@ final class AuthenticatedSessionController extends Controller
         $loginRequest->authenticate();
 
         $loginRequest->session()->regenerate();
+        Inertia::clearHistory();
 
         return redirect()->intended(route('app.dashboard', absolute: false));
     }
@@ -52,6 +54,7 @@ final class AuthenticatedSessionController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        Inertia::clearHistory();
 
         return redirect('/');
     }

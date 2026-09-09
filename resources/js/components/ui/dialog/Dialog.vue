@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { DialogRoot, type DialogRootEmits, type DialogRootProps, useForwardPropsEmits } from 'reka-ui'
+import { useForwardedPropsEmits } from '@/lib/forward-props'
+import { DialogRoot, type DialogRootEmits, type DialogRootProps } from 'reka-ui'
 
 const props = defineProps<DialogRootProps>()
 const emits = defineEmits<DialogRootEmits>()
 
-const forwarded = useForwardPropsEmits(computed(() => props as Partial<DialogRootProps>), emits)
+const forwarded = useForwardedPropsEmits(props, emits)
 </script>
 
 <template>
-  <DialogRoot
-    data-slot="dialog"
-    v-bind="forwarded"
-  >
-    <slot />
-  </DialogRoot>
+    <DialogRoot data-slot="dialog" v-bind="forwarded">
+        <slot />
+    </DialogRoot>
 </template>

@@ -153,6 +153,26 @@ on both Windows and Linux.
 
 ### Import rules
 
+Vue typechecking and ESLint cover UI primitives as well as application components. Primitives keep explicit imports because the shadcn-vue CLI regenerates them.
+
+Forward props to a reka-ui primitive with `useForwardedProps` / `useForwardedPropsEmits` from `@/lib/forward-props`, narrowing with `reactiveOmit` when a prop is consumed locally. reka-ui already omits undefined values while forwarding but types the result with every key present, which `exactOptionalPropertyTypes` rejects; the adapters restate that runtime contract in the type system and add no work of their own. Asserting `as Partial<...>` hides missing required props, and wrapping the forwarded object in another filter repeats what reka-ui just did. Reach for `omitUndefinedProps` only when the component builds the object itself, since the adapters read the calling component instance.
+
+Server listing pages pass a reactive `initialQuery` getter or computed ref to `useServerDataTable`. Users derives the query from the current location and backend pagination; generated pages use pagination props. Preserved-state redirects synchronize pagination, search, and sort without another visit. Pending searches that now match server state do not issue a stale request.
+
+The app root clears client query caches when authenticated identity changes. Clearing also synchronously resets mounted query and mutation data/errors; pending query completions cannot restore them. A query key change drops the previous key's data while the new result loads. After a full cache clear, enabled queries fetch again on an explicit refresh or a key/enabled change. SSR never fetches into or mutates these caches. Custom query/mutation error types require a mapper when they cannot represent `ApiError`, and mutation pending state accounts for overlapping requests.
+
+String cache keys and array cache keys remain distinct, even when a string looks like serialized JSON. Delayed retries stop when their key changes or their cache revision is invalidated, including logout/account changes. Keep each key tied to one raw response shape; selectors may project that shape separately.
+
+`AppPageProps` composes backend-generated `SharedPageData`; shared auth, quote, flash, appearance, and location types are not maintained manually. Flash properties are present as `string | null`. Form controls expose labels, descriptions, validation errors, and required state to assistive technology. Form IDs include a per-instance `useId()` prefix, which remains stable through SSR hydration and unique when forms repeat field names. Processing disables fields and suppresses submission; read-only choice/file controls and disabled options cannot be changed.
+
+Mutation callbacks run once per invocation. A successful write invalidates its cache keys before success callbacks run. Callback failures propagate to the caller without marking the write as failed or invoking rollback; settlement still runs if a success or error callback throws.
+
+A full cache clear invalidates outstanding mutation contexts. They reject with `stale_auth_context` (or the custom mapped error), skip subsequent callbacks and invalidations belonging to the old account, and cannot start a write after asynchronous preparation completes under a changed account. The account is checked between asynchronous callbacks as well. A callback already running cannot be cancelled, and a write already sent may have persisted; this rejection does not imply server rollback. Pending state settles when the outstanding operation finishes.
+
+Inertia's browser history is a separate cache of page props. `INERTIA_ENCRYPT_HISTORY` defaults to `true`, and successful login, registration, logout, and account deletion clear its key on the next page response. Back navigation then requests protected data from the server instead of restoring an old account's encrypted snapshot. HTTPS or localhost is required; an explicit `false` environment override disables this behavior. See [Inertia history encryption](https://inertiajs.com/docs/v3/security/history-encryption).
+
+`apiRequest` reads Laravel's current CSRF cookie for same-origin mutations, merges existing query parameters, and keeps URL fragments intact. Automatic CSRF and socket headers remain on the same origin.
+
 `eslint.config.js` uses `@typescript-eslint/no-restricted-imports` with `allowTypeImports: true`:
 
 - Runtime values from `@/composables/**`, `@/stores/**`, `@/lib/**`, `@/utils/**`,

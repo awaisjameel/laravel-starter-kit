@@ -6,6 +6,7 @@ namespace App\Modules\Users\Events\Broadcast;
 
 use App\Modules\Shared\Realtime\Events\RealtimeEvent;
 use App\Modules\Users\Data\UsersListChangedBroadcastData;
+use App\Modules\Users\Enums\UsersRealtimeChannel;
 use App\Modules\Users\Enums\UsersRealtimeEvent;
 use Illuminate\Broadcasting\PrivateChannel;
 
@@ -26,7 +27,7 @@ final class UsersListChanged extends RealtimeEvent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('users.index'),
+            new PrivateChannel(UsersRealtimeChannel::Index->value),
         ];
     }
 

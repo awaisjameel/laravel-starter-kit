@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useForwardedProps } from '@/lib/forward-props'
 import { DropdownMenuGroup, type DropdownMenuGroupProps } from 'reka-ui'
 
 const props = defineProps<DropdownMenuGroupProps>()
 
-const forwardedProps = computed(() => props as Partial<DropdownMenuGroupProps>)
+const forwarded = useForwardedProps(props)
 </script>
 
 <template>
   <DropdownMenuGroup
     data-slot="dropdown-menu-group"
-    v-bind="forwardedProps"
+    v-bind="forwarded"
   >
     <slot />
   </DropdownMenuGroup>

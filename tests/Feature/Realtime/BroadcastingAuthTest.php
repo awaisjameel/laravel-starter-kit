@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Modules\Shared\Enums\SharedRealtimeChannel;
+use App\Modules\Shared\Realtime\Support\ChannelPatternResolver;
+use App\Modules\Users\Enums\UsersRealtimeChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Broadcast;
 use Laravel\Sanctum\Sanctum;
@@ -28,6 +31,18 @@ test('guests cannot authorize private broadcast channels', function (): void {
         'channel_name' => 'private-users.index',
         'socket_id' => '1234.5678',
     ])->assertForbidden();
+});
+
+test('every generated channel contract has backend authorization and matching notification routing', function (): void {
+    $registeredChannels = Broadcast::getChannels();
+    foreach ([...UsersRealtimeChannel::cases(), ...SharedRealtimeChannel::cases()] as $channel) {
+        expect($registeredChannels)->toHaveKey($channel->value);
+    }
+
+    $user = User::factory()->create();
+    expect($user->receivesBroadcastNotificationsOn())->toBe(
+        ChannelPatternResolver::resolve(SharedRealtimeChannel::UserNotifications->value, ['userId' => $user->id]),
+    );
 });
 test('non admin users cannot authorize admin private channels', function (): void {
     $user = User::factory()->create(['role' => UserRole::User]);

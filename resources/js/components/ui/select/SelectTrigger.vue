@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { useForwardedProps } from '@/lib/forward-props'
 import type { SelectTriggerProps } from "reka-ui"
-import { computed, type HTMLAttributes } from "vue"
+import { type HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import { SelectIcon, SelectTrigger, useForwardProps } from "reka-ui"
-import { cn, omitUndefinedProps } from "@/lib/utils"
+import { SelectIcon, SelectTrigger } from "reka-ui"
+import { cn } from "@/lib/utils"
 import { appTheme } from '@/lib/theme'
 
 const props = withDefaults(
@@ -12,7 +13,7 @@ const props = withDefaults(
 )
 
 const delegatedProps = reactiveOmit(props, "class", "size")
-const forwardedProps = useForwardProps(computed(() => omitUndefinedProps(delegatedProps)))
+const forwardedProps = useForwardedProps(delegatedProps)
 </script>
 
 <template>

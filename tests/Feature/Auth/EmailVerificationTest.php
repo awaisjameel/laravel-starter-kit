@@ -11,6 +11,12 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
+test('unverified users reach the namespaced verification prompt from protected pages', function (string $path): void {
+    $user = User::factory()->unverified()->create();
+    $this->actingAs($user)->get($path)->assertRedirect(route('auth.verification.notice'));
+    $this->getJson($path)->assertForbidden();
+})->with(['/app/dashboard', '/app/admin/users']);
+
 test('email verification screen can be rendered', function (): void {
     $user = User::factory()->unverified()->create();
 

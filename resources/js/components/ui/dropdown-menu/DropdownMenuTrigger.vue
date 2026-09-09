@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { DropdownMenuTrigger, type DropdownMenuTriggerProps, useForwardProps } from 'reka-ui'
+import { useForwardedProps } from '@/lib/forward-props'
+import { DropdownMenuTrigger, type DropdownMenuTriggerProps } from 'reka-ui'
 
 const props = defineProps<DropdownMenuTriggerProps>()
 
-const forwardedProps = useForwardProps(computed(() => props as Partial<DropdownMenuTriggerProps>))
+const forwardedProps = useForwardedProps(props)
 </script>
 
 <template>

@@ -11,6 +11,7 @@ use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}CommandHandler;
 use App\Modules\{{ moduleNamespace }}\Handlers\{{ modelClass }}QueryHandler;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}StoreRequest;
 use App\Modules\{{ moduleNamespace }}\Http\Requests\{{ pagePascalName }}UpdateRequest;
+use App\Modules\Shared\Http\Requests\PaginationQueryRequest;
 use App\Modules\Shared\Http\Responders\PageResponder;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
@@ -22,9 +23,9 @@ final class {{ pagePascalName }}Controller extends Controller
         private readonly {{ modelClass }}CommandHandler ${{ modelVariable }}CommandHandler,
     ) {}
 
-    public function index(): Response
+    public function index(PaginationQueryRequest $paginationQueryRequest): Response
     {
-        $lengthAwarePaginator = $this->{{ modelVariable }}QueryHandler->index();
+        $lengthAwarePaginator = $this->{{ modelVariable }}QueryHandler->index($paginationQueryRequest->toDto());
 
         return PageResponder::render(
             'modules/{{ moduleKebab }}/pages/{{ pagePascalName }}',
@@ -32,17 +33,17 @@ final class {{ pagePascalName }}Controller extends Controller
         );
     }
 
-    public function store({{ pagePascalName }}StoreRequest $request): RedirectResponse
+    public function store({{ pagePascalName }}StoreRequest ${{ pageCamelName }}StoreRequest): RedirectResponse
     {
-        $this->{{ modelVariable }}CommandHandler->create($request->toDto());
+        $this->{{ modelVariable }}CommandHandler->create(${{ pageCamelName }}StoreRequest->toDto());
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} saved successfully');
     }
 
-    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): RedirectResponse
+    public function update({{ pagePascalName }}UpdateRequest ${{ pageCamelName }}UpdateRequest, {{ modelClass }} ${{ modelVariable }}): RedirectResponse
     {
-        $this->{{ modelVariable }}CommandHandler->update(${{ modelVariable }}, $request->toDto());
+        $this->{{ modelVariable }}CommandHandler->update(${{ modelVariable }}, ${{ pageCamelName }}UpdateRequest->toDto());
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} updated successfully');

@@ -83,7 +83,7 @@ function createMockPage({ url, role }: { url: string; role: UserRole | null }): 
             auth: {
                 user: role === null ? null : createUser(role)
             },
-            flash: {},
+            flash: { message: null, error: null, status: null },
             location: `http://localhost${url}`,
             sidebarOpen: true,
             appearance: Appearance.Light

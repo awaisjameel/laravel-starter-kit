@@ -33,8 +33,8 @@ final readonly class UserActionContext
     {
         return new MutationContext(
             action: $action,
-            actor: $this->actor,
-            target: $user,
+            actor: clone $this->actor,
+            target: $user instanceof User ? clone $user : null,
             metadata: $this->metadata,
             changes: $changes,
         );

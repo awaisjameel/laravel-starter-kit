@@ -134,6 +134,8 @@ Canonical frontend presentation contracts:
 
 ### API v1
 
+First-party browser requests use Sanctum's session and CSRF middleware. Set `SANCTUM_STATEFUL_DOMAINS` to the frontend hosts (including ports); the application URL is included by default. External API clients use bearer tokens. Tests exercise actual encrypted cookies and persisted sessions in addition to authorization checks.
+
 - `GET /api/v1/me` => `api.v1.me.show`
 - `GET /api/v1/admin/users` => `api.v1.admin.users.index`
 - `POST /api/v1/admin/users` => `api.v1.admin.users.store`
@@ -141,6 +143,8 @@ Canonical frontend presentation contracts:
 - `DELETE /api/v1/admin/users/{user}` => `api.v1.admin.users.destroy`
 
 ## Type-Safe Data Contracts
+
+Application-wide Inertia props come from `SharedPageData` and its nested DTOs. `AppPageProps` extends that generated contract, including explicit `string | null` flash values. Feature page DTOs remain owned by their modules.
 
 The project uses Spatie Data + TypeScript Transformer 3, configured in `app/Providers/TypeScriptTransformerServiceProvider.php` (v3 has no config file).
 
@@ -186,7 +190,13 @@ paint has to arrive as markup rather than as a side effect of the JS bundle:
 - CSP + nonce-based security headers. The nonce is exposed to the client through a `meta[name="csp-nonce"]` tag and handed to Inertia so its injected style elements pass the policy.
 - Hardened browser/security headers middleware.
 - Throttling for sensitive auth endpoints.
+- Email changes invalidate verification consistently across profile and admin updates.
+- API mutations use Laravel's rotating CSRF cookie; automatic session headers stay on the same origin.
 - Server-side authorization via policies and gates.
+
+User-management side effects dispatch after successful persistence and transaction commit. The client clears cached and mounted account data when identity changes; outstanding mutations skip subsequent callbacks and cache invalidations from the previous account.
+
+Inertia history encryption is enabled by default and its key rotates on login, registration, logout, and account deletion. Serve the app over HTTPS or localhost so the browser's Web Crypto API is available. An existing `INERTIA_ENCRYPT_HISTORY=false` override disables this protection. Unverified users are redirected to the namespaced verification page through the shared `verified` middleware alias.
 
 ## Testing
 
@@ -212,6 +222,16 @@ Includes coverage for:
 - dashboard + marketing rendering
 - module discovery and generator behavior
 - strict-types and security architecture rules
+
+UI primitives participate in Vue typechecking and ESLint. Generator tests execute standalone and combined APIs with and without resources, including later pages and invalid pagination. Generated CRUD pages retain pagination metadata and controls.
+
+CI also runs `composer audit --locked` and `npm audit`. The production PM2 example runs one scheduler and restarts services after graceful deployment exits.
+
+`composer qa:generated` copies the current tracked changes and untracked source into an isolated checkout, installs the locked Composer and npm dependencies, and scaffolds protected and public modules. It runs the client/SSR build, mandatory generation and cleanup, all static checks, both suites, a guest public-page SSR regression, and whitespace verification including new files. The source checkout, index, database, and build outputs stay untouched, including on failure. CI runs it as its own job. This verifies that generated modules compile and execute in the application, beyond the generator's template assertions.
+
+## Working With Coding Agents
+
+[AGENTS.md](AGENTS.md) is the canonical guide, with an entry map for each kind of change. `CLAUDE.md` imports the same guidance. Agents should trace the owning module and generated consumers, repair the complete flow, and finish with the documented quality gate and relevant tests.
 
 ## Notes
 

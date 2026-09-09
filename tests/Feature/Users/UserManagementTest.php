@@ -58,16 +58,16 @@ test('admin users can create users', function (): void {
     ]);
 });
 
-test('empty user pages retain explicit null pagination boundaries', function (): void {
+test('empty user pages still carry the shared pagination envelope', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
 
     $this->actingAs($admin)->get('/app/admin/users?search=nonexistent-user')
         ->assertOk()
         ->assertInertia(fn (Assert $assert): Assert => $assert
-            ->has('users.data', 0)
-            ->where('users.from', null)
-            ->where('users.to', null)
-            ->where('users.total', 0));
+            ->has('items', 0)
+            ->where('pagination.current_page', 1)
+            ->where('pagination.last_page', 1)
+            ->where('pagination.total', 0));
 });
 test('admin users cannot create invalid users', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
@@ -100,6 +100,21 @@ test('admin users can update users', function (): void {
         'email' => 'updated@example.com',
         'role' => UserRole::Admin->value,
     ]);
+});
+
+test('admin user email updates reset verification status', function (): void {
+    $admin = User::factory()->create(['role' => UserRole::Admin]);
+    $target = User::factory()->create(['role' => UserRole::User]);
+    expect($target->email_verified_at)->not->toBeNull();
+
+    $this->actingAs($admin)->put('/app/admin/users/'.$target->id, [
+        'name' => 'Verified User Updated',
+        'email' => 'verified-updated@example.com',
+        'password' => '',
+        'role' => UserRole::User->value,
+    ])->assertRedirect('/app/admin/users');
+
+    expect($target->fresh()?->email_verified_at)->toBeNull();
 });
 test('admin users can delete other users', function (): void {
     $admin = User::factory()->create(['role' => UserRole::Admin]);
@@ -149,10 +164,10 @@ test('user listing trims query input and applies default query values', function
     $this->actingAs($admin)
         ->get('/app/admin/users?search=%20%20Alice%20Trimmed%20%20')
         ->assertInertia(fn (Assert $assert): Assert => $assert
-            ->where('users.current_page', 1)
-            ->where('users.per_page', 10)
-            ->has('users.data', 1)
-            ->where('users.data.0.email', 'alice-trimmed@example.com')
+            ->where('pagination.current_page', 1)
+            ->where('pagination.per_page', 10)
+            ->has('items', 1)
+            ->where('items.0.email', 'alice-trimmed@example.com')
         );
 });
 test('admin users can search users by name email and role', function (): void {
@@ -171,15 +186,15 @@ test('admin users can search users by name email and role', function (): void {
     $this->actingAs($admin)
         ->get('/app/admin/users?search=alice')
         ->assertInertia(fn (Assert $assert): Assert => $assert
-            ->has('users.data', 1)
-            ->where('users.data.0.email', 'alice@example.com')
+            ->has('items', 1)
+            ->where('items.0.email', 'alice@example.com')
         );
 
     $this->actingAs($admin)
         ->get('/app/admin/users?search=bob@example.com')
         ->assertInertia(fn (Assert $assert): Assert => $assert
-            ->has('users.data', 1)
-            ->where('users.data.0.name', 'Bob Search')
+            ->has('items', 1)
+            ->where('items.0.name', 'Bob Search')
         );
 
     $testResponse = $this->actingAs($admin)->get('/app/admin/users?search=admin');
@@ -195,13 +210,13 @@ test('admin users can sort users by allowed fields', function (): void {
     $this->actingAs($admin)
         ->get('/app/admin/users?search=Sort&sortBy=name&sortDirection=asc')
         ->assertInertia(fn (Assert $assert): Assert => $assert
-            ->where('users.data.0.name', 'Alpha Sort')
+            ->where('items.0.name', 'Alpha Sort')
         );
 
     $this->actingAs($admin)
         ->get('/app/admin/users?search=Sort&sortBy=email&sortDirection=desc')
         ->assertInertia(fn (Assert $assert): Assert => $assert
-            ->where('users.data.0.email', 'zulu@example.com')
+            ->where('items.0.email', 'zulu@example.com')
         );
 });
 test('shared location prop preserves the query string', function (): void {

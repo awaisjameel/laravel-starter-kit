@@ -6,6 +6,7 @@ namespace App\Modules\{{ moduleNamespace }}\Handlers;
 
 use App\Models\{{ modelClass }};
 use App\Modules\{{ moduleNamespace }}\Queries\{{ modelClass }}Queries;
+use App\Modules\Shared\Data\PaginationQueryData;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final readonly class {{ modelClass }}QueryHandler
@@ -17,8 +18,8 @@ final readonly class {{ modelClass }}QueryHandler
     /**
      * @return LengthAwarePaginator<int, {{ modelClass }}>
      */
-    public function index(int $perPage = 15): LengthAwarePaginator
+    public function index(PaginationQueryData $paginationQueryData): LengthAwarePaginator
     {
-        return $this->{{ modelVariable }}Queries->paginate($perPage);
+        return $this->{{ modelVariable }}Queries->paginate($paginationQueryData);
     }
 }
