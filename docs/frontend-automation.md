@@ -153,7 +153,9 @@ on both Windows and Linux.
 
 ### Import rules
 
-Vue typechecking and ESLint cover UI primitives as well as application components. Primitives keep explicit imports. When forwarding optional props, use the shared `omitUndefinedProps` helper to preserve required keys and omit undefined values without losing null or false. Do not cast forwarded props to an untyped record.
+Vue typechecking and ESLint cover UI primitives as well as application components. Primitives keep explicit imports because the shadcn-vue CLI regenerates them.
+
+Forward props to a reka-ui primitive with `useForwardedProps` / `useForwardedPropsEmits` from `@/lib/forward-props`, narrowing with `reactiveOmit` when a prop is consumed locally. reka-ui already omits undefined values while forwarding but types the result with every key present, which `exactOptionalPropertyTypes` rejects; the adapters restate that runtime contract in the type system and add no work of their own. Asserting `as Partial<...>` hides missing required props, and wrapping the forwarded object in another filter repeats what reka-ui just did. Reach for `omitUndefinedProps` only when the component builds the object itself, since the adapters read the calling component instance.
 
 Server listing pages pass a reactive `pagination` getter to `useServerDataTable`. Returned metadata synchronizes page and page size after preserved-state mutation redirects without issuing an extra visit.
 

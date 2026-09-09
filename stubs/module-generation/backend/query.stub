@@ -13,8 +13,8 @@ final class {{ modelClass }}Queries
     /**
      * @return LengthAwarePaginator<int, {{ modelClass }}>
      */
-    public function paginate(PaginationQueryData $query): LengthAwarePaginator
+    public function paginate(PaginationQueryData $paginationQueryData): LengthAwarePaginator
     {
-        return {{ modelClass }}::query()->latest()->orderByDesc('id')->paginate(perPage: $query->perPage, page: $query->page);
+        return {{ modelClass }}::query()->latest()->orderByDesc('id')->paginate(perPage: $paginationQueryData->perPage, page: $paginationQueryData->page);
     }
 }

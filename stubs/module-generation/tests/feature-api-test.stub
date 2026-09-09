@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-{{ userRoleImportLine }}
-use App\Models\{{ modelClass }};
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+{{ userRoleImportLine }}use App\Models\{{ modelClass }};
+{{ userModelImportLine }}use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -15,8 +13,7 @@ test('guests access behavior for {{ routeLabel }} api index', function (): void 
     {{ apiGuestAssertion }}
 });
 
-{{ forbiddenRoleTest }}
-test('authenticated users can list {{ routeLabel }} api results', function (): void {
+{{ forbiddenRoleTest }}test('authenticated users can list {{ routeLabel }} api results', function (): void {
     {{ apiAuthRequestLine }}
 
     $testResponse->assertOk();

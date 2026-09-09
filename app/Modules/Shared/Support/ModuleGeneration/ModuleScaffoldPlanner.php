@@ -113,7 +113,9 @@ final readonly class ModuleScaffoldPlanner
             'moduleNamespace' => $generateModuleInput->moduleName->namespace,
             'pagePascalName' => $generateModuleInput->pagePascalName,
             'modelClass' => $this->modelClassName($generateModuleInput->moduleName),
+            'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
             'storeDataClass' => $this->storeDataClassName($generateModuleInput),
+            'storeDataVariable' => lcfirst($this->storeDataClassName($generateModuleInput)),
         ];
 
         $files[] = new PlannedFile(
@@ -144,9 +146,7 @@ final readonly class ModuleScaffoldPlanner
             path: sprintf('%s/%sQueries.php', $queriesPath, $this->modelClassName($generateModuleInput->moduleName)),
             contents: $this->templateRenderer->render(
                 base_path('stubs/module-generation/backend/query.stub'),
-                array_merge($tokens, [
-                    'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
-                ]),
+                $tokens,
             ),
         );
 
@@ -154,22 +154,16 @@ final readonly class ModuleScaffoldPlanner
             path: sprintf('%s/%sCommands.php', $commandsPath, $this->modelClassName($generateModuleInput->moduleName)),
             contents: $this->templateRenderer->render(
                 base_path('stubs/module-generation/backend/command.stub'),
-                array_merge($tokens, [
-                    'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
-                ]),
+                $tokens,
             ),
         );
 
         if ($this->shouldGenerateHandlers($generateModuleInput)) {
-            $handlerTokens = array_merge($tokens, [
-                'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
-            ]);
-
             $files[] = new PlannedFile(
                 path: sprintf('%s/%sQueryHandler.php', $handlersPath, $this->modelClassName($generateModuleInput->moduleName)),
                 contents: $this->templateRenderer->render(
                     base_path('stubs/module-generation/backend/query-handler.stub'),
-                    $handlerTokens,
+                    $tokens,
                 ),
             );
 
@@ -177,7 +171,7 @@ final readonly class ModuleScaffoldPlanner
                 path: sprintf('%s/%sCommandHandler.php', $handlersPath, $this->modelClassName($generateModuleInput->moduleName)),
                 contents: $this->templateRenderer->render(
                     base_path('stubs/module-generation/backend/command-handler.stub'),
-                    $handlerTokens,
+                    $tokens,
                 ),
             );
         }
@@ -322,7 +316,11 @@ final readonly class ModuleScaffoldPlanner
 
         $tokens = [
             'abilityName' => $abilityName,
-            'allowedRoleCases' => implode(', ', $allowedRoleCases),
+            // A single allowed role reads as a comparison rather than a one-element
+            // `in_array`, which is also what Rector rewrites it to.
+            'allowedRoleExpression' => count($allowedRoleCases) === 1
+                ? '$user->role === '.$allowedRoleCases[0]
+                : sprintf('in_array($user->role, [%s], true)', implode(', ', $allowedRoleCases)),
         ];
 
         $files[] = new PlannedFile(
@@ -436,7 +434,9 @@ final readonly class ModuleScaffoldPlanner
             'moduleNamespace' => $moduleNamespace,
             'pagePascalName' => $pagePascalName,
             'modelClass' => $modelClass,
+            'modelVariable' => $this->modelVariableName($generateModuleInput->moduleName),
             'storeDataClass' => $this->storeDataClassName($generateModuleInput),
+            'storeDataVariable' => lcfirst($this->storeDataClassName($generateModuleInput)),
             'tableName' => $tableName,
         ];
 
@@ -604,7 +604,7 @@ final readonly class ModuleScaffoldPlanner
         $schemaTokens = [
             'pagePascalName' => $pagePascalName,
             'pageCamelName' => lcfirst($pagePascalName),
-            'formTypeImports' => sprintf("import type { %s } from '@/types/app-data'\nimport type { FormValuesFromData } from '@/lib/forms'", $this->storeDataClassName($generateModuleInput)),
+            'formTypeImports' => sprintf("import type { FormValuesFromData } from '@/lib/forms'\nimport type { %s } from '@/types/app-data'", $this->storeDataClassName($generateModuleInput)),
             'formValuesType' => sprintf('FormValuesFromData<%s>', $this->storeDataClassName($generateModuleInput)),
             'formDefaultValues' => $this->renderFormDefaultValues($crudResourceManifest),
             'formFieldDefinitions' => $this->renderFormFieldDefinitions($crudResourceManifest),
@@ -772,7 +772,7 @@ final readonly class ModuleScaffoldPlanner
         $allowedRoleFactoryState = $this->allowedRoleFactoryState($generateModuleInput->allowedRoles);
 
         $apiAuthRequestLine = $apiRequiresAuth
-            ? "\$user = User::factory()->create({$allowedRoleFactoryState});\n\n        \$testResponse = \$this->actingAs(\$user)->getJson('{$apiRouteUri}');"
+            ? "\$user = User::factory()->create({$allowedRoleFactoryState});\n\n    \$testResponse = \$this->actingAs(\$user)->getJson('{$apiRouteUri}');"
             : sprintf("\$testResponse = \$this->getJson('%s');", $apiRouteUri);
 
         $apiAuthFollowUpLine = $apiRequiresAuth
@@ -792,6 +792,9 @@ final readonly class ModuleScaffoldPlanner
             'apiAuthRequestLine' => $apiAuthRequestLine,
             'apiAuthFollowUpLine' => $apiAuthFollowUpLine,
             'userRoleImportLine' => $restrictedByRoles ? "use App\\Enums\\UserRole;\n" : '',
+            // A public API scaffold never authenticates, so importing the user model
+            // there would leave the generated test with an unused import.
+            'userModelImportLine' => $apiRequiresAuth || $deniedRoleCase !== null ? "use App\\Models\\User;\n" : '',
             'forbiddenRoleTest' => $deniedRoleCase !== null
                 ? $this->forbiddenApiRoleTest($routeLabel, $apiRouteUri, $deniedRoleCase)
                 : '',
@@ -1042,7 +1045,7 @@ final readonly class ModuleScaffoldPlanner
             "    \$user = User::factory()->create(['role' => %s]);\n\n".
             "    \$testResponse = \$this->actingAs(\$user)->get('%s');\n\n".
             "    \$testResponse->assertForbidden();\n".
-            "});\n",
+            "});\n\n",
             $routeLabel,
             $deniedRoleCase,
             $routeUri,
@@ -1056,7 +1059,7 @@ final readonly class ModuleScaffoldPlanner
             "    \$user = User::factory()->create(['role' => %s]);\n\n".
             "    \$testResponse = \$this->actingAs(\$user)->getJson('%s');\n\n".
             "    \$testResponse->assertForbidden();\n".
-            "});\n",
+            "});\n\n",
             $routeLabel,
             $deniedRoleCase,
             $routeUri,
@@ -1155,25 +1158,24 @@ final readonly class ModuleScaffoldPlanner
     private function renderFormFieldDefinitions(CrudResourceManifest $crudResourceManifest): string
     {
         return implode(",\n", array_map(function (array $formField): string {
-            $lines = [
-                '            {',
-                sprintf('                name: %s,', $this->renderTsString($formField['name'])),
-                sprintf('                label: %s,', $this->renderTsString($formField['label'])),
-                sprintf('                type: %s,', $this->renderTsString($formField['type'])),
-                sprintf('                required: %s,', $formField['required'] ? 'true' : 'false'),
+            // Properties are joined rather than individually terminated so the last one
+            // carries no comma, matching Prettier's `trailingComma: none`.
+            $properties = [
+                sprintf('                name: %s', $this->renderTsString($formField['name'])),
+                sprintf('                label: %s', $this->renderTsString($formField['label'])),
+                sprintf('                type: %s', $this->renderTsString($formField['type'])),
+                sprintf('                required: %s', $formField['required'] ? 'true' : 'false'),
             ];
 
             if (isset($formField['placeholder'])) {
-                $lines[] = sprintf('                placeholder: %s,', $this->renderTsString($formField['placeholder']));
+                $properties[] = sprintf('                placeholder: %s', $this->renderTsString($formField['placeholder']));
             }
 
             if (isset($formField['autocomplete'])) {
-                $lines[] = sprintf('                autocomplete: %s,', $this->renderTsString($formField['autocomplete']));
+                $properties[] = sprintf('                autocomplete: %s', $this->renderTsString($formField['autocomplete']));
             }
 
-            $lines[] = '            }';
-
-            return implode("\n", $lines);
+            return "            {\n".implode(",\n", $properties)."\n            }";
         }, $crudResourceManifest->formFields));
     }
 

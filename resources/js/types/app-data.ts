@@ -169,22 +169,14 @@ export type UserViewData = {
     email_verified_at: string | null
 }
 export type UsersIndexPageData = {
-    users: UsersPaginationData
+    items: UserViewData[]
+    pagination: PaginationData
 }
 export type UsersListChangedBroadcastData = {
     action: UsersRealtimeAction
     actorUserId: number
     targetUserId: number | null
     occurredAt: string
-}
-export type UsersPaginationData = {
-    data: UserViewData[]
-    per_page: number
-    current_page: number
-    from: number | null
-    to: number | null
-    last_page: number
-    total: number
 }
 export enum UsersRealtimeAction {
     Create = 'create',

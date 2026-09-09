@@ -18,8 +18,8 @@ final readonly class {{ modelClass }}QueryHandler
     /**
      * @return LengthAwarePaginator<int, {{ modelClass }}>
      */
-    public function index(PaginationQueryData $query): LengthAwarePaginator
+    public function index(PaginationQueryData $paginationQueryData): LengthAwarePaginator
     {
-        return $this->{{ modelVariable }}Queries->paginate($query);
+        return $this->{{ modelVariable }}Queries->paginate($paginationQueryData);
     }
 }

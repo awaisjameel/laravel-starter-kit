@@ -61,6 +61,21 @@ Plain API stubs now serialize metadata through the same `PaginationData` used by
 
 A temporary `StagedAuditProbe` CRUD/API module passed `composer generate-and-cleanup`, the full backend suite (144 tests), the full frontend suite (84 tests), and `npm run build:ssr`. Its source, migration, tests, and generated helpers were removed afterward. No migration was applied to the application's database. Dependency validation and both locked-graph audits passed. This follow-up did not repeat the earlier browser smoke checks.
 
+## Residual-risk follow-up
+
+The staged-change review left four residual risks. All four are now closed.
+
+| Risk                                    | Resolution                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unsafe prop assertions in UI primitives | reka-ui already drops undefined values while forwarding; the previous code either hid that behind `as Partial<...>` or re-filtered the result. `resources/js/lib/forward-props.ts` now restates the contract for `exactOptionalPropertyTypes` at no runtime cost. All 35 `Partial` assertions, every `Record<string, unknown>` cast, and every second filtering pass are gone. |
+| Two pagination envelopes                | `UsersIndexPageData` now exposes `items` plus the shared `PaginationData`, matching generator output exactly. `UsersPaginationData` is deleted, so paginator metadata is declared once for the whole application.                                                                                                                                                              |
+| Name-dependent stub import order        | `PhpUseStatementSorter` orders the `use` block after rendering, so generated modules are correctly ordered for any module name. Stubs were also aligned with the project's Rector rules, so generated code now passes Pint and Rector with no formatting pass.                                                                                                                 |
+| No gate over generated frontend code    | `composer qa:generated` scaffolds a module into the application and runs the full gate against it, then restores the tree. It runs as its own CI job.                                                                                                                                                                                                                          |
+
+Sixty-six vendored primitives were converted to the two shared forwarding helpers, which also removed the last `_`-prefixed destructuring variables; the ESLint exemption that allowed them is withdrawn, so unused-variable detection now applies to `resources/js/components/ui/**` unchanged.
+
+Verified by regenerating four scaffold variants — module names sorting before and after `Shared`, role-restricted and public — and running Pint, Rector, PHPStan, the PHP suite, `vue-tsc`, ESLint, Vitest, and the client/SSR build against each. Prettier line wrapping in generated markup still depends on module-name length; that remains `composer generate-and-cleanup`'s job, and the gate deliberately does not assert it.
+
 ## Validation limits
 
 Local checks ran on Windows with the repository's test database configuration. Linux CI, real PM2 process restarts, production SSR hydration, authenticated browser workflows, live Reverb delivery, external mail, proxy/TLS configuration, and multi-host or load behavior were not exercised against a deployed environment. The suite and builds verify the corresponding repository contracts where tests exist; they do not replace those operational checks.

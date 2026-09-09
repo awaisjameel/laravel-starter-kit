@@ -31,7 +31,7 @@ final class {{ pageDataClass }} extends Data
 
         return new self(
             items: array_map(
-                static fn ({{ modelClass }} ${{ modelVariable }}): {{ listItemDataClass }} => {{ listItemDataClass }}::fromModel(${{ modelVariable }}),
+                {{ listItemDataClass }}::fromModel(...),
                 $models,
             ),
             pagination: PaginationData::fromPaginator($lengthAwarePaginator),

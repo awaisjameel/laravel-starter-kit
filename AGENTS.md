@@ -4,13 +4,13 @@
 
 Read the sections relevant to the task, then trace their reference implementations before editing. Keep a short record of findings, changed contracts, and remaining verification during broad tasks.
 
-| Task                          | First implementation to inspect                                                           | Verification                                                           |
-| ----------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| CRUD, requests, authorization | `app/Modules/Users`, `tests/Feature/Users`, `tests/Feature/Api`                           | PHP suite, generation                                                  |
-| Forms, tables, themes         | `resources/js/components/base`, `resources/js/lib`, `resources/js/modules/users`          | Vue typecheck, Vitest, client/SSR build                                |
-| Realtime and mutations        | `app/Modules/Shared/Realtime`, `app/Modules/Users/Listeners`, `resources/js/lib/realtime` | Realtime PHP/Vitest suites; live Reverb when relevant                  |
-| Discovery or scaffolding      | `app/Modules/Shared/Support`, `stubs/module-generation`                                   | Generator tests and a temporary generated module through the full gate |
-| Dependencies and CI           | `composer.json`, `package.json`, lock files, `.github/actions/setup-project`              | Locked audits, clean install for dependency changes, full gate         |
+| Task                          | First implementation to inspect                                                           | Verification                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| CRUD, requests, authorization | `app/Modules/Users`, `tests/Feature/Users`, `tests/Feature/Api`                           | PHP suite, generation                                          |
+| Forms, tables, themes         | `resources/js/components/base`, `resources/js/lib`, `resources/js/modules/users`          | Vue typecheck, Vitest, client/SSR build                        |
+| Realtime and mutations        | `app/Modules/Shared/Realtime`, `app/Modules/Users/Listeners`, `resources/js/lib/realtime` | Realtime PHP/Vitest suites; live Reverb when relevant          |
+| Discovery or scaffolding      | `app/Modules/Shared/Support`, `stubs/module-generation`                                   | Generator tests plus `composer qa:generated`                   |
+| Dependencies and CI           | `composer.json`, `package.json`, lock files, `.github/actions/setup-project`              | Locked audits, clean install for dependency changes, full gate |
 
 `composer generate-and-cleanup` is the mandatory static completion gate. Run it separately from builds and tests that regenerate artifacts. Then run the affected suites and builds. Do not count passing static checks as browser, deployment, or load-test verification.
 
@@ -380,7 +380,8 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Do not place feature-specific UI in `resources/js/components/**`.
 - Prefer composing `Base*` components rather than rebuilding common structures.
 - `appTheme` is auto-imported but must be aliased in `<script setup>` (`const theme = appTheme`) before a template uses it. `vue-tsc` cannot resolve an auto-imported symbol that appears only in markup. UI primitives import the theme explicitly and are included in typechecking and ESLint.
-- Reuse `omitUndefinedProps` for exact optional prop forwarding. It preserves required keys, null, and false; do not erase prop contracts with `as Record<string, unknown>`.
+- Forward props to a reka-ui primitive with `useForwardedProps` / `useForwardedPropsEmits` from `@/lib/forward-props`, narrowing with `reactiveOmit` where a prop is consumed locally. reka-ui already drops undefined values while forwarding; those adapters only restate that contract for `exactOptionalPropertyTypes`, so they cost nothing at runtime. Never assert `as Partial<...>` or `as Record<string, unknown>`: both hide missing required props, and re-filtering an already-forwarded object duplicates work reka-ui did.
+- `omitUndefinedProps` remains the tool for sanitising an object the component builds itself. The forwarding adapters read the calling component instance, so they only ever forward that component's own props.
 - Icons come only from Iconify through `unplugin-icons` using the `Icon*` component prefix. Use auto-resolved tags such as `<IconLucideChevronLeft />` in templates and virtual imports such as `~icons/lucide/chevron-left` when a component value is required in TypeScript. Application chrome uses the `lucide` collection; a multi-word collection needs the explicit `<Icon-<collection>:<name> />` form, as in `<Icon-icon-park-outline:system />`.
 - Icon-bearing contracts use Vue's generic `Component` type so they remain collection-agnostic.
 - `components.json` points the shadcn-vue CLI at `resources/css/theme.css` and declares no `iconLibrary`. Newly vendored primitives must be rewritten onto `appTheme` recipes and `~icons/*` before they are committed.
@@ -805,6 +806,8 @@ Do not shadow them with manual duplicates.
 - Template rendering rejects missing tokens before writes; module and page identifiers must start with a letter after normalization.
 - CRUD/API model names also reject PHP reserved names before files are written.
 - Generated listings use `PaginationQueryRequest` / `PaginationQueryData`, bounded to 100 rows per page, with stable ordering. CRUD page DTOs include shared `PaginationData` metadata and the page uses the shared pagination component.
+- Every paginated page DTO exposes the same envelope: `items` plus a shared `PaginationData`. `UsersIndexPageData` follows it too, so the reference module and generator output have one shape. Do not redeclare paginator metadata per module.
+- `TemplateRenderer` sorts the rendered `use` block through `PhpUseStatementSorter`. A stub cannot know whether `App\Modules\Shared\...` sorts before or after the module namespace, so imports are ordered after rendering instead. Stubs stay Rector- and Pint-clean by construction: name parameters after their type, and keep generated arrays free of trailing commas.
 - Resource API pagination links preserve query parameters. Plain API metadata uses `PaginationData` too. Server tables pass a reactive `pagination` getter to `useServerDataTable` so preserved-state redirects synchronize the current page and page size without another visit.
 - A `page` scaffold has frontend-only form values until connected to a backend endpoint. When connecting it, derive form values from that endpoint's generated DTO. It must never import a DTO that the scaffold did not generate.
 - `GeneratedPaginationTest` executes all four API variants (standalone/combined, resource/plain) and checks later pages, invalid input, and CRUD page metadata.
@@ -1000,6 +1003,8 @@ The test workflow checks generated types, auto-import/component declarations, ro
 The shared setup uses `actions/cache@v6` with the Node 24 action runtime. Dependency and patch locks are part of the cache identity.
 
 The test workflow audits both locked dependency graphs. Both mutating and non-mutating ESLint commands fail on warnings.
+
+A second CI job runs `composer qa:generated` (`scripts/verify-generated-module.sh`), which scaffolds a module into the real application, puts it through the whole gate, and then restores the tree. Run it after touching anything under `stubs/module-generation` or the scaffold planner. Prettier wrapping of generated markup depends on how long the module name is, so formatting stays the job of `composer generate-and-cleanup` rather than that gate.
 
 - Pint
 - Rector dry-run

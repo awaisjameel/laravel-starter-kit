@@ -1,15 +1,10 @@
 <script setup lang="ts">
+import { useForwardedPropsEmits } from '@/lib/forward-props'
 import type { SelectContentEmits, SelectContentProps } from "reka-ui"
-import { computed, type HTMLAttributes } from "vue"
+import { type HTMLAttributes } from "vue"
 import { reactiveOmit } from "@vueuse/core"
-import {
-  SelectContent,
-
-  SelectPortal,
-  SelectViewport,
-  useForwardPropsEmits,
-} from "reka-ui"
-import { cn, omitUndefinedProps } from "@/lib/utils"
+import { SelectContent, SelectPortal, SelectViewport } from "reka-ui"
+import { cn } from "@/lib/utils"
 import { appTheme } from '@/lib/theme'
 import { SelectScrollDownButton, SelectScrollUpButton } from "."
 
@@ -27,7 +22,7 @@ const emits = defineEmits<SelectContentEmits>()
 
 const delegatedProps = reactiveOmit(props, "class")
 
-const forwarded = useForwardPropsEmits(computed(() => omitUndefinedProps(delegatedProps)), emits)
+const forwarded = useForwardedPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

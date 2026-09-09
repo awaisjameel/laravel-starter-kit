@@ -30,6 +30,8 @@ final readonly class TemplateRenderer
             return $tokens[$key] ?? throw new RuntimeException(sprintf('Missing template token "%s" in %s.', $key, $stubPath));
         }, $contents);
 
-        return $rendered ?? throw new RuntimeException('Could not render stub: '.$stubPath);
+        $rendered ?? throw new RuntimeException('Could not render stub: '.$stubPath);
+
+        return str_starts_with($rendered, '<?php') ? PhpUseStatementSorter::sort($rendered) : $rendered;
     }
 }

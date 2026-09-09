@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useForwardedProps } from '@/lib/forward-props'
 import { TooltipTrigger, type TooltipTriggerProps } from 'reka-ui'
 
 const props = defineProps<TooltipTriggerProps>()
 
-const forwardedProps = computed(() => props as Partial<TooltipTriggerProps>)
+const forwarded = useForwardedProps(props)
 </script>
 
 <template>
   <TooltipTrigger
     data-slot="tooltip-trigger"
-    v-bind="forwardedProps"
+    v-bind="forwarded"
   >
     <slot />
   </TooltipTrigger>

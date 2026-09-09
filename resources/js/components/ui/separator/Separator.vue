@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { omitUndefinedProps } from '@/lib/utils'
+import { useForwardedProps } from '@/lib/forward-props'
 import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
@@ -13,14 +12,13 @@ const props = withDefaults(defineProps<
   decorative: true,
 })
 
-const delegated = reactiveOmit(props, 'class')
-const delegatedProps = computed(() => omitUndefinedProps(delegated))
+const forwarded = useForwardedProps(reactiveOmit(props, 'class'))
 </script>
 
 <template>
   <Separator
     data-slot="separator-root"
-    v-bind="delegatedProps"
+    v-bind="forwarded"
     :class="
       cn(
         `bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px`,

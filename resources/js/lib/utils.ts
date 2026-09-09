@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-type OptionalWithoutUndefined<T> = {
+export type OptionalWithoutUndefined<T> = {
     [K in keyof T as undefined extends T[K] ? never : K]: T[K]
 } & {
     [K in keyof T as undefined extends T[K] ? K : never]?: Exclude<T[K], undefined>

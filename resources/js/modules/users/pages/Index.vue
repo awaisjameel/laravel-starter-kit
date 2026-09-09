@@ -32,8 +32,8 @@
     const initialQuery = resolveServerTableInitialQuery<UserSortColumn>({
         locationSearch,
         fallback: {
-            page: props.users.current_page,
-            perPage: props.users.per_page,
+            page: props.pagination.current_page,
+            perPage: props.pagination.per_page,
             sortBy: UserSortBy.CreatedAt,
             sortDirection: SortDirection.Desc
         },
@@ -45,7 +45,7 @@
     const { query, searchValue, setPage, setPerPage, setSort } = useServerDataTable<UserSortColumn>({
         endpoint: UserController.index,
         initialQuery,
-        pagination: () => props.users,
+        pagination: () => props.pagination,
         debounceMs: 300
     })
 
@@ -54,7 +54,7 @@
         onListChanged: () => {
             if (!isUserDialogOpen.value && !isDeleteDialogOpen.value) {
                 router.reload({
-                    only: ['users']
+                    only: ['items', 'pagination']
                 })
             }
         }
@@ -67,7 +67,7 @@
             sortBy?: UserSortColumn
             sortDirection?: 'asc' | 'desc'
         } = {
-            users: props.users.data,
+            users: props.items,
             currentUserId: currentUserId.value
         }
 
@@ -131,10 +131,10 @@
                 <UsersTable v-bind="usersTableProps" @edit="onEditUser" @delete="onDeleteUser" @sort="setSort($event)" />
 
                 <BaseTableBaseDataTablePagination
-                    :current-page="props.users.current_page"
-                    :total-pages="props.users.last_page"
-                    :items-per-page="props.users.per_page"
-                    :total-items="props.users.total"
+                    :current-page="props.pagination.current_page"
+                    :total-pages="props.pagination.last_page"
+                    :items-per-page="props.pagination.per_page"
+                    :total-items="props.pagination.total"
                     @page-change="setPage($event)"
                 />
             </div>

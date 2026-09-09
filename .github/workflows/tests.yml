@@ -42,3 +42,19 @@ jobs:
 
       - name: Tests
         run: composer test
+
+  # Generator tests assert on rendered strings, so only a real generated module proves
+  # the stubs still emit code that compiles, lints, and passes the PHP toolchain. This
+  # runs beside `ci` rather than inside it so the two pipelines overlap.
+  generated-module:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Project
+        uses: ./.github/actions/setup-project
+
+      - name: Verify A Generated Module
+        run: composer qa:generated

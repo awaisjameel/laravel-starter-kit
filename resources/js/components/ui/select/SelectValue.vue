@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { omitUndefinedProps } from '@/lib/utils'
+import { useForwardedProps } from '@/lib/forward-props'
 import type { SelectValueProps } from "reka-ui"
 import { SelectValue } from "reka-ui"
-import { computed } from 'vue'
 
 const props = defineProps<SelectValueProps>()
 
-const forwardedProps = computed(() => omitUndefinedProps(props))
+const forwarded = useForwardedProps(props)
 </script>
 
 <template>
   <SelectValue
     data-slot="select-value"
-    v-bind="forwardedProps"
+    v-bind="forwarded"
   >
     <slot />
   </SelectValue>

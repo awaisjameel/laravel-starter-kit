@@ -119,6 +119,10 @@
             "@format:check",
             "@analyse"
         ],
+        "qa:generated": [
+            "Composer\\Config::disableProcessTimeout",
+            "bash scripts/verify-generated-module.sh"
+        ],
         "qa:check": [
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#c4b5fd,#93c5fd,#fb7185,#34d399\" --group --names=php,format,lint,types \"composer qa:php\" \"npm run format:check\" \"npm run lint:check\" \"npm run typecheck\""
@@ -149,7 +153,8 @@
         "qa:php": "Run the non-mutating PHP checks: Rector dry-run, Pint test, then PHPStan.",
         "qa:check": "Run every non-mutating PHP and frontend check in parallel.",
         "generate": "Regenerate backend-owned contracts: module manifest, TypeScript types, Wayfinder helpers.",
-        "generate-and-cleanup": "Regenerate backend-owned contracts, then run the mutating cleanup pipelines."
+        "generate-and-cleanup": "Regenerate backend-owned contracts, then run the mutating cleanup pipelines.",
+        "qa:generated": "Generate a throwaway module and run it through the full quality gate."
     },
     "extra": {
         "patches": {

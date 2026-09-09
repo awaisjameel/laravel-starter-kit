@@ -23,16 +23,16 @@ final class {{ modelClass }} extends Model
         'name',
     ];
 
-    public static function createFromData({{ storeDataClass }} $storeData): self
+    public static function createFromData({{ storeDataClass }} ${{ storeDataVariable }}): self
     {
-        /** @var self $model */
-        $model = self::query()->create($storeData->toArray());
+        /** @var self ${{ modelVariable }} */
+        ${{ modelVariable }} = self::query()->create(${{ storeDataVariable }}->toArray());
 
-        return $model;
+        return ${{ modelVariable }};
     }
 
-    public function updateFromData({{ storeDataClass }} $storeData): bool
+    public function updateFromData({{ storeDataClass }} ${{ storeDataVariable }}): bool
     {
-        return $this->fill($storeData->toArray())->save();
+        return $this->fill(${{ storeDataVariable }}->toArray())->save();
     }
 }

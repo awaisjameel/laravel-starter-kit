@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { omitUndefinedProps } from '@/lib/utils'
+import { useForwardedProps } from '@/lib/forward-props'
+import { reactiveOmit } from '@vueuse/core'
 import type { HTMLAttributes } from 'vue'
 import type { TabsListProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
 import { appTheme } from '@/lib/theme'
-import { TabsList, useForwardProps } from 'reka-ui'
-import { computed } from 'vue'
+import { TabsList } from 'reka-ui'
 
 const props = defineProps<
     TabsListProps & {
@@ -13,13 +13,9 @@ const props = defineProps<
     }
 >()
 
-const delegatedProps = computed(() => {
-    const { class: _class, ...delegated } = props
-    return delegated
-})
+const delegatedProps = reactiveOmit(props, 'class')
 
-const rawForwardedProps = useForwardProps(delegatedProps)
-const forwarded = computed(() => omitUndefinedProps(rawForwardedProps.value))
+const forwarded = useForwardedProps(delegatedProps)
 </script>
 
 <template>

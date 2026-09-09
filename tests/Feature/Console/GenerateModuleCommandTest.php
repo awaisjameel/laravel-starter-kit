@@ -216,7 +216,7 @@ test('api mode scaffolds api assets and skips frontend assets', function (): voi
     $apiControllerContents = is_string($apiControllerContents) ? $apiControllerContents : '';
     $this->assertStringContainsString('use App\\Modules\\Shared\\Http\\Responders\\ApiResponder;', $apiControllerContents);
     $this->assertStringContainsString('return ApiResponder::collection(', $apiControllerContents);
-    $this->assertStringContainsString('return ApiResponder::resource(IndexResource::make($model), 201);', $apiControllerContents);
+    $this->assertStringContainsString('return ApiResponder::resource(IndexResource::make($billing), 201);', $apiControllerContents);
 });
 test('crud api mode scaffolds both backend route files', function (): void {
     $basePath = $this->createTemporaryModuleGenerationBasePath();

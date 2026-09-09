@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { useForwardedProps } from '@/lib/forward-props'
 import type { PaginationFirstProps } from "reka-ui"
-import { computed, type HTMLAttributes } from "vue"
+import { type HTMLAttributes } from "vue"
 import type { ButtonVariants } from '@/components/ui/button'
 import { reactiveOmit } from "@vueuse/core"
-import { PaginationFirst, useForwardProps } from "reka-ui"
-import { cn, omitUndefinedProps } from "@/lib/utils"
+import { PaginationFirst } from "reka-ui"
+import { cn } from "@/lib/utils"
 import { buttonStyles } from '@/components/ui/button'
 import { appTheme } from '@/lib/theme'
 
@@ -16,7 +17,7 @@ const props = withDefaults(defineProps<PaginationFirstProps & {
 })
 
 const delegatedProps = reactiveOmit(props, "class", "size")
-const forwarded = useForwardProps(computed(() => omitUndefinedProps(delegatedProps)))
+const forwarded = useForwardedProps(delegatedProps)
 </script>
 
 <template>

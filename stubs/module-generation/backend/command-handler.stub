@@ -14,18 +14,18 @@ final readonly class {{ modelClass }}CommandHandler
         private {{ modelClass }}Commands ${{ modelVariable }}Commands,
     ) {}
 
-    public function create({{ storeDataClass }} $storeData): {{ modelClass }}
+    public function create({{ storeDataClass }} ${{ storeDataVariable }}): {{ modelClass }}
     {
-        return $this->{{ modelVariable }}Commands->create($storeData);
+        return $this->{{ modelVariable }}Commands->create(${{ storeDataVariable }});
     }
 
-    public function update({{ modelClass }} $model, {{ storeDataClass }} $storeData): {{ modelClass }}
+    public function update({{ modelClass }} ${{ modelVariable }}, {{ storeDataClass }} ${{ storeDataVariable }}): {{ modelClass }}
     {
-        return $this->{{ modelVariable }}Commands->update($model, $storeData);
+        return $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, ${{ storeDataVariable }});
     }
 
-    public function delete({{ modelClass }} $model): void
+    public function delete({{ modelClass }} ${{ modelVariable }}): void
     {
-        $this->{{ modelVariable }}Commands->delete($model);
+        $this->{{ modelVariable }}Commands->delete(${{ modelVariable }});
     }
 }

@@ -22,9 +22,9 @@ final class {{ pagePascalName }}ApiController extends Controller
         private readonly {{ modelClass }}Commands ${{ modelVariable }}Commands,
     ) {}
 
-    public function index(PaginationQueryRequest $request): JsonResponse
+    public function index(PaginationQueryRequest $paginationQueryRequest): JsonResponse
     {
-        $paginator = $this->{{ modelVariable }}Queries->paginate($request->toDto());
+        $paginator = $this->{{ modelVariable }}Queries->paginate($paginationQueryRequest->toDto());
         /** @var list<{{ modelClass }}> $models */
         $models = $paginator->items();
 
@@ -34,11 +34,11 @@ final class {{ pagePascalName }}ApiController extends Controller
         ]);
     }
 
-    public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
+    public function store({{ pagePascalName }}StoreRequest ${{ pageCamelName }}StoreRequest): JsonResponse
     {
-        $model = $this->{{ modelVariable }}Commands->create($request->toDto());
+        ${{ modelVariable }} = $this->{{ modelVariable }}Commands->create(${{ pageCamelName }}StoreRequest->toDto());
 
-        return ApiResponder::payload(['data' => $this->serializeModel($model)], 201);
+        return ApiResponder::payload(['data' => $this->serializeModel(${{ modelVariable }})], 201);
     }
 
     public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
@@ -46,9 +46,9 @@ final class {{ pagePascalName }}ApiController extends Controller
         return ApiResponder::payload(['data' => $this->serializeModel(${{ modelVariable }})]);
     }
 
-    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
+    public function update({{ pagePascalName }}UpdateRequest ${{ pageCamelName }}UpdateRequest, {{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
-        $model = $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, $request->toDto());
+        $model = $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, ${{ pageCamelName }}UpdateRequest->toDto());
 
         return ApiResponder::payload(['data' => $this->serializeModel($model)]);
     }

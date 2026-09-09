@@ -23,16 +23,16 @@ final class {{ pagePascalName }}ApiController extends Controller
         private readonly {{ modelClass }}Commands ${{ modelVariable }}Commands,
     ) {}
 
-    public function index(PaginationQueryRequest $request): AnonymousResourceCollection
+    public function index(PaginationQueryRequest $paginationQueryRequest): AnonymousResourceCollection
     {
-        return ApiResponder::collection({{ pagePascalName }}Resource::collection($this->{{ modelVariable }}Queries->paginate($request->toDto())->withQueryString()));
+        return ApiResponder::collection({{ pagePascalName }}Resource::collection($this->{{ modelVariable }}Queries->paginate($paginationQueryRequest->toDto())->withQueryString()));
     }
 
-    public function store({{ pagePascalName }}StoreRequest $request): JsonResponse
+    public function store({{ pagePascalName }}StoreRequest ${{ pageCamelName }}StoreRequest): JsonResponse
     {
-        $model = $this->{{ modelVariable }}Commands->create($request->toDto());
+        ${{ modelVariable }} = $this->{{ modelVariable }}Commands->create(${{ pageCamelName }}StoreRequest->toDto());
 
-        return ApiResponder::resource({{ pagePascalName }}Resource::make($model), 201);
+        return ApiResponder::resource({{ pagePascalName }}Resource::make(${{ modelVariable }}), 201);
     }
 
     public function show({{ modelClass }} ${{ modelVariable }}): JsonResponse
@@ -40,9 +40,9 @@ final class {{ pagePascalName }}ApiController extends Controller
         return ApiResponder::resource({{ pagePascalName }}Resource::make(${{ modelVariable }}));
     }
 
-    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): JsonResponse
+    public function update({{ pagePascalName }}UpdateRequest ${{ pageCamelName }}UpdateRequest, {{ modelClass }} ${{ modelVariable }}): JsonResponse
     {
-        $model = $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, $request->toDto());
+        $model = $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, ${{ pageCamelName }}UpdateRequest->toDto());
 
         return ApiResponder::resource({{ pagePascalName }}Resource::make($model));
     }

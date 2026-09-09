@@ -10,10 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('{{ tableName }}', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::create('{{ tableName }}', function (Blueprint $blueprint): void {
+            $blueprint->id();
+            $blueprint->string('name');
+            $blueprint->timestamps();
         });
     }
 

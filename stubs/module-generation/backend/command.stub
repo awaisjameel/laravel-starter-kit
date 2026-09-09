@@ -9,20 +9,20 @@ use App\Modules\{{ moduleNamespace }}\Data\{{ storeDataClass }};
 
 final class {{ modelClass }}Commands
 {
-    public function create({{ storeDataClass }} $storeData): {{ modelClass }}
+    public function create({{ storeDataClass }} ${{ storeDataVariable }}): {{ modelClass }}
     {
-        return {{ modelClass }}::createFromData($storeData);
+        return {{ modelClass }}::createFromData(${{ storeDataVariable }});
     }
 
-    public function update({{ modelClass }} $model, {{ storeDataClass }} $storeData): {{ modelClass }}
+    public function update({{ modelClass }} ${{ modelVariable }}, {{ storeDataClass }} ${{ storeDataVariable }}): {{ modelClass }}
     {
-        $model->updateFromData($storeData);
+        ${{ modelVariable }}->updateFromData(${{ storeDataVariable }});
 
-        return $model->refresh();
+        return ${{ modelVariable }}->refresh();
     }
 
-    public function delete({{ modelClass }} $model): void
+    public function delete({{ modelClass }} ${{ modelVariable }}): void
     {
-        $model->delete();
+        ${{ modelVariable }}->delete();
     }
 }

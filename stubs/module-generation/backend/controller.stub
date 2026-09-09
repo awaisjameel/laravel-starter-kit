@@ -23,9 +23,9 @@ final class {{ pagePascalName }}Controller extends Controller
         private readonly {{ modelClass }}Commands ${{ modelVariable }}Commands,
     ) {}
 
-    public function index(PaginationQueryRequest $request): Response
+    public function index(PaginationQueryRequest $paginationQueryRequest): Response
     {
-        $lengthAwarePaginator = $this->{{ modelVariable }}Queries->paginate($request->toDto());
+        $lengthAwarePaginator = $this->{{ modelVariable }}Queries->paginate($paginationQueryRequest->toDto());
 
         return PageResponder::render(
             'modules/{{ moduleKebab }}/pages/{{ pagePascalName }}',
@@ -33,17 +33,17 @@ final class {{ pagePascalName }}Controller extends Controller
         );
     }
 
-    public function store({{ pagePascalName }}StoreRequest $request): RedirectResponse
+    public function store({{ pagePascalName }}StoreRequest ${{ pageCamelName }}StoreRequest): RedirectResponse
     {
-        $this->{{ modelVariable }}Commands->create($request->toDto());
+        $this->{{ modelVariable }}Commands->create(${{ pageCamelName }}StoreRequest->toDto());
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} saved successfully');
     }
 
-    public function update({{ pagePascalName }}UpdateRequest $request, {{ modelClass }} ${{ modelVariable }}): RedirectResponse
+    public function update({{ pagePascalName }}UpdateRequest ${{ pageCamelName }}UpdateRequest, {{ modelClass }} ${{ modelVariable }}): RedirectResponse
     {
-        $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, $request->toDto());
+        $this->{{ modelVariable }}Commands->update(${{ modelVariable }}, ${{ pageCamelName }}UpdateRequest->toDto());
 
         return redirect()->route('{{ routeIndexName }}')
             ->with('message', '{{ pageTitle }} updated successfully');

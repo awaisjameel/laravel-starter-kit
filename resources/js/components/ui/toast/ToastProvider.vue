@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useForwardedProps } from '@/lib/forward-props'
 import type { ToastProviderProps } from 'reka-ui'
-import { ToastProvider, useForwardProps } from 'reka-ui'
-import { omitUndefinedProps } from '@/lib/utils'
+import { ToastProvider } from 'reka-ui'
 
 const props = defineProps<ToastProviderProps>()
-const rawForwardedProps = useForwardProps(props)
-const forwarded = computed(() => omitUndefinedProps(rawForwardedProps.value))
+const forwarded = useForwardedProps(props)
 </script>
 
 <template>

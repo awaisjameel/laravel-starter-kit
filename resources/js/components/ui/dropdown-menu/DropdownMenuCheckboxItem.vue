@@ -1,25 +1,17 @@
 <script setup lang="ts">
+import { useForwardedPropsEmits } from '@/lib/forward-props'
+import { reactiveOmit } from '@vueuse/core'
 import { cn } from '@/lib/utils'
 import { appTheme } from '@/lib/theme'
-import {
-  DropdownMenuCheckboxItem,
-  type DropdownMenuCheckboxItemEmits,
-  type DropdownMenuCheckboxItemProps,
-  DropdownMenuItemIndicator,
-  useForwardPropsEmits,
-} from 'reka-ui'
-import { computed, type HTMLAttributes } from 'vue'
+import { DropdownMenuCheckboxItem, type DropdownMenuCheckboxItemEmits, type DropdownMenuCheckboxItemProps, DropdownMenuItemIndicator } from 'reka-ui'
+import { type HTMLAttributes } from 'vue'
 
 const props = defineProps<DropdownMenuCheckboxItemProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<DropdownMenuCheckboxItemEmits>()
 
-const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+const delegatedProps = reactiveOmit(props, 'class')
 
-  return delegated as Partial<DropdownMenuCheckboxItemProps>
-})
-
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardedPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

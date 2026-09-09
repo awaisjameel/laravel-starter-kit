@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { omitUndefinedProps } from '@/lib/utils'
+import { useForwardedPropsEmits } from '@/lib/forward-props'
 import type { HTMLAttributes } from 'vue'
 import type { SwitchRootEmits, SwitchRootProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
 import { appTheme } from '@/lib/theme'
 import { reactiveOmit } from '@vueuse/core'
-import { SwitchRoot, SwitchThumb, useForwardPropsEmits } from 'reka-ui'
+import { SwitchRoot, SwitchThumb } from 'reka-ui'
 
 const props = defineProps<
     SwitchRootProps & {
@@ -17,8 +16,7 @@ const props = defineProps<
 const emits = defineEmits<SwitchRootEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class')
-const rawForwardedProps = useForwardPropsEmits(delegatedProps, emits)
-const forwarded = computed(() => omitUndefinedProps(rawForwardedProps.value))
+const forwarded = useForwardedPropsEmits(delegatedProps, emits)
 </script>
 
 <template>
