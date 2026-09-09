@@ -1,6 +1,82 @@
 import { mount } from '@vue/test-utils'
 import { expect, it } from 'vitest'
+import BaseFormRenderer from '../BaseFormRenderer.vue'
 import BaseInputField from '../BaseInputField.vue'
+
+it('disables every field while the form is processing', () => {
+    const wrapper = mount(BaseFormRenderer<{ name: string }>, {
+        props: {
+            model: { name: 'Saved name' },
+            fields: [{ name: 'name', label: 'Name', type: 'text' }],
+            processing: true
+        }
+    })
+    try {
+        expect(wrapper.get('input').attributes('disabled')).toBeDefined()
+    } finally {
+        wrapper.unmount()
+    }
+})
+
+it.each(['tabs', 'multiselect'] as const)('respects disabled options in %s', (type) => {
+    const wrapper = mount(BaseInputField<{ choice: string | string[] }>, {
+        props: {
+            id: 'choice',
+            field: { name: 'choice', label: 'Choice', type, options: [{ value: 'locked', label: 'Locked', disabled: true }] },
+            modelValue: type === 'tabs' ? 'locked' : []
+        }
+    })
+    try {
+        expect(wrapper.get(type === 'tabs' ? '[role="tab"]' : 'option').attributes('disabled')).toBeDefined()
+    } finally {
+        wrapper.unmount()
+    }
+})
+
+it.each(['checkbox', 'toggle', 'select', 'multiselect', 'radio', 'tabs', 'file'] as const)('prevents changes to a readonly %s field', (type) => {
+    const wrapper = mount(BaseInputField<{ choice: unknown }>, {
+        props: {
+            id: 'readonly-choice',
+            field: { name: 'choice', label: 'Choice', type, readonly: true, options: [{ value: 'one', label: 'One' }] },
+            modelValue: null
+        }
+    })
+    try {
+        const selector = {
+            checkbox: '[role="checkbox"]',
+            toggle: '[role="switch"]',
+            select: '[role="combobox"]',
+            multiselect: 'select',
+            radio: '[role="radio"]',
+            tabs: '[role="tab"]',
+            file: 'input'
+        }[type]
+        expect(wrapper.get(selector).attributes('disabled')).toBeDefined()
+    } finally {
+        wrapper.unmount()
+    }
+})
+
+it('associates a toggle label and field feedback with its control', () => {
+    const wrapper = mount(BaseInputField<{ enabled: boolean }>, {
+        props: {
+            id: 'enabled',
+            field: { name: 'enabled', label: 'Enabled', type: 'toggle', description: 'Allow access' },
+            modelValue: false,
+            error: 'Access is required'
+        }
+    })
+    try {
+        const control = wrapper.get('[role="switch"]')
+        expect(control.attributes('id')).toBe('enabled')
+        expect(control.attributes('aria-invalid')).toBe('true')
+        expect(control.attributes('aria-describedby')).toBe('enabled-description enabled-error')
+        expect(wrapper.get('#enabled-description').text()).toBe('Allow access')
+        expect(wrapper.get('#enabled-error').text()).toBe('Access is required')
+    } finally {
+        wrapper.unmount()
+    }
+})
 
 it('renders one checkbox label and preserves its required marker and interaction', async () => {
     const wrapper = mount(BaseInputField<{ remember: boolean }>, {

@@ -161,6 +161,10 @@ Server listing pages pass a reactive `initialQuery` getter or computed ref to `u
 
 The app root clears client query caches when authenticated identity changes. SSR never fetches into these caches. Custom query/mutation error types require a mapper when they cannot represent `ApiError`, and mutation pending state accounts for overlapping requests.
 
+String cache keys and array cache keys remain distinct, even when a string looks like serialized JSON. Delayed retries stop when their key changes or their cache revision is invalidated, including logout/account changes. Keep each key tied to one raw response shape; selectors may project that shape separately.
+
+`AppPageProps` composes backend-generated `SharedPageData`; shared auth, quote, flash, appearance, and location types are not maintained manually. Flash properties are present as `string | null`. Form controls expose labels, descriptions, validation errors, and required state to assistive technology. Processing disables fields; read-only choice/file controls and disabled options cannot be changed.
+
 Mutation callbacks run once per invocation. A successful write invalidates its cache keys before success callbacks run. Callback failures propagate to the caller without marking the write as failed or invoking rollback; settlement still runs if a success or error callback throws.
 
 `apiRequest` reads Laravel's current CSRF cookie for same-origin mutations, merges existing query parameters, and keeps URL fragments intact. Automatic CSRF and socket headers remain on the same origin.

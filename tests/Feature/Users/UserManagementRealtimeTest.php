@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Modules\Users\Enums\UsersRealtimeChannel;
 use App\Modules\Users\Events\Broadcast\UserChanged;
 use App\Modules\Users\Events\Broadcast\UsersListChanged;
 use App\Modules\Users\Notifications\UserManagementBroadcastNotification;
@@ -32,6 +33,7 @@ test('creating a user dispatches realtime events and notifications', function ()
 
     Event::assertDispatched(UsersListChanged::class, static function (UsersListChanged $usersListChanged) use ($admin): true {
         expect($usersListChanged->broadcastAs())->toBe('users.list.changed')
+            ->and((string) ($usersListChanged->broadcastOn()[0] ?? ''))->toBe('private-'.UsersRealtimeChannel::Index->value)
             ->and($usersListChanged->broadcastWith())->toMatchArray([
                 'action' => 'create',
                 'actorUserId' => $admin->id,

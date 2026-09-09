@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
         $middleware->redirectGuestsTo(fn (Request $request): string => route('auth.login.create'));
+        $middleware->statefulApi();
 
         $middleware->web(append: [
             HandleAppearance::class,

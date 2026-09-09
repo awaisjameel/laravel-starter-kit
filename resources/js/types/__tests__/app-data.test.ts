@@ -1,6 +1,8 @@
 import { expectTypeOf, it } from 'vitest'
+import type { AppPageProps } from '..'
 import type {
     PaginationData,
+    SharedPageData,
     UserChangedBroadcastData,
     UserIndexData,
     UserManagementNotificationData,
@@ -9,6 +11,8 @@ import type {
 } from '../app-data'
 
 it('preserves explicit nulls in backend response contracts', () => {
+    expectTypeOf<AppPageProps['flash']['message']>().toEqualTypeOf<string | null>()
+    expectTypeOf<AppPageProps>().toExtend<SharedPageData>()
     expectTypeOf<UserViewData['email_verified_at']>().toEqualTypeOf<string | null>()
     expectTypeOf<UserChangedBroadcastData['user']>().toEqualTypeOf<UserViewData | null>()
     expectTypeOf<UserManagementNotificationData['targetUserId']>().toEqualTypeOf<number | null>()

@@ -113,6 +113,27 @@ export type ResetPasswordPageData = {
     email: string
     token: string
 }
+export type SharedAuthData = {
+    user: UserViewData | null
+}
+export type SharedFlashData = {
+    message: string | null
+    error: string | null
+    status: string | null
+}
+export type SharedPageData = {
+    name: string
+    quote: SharedQuoteData
+    auth: SharedAuthData
+    flash: SharedFlashData
+    location: string
+    sidebarOpen: boolean
+    appearance: Appearance
+}
+export type SharedQuoteData = {
+    message: string
+    author: string
+}
 export enum SharedRealtimeChannel {
     UserNotifications = 'users.{userId}.notifications'
 }

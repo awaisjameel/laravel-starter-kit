@@ -15,6 +15,9 @@ test('the configured generator preserves nullable response properties', function
     expect($output)
         ->toMatch('/email_verified_at:\s*string\s*\|\s*null/')
         ->toMatch('/user:\s*UserViewData\s*\|\s*null/')
+        ->toMatch('/flash:\s*SharedFlashData/')
+        ->toMatch('/message:\s*string\s*\|\s*null/')
+        ->toMatch('/appearance:\s*Appearance/')
         ->toMatch('/from:\s*number\s*\|\s*null/')
         ->toMatch('/targetUserId:\s*number\s*\|\s*null/');
 });

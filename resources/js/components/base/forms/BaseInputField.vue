@@ -8,6 +8,7 @@
         field: FormFieldSchema<TForm>
         modelValue: unknown
         error?: string
+        disabled?: boolean
     }
 
     const props = defineProps<Props>()
@@ -17,8 +18,19 @@
     }>()
 
     const resolvedOptions = computed<FormOption[]>(() => props.field.options ?? [])
-    const isFieldDisabled = computed(() => props.field.disabled === true)
+    const isFieldDisabled = computed(() => props.disabled === true || props.field.disabled === true)
     const isFieldReadonly = computed(() => props.field.readonly === true)
+    const isChoiceDisabled = computed(() => isFieldDisabled.value || isFieldReadonly.value)
+    const controlAttributes = computed(() => ({
+        'aria-invalid': Boolean(props.error),
+        'aria-required': props.field.required === true,
+        'aria-describedby':
+            [props.field.description ? `${props.id}-description` : '', props.error ? `${props.id}-error` : ''].filter(Boolean).join(' ') || undefined
+    }))
+
+    const updateValue = (value: unknown): void => {
+        if (!isChoiceDisabled.value) emit('update:modelValue', value)
+    }
 
     const onFileChange = (event: Event): void => {
         const target = event.target
@@ -30,16 +42,16 @@
         const files = target.files
 
         if (files === null) {
-            emit('update:modelValue', props.field.multiple ? [] : null)
+            updateValue(props.field.multiple ? [] : null)
             return
         }
 
         if (props.field.multiple) {
-            emit('update:modelValue', Array.from(files))
+            updateValue(Array.from(files))
             return
         }
 
-        emit('update:modelValue', files.item(0))
+        updateValue(files.item(0))
     }
 
     const onMultiSelectChange = (event: Event): void => {
@@ -50,7 +62,7 @@
         }
 
         const values = Array.from(target.selectedOptions).map((option) => option.value)
-        emit('update:modelValue', values)
+        updateValue(values)
     }
 
     const toBoolean = (value: unknown): boolean => value === true
@@ -67,6 +79,7 @@
     >
         <UiInput
             v-if="['text', 'email', 'password'].includes(props.field.type)"
+            v-bind="controlAttributes"
             :id="props.id"
             :type="props.field.type"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
@@ -74,26 +87,27 @@
             :autocomplete="props.field.autocomplete"
             :disabled="isFieldDisabled"
             :readonly="isFieldReadonly"
-            @update:model-value="emit('update:modelValue', $event)"
+            @update:model-value="updateValue"
         />
 
         <UiTextarea
             v-else-if="props.field.type === 'textarea'"
+            v-bind="controlAttributes"
             :id="props.id"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
             :placeholder="props.field.placeholder"
             :disabled="isFieldDisabled"
             :readonly="isFieldReadonly"
-            @update:model-value="emit('update:modelValue', $event)"
+            @update:model-value="updateValue"
         />
 
         <UiSelect
             v-else-if="props.field.type === 'select'"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
-            :disabled="isFieldDisabled"
-            @update:model-value="emit('update:modelValue', $event)"
+            :disabled="isChoiceDisabled"
+            @update:model-value="updateValue"
         >
-            <UiSelectTrigger :id="props.id" class="w-full">
+            <UiSelectTrigger :id="props.id" v-bind="controlAttributes" class="w-full">
                 <UiSelectValue :placeholder="props.field.placeholder ?? 'Select an option'" />
             </UiSelectTrigger>
             <UiSelectContent>
@@ -105,9 +119,10 @@
 
         <select
             v-else-if="props.field.type === 'multiselect'"
+            v-bind="controlAttributes"
             :id="props.id"
             multiple
-            :disabled="isFieldDisabled"
+            :disabled="isChoiceDisabled"
             :class="[theme.field.control, theme.field.multiselect]"
             @change="onMultiSelectChange"
         >
@@ -115,6 +130,7 @@
                 v-for="option in resolvedOptions"
                 :key="option.value"
                 :value="option.value"
+                :disabled="option.disabled === true"
                 :selected="Array.isArray(props.modelValue) && props.modelValue.includes(option.value)"
             >
                 {{ option.label }}
@@ -123,22 +139,24 @@
 
         <UiInput
             v-else-if="props.field.type === 'file'"
+            v-bind="controlAttributes"
             :id="props.id"
             type="file"
             :accept="props.field.accept"
             :multiple="props.field.multiple"
-            :disabled="isFieldDisabled"
+            :disabled="isChoiceDisabled"
             @change="onFileChange"
         />
 
         <div v-else-if="props.field.type === 'checkbox'" class="flex items-center gap-2">
             <UiCheckbox
                 :id="props.id"
+                v-bind="controlAttributes"
                 :model-value="toBoolean(props.modelValue)"
-                :disabled="isFieldDisabled"
-                @update:model-value="emit('update:modelValue', $event === true)"
+                :disabled="isChoiceDisabled"
+                @update:model-value="updateValue($event === true)"
             />
-            <UiLabel :for="props.id">
+            <UiLabel :id="`${props.id}-label`" :for="props.id">
                 {{ props.field.placeholder ?? props.field.label }}
                 <span v-if="props.field.required" class="text-destructive">*</span>
             </UiLabel>
@@ -147,21 +165,25 @@
         <div v-else-if="props.field.type === 'toggle'" :class="theme.field.toggle">
             <div class="space-y-0.5">
                 <p class="text-sm font-medium">{{ props.field.placeholder ?? props.field.label }}</p>
-                <p v-if="props.field.description !== undefined" class="text-xs text-muted-foreground">{{ props.field.description }}</p>
             </div>
             <UiSwitch
+                :id="props.id"
+                v-bind="controlAttributes"
                 :model-value="toBoolean(props.modelValue)"
-                :disabled="isFieldDisabled"
-                @update:model-value="emit('update:modelValue', $event === true)"
+                :disabled="isChoiceDisabled"
+                @update:model-value="updateValue($event === true)"
             />
         </div>
 
         <UiRadioGroup
             v-else-if="props.field.type === 'radio'"
+            :id="props.id"
+            v-bind="controlAttributes"
+            :aria-labelledby="`${props.id}-label`"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
-            :disabled="isFieldDisabled"
+            :disabled="isChoiceDisabled"
             class="space-y-2"
-            @update:model-value="emit('update:modelValue', $event)"
+            @update:model-value="updateValue"
         >
             <div v-for="option in resolvedOptions" :key="option.value" class="flex items-center gap-2">
                 <UiRadioGroupItem :id="`${props.id}-${option.value}`" :value="option.value" :disabled="option.disabled === true" />
@@ -172,10 +194,16 @@
         <UiTabs
             v-else-if="props.field.type === 'tabs'"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
-            @update:model-value="emit('update:modelValue', $event)"
+            @update:model-value="updateValue"
         >
-            <UiTabsList class="w-full">
-                <UiTabsTrigger v-for="option in resolvedOptions" :key="option.value" :value="option.value" class="flex-1">
+            <UiTabsList :id="props.id" v-bind="controlAttributes" :aria-labelledby="`${props.id}-label`" class="w-full">
+                <UiTabsTrigger
+                    v-for="option in resolvedOptions"
+                    :key="option.value"
+                    :value="option.value"
+                    :disabled="isChoiceDisabled || option.disabled === true"
+                    class="flex-1"
+                >
                     {{ option.label }}
                 </UiTabsTrigger>
             </UiTabsList>
@@ -183,11 +211,13 @@
 
         <UiInput
             v-else
+            v-bind="controlAttributes"
             :id="props.id"
             :model-value="typeof props.modelValue === 'string' ? props.modelValue : ''"
             :placeholder="props.field.placeholder"
             :disabled="isFieldDisabled"
-            @update:model-value="emit('update:modelValue', $event)"
+            :readonly="isFieldReadonly"
+            @update:model-value="updateValue"
         />
     </BaseFormsBaseFieldShell>
 </template>

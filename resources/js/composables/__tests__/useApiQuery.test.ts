@@ -15,6 +15,47 @@ describe('useApiQuery', () => {
         clearApiQueryCache()
     })
 
+    it('keeps string keys distinct from structured keys in cache and in-flight requests', async () => {
+        const stringKey = '["users"]'
+        const arrayKey = ['users']
+        const first = useApiQuery({ key: stringKey, queryFn: async () => 'string-result', enabled: false })
+        const second = useApiQuery({ key: arrayKey, queryFn: async () => 'array-result', enabled: false })
+
+        await Promise.all([first.refresh(), second.refresh()])
+
+        expect(first.data.value).toBe('string-result')
+        expect(second.data.value).toBe('array-result')
+        expect(getApiQueryCacheData(stringKey)).toBe('string-result')
+        expect(getApiQueryCacheData(arrayKey)).toBe('array-result')
+        invalidateApiQueryCache(stringKey)
+        expect(getApiQueryCacheData(arrayKey)).toBe('array-result')
+    })
+
+    it.each(['key-change', 'cache-clear'] as const)('stops retrying a request superseded by %s', async (change) => {
+        vi.useFakeTimers()
+        try {
+            const key = ref('first-account')
+            const queryFn = vi.fn(async () => {
+                if (queryFn.mock.calls.length === 1) throw new Error('temporary failure')
+                return key.value
+            })
+            const query = useApiQuery({ key, queryFn, enabled: false, retryDelayMs: 100 })
+            const request = query.refresh().catch(() => undefined)
+            await vi.advanceTimersByTimeAsync(0)
+
+            if (change === 'key-change') key.value = 'second-account'
+            else clearApiQueryCache()
+
+            await vi.advanceTimersByTimeAsync(100)
+            await request
+
+            expect(queryFn).toHaveBeenCalledTimes(1)
+            expect(getApiQueryCacheData('first-account')).toBeUndefined()
+        } finally {
+            vi.useRealTimers()
+        }
+    })
+
     it('reuses cached data for the same cache key within stale time', async () => {
         const queryFn = vi.fn(async () => ({ count: 1 }))
 

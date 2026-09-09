@@ -72,6 +72,7 @@
                         :field="field"
                         :model-value="getModelFieldValue(field.name)"
                         :error="props.errors[field.name] ?? ''"
+                        :disabled="props.processing"
                         @update:model-value="setValue(field.name, $event)"
                     />
                 </div>

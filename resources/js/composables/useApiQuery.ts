@@ -111,13 +111,7 @@ const dedupeRequest = async <TData>(cacheKey: string, request: () => Promise<TDa
     }
 }
 
-const toCacheKey = (key: ApiCacheKey): string => {
-    if (Array.isArray(key)) {
-        return JSON.stringify(key)
-    }
-
-    return key
-}
+const toCacheKey = (key: ApiCacheKey): string => JSON.stringify(key)
 
 const wait = async (durationMs: number): Promise<void> => {
     await new Promise((resolve) => {
@@ -222,7 +216,7 @@ function createApiQuery<TData, TSelected, TError>(options: UseSelectedApiQueryOp
         isLoading.value = data.value === undefined && isFetching.value
     }
 
-    const fetchWithRetry = async (): Promise<TData> => {
+    const fetchWithRetry = async (cacheKey: string, revision: QueryCacheRevision): Promise<TData> => {
         let attempt = 0
 
         while (true) {
@@ -235,6 +229,11 @@ function createApiQuery<TData, TSelected, TError>(options: UseSelectedApiQueryOp
 
                 attempt += 1
                 await wait(retryDelayMs)
+
+                // queryFn may read reactive inputs or the current account's cookies.
+                if (cacheKey !== resolveCacheKey() || !isCurrentQueryCacheRevision(cacheKey, revision)) {
+                    throw caughtError
+                }
             }
         }
     }
@@ -274,7 +273,7 @@ function createApiQuery<TData, TSelected, TError>(options: UseSelectedApiQueryOp
             // Deduped even when forced: a request already in flight is by definition
             // as fresh as one started now, so a refresh joins it rather than doubling
             // the load on the endpoint.
-            const rawData = await dedupeRequest(cacheKey, fetchWithRetry)
+            const rawData = await dedupeRequest(cacheKey, () => fetchWithRetry(cacheKey, requestRevision))
 
             if (!isCurrentQueryCacheRevision(cacheKey, requestRevision)) {
                 return data.value

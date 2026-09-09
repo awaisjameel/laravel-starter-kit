@@ -1,9 +1,5 @@
 import type { Component } from 'vue'
-import type { Appearance, UserViewData } from './app-data'
-
-export interface Auth {
-    user: UserViewData | null
-}
+import type { SharedPageData } from './app-data'
 
 export interface BreadcrumbItem {
     title: string
@@ -21,27 +17,7 @@ export interface NavItem {
     external?: boolean
 }
 
-export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
-    name: string
-    quote: { message: string; author: string }
-    auth: Auth
-    flash: {
-        message?: string
-        error?: string
-        status?: string
-    }
-    /**
-     * Absolute URL of the current request, including the query string. Inertia's
-     * `page.url` is relative, so this is the origin to resolve it against.
-     */
-    location: string
-    sidebarOpen: boolean
-    /**
-     * Colour scheme the server rendered this response with, taken from the
-     * `appearance` cookie. Seeds the appearance UI so it hydrates without a mismatch.
-     */
-    appearance: Appearance
-}
+export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & SharedPageData
 
 export interface SelectOption {
     value: string

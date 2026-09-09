@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Modules\Shared\Data\UserViewData;
+use App\Modules\Shared\Enums\SharedRealtimeChannel;
+use App\Modules\Shared\Realtime\Support\ChannelPatternResolver;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
@@ -42,7 +44,7 @@ final class User extends Authenticatable implements MustVerifyEmailContract
 
     public function receivesBroadcastNotificationsOn(): string
     {
-        return 'users.'.$this->id.'.notifications';
+        return ChannelPatternResolver::resolve(SharedRealtimeChannel::UserNotifications->value, ['userId' => $this->id]);
     }
 
     public function toViewData(): UserViewData

@@ -189,6 +189,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `App\Http\Middleware\SecurityHeaders`
     - `Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets`
 - Guest redirects are configured centrally in `bootstrap/app.php` to `route('auth.login.create')`.
+- `statefulApi()` enables Sanctum session authentication and CSRF protection for API requests from configured first-party origins. Keep `SANCTUM_STATEFUL_DOMAINS` aligned with deployed frontend hosts, including ports. External clients use bearer tokens. Authentication regressions must exercise persisted cookies or real tokens; `actingAs` alone cannot verify middleware wiring.
 - Events are registered from `app/Listeners` and module-discovered listener directories via `ModuleRegistry::listenerDirectories(...)`.
 
 ### Module Discovery
@@ -543,6 +544,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `withoutManifest()` so no transformer manifest file lands in `resources/js/types`
 - Route and controller type generation from the transformer stays off. Wayfinder owns that surface.
 - Current shared auth user contract is `App\Modules\Shared\Data\UserViewData|null`; do not serialize the raw user model into Inertia props.
+- `SharedPageData` and its nested `SharedAuthData`, `SharedFlashData`, and `SharedQuoteData` own application-wide Inertia props. `AppPageProps` composes the generated type with page-specific props. Flash fields are always present as `string|null`; do not redeclare these shapes in TypeScript.
 - Request DTO hydration must be the canonical transport boundary.
 - Services, queries, commands, and handlers must accept DTOs or explicit typed parameters, never mixed arrays.
 - Prefer module-prefixed DTO names for generated CRUD contracts:
@@ -570,6 +572,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - `queryCache` stores the raw `queryFn` result, never a `select` projection, so one entry can serve consumers that project the same key differently. `getApiQueryCacheData`/`setApiQueryCacheData` operate on that raw shape.
     - Invalidations and explicit cache writes version the key and drop its in-flight entry, so a request that started earlier cannot be joined or overwrite newer/optimistic data when it settles.
     - A request for an earlier reactive key may populate that key's cache, but it cannot overwrite the composable state for the current key.
+    - String and array keys have distinct serialized identities. Delayed retries stop after a key change, invalidation, or identity-driven cache clear so they cannot read new inputs under an old key.
     - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
     - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
 - The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `create-app.ts`; account data must not survive logout or account switching.
@@ -582,6 +585,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
 - Schema form checkboxes own their inline label; `BaseFieldShell` hides its duplicate label for those fields. Select triggers receive the field ID so the shell label targets the focusable control.
+- Schema controls associate descriptions and errors through `aria-describedby` and expose invalid/required state. Processing disables the form's fields. Read-only text remains selectable; choice/file controls disable interaction. Every choice variant honors disabled options.
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 
 ### Backend-Driven Contract Pipeline
@@ -611,6 +615,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Broadcast notification payload contract:
     - `App\Modules\Users/Data/UserManagementNotificationData`
 - Keep domain events separate from broadcast events.
+- Channel registration, broadcast destinations, notification routing, and frontend subscriptions must all consume the canonical channel enums. Resolve parameterized destinations through `ChannelPatternResolver`; do not repeat channel string literals outside their owning enums.
 - Let listeners translate domain events into realtime broadcasts and notifications.
 
 ### Frontend

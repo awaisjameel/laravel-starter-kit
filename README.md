@@ -134,6 +134,8 @@ Canonical frontend presentation contracts:
 
 ### API v1
 
+First-party browser requests use Sanctum's session and CSRF middleware. Set `SANCTUM_STATEFUL_DOMAINS` to the frontend hosts (including ports); the application URL is included by default. External API clients use bearer tokens. Tests exercise actual encrypted cookies and persisted sessions in addition to authorization checks.
+
 - `GET /api/v1/me` => `api.v1.me.show`
 - `GET /api/v1/admin/users` => `api.v1.admin.users.index`
 - `POST /api/v1/admin/users` => `api.v1.admin.users.store`
@@ -141,6 +143,8 @@ Canonical frontend presentation contracts:
 - `DELETE /api/v1/admin/users/{user}` => `api.v1.admin.users.destroy`
 
 ## Type-Safe Data Contracts
+
+Application-wide Inertia props come from `SharedPageData` and its nested DTOs. `AppPageProps` extends that generated contract, including explicit `string | null` flash values. Feature page DTOs remain owned by their modules.
 
 The project uses Spatie Data + TypeScript Transformer 3, configured in `app/Providers/TypeScriptTransformerServiceProvider.php` (v3 has no config file).
 
@@ -226,8 +230,6 @@ CI also runs `composer audit --locked` and `npm audit`. The production PM2 examp
 ## Working With Coding Agents
 
 [AGENTS.md](AGENTS.md) is the canonical guide, with an entry map for each kind of change. `CLAUDE.md` imports the same guidance. Agents should trace the owning module and generated consumers, repair the complete flow, and finish with the documented quality gate and relevant tests.
-
-See the [audit record](docs/starter-kit-audit.md) for verified repairs, coverage, and the limits of local validation.
 
 ## Notes
 
