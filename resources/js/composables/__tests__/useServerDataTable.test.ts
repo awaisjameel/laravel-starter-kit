@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/vue3'
 import { describe, expect, it, vi } from 'vitest'
-import { effectScope, ref } from 'vue'
+import { effectScope, nextTick, ref } from 'vue'
 import { resolveServerTableInitialQuery, useServerDataTable } from '../useServerDataTable'
 
 it('synchronizes pagination after a preserved-state mutation redirect without issuing another visit', () => {
@@ -12,8 +12,7 @@ it('synchronizes pagination after a preserved-state mutation redirect without is
         scope.run(() => {
             const table = useServerDataTable({
                 endpoint: ({ query } = {}) => ({ url: `/records?page=${query?.page}&perPage=${query?.perPage}`, method: 'get' }),
-                initialQuery: { page: 2, perPage: 5 },
-                pagination: () => pagination.value
+                initialQuery: () => ({ page: pagination.value.current_page, perPage: pagination.value.per_page })
             })
 
             pagination.value = { current_page: 1, per_page: 15 }
@@ -38,6 +37,49 @@ it('synchronizes pagination after a preserved-state mutation redirect without is
 })
 
 type SortColumn = 'name' | 'email' | 'role' | 'created_at'
+
+it('synchronizes filters after redirects and cancels obsolete pending searches', async () => {
+    vi.useFakeTimers()
+    const visit = vi.spyOn(router, 'get').mockImplementation(() => undefined)
+    const serverQuery = ref({ page: 2, perPage: 5, search: 'alice', sortBy: 'name', sortDirection: 'asc' as 'asc' | 'desc' })
+    const scope = effectScope()
+    try {
+        const table = scope.run(() =>
+            useServerDataTable({
+                endpoint: ({ query } = {}) => ({
+                    url: `/records?${new URLSearchParams(Object.entries(query ?? {}).map(([key, value]) => [key, String(value)]))}`,
+                    method: 'get'
+                }),
+                initialQuery: serverQuery
+            })
+        )
+        if (table === undefined) throw new Error('Expected an active table scope.')
+        table.searchValue.value = 'pending search'
+        await nextTick()
+        serverQuery.value = { page: 1, perPage: 15, search: '', sortBy: 'created_at', sortDirection: 'desc' }
+        expect(table.query.value).toEqual(serverQuery.value)
+        expect(table.searchValue.value).toBe('')
+        await nextTick()
+        await vi.runAllTimersAsync()
+        expect(visit).not.toHaveBeenCalled()
+        table.setPage(2)
+        expect(visit.mock.calls[0]?.[0]).toBe('/records?page=2&perPage=15&sortBy=created_at&sortDirection=desc')
+        table.searchValue.value = 'bob'
+        await nextTick()
+        await vi.runAllTimersAsync()
+        expect(visit).toHaveBeenCalledTimes(2)
+        expect(table.query.value.search).toBe('bob')
+        table.searchValue.value = 'unmounted search'
+        await nextTick()
+        scope.stop()
+        await vi.runAllTimersAsync()
+        expect(visit).toHaveBeenCalledTimes(2)
+    } finally {
+        scope.stop()
+        visit.mockRestore()
+        vi.useRealTimers()
+    }
+})
 
 describe('resolveServerTableInitialQuery', () => {
     const fallback = {

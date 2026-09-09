@@ -6,23 +6,34 @@ namespace App\Modules\{{ moduleNamespace }}\Commands;
 
 use App\Models\{{ modelClass }};
 use App\Modules\{{ moduleNamespace }}\Data\{{ storeDataClass }};
+use RuntimeException;
 
 final class {{ modelClass }}Commands
 {
     public function create({{ storeDataClass }} ${{ storeDataVariable }}): {{ modelClass }}
     {
-        return {{ modelClass }}::createFromData(${{ storeDataVariable }});
+        ${{ modelVariable }} = {{ modelClass }}::createFromData(${{ storeDataVariable }});
+
+        if (! ${{ modelVariable }}->exists) {
+            throw new RuntimeException('Record creation was cancelled.');
+        }
+
+        return ${{ modelVariable }};
     }
 
     public function update({{ modelClass }} ${{ modelVariable }}, {{ storeDataClass }} ${{ storeDataVariable }}): {{ modelClass }}
     {
-        ${{ modelVariable }}->updateFromData(${{ storeDataVariable }});
+        if (! ${{ modelVariable }}->updateFromData(${{ storeDataVariable }})) {
+            throw new RuntimeException('Record update was cancelled.');
+        }
 
         return ${{ modelVariable }}->refresh();
     }
 
     public function delete({{ modelClass }} ${{ modelVariable }}): void
     {
-        ${{ modelVariable }}->delete();
+        if (${{ modelVariable }}->delete() !== true) {
+            throw new RuntimeException('Record deletion was cancelled.');
+        }
     }
 }

@@ -45,7 +45,7 @@ php artisan generate:module <ModuleName> --extend --scaffold=page --page=<PageNa
 
 Generated CRUD listings already include `PaginationData` and the shared pagination controls. Their web/API requests validate `page` and `perPage` through `PaginationQueryRequest` (maximum 100 rows). Extend the module's query DTO/request when adding filters or sorting; keep a unique tie breaker in database ordering.
 
-1. Use `useServerDataTable` with a reactive `pagination` getter so mutation redirects update page and page size.
+1. Use `useServerDataTable` with a reactive `initialQuery` getter or computed ref so mutation redirects update pagination and any search/sort controls from server state.
 2. Build initial query with `resolveServerTableInitialQuery`.
 3. Use shared table primitives from `components/base/table/**`.
 4. Keep row typing strict (avoid row casts).

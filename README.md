@@ -221,7 +221,7 @@ UI primitives participate in Vue typechecking and ESLint. Generator tests execut
 
 CI also runs `composer audit --locked` and `npm audit`. The production PM2 example runs one scheduler and restarts services after graceful deployment exits.
 
-`composer qa:generated` scaffolds a throwaway module into the application, runs Pint, Rector, PHPStan, `vue-tsc`, ESLint, both suites, and the client/SSR build against it, then restores the working tree. CI runs it as its own job. Generator tests can only assert on rendered strings, so this is what proves a stub still emits code that actually compiles.
+`composer qa:generated` copies the current tracked changes and untracked source into an isolated checkout, installs the locked Composer and npm dependencies, and scaffolds a throwaway module. It runs the client/SSR build, mandatory generation and cleanup, all static checks, both suites, and whitespace verification. The source checkout, index, database, and build outputs stay untouched, including on failure. CI runs it as its own job. This verifies that generated modules compile and execute in the application, beyond the generator's template assertions.
 
 ## Working With Coding Agents
 

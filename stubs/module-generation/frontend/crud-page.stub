@@ -10,8 +10,7 @@
 
     const { setPage } = useServerDataTable({
         endpoint: {{ pagePascalName }}Controller.index,
-        initialQuery: { page: props.pagination.current_page, perPage: props.pagination.per_page },
-        pagination: () => props.pagination
+        initialQuery: () => ({ page: props.pagination.current_page, perPage: props.pagination.per_page })
     })
     const breadcrumbs = buildDashboardBreadcrumbs()
 

@@ -300,7 +300,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `UserManagementEvent`
     - listeners under `app/Modules/Users/Listeners/**`
 - Domain events should remain separate from broadcast events.
-- `UserManagementEvent` implements `ShouldDispatchAfterCommit`. Dispatch it after persistence succeeds; rolled-back transactions must not emit audit, notification, or realtime side effects. Deleted-user broadcasts carry `user: null`.
+- `UserManagementEvent` implements `ShouldDispatchAfterCommit`. Dispatch it after persistence succeeds; rolled-back transactions must not emit audit, notification, or realtime side effects. `UserActionContext` snapshots actor and target models so later changes within the transaction cannot rewrite an earlier event. Deleted-user broadcasts carry `user: null`.
 - Listeners translate domain events into realtime broadcasts and notifications.
 - Realtime events should extend `app/Modules/Shared/Realtime/Events/RealtimeEvent`.
 - `RealtimeEvent` currently broadcasts:
@@ -581,6 +581,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 - Same-origin mutations read the current `XSRF-TOKEN` cookie into `X-XSRF-TOKEN`; no static CSRF meta tag is needed. Automatic CSRF and socket headers must not be sent to another origin. Existing URL queries and fragments must survive added query options.
 - Realtime channel strings must be derived from backend-owned patterns through `resolveRealtimeChannel(...)`.
 - Shared UI primitives must include baseline accessibility: visible focus states, meaningful `aria-*` labels for icon-only controls, keyboard-operable interactions, and color-contrast-safe active/focus states.
+- Schema form checkboxes own their inline label; `BaseFieldShell` hides its duplicate label for those fields. Select triggers receive the field ID so the shell label targets the focusable control.
 - Avoid unsafe casts like `as User`; guard nullable values explicitly.
 
 ### Backend-Driven Contract Pipeline
@@ -808,7 +809,7 @@ Do not shadow them with manual duplicates.
 - Generated listings use `PaginationQueryRequest` / `PaginationQueryData`, bounded to 100 rows per page, with stable ordering. CRUD page DTOs include shared `PaginationData` metadata and the page uses the shared pagination component.
 - Every paginated page DTO exposes the same envelope: `items` plus a shared `PaginationData`. `UsersIndexPageData` follows it too, so the reference module and generator output have one shape. Do not redeclare paginator metadata per module.
 - `TemplateRenderer` sorts the rendered `use` block through `PhpUseStatementSorter`. A stub cannot know whether `App\Modules\Shared\...` sorts before or after the module namespace, so imports are ordered after rendering instead. Stubs stay Rector- and Pint-clean by construction: name parameters after their type, and keep generated arrays free of trailing commas.
-- Resource API pagination links preserve query parameters. Plain API metadata uses `PaginationData` too. Server tables pass a reactive `pagination` getter to `useServerDataTable` so preserved-state redirects synchronize the current page and page size without another visit.
+- Resource API pagination links preserve query parameters. Plain API metadata uses `PaginationData` too. Server tables pass a reactive `initialQuery` to `useServerDataTable` so preserved-state redirects synchronize pagination, search, and sort without another visit. Users derives it from the current location and pagination props; generated pages derive it from pagination props.
 - A `page` scaffold has frontend-only form values until connected to a backend endpoint. When connecting it, derive form values from that endpoint's generated DTO. It must never import a DTO that the scaffold did not generate.
 - `GeneratedPaginationTest` executes all four API variants (standalone/combined, resource/plain) and checks later pages, invalid input, and CRUD page metadata.
 
@@ -1004,7 +1005,7 @@ The shared setup uses `actions/cache@v6` with the Node 24 action runtime. Depend
 
 The test workflow audits both locked dependency graphs. Both mutating and non-mutating ESLint commands fail on warnings.
 
-A second CI job runs `composer qa:generated` (`scripts/verify-generated-module.sh`), which scaffolds a module into the real application, puts it through the whole gate, and then restores the tree. Run it after touching anything under `stubs/module-generation` or the scaffold planner. Prettier wrapping of generated markup depends on how long the module name is, so formatting stays the job of `composer generate-and-cleanup` rather than that gate.
+A second CI job runs `composer qa:generated` (`scripts/verify-generated-module.sh`). It snapshots tracked changes and untracked source into an isolated checkout, installs both locked dependency graphs, scaffolds a module, builds client/SSR assets, and runs `composer generate-and-cleanup`, `composer qa:check`, both suites, and whitespace verification. The source checkout and index remain untouched even on failure; only the temporary checkout is deleted. Run it after touching anything under `stubs/module-generation` or the scaffold planner. Name-dependent formatting is handled by the canonical cleanup inside the gate.
 
 - Pint
 - Rector dry-run

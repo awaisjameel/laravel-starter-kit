@@ -63,6 +63,7 @@
         :description="props.field.description ?? ''"
         :error="props.error ?? ''"
         :required="props.field.required === true"
+        :hide-label="props.field.type === 'checkbox'"
     >
         <UiInput
             v-if="['text', 'email', 'password'].includes(props.field.type)"
@@ -92,7 +93,7 @@
             :disabled="isFieldDisabled"
             @update:model-value="emit('update:modelValue', $event)"
         >
-            <UiSelectTrigger class="w-full">
+            <UiSelectTrigger :id="props.id" class="w-full">
                 <UiSelectValue :placeholder="props.field.placeholder ?? 'Select an option'" />
             </UiSelectTrigger>
             <UiSelectContent>
@@ -137,7 +138,10 @@
                 :disabled="isFieldDisabled"
                 @update:model-value="emit('update:modelValue', $event === true)"
             />
-            <UiLabel :for="props.id">{{ props.field.placeholder ?? props.field.label }}</UiLabel>
+            <UiLabel :for="props.id">
+                {{ props.field.placeholder ?? props.field.label }}
+                <span v-if="props.field.required" class="text-destructive">*</span>
+            </UiLabel>
         </div>
 
         <div v-else-if="props.field.type === 'toggle'" :class="theme.field.toggle">

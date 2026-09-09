@@ -157,7 +157,7 @@ Vue typechecking and ESLint cover UI primitives as well as application component
 
 Forward props to a reka-ui primitive with `useForwardedProps` / `useForwardedPropsEmits` from `@/lib/forward-props`, narrowing with `reactiveOmit` when a prop is consumed locally. reka-ui already omits undefined values while forwarding but types the result with every key present, which `exactOptionalPropertyTypes` rejects; the adapters restate that runtime contract in the type system and add no work of their own. Asserting `as Partial<...>` hides missing required props, and wrapping the forwarded object in another filter repeats what reka-ui just did. Reach for `omitUndefinedProps` only when the component builds the object itself, since the adapters read the calling component instance.
 
-Server listing pages pass a reactive `pagination` getter to `useServerDataTable`. Returned metadata synchronizes page and page size after preserved-state mutation redirects without issuing an extra visit.
+Server listing pages pass a reactive `initialQuery` getter or computed ref to `useServerDataTable`. Users derives the query from the current location and backend pagination; generated pages use pagination props. Preserved-state redirects synchronize pagination, search, and sort without another visit. Pending searches that now match server state do not issue a stale request.
 
 The app root clears client query caches when authenticated identity changes. SSR never fetches into these caches. Custom query/mutation error types require a mapper when they cannot represent `ApiError`, and mutation pending state accounts for overlapping requests.
 

@@ -1,13 +1,11 @@
-import type { PaginationData } from '@/types/app-data'
 import type { ServerTableQuery, SortDirection } from '@/types/base-ui'
 import type { QueryParams, RouteDefinition } from '@/wayfinder'
-import { useDebounceFn } from '@vueuse/core'
-import type { UnwrapRef } from 'vue'
+import { tryOnScopeDispose, useDebounceFn } from '@vueuse/core'
+import type { MaybeRefOrGetter, UnwrapRef } from 'vue'
 
 interface ServerDataTableOptions<TSort extends string> {
     endpoint: (options?: { query?: QueryParams }) => RouteDefinition<'get'>
-    initialQuery: ServerTableQuery<TSort>
-    pagination?: () => Pick<PaginationData, 'current_page' | 'per_page'>
+    initialQuery: MaybeRefOrGetter<ServerTableQuery<TSort>>
     debounceMs?: number
 }
 
@@ -156,33 +154,16 @@ const sanitizeQuery = <TSort extends string>(query: ServerTableQuery<TSort>): Qu
 }
 
 export function useServerDataTable<TSort extends string>(options: ServerDataTableOptions<TSort>) {
-    const initialQuery = buildServerTableQuery<TSort>({
-        page: options.initialQuery.page,
-        perPage: options.initialQuery.perPage
-    })
-
-    if (options.initialQuery.search !== undefined) {
-        initialQuery.search = options.initialQuery.search
-    }
-
-    if (options.initialQuery.sortBy !== undefined) {
-        initialQuery.sortBy = options.initialQuery.sortBy
-    }
-
-    if (options.initialQuery.sortDirection !== undefined) {
-        initialQuery.sortDirection = options.initialQuery.sortDirection
-    }
-
-    const query = ref<ServerTableQuery<TSort>>(initialQuery)
+    const query = ref<ServerTableQuery<TSort>>(buildServerTableQuery(toValue(options.initialQuery)))
 
     const searchValue = ref(query.value.search ?? '')
 
     watch(
-        () => options.pagination?.(),
-        (pagination) => {
-            if (pagination === undefined) return
-            query.value.page = pagination.current_page
-            query.value.perPage = pagination.per_page
+        () => toValue(options.initialQuery),
+        (serverQuery) => {
+            debouncedSearch.cancel()
+            query.value = buildServerTableQuery(serverQuery)
+            searchValue.value = serverQuery.search ?? ''
         },
         { flush: 'sync' }
     )
@@ -204,10 +185,13 @@ export function useServerDataTable<TSort extends string>(options: ServerDataTabl
     }
 
     const debouncedSearch = useDebounceFn(() => {
+        if (searchValue.value.trim() === (query.value.search ?? '').trim()) return
         query.value.page = 1
         query.value.search = searchValue.value
         visit()
     }, options.debounceMs ?? DEFAULT_DEBOUNCE)
+
+    tryOnScopeDispose(debouncedSearch.cancel)
 
     const setPage = (page: number) => {
         if (page < 1 || page === query.value.page) {
@@ -247,6 +231,7 @@ export function useServerDataTable<TSort extends string>(options: ServerDataTabl
     }
 
     watch(searchValue, () => {
+        if (searchValue.value.trim() === (query.value.search ?? '').trim()) return
         debouncedSearch()
     })
 

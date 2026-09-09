@@ -7,16 +7,18 @@
         description?: string
         error?: string
         required?: boolean
+        hideLabel?: boolean
     }
 
     const props = withDefaults(defineProps<Props>(), {
-        required: false
+        required: false,
+        hideLabel: false
     })
 </script>
 
 <template>
     <div class="grid gap-2">
-        <UiLabel :for="props.id">
+        <UiLabel v-if="!props.hideLabel" :for="props.id">
             {{ props.label }}
             <span v-if="props.required" class="text-destructive">*</span>
         </UiLabel>

@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-#
-# Puts a freshly generated module through the same gate the application itself has to
-# pass. Generator tests assert on rendered strings, which cannot tell whether a stub
-# still emits compiling TypeScript, lint-clean Vue, or code the PHP toolchain accepts.
-# Generating into the real application is the only way to find that out, so this script
-# does exactly that and then restores the working tree to the state it started in.
-#
-# Usage: scripts/verify-generated-module.sh [ModuleName]
 
 set -euo pipefail
 
@@ -24,57 +16,51 @@ if [[ -z "${PHP}" ]]; then
     fi
 fi
 
+if command -v composer >/dev/null 2>&1; then
+    COMPOSER=composer
+else
+    COMPOSER=composer.bat
+fi
+
 MODULE="${1:-Scaffoldgate}"
-# A single-word module keeps every derived path trivially predictable for cleanup.
 if [[ ! "${MODULE}" =~ ^[A-Z][a-z]+$ ]]; then
     echo "Module name must be a single capitalised word, got '${MODULE}'." >&2
     exit 1
 fi
 
-KEBAB="$(echo "${MODULE}" | tr '[:upper:]' '[:lower:]')"
-TABLE="${KEBAB}s"
+SOURCE="$(git rev-parse --show-toplevel)"
+SOURCE_HEAD="$(git -C "${SOURCE}" rev-parse HEAD)"
+SANDBOX="$(mktemp -d "${TMPDIR:-/tmp}/starter-kit-generated.XXXXXXXX")"
+SANDBOX="$(cd "${SANDBOX}" && pwd -P)"
 
-GENERATED_PATHS=(
-    "app/Models/${MODULE}.php"
-    "app/Modules/${MODULE}"
-    "resources/js/modules/${KEBAB}"
-    "resources/js/actions/App/Modules/${MODULE}"
-    "resources/js/routes/app/${KEBAB}"
-    "tests/Feature/${MODULE}"
-)
-
-for path in "${GENERATED_PATHS[@]}"; do
-    if [[ -e "${path}" ]]; then
-        echo "Refusing to run: '${path}' already exists. Pass a different module name." >&2
-        exit 1
-    fi
-done
-
-# The gate rewrites generated contracts, so it compares the tree against how it found
-# it rather than demanding a pristine one. That keeps it usable mid-change.
-BASELINE="$(git status --porcelain)"
-
-restore() {
+cleanup() {
     local status=$?
-    echo "--- Restoring working tree ---"
-    rm -rf "${GENERATED_PATHS[@]}"
-    rm -f database/migrations/*_create_"${TABLE}"_table.php
-    "${PHP}" artisan modules:cache --no-interaction >/dev/null
-    "${PHP}" artisan typescript:transform >/dev/null
-    "${PHP}" artisan wayfinder:generate >/dev/null
-    # `components.d.ts` is emitted by the Vite component scanner, so it only returns to
-    # its previous state once a build runs without the generated module present.
-    npm run build >/dev/null
-
-    if [[ "$(git status --porcelain)" != "${BASELINE}" ]]; then
-        echo "Generated-module gate did not restore the working tree:" >&2
-        diff <(echo "${BASELINE}") <(git status --porcelain) >&2 || true
-        exit 1
-    fi
-
+    cd "${SOURCE}"
+    # Delete only this resolved temporary directory, never inferred source paths.
+    rm -rf -- "${SANDBOX}"
     exit "${status}"
 }
-trap restore EXIT
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# Capture staged, unstaged, and untracked source without touching the source index,
+# generated contracts, build outputs, credentials, or database.
+git clone --quiet --no-hardlinks --no-checkout "${SOURCE}" "${SANDBOX}"
+git -C "${SANDBOX}" checkout --quiet --detach "${SOURCE_HEAD}"
+git -C "${SOURCE}" diff --binary HEAD | git -C "${SANDBOX}" apply --allow-empty
+while IFS= read -r -d '' path; do
+    mkdir -p "${SANDBOX}/$(dirname "${path}")"
+    cp -P -- "${SOURCE}/${path}" "${SANDBOX}/${path}"
+done < <(git -C "${SOURCE}" ls-files --others --exclude-standard -z)
+
+cd "${SANDBOX}"
+cp .env.example .env
+
+echo "Installing locked dependencies in the isolated checkout"
+"${COMPOSER}" install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+npm ci
+"${PHP}" artisan key:generate --no-interaction
 
 echo "--- Generating ${MODULE} ---"
 "${PHP}" artisan generate:module "${MODULE}" \
@@ -85,26 +71,14 @@ echo "--- Generating ${MODULE} ---"
     --no-file-prompts \
     --no-interaction
 
-echo "--- Regenerating backend-owned contracts ---"
-"${PHP}" artisan modules:cache --no-interaction
-"${PHP}" artisan typescript:transform
-"${PHP}" artisan wayfinder:generate
-
-# Formatting is width-sensitive, so whether Prettier wraps a generated component tag
-# depends on how long the module's name is. That is what `composer generate-and-cleanup`
-# normalises; this gate asserts the properties a formatter cannot fix for you.
-echo "--- PHP gate ---"
-"${PHP}" vendor/bin/pint --test
-"${PHP}" vendor/bin/rector process --dry-run
-"${PHP}" vendor/bin/phpstan analyse --no-progress
-
-echo "--- Frontend gate ---"
-npm run typecheck
-npm run lint:check
-
-echo "--- Suites and build ---"
-"${PHP}" vendor/bin/pest --parallel
-npm run test:unit
+# Build first to discover the new components before typechecking. The canonical
+# cleanup also handles module-name-dependent formatting of generated markup.
+"${COMPOSER}" generate
 npm run build:ssr
+"${COMPOSER}" generate-and-cleanup
+"${COMPOSER}" qa:check
+"${COMPOSER}" test
+npm run test:unit
+git diff --check
 
-echo "--- Generated-module gate passed ---"
+echo "Generated-module gate passed; source checkout was left untouched."

@@ -21,31 +21,32 @@
     const selectedUser = ref<UserViewData | null>(null)
     const userDialogMode = ref<'create' | 'edit'>('create')
 
-    const locationSearch = (() => {
+    const locationSearch = computed(() => {
         try {
             return new URL(page.props.location).search
         } catch {
             return ''
         }
-    })()
-
-    const initialQuery = resolveServerTableInitialQuery<UserSortColumn>({
-        locationSearch,
-        fallback: {
-            page: props.pagination.current_page,
-            perPage: props.pagination.per_page,
-            sortBy: UserSortBy.CreatedAt,
-            sortDirection: SortDirection.Desc
-        },
-        allowedSortBy: userSortColumns,
-        defaultSortBy: UserSortBy.CreatedAt,
-        defaultSortDirection: SortDirection.Desc
     })
+
+    const initialQuery = computed(() =>
+        resolveServerTableInitialQuery<UserSortColumn>({
+            locationSearch: locationSearch.value,
+            fallback: {
+                page: props.pagination.current_page,
+                perPage: props.pagination.per_page,
+                sortBy: UserSortBy.CreatedAt,
+                sortDirection: SortDirection.Desc
+            },
+            allowedSortBy: userSortColumns,
+            defaultSortBy: UserSortBy.CreatedAt,
+            defaultSortDirection: SortDirection.Desc
+        })
+    )
 
     const { query, searchValue, setPage, setPerPage, setSort } = useServerDataTable<UserSortColumn>({
         endpoint: UserController.index,
         initialQuery,
-        pagination: () => props.pagination,
         debounceMs: 300
     })
 

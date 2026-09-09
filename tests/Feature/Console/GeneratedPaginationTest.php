@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -76,6 +77,24 @@ test('generated api variants validate pagination and serialize later pages', fun
                 ->assertJsonPath('meta.per_page', 5)
                 ->assertJsonPath('data.0.name', 'Record 11');
         }
+
+        $modelClass = 'App\\Models\\'.$module;
+        if (! is_subclass_of($modelClass, Model::class)) {
+            $this->fail('Expected the generated Eloquent model.');
+        }
+
+        $modelClass::saving(static fn (): bool => false);
+        $modelClass::deleting(static fn (): bool => false);
+        $controller = 'App\\Modules\\'.$module.'\\Http\\Controllers\\IndexApiController';
+        $parameter = lcfirst($module);
+        Route::post('/_audit/generated', $controller.'@store');
+        Route::put('/_audit/generated/{'.$parameter.'}', $controller.'@update');
+        Route::delete('/_audit/generated/{'.$parameter.'}', $controller.'@destroy');
+        $this->postJson('/_audit/generated', ['name' => 'Cancelled'])->assertStatus(500);
+        $this->putJson('/_audit/generated/1', ['name' => 'Cancelled'])->assertStatus(500);
+        $this->deleteJson('/_audit/generated/1')->assertStatus(500);
+        $this->assertDatabaseCount($table, 16);
+        $this->assertDatabaseHas($table, ['id' => 1, 'name' => 'Record 1']);
 
         if ($scaffold === 'crud-api') {
             Route::get('/_audit/page', 'App\\Modules\\'.$module.'\\Http\\Controllers\\IndexController@index');
