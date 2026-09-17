@@ -75,6 +75,15 @@ export default defineConfig({
             '/resources/js': jsDirectory
         }
     },
+    // Pages, UI primitives, and module components are reached through globs and
+    // auto-registration, so Vite's initial crawl does not see the dependencies they
+    // pull in. Discovering them later forces a re-bundle and a dev-server reload while
+    // `@inertiajs/vite` is warming the SSR module graph, which cancels its in-flight
+    // module fetches: the first page then fails to render until the dev server is
+    // restarted. Declaring them keeps that work in the first optimize pass.
+    optimizeDeps: {
+        include: ['@inertiajs/vue3', '@laravel/echo-vue', '@vueuse/core', 'clsx', 'pinia', 'reka-ui', 'tailwind-merge', 'vue']
+    },
     build: {
         rolldownOptions: {
             checks: {

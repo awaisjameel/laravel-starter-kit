@@ -172,6 +172,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
     - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/ssr.js` and `php artisan inertia:start-ssr` serves it.
 - `INERTIA_SSR_ENABLED` in `.env.example` toggles both paths.
+- `vite.config.ts` declares `optimizeDeps.include`. Pages, module components, and UI primitives are reached through globs and auto-registration, so Vite's first crawl never sees the dependencies they import. Discovering one later re-bundles and reloads the dev server while `@inertiajs/vite` is warming the SSR module graph, which cancels its in-flight module fetches; the dev server then fails to render any page until it is restarted, and `php artisan serve` fatals on its 30-second limit while waiting. Add a dependency to that list when it is only reachable from a page, module component, or UI primitive.
 
 ## Canonical Architecture
 
