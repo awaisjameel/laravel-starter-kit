@@ -85,6 +85,7 @@ export default defineConfig({
         include: ['@inertiajs/vue3', '@laravel/echo-vue', '@vueuse/core', 'clsx', 'pinia', 'reka-ui', 'tailwind-merge', 'vue']
     },
     build: {
+        ssrManifest: false,
         rolldownOptions: {
             checks: {
                 // These transforms intentionally own most of this small app's build
