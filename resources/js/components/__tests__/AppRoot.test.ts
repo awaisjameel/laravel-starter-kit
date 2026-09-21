@@ -1,7 +1,8 @@
+import { clearApiQueryCache, getApiQueryCacheData, setApiQueryCacheData } from '@/composables/useApiQuery'
+import { mount } from '@vue/test-utils'
 import { afterEach, expect, it, vi } from 'vitest'
-import { createApp, defineComponent, h, reactive } from 'vue'
-import { clearApiQueryCache, getApiQueryCacheData, setApiQueryCacheData } from '../composables/useApiQuery'
-import { createAppInstance } from '../create-app'
+import { defineComponent, h, reactive } from 'vue'
+import AppRoot from '../AppRoot.vue'
 
 const pageProps = reactive<{ auth: { user: { id: number } | null }; flash: { message: null; error: null; status: null } }>({
     auth: { user: { id: 1 } },
@@ -13,15 +14,13 @@ vi.mock('@inertiajs/vue3', () => ({ usePage: () => state }))
 afterEach(() => clearApiQueryCache())
 
 it('clears cached account data synchronously on an identity change', () => {
-    const element = document.createElement('div')
     const Page = defineComponent({
         setup() {
             state.props = pageProps
             return () => h('div')
         }
     })
-    const app = createAppInstance({ create: createApp, page: () => h(Page), plugin: { install: () => undefined } })
-    app.mount(element)
+    const wrapper = mount(AppRoot, { slots: { default: () => h(Page) } })
     try {
         setApiQueryCacheData('account', { private: 'first-user' })
         pageProps.auth.user = null
@@ -31,6 +30,16 @@ it('clears cached account data synchronously on an identity change', () => {
         pageProps.auth.user = { id: 3 }
         expect(getApiQueryCacheData('account')).toBeUndefined()
     } finally {
-        app.unmount()
+        wrapper.unmount()
+    }
+})
+
+it('renders the Inertia page it wraps', () => {
+    state.props = pageProps
+    const wrapper = mount(AppRoot, { slots: { default: () => h('main', { id: 'page' }) } })
+    try {
+        expect(wrapper.find('#page').exists()).toBe(true)
+    } finally {
+        wrapper.unmount()
     }
 })

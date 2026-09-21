@@ -3,6 +3,7 @@ import { wayfinder } from '@laravel/vite-plugin-wayfinder'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import laravel from 'laravel-vite-plugin'
+import { local } from 'laravel-vite-plugin/fonts'
 import { fileURLToPath, URL } from 'node:url'
 import AutoImport from 'unplugin-auto-import/vite'
 import IconsResolver from 'unplugin-icons/resolver'
@@ -12,14 +13,7 @@ import { defineConfig } from 'vite'
 
 import { autoImportOptions, componentAutoImportOptions, iconComponentPrefix, inertiaComponentResolver } from './frontend-auto-import.config.mjs'
 
-const ssrEntry = 'resources/js/ssr.ts'
-// The stylesheet is its own entry rather than an import inside `app.ts`. SSR ships
-// a fully rendered document, so the browser paints as soon as the HTML lands: if the
-// CSS only arrived through the JS module graph the page would render unstyled first
-// and reflow once the bundle evaluated. As a separate entry, `@vite` emits a
-// render-blocking `<link rel="stylesheet">` in both dev and production instead.
-const cssEntry = 'resources/css/app.css'
-const jsDirectory = fileURLToPath(new URL('./resources/js', import.meta.url))
+const appEntry = 'resources/js/app.ts'
 
 export default defineConfig({
     plugins: [
@@ -27,18 +21,37 @@ export default defineConfig({
             command: 'php artisan wayfinder:generate --no-interaction'
         }),
         laravel({
-            input: [cssEntry, 'resources/js/app.ts'],
-            ssr: ssrEntry,
-            refresh: true
+            // The stylesheet is its own entry so `@vite` emits a render-blocking
+            // `<link>`: server-rendered markup must never paint before its CSS.
+            input: ['resources/css/app.css', appEntry],
+            ssr: appEntry,
+            refresh: true,
+            // Self-hosted from the locked npm package, so builds need no network and
+            // every weight ships in one preloaded variable file. `@fonts` inlines the
+            // `@font-face` rules plus a metric-matched fallback, so text neither waits
+            // on a third-party stylesheet nor shifts when the font arrives.
+            fonts: [
+                local('Instrument Sans', {
+                    variants: [
+                        {
+                            src: 'node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2',
+                            weight: '400 700'
+                        }
+                    ],
+                    fallbacks: [
+                        'ui-sans-serif',
+                        'system-ui',
+                        'sans-serif',
+                        "'Apple Color Emoji'",
+                        "'Segoe UI Emoji'",
+                        "'Segoe UI Symbol'",
+                        "'Noto Color Emoji'"
+                    ]
+                })
+            ]
         }),
-        // Serves SSR from the Vite dev server (no separate node process in dev),
-        // warms up page modules, and wraps `resources/js/ssr.ts` for production.
-        inertia({
-            ssr: {
-                entry: ssrEntry,
-                cluster: true
-            }
-        }),
+        // Serves SSR from the Vite dev server and wraps `app.ts` for the SSR build.
+        inertia(),
         tailwindcss(),
         vue({
             template: {
@@ -55,8 +68,7 @@ export default defineConfig({
             dtsMode: 'overwrite'
         }),
         Icons({
-            compiler: 'vue3',
-            autoInstall: true
+            compiler: 'vue3'
         }),
         Components({
             ...componentAutoImportOptions,
@@ -71,21 +83,18 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': jsDirectory,
-            '/resources/js': jsDirectory
+            '@': fileURLToPath(new URL('./resources/js', import.meta.url))
         }
     },
-    // Pages, UI primitives, and module components are reached through globs and
-    // auto-registration, so Vite's initial crawl does not see the dependencies they
-    // pull in. Discovering them later forces a re-bundle and a dev-server reload while
-    // `@inertiajs/vite` is warming the SSR module graph, which cancels its in-flight
-    // module fetches: the first page then fails to render until the dev server is
-    // restarted. Declaring them keeps that work in the first optimize pass.
-    optimizeDeps: {
-        include: ['@inertiajs/vue3', '@laravel/echo-vue', '@vueuse/core', 'clsx', 'pinia', 'reka-ui', 'tailwind-merge', 'vue']
+    server: {
+        watch: {
+            // Watching PHP dependencies and runtime storage creates tens of thousands
+            // of file watchers, which blocks the dev server for long enough that the
+            // SSR warm-up and the first requests from Laravel time out.
+            ignored: ['**/storage/**', '**/vendor/**', '**/bootstrap/ssr/**', '**/public/build/**']
+        }
     },
     build: {
-        ssrManifest: false,
         rolldownOptions: {
             checks: {
                 // These transforms intentionally own most of this small app's build
@@ -96,8 +105,8 @@ export default defineConfig({
             onwarn: (warning, defaultHandler) => {
                 // `@inertiajs/vite` enables sourcemaps for the SSR build but rewrites
                 // the `pages` shorthand without emitting one, so every build warns
-                // about the entry files. Only those entries are affected and the
-                // plugin owns the transform, so there is nothing to fix here.
+                // about the entry file. Only that entry is affected and the plugin
+                // owns the transform, so there is nothing to fix here.
                 if (warning.code === 'SOURCEMAP_BROKEN' && warning.plugin === '@inertiajs/vite') {
                     return
                 }

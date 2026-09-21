@@ -36,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
         $middleware->redirectGuestsTo(fn (Request $request): string => route('auth.login.create'));
+        $middleware->redirectUsersTo(fn (Request $request): string => route('app.dashboard'));
         $middleware->alias(['verified' => EnsureEmailIsVerified::redirectTo('auth.verification.notice')]);
         $middleware->statefulApi();
 
