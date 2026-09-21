@@ -32,6 +32,11 @@ test('users can authenticate using the login screen', function (): void {
     $this->get('/app/dashboard')->assertViewHas('page.clearHistory', true);
     $this->get('/app/dashboard')->assertViewMissing('page.clearHistory');
 });
+test('authenticated users are redirected from guest screens to the dashboard', function (string $uri): void {
+    $this->actingAs(User::factory()->create())
+        ->get($uri)
+        ->assertRedirect(route('app.dashboard', absolute: false));
+})->with(['/auth/login', '/auth/register', '/auth/forgot-password']);
 test('users can not authenticate with invalid password', function (): void {
     $user = User::factory()->create();
 

@@ -24,13 +24,11 @@ TypeScript uses the 7.0.2 native checker through the exactly pinned `typescript-
 ## Quick Start
 
 ```bash
-cp .env.example .env
-composer install
-npm ci
-php artisan key:generate
-php artisan migrate
+composer setup
 composer dev
 ```
+
+`composer setup` is Laravel's first-run script: it installs the locked Composer and npm dependencies, creates `.env`, generates the application key, runs migrations, and builds the assets. `composer dev` serves the app at `http://127.0.0.1:8000`. If you serve it from another host or port, set `APP_URL` to that origin so Sanctum treats first-party API requests as stateful.
 
 Realtime dev dependencies are included in `composer dev`; this starts Laravel Reverb alongside the web server, queue worker, logs, and Vite.
 
@@ -170,7 +168,7 @@ Realtime channel pattern enums, event-name enums, presence payloads, and broadca
 ## Realtime
 
 - Reverb is the default broadcaster in `.env.example`.
-- Echo is initialized through `configureRealtime()`, called from both `resources/js/app.ts` and `resources/js/ssr.ts`. Under SSR it falls back to Echo's `null` broadcaster, so realtime pages render on the server without opening a connection.
+- Echo is initialized through `configureRealtime()`, called once from `resources/js/app.ts`, the single client and SSR entry. Under SSR it falls back to Echo's `null` broadcaster, so realtime pages render on the server without opening a connection.
 - Channel authorization is module-local in `app/Modules/*/Routes/channels.php` and aggregated by the root `routes/channels.php`.
 - Frontend modules should use shared realtime composables plus module-local `contracts/realtime.ts` helpers instead of using Echo directly.
 - `apiRequest()` automatically forwards `X-Socket-ID` so broadcast listeners can call `toOthers()` safely.
@@ -182,12 +180,13 @@ SSR delivers a fully rendered document, so anything the browser needs for the fi
 paint has to arrive as markup rather than as a side effect of the JS bundle:
 
 - `resources/css/app.css` is its own Vite entry and is listed first in `@vite`, so it is a render-blocking stylesheet in dev and production. Importing it from `app.ts` instead would paint the server-rendered HTML unstyled and reflow once the bundle evaluated.
+- `resources/js/app.ts` is the single client and SSR entry (Inertia v3's default). Media queries resolve against a desktop width on the server and during hydration, then follow the real viewport after mount, so narrow screens hydrate the same tree the server rendered.
 - The color scheme comes from the `appearance` cookie and is rendered onto `<html>` by Blade — no boot script, and no post-hydration re-apply. The same value is shared as an Inertia prop so the appearance controls render identically on both sides.
 - Web fonts use `display=swap` and a pair of preconnects (the stylesheet fetch is same-origin to the font host, the font files are CORS, and they use separate connections).
 
 ## Security Defaults
 
-- CSP + nonce-based security headers. The nonce is exposed to the client through a `meta[name="csp-nonce"]` tag and handed to Inertia so its injected style elements pass the policy.
+- CSP + nonce-based security headers. The nonce comes from Laravel's `Vite::useCspNonce()`, so `@vite` tags carry it; the root view also exposes it through a `meta[name="csp-nonce"]` tag that is handed to Inertia so its injected style elements pass the policy.
 - Hardened browser/security headers middleware.
 - Throttling for sensitive auth endpoints.
 - Email changes invalidate verification consistently across profile and admin updates.

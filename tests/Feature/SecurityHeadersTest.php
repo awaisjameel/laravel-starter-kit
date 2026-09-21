@@ -18,3 +18,19 @@ test('security headers are present on web responses', function (): void {
     $testResponse->assertHeader('X-Frame-Options', 'DENY');
     $testResponse->assertHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 });
+
+test('the root view exposes the nonce the content security policy enforces', function (): void {
+    $testResponse = $this->get('/');
+
+    preg_match("/script-src 'self' 'nonce-([^']+)'/", (string) $testResponse->headers->get('Content-Security-Policy'), $matches);
+
+    expect($matches[1] ?? null)->toBeString();
+    $testResponse->assertSee(sprintf('<meta name="csp-nonce" content="%s">', $matches[1] ?? ''), false);
+});
+
+test('each response receives a fresh nonce', function (): void {
+    $firstPolicy = (string) $this->get('/')->headers->get('Content-Security-Policy');
+    $secondPolicy = (string) $this->get('/')->headers->get('Content-Security-Policy');
+
+    expect($firstPolicy)->not->toBe($secondPolicy);
+});

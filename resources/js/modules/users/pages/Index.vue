@@ -111,6 +111,7 @@
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
+        <Head title="Users" />
         <div class="flex h-full min-w-0 flex-1 flex-col gap-4 rounded-xl p-3 sm:p-4">
             <div class="mt-2 flex flex-col gap-4 sm:mt-4">
                 <div :class="theme.layout.pageHeader">

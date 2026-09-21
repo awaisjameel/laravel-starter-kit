@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         {{-- Consumed by resources/js/app.ts so Inertia can nonce the style elements it injects --}}
-        <meta name="csp-nonce" content="{{ $cspNonce ?? '' }}">
+        <meta name="csp-nonce" content="{{ Vite::cspNonce() }}">
 
         <title data-inertia>{{ config('app.name', 'Laravel') }}</title>
 

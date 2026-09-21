@@ -154,15 +154,17 @@ For every non-trivial change, explicitly verify all affected layers before consi
 
 ## Current Runtime And Tooling
 
+- `composer setup` is Laravel's first-run script: install both dependency graphs, create `.env`, generate the key, migrate, and build assets.
+- `.env.example` keeps Laravel's `APP_URL=http://localhost`, and `php artisan serve` keeps its default `127.0.0.1:8000`, which Sanctum's default stateful domains already cover. When serving on another host or port, set `APP_URL` to that origin so first-party API requests stay stateful.
 - `composer dev` starts:
     - `php artisan serve`
-    - `php artisan queue:listen --queue=realtime,high,default --tries=1`
+    - `php artisan queue:listen --queue=realtime,high,default --tries=1 --timeout=0`
     - `php artisan pail --timeout=0`
     - `npm run dev`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
 - `composer dev:ssr` builds SSR assets, then starts:
     - `php artisan serve`
-    - `php artisan queue:listen --queue=realtime,high,default --tries=1`
+    - `php artisan queue:listen --queue=realtime,high,default --tries=1 --timeout=0`
     - `php artisan pail --timeout=0`
     - `php artisan inertia:start-ssr`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
@@ -170,9 +172,9 @@ For every non-trivial change, explicitly verify all affected layers before consi
 - Run one scheduler per host. Long-lived services restart after a successful exit so deployment commands such as `queue:restart` do not leave workers stopped. Multiple scheduler hosts require Laravel's shared-cache scheduling locks.
 - SSR is served two different ways and both are wired up:
     - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
-    - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/ssr.js` and `php artisan inertia:start-ssr` serves it.
+    - Production / `composer dev:ssr`: `npm run build:ssr` emits `bootstrap/ssr/app.js`, which Inertia's bundle detector finds without configuration, and `php artisan inertia:start-ssr` serves it as a single Node process.
 - `INERTIA_SSR_ENABLED` in `.env.example` toggles both paths.
-- `vite.config.ts` declares `optimizeDeps.include`. Pages, module components, and UI primitives are reached through globs and auto-registration, so Vite's first crawl never sees the dependencies they import. Discovering one later re-bundles and reloads the dev server while `@inertiajs/vite` is warming the SSR module graph, which cancels its in-flight module fetches; the dev server then fails to render any page until it is restarted, and `php artisan serve` fatals on its 30-second limit while waiting. Add a dependency to that list when it is only reachable from a page, module component, or UI primitive.
+- `vite.config.ts` excludes `storage`, `vendor`, and the build output directories from the dev server's file watcher. Watching them creates tens of thousands of watchers; on Windows that blocked the dev server for 20 seconds to several minutes on start, long enough for the SSR warm-up to time out and for `php artisan serve` to hit its 30-second limit. Keep new non-frontend directories with many files out of the watcher the same way. Vite's dependency optimizer discovers every bare import in its first pass, so no `optimizeDeps.include` list is maintained.
 
 ## Canonical Architecture
 
@@ -189,7 +191,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `App\Http\Middleware\HandleInertiaRequests`
     - `App\Http\Middleware\SecurityHeaders`
     - `Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets`
-- Guest redirects are configured centrally in `bootstrap/app.php` to `route('auth.login.create')`.
+- Guest redirects are configured centrally in `bootstrap/app.php` to `route('auth.login.create')`, and authenticated users visiting guest-only routes are redirected to `route('app.dashboard')`. Laravel's own fallback looks for a route named `dashboard` or `home`, which the namespaced route names do not provide.
 - The `verified` middleware alias is configured there with Laravel's `EnsureEmailIsVerified::redirectTo('auth.verification.notice')`. Keep this central default so existing and generated protected routes share the namespaced verification prompt; JSON requests retain Laravel's 403 response.
 - Inertia history encryption defaults to enabled (`INERTIA_ENCRYPT_HISTORY=true`) and requires HTTPS or localhost. Login, registration, logout, and account deletion call `Inertia::clearHistory()` after changing the session so the next page rotates the browser history key. Query-cache clearing does not replace this protection.
 - `statefulApi()` enables Sanctum session authentication and CSRF protection for API requests from configured first-party origins. Keep `SANCTUM_STATEFUL_DOMAINS` aligned with deployed frontend hosts, including ports. External clients use bearer tokens. Authentication regressions must exercise persisted cookies or real tokens; `actingAs` alone cannot verify middleware wiring.
@@ -337,23 +339,20 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 ### Frontend
 
-- App entry points:
-    - `resources/js/app.ts` - Client-side entry
-    - `resources/js/ssr.ts` - SSR entry
-    - `resources/js/create-app.ts` - Root tree and plugins shared by both entries
-- Both entries call `createInertiaApp<AppPageProps>` with the same `pages` shorthand. `@inertiajs/vite` compiles it into an `import.meta.glob` resolver over `resources/js/modules/**/*.vue`, and the `transform` strips the leading `modules/` from the backend-supplied component name (`modules/users/pages/Index`).
-- That `pages` object is rewritten by a static AST transform, so it must stay an inline object literal in each entry. It cannot be hoisted into a shared constant, and the duplication between the two entries is intentional.
-- Passing `AppPageProps` as the type argument is what keeps `props.initialPage.props` typed; do not fall back to casting individual shared props.
-- Both entries build their Vue app through `resources/js/create-app.ts`, so the root tree (`App` plus `AppToaster`) and the installed plugins are declared once and cannot drift apart. Register new plugins and root-level components there, never in a single entry.
-- Pinia is created per app instance rather than at module scope, so the long-lived SSR process never shares store state between requests.
+- `resources/js/app.ts` is the single entry for both the client and SSR, matching Inertia v3's default. `@inertiajs/vite` auto-detects it as the SSR entry, and `laravel()` names it as the `ssr` input so the stylesheet stays out of the SSR build. Do not reintroduce a separate `ssr.ts` or a manual `createServer` wrapper.
+- `createInertiaApp(...)` must stay a bare top-level statement: the plugin rewrites it into the render function for the dev SSR endpoint and the production `createServer` boot. Its `pages` shorthand must stay an inline object literal, because a static AST transform compiles it into an `import.meta.glob` resolver over `resources/js/modules/**/*.vue`. The `transform` strips the leading `modules/` from the backend-supplied component name (`modules/users/pages/Index`).
+- Shared page props are typed through Inertia v3's `InertiaConfig.sharedPageProps` augmentation in `resources/js/types/globals.d.ts`, bound to the generated `SharedPageData`. `usePage()`, `$page`, and `createInertiaApp` are therefore typed without a type argument; do not cast individual shared props.
+- `globals.d.ts` also declares the `VITE_*` variables the frontend reads, and enables Vite's `strictImportMetaEnv`, so reading an undeclared `import.meta.env` key is a type error instead of `any`. Declare a new client variable there when adding it to `.env.example`.
+- `setup` in `app.ts` builds the Vue app for both renders, so they cannot drift apart. It renders `resources/js/components/AppRoot.vue` around the Inertia page; `AppRoot` owns the global toaster and the query-cache reset on identity changes. Register new plugins in `setup` and new root-level components in `AppRoot`.
+- `setup` uses `createSSRApp` on the server and for roots Inertia marks with `data-server-rendered`, and `createApp` otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
+- `setup` calls VueUse's `provideSSRWidth` with the desktop breakpoint. The server cannot measure a viewport, so media queries (the sidebar's mobile check) resolve against that width on the server and during hydration, then switch to the real viewport after mount. Without it, narrow screens hydrate a different sidebar tree and every later `useId()` shifts, breaking label and `aria-describedby` targets in production.
 - Nothing request-scoped may be written to a module-level binding or to `globalThis`. The SSR process is long-lived and serves concurrent requests, so a per-request global is overwritten by whichever request rendered last. Current applications of this rule:
-    - Pinia is per app instance (`create-app.ts`)
+    - Pinia is created per app instance in `setup`
     - `useToast` drops toasts under SSR
     - `useApiQuery` never reads, writes, or fetches into its module-level cache or in-flight request map under SSR
     - `useAppearance` keeps only a client override at module scope, seeded from the `appearance` page prop and written solely from a browser interaction
-- `app.ts` hydrates when Inertia marks the root element with `data-server-rendered` and mounts a fresh app otherwise, so `INERTIA_SSR_ENABLED` can be toggled without a hydration mismatch.
-- `resources/js/ssr.ts` must stay a bare top-level `createInertiaApp(...)` statement. `@inertiajs/vite` rewrites it into the render function used by the dev SSR endpoint and the `createServer` boot used by production builds. Do not reintroduce a manual `createServer` wrapper.
-- `app.ts` passes Inertia a CSP `nonce` read from the `meta[name="csp-nonce"]` tag rendered by `resources/views/app.blade.php`, so Inertia's injected style elements satisfy `SecurityHeaders`.
+- Code at the top level of `app.ts` runs in both environments. Guard browser globals with `import.meta.env.SSR`, which Vite replaces at build time.
+- `SecurityHeaders` generates the per-request CSP nonce with Laravel's `Vite::useCspNonce()`, so `@vite` adds it to every tag it renders. The root view exposes `Vite::cspNonce()` in a `meta[name="csp-nonce"]` tag, and `app.ts` passes it to Inertia so its injected style elements satisfy the policy.
 - The root Blade template uses `data-inertia` (not `inertia`) on head elements, per Inertia v3.
 - `resources/css/app.css` is a Vite entry of its own (`vite.config.ts` `input`, first in the `@vite` array) and must never be imported from `app.ts`. SSR ships a fully rendered document, so the browser paints as soon as the HTML lands; CSS reaching it through the JS module graph would render that markup unstyled and reflow when the bundle evaluated. As a separate entry it is a render-blocking `<link rel="stylesheet">` in dev and production alike — the Vite dev server serves it as real `text/css` because a `<link>` sends `Accept: text/css`.
 - The color scheme is server-rendered. `HandleAppearance` normalizes the `appearance` cookie through `App\Enums\Appearance` and shares it with the root view, which puts `class="dark"` on `<html>` directly; there is no boot script and nothing for the client to re-apply. `HandleInertiaRequests` shares the same value as a page prop so `useAppearance` seeds the appearance UI from it and hydrates without a mismatch. `useAppearance` holds only a client override (`null` until the visitor toggles), which is what keeps this module-level state out of the shared SSR process.
@@ -579,7 +578,7 @@ When adding similar behavior, inspect and follow the nearest established referen
     - String and array keys have distinct serialized identities. Delayed retries stop after a key change, invalidation, or identity-driven cache clear so they cannot read new inputs under an old key.
     - A projected result type requires an explicit `select`; identity queries preserve `TData` and cannot assert an unrelated result type.
     - A disabled query is never `isLoading`; disabling it supersedes observer updates from in-flight work, and `isSuccess` additionally requires resolved data.
-- The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `create-app.ts`; account data must not survive logout or account switching. Full clears synchronously reset mounted query/mutation data and errors. Mutations check that context before sending a write and between asynchronous callbacks; stale contexts reject with `stale_auth_context` and skip subsequent callbacks and invalidations. Already running callbacks and server writes cannot be cancelled by a cache reset.
+- The app root clears the query cache synchronously when authenticated identity changes. Keep this lifecycle in `resources/js/components/AppRoot.vue`; account data must not survive logout or account switching. Full clears synchronously reset mounted query/mutation data and errors. Mutations check that context before sending a write and between asynchronous callbacks; stale contexts reject with `stale_auth_context` and skip subsequent callbacks and invalidations. Already running callbacks and server writes cannot be cancelled by a cache reset.
 - Query/mutation error types incompatible with `ApiError` require `mapError`. Mutation pending state covers all concurrent requests; the latest invocation owns displayed data/errors. Reset clears displayed state without pretending outstanding work has stopped.
 - Mutation callback failures propagate without reclassifying successful writes as failures. Cache invalidation precedes success callbacks, and settlement runs once even when a success or error callback throws.
 - Wayfinder's generated route/action helpers are the only route surface. Ziggy is deliberately not a dependency: its `route()` is string-keyed rather than type-checked, and shipping its route table in every Inertia response duplicates what Wayfinder already generates at build time.
@@ -625,7 +624,7 @@ When adding similar behavior, inspect and follow the nearest established referen
 
 ### Frontend
 
-- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts`. Both `resources/js/app.ts` and `resources/js/ssr.ts` call it.
+- Initialize Echo only through `configureRealtime()` in `resources/js/lib/realtime/config.ts`, which `resources/js/app.ts` calls once for both the client and SSR.
 - `configureRealtime()` is SSR-aware: under `import.meta.env.SSR` it configures the `null` broadcaster, so realtime composables resolve to inert channels instead of throwing or opening a WebSocket while the server renders. Never make a realtime composable depend on a live connection at `setup()` time.
 - Shared realtime frontend helpers live in:
     - `resources/js/lib/realtime/config.ts`

@@ -117,14 +117,6 @@
         // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
         "skipLibCheck": true /* Skip type checking all .d.ts files. */
     },
-    "include": [
-        "resources/js/**/*.ts",
-        "resources/js/**/*.tsx",
-        "resources/js/**/*.vue",
-        "resources/js/types/auto-imports.d.ts",
-        "resources/js/types/globals.d.ts",
-        "resources/js/types/index.d.ts",
-        "env.d.ts" // Custom environment declaration file for Vite
-    ],
+    "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx", "resources/js/**/*.vue"],
     "exclude": []
 }
