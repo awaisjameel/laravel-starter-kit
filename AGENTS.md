@@ -168,7 +168,9 @@ For every non-trivial change, explicitly verify all affected layers before consi
     - `php artisan pail --timeout=0`
     - `php artisan inertia:start-ssr`
     - `php artisan reverb:start --host=0.0.0.0 --port=8080 --hostname=127.0.0.1 --no-interaction`
-- `pm2.config.cjs` currently manages production-style queue workers, Reverb, the Inertia SSR server, and the scheduler.
+- `pm2.config.cjs` currently manages production-style queue workers, Reverb, the Inertia SSR server, and the scheduler. PM2 starts Reverb without flags so it binds to `REVERB_SERVER_HOST`/`REVERB_SERVER_PORT` from `.env`; shell-expanded flags would ignore `.env`.
+- `hosting/nginx_config` is the single-server nginx setup documented in `docs/deployment.md`. `app.conf` (behind a TLS-terminating proxy) and `app-https.conf` (nginx terminates TLS) both include `snippets/app-locations.conf`, which owns all routing. Reverb shares the domain: only `Upgrade: websocket` requests under `/app/` reach it, because Reverb's `/app/{key}` endpoint shares the prefix with the application's `/app/*` pages. Never route by a literal app key. Only `public/index.php` executes. Keep the routing change and `docs/deployment.md` in the same change; `nginx -t` with request checks is the verification, since no automated suite covers these files.
+- `config/trustedproxy.php` feeds Laravel's global `TrustProxies` middleware from `TRUSTED_PROXIES`. Leave it unset when clients connect directly; behind a TLS-terminating proxy it must name that proxy, or generated URLs and asset links use `http://`.
 - Run one scheduler per host. Long-lived services restart after a successful exit so deployment commands such as `queue:restart` do not leave workers stopped. Multiple scheduler hosts require Laravel's shared-cache scheduling locks.
 - SSR is served two different ways and both are wired up:
     - Development: `@inertiajs/vite` exposes `/__inertia_ssr` on the Vite dev server and `inertia-laravel` routes to it automatically while Vite is hot. `composer dev` therefore renders pages server-side with HMR and no extra process.
@@ -980,6 +982,7 @@ Do not shadow them with manual duplicates.
     - `README.md`
     - `docs/frontend-automation.md`
     - `docs/how-to-add-module-page.md`
+    - `docs/deployment.md`
 - Do not leave known stale instructions behind after changing the implementation.
 
 ## Quality Gate

@@ -27,8 +27,8 @@ module.exports = {
             instances: 1,
             name: 'reverb',
             script: 'artisan',
-            interpreter_args:
-                '-c "umask 0002 && exec php artisan reverb:start --host=${REVERB_SERVER_HOST:-0.0.0.0} --port=${REVERB_SERVER_PORT:-8080} --hostname=${REVERB_HOST:-127.0.0.1} --no-interaction"',
+            // Without flags, reverb:start binds to REVERB_SERVER_HOST/PORT from `.env`.
+            interpreter_args: '-c "umask 0002 && exec php artisan reverb:start --no-interaction"',
             cwd: './',
             error_file: './storage/logs/pm2/reverb/pm2-error.log',
             out_file: './storage/logs/pm2/reverb/pm2-out.log',
