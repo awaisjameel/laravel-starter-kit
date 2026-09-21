@@ -182,7 +182,7 @@ paint has to arrive as markup rather than as a side effect of the JS bundle:
 - `resources/css/app.css` is its own Vite entry and is listed first in `@vite`, so it is a render-blocking stylesheet in dev and production. Importing it from `app.ts` instead would paint the server-rendered HTML unstyled and reflow once the bundle evaluated.
 - `resources/js/app.ts` is the single client and SSR entry (Inertia v3's default). Media queries resolve against a desktop width on the server and during hydration, then follow the real viewport after mount, so narrow screens hydrate the same tree the server rendered.
 - The color scheme comes from the `appearance` cookie and is rendered onto `<html>` by Blade — no boot script, and no post-hydration re-apply. The same value is shared as an Inertia prop so the appearance controls render identically on both sides.
-- Web fonts use `display=swap` and a pair of preconnects (the stylesheet fetch is same-origin to the font host, the font files are CORS, and they use separate connections).
+- Fonts are self-hosted through laravel-vite-plugin's `fonts` option: one variable woff2 covers every weight, `@fonts` preloads it and inlines its `@font-face` rules, and a metric-matched fallback keeps text from shifting while it loads. No third-party font host is contacted, and builds need no network.
 
 ## Security Defaults
 

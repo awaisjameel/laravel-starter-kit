@@ -1,5 +1,6 @@
 @theme inline {
-    --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Defined by `@fonts` from the `laravel()` font config in `vite.config.ts`. */
+    --font-sans: var(--font-instrument-sans);
 
     --radius-control: var(--theme-radius-control);
     --radius-panel: var(--theme-radius-panel);

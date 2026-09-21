@@ -12,7 +12,10 @@ test('security headers are present on web responses', function (): void {
     $contentSecurityPolicy = (string) $testResponse->headers->get('Content-Security-Policy');
 
     $this->assertNotSame('', $contentSecurityPolicy);
-    expect($contentSecurityPolicy)->toMatch("/script-src 'self' 'nonce-[^']+'/");
+    expect($contentSecurityPolicy)
+        ->toMatch("/script-src 'self' 'nonce-[^']+'/")
+        ->toMatch("/style-src 'self' 'nonce-[^']+';/")
+        ->toContain("style-src-attr 'unsafe-inline'");
     $testResponse->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     $testResponse->assertHeader('X-Content-Type-Options', 'nosniff');
     $testResponse->assertHeader('X-Frame-Options', 'DENY');

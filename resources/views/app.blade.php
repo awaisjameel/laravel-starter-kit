@@ -16,12 +16,9 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        {{-- Two preconnects on purpose: the stylesheet is a same-origin fetch, the
-             font files it references are CORS, and the two use separate connections.
-             `display=swap` keeps text visible while the font is still downloading. --}}
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />
+        {{-- Self-hosted fonts from `vite.config.ts`: a preload plus inline `@font-face`
+             rules, so the font request starts before any stylesheet is parsed. --}}
+        @fonts
 
         {{-- The stylesheet is listed first and is a Vite entry of its own, so it is a
              render-blocking `<link>` in dev and production alike. Bundling it through

@@ -3,6 +3,7 @@ import { wayfinder } from '@laravel/vite-plugin-wayfinder'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import laravel from 'laravel-vite-plugin'
+import { local } from 'laravel-vite-plugin/fonts'
 import { fileURLToPath, URL } from 'node:url'
 import AutoImport from 'unplugin-auto-import/vite'
 import IconsResolver from 'unplugin-icons/resolver'
@@ -24,7 +25,30 @@ export default defineConfig({
             // `<link>`: server-rendered markup must never paint before its CSS.
             input: ['resources/css/app.css', appEntry],
             ssr: appEntry,
-            refresh: true
+            refresh: true,
+            // Self-hosted from the locked npm package, so builds need no network and
+            // every weight ships in one preloaded variable file. `@fonts` inlines the
+            // `@font-face` rules plus a metric-matched fallback, so text neither waits
+            // on a third-party stylesheet nor shifts when the font arrives.
+            fonts: [
+                local('Instrument Sans', {
+                    variants: [
+                        {
+                            src: 'node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2',
+                            weight: '400 700'
+                        }
+                    ],
+                    fallbacks: [
+                        'ui-sans-serif',
+                        'system-ui',
+                        'sans-serif',
+                        "'Apple Color Emoji'",
+                        "'Segoe UI Emoji'",
+                        "'Segoe UI Symbol'",
+                        "'Noto Color Emoji'"
+                    ]
+                })
+            ]
         }),
         // Serves SSR from the Vite dev server and wraps `app.ts` for the SSR build.
         inertia(),
