@@ -21,4 +21,5 @@ npm-debug.log
 /.idea
 /.nova
 /.zed
-/hosting/nginx_logs/
+/hosting/nginx_logs/*
+!/hosting/nginx_logs/.gitkeep

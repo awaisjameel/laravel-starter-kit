@@ -228,6 +228,10 @@ CI also runs `composer audit --locked` and `npm audit`. The production PM2 examp
 
 `composer qa:generated` copies the current tracked changes and untracked source into an isolated checkout, installs the locked Composer and npm dependencies, and scaffolds protected and public modules. It runs the client/SSR build, mandatory generation and cleanup, all static checks, both suites, a guest public-page SSR regression, and whitespace verification including new files. The source checkout, index, database, and build outputs stay untouched, including on failure. CI runs it as its own job. This verifies that generated modules compile and execute in the application, beyond the generator's template assertions.
 
+## Deployment
+
+`hosting/` contains a ready-to-use nginx site for a single Linux server, in two variants: behind a TLS-terminating proxy, or with nginx serving HTTPS through Let's Encrypt. Both serve Reverb on the application's own domain, alongside the PM2 processes in `pm2.config.cjs`. Follow [docs/deployment.md](docs/deployment.md) for the production `.env`, build, site, log rotation, and update steps. In particular, set `APP_SEED_USERS=false` before the first production migration, and set `TRUSTED_PROXIES` when a proxy terminates TLS.
+
 ## Working With Coding Agents
 
 [AGENTS.md](AGENTS.md) is the canonical guide, with an entry map for each kind of change. `CLAUDE.md` imports the same guidance. Agents should trace the owning module and generated consumers, repair the complete flow, and finish with the documented quality gate and relevant tests.
