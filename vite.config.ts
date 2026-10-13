@@ -101,17 +101,6 @@ export default defineConfig({
                 // work. Rolldown's percentage-based advisory is therefore noisy even
                 // when the complete production build finishes in a few seconds.
                 pluginTimings: false
-            },
-            onwarn: (warning, defaultHandler) => {
-                // `@inertiajs/vite` enables sourcemaps for the SSR build but rewrites
-                // the `pages` shorthand without emitting one, so every build warns
-                // about the entry file. Only that entry is affected and the plugin
-                // owns the transform, so there is nothing to fix here.
-                if (warning.code === 'SOURCEMAP_BROKEN' && warning.plugin === '@inertiajs/vite') {
-                    return
-                }
-
-                defaultHandler(warning)
             }
         }
     }

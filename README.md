@@ -12,9 +12,9 @@ Published Sail Docker contexts are limited to PHP 8.4 and 8.5, matching the Comp
 
 ## Stack
 
-- Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.11, Sanctum 4
+- Laravel 13, Inertia 3 (`inertiajs/inertia-laravel`, `@inertiajs/vue3`, `@inertiajs/vite`), Reverb 1.12, Sanctum 4
 - Spatie Laravel Data 4 + TypeScript Transformer 3, Wayfinder
-- Vue 3.5, TypeScript 7 checker via TypeScript Native Bridge, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, Iconify through `unplugin-icons`
+- Vue 3.5, VueUse 15, TypeScript 7 checker via TypeScript Native Bridge, Vite 8 (Rolldown), Tailwind CSS 4, Pinia 4, Reka UI, Iconify through `unplugin-icons` 24
 - Pest 5 (PHPUnit 13 engine), Vitest 5, Pint, PHPStan/Larastan at level 9 with strict/deprecation rules, Rector, ESLint 10, Prettier 3
 
 TypeScript uses the 7.0.2 native checker through the exactly pinned `typescript-native-bridge` npm alias. Its classic API adapter keeps Vue, ESLint, and Prettier compatible. This is a third-party compiler bridge, not Microsoft's stock TypeScript package. See [frontend tooling and editor setup](docs/frontend-automation.md#typescript-compiler-and-editor) for platform requirements and upgrade guidance.
@@ -159,7 +159,7 @@ Vite also generates the auto-import and component declarations at
 `resources/js/types/auto-imports.d.ts` and `resources/js/types/components.d.ts`.
 All generated artifacts are committed and validated by CI; do not hand-edit them.
 
-Wayfinder's Windows/Linux newline handling is fixed by a local Composer patch, applied automatically by `composer install` (Git must be available). Commit `patches.lock.json` and `patches/**` alongside the dependency locks. When changing the patch, run `composer patches-relock` and `composer patches-repatch` before regeneration. Existing checkouts that already have Wayfinder installed should run `composer patches-repatch` once after pulling this change.
+Wayfinder's Windows/Linux newline handling and Laravel 13 `QUERY` method types are fixed by local Composer patches, applied automatically by `composer install` (Git must be available). Commit `patches.lock.json` and `patches/**` alongside the dependency locks. When changing a patch, run `composer patches-relock` and `composer patches-repatch` before regeneration. Existing checkouts that already have Wayfinder installed should run `composer patches-repatch` once after pulling this change.
 
 Nullable PHP properties generate required `T | null` fields, matching their serialized values. Use backend `Optional` or `Lazy` types for fields that may be absent; do not hide nulls by making every nullable property optional.
 

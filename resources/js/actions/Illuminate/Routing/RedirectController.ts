@@ -10,9 +10,9 @@ const RedirectController = (options?: RouteQueryOptions): RouteDefinition<'get'>
 })
 
 RedirectController.definition = {
-    methods: ["get","head","post","put","patch","delete","options"],
+    methods: ["get","head","post","put","patch","delete","options","query"],
     url: '/app/settings',
-} satisfies RouteDefinition<["get","head","post","put","patch","delete","options"]>
+} satisfies RouteDefinition<["get","head","post","put","patch","delete","options","query"]>
 
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
@@ -91,6 +91,16 @@ RedirectController.delete = (options?: RouteQueryOptions): RouteDefinition<'dele
 RedirectController.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
     url: RedirectController.url(options),
     method: 'options',
+})
+
+/**
+* @see \Illuminate\Routing\RedirectController::__invoke
+* @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
+* @route '/app/settings'
+*/
+RedirectController.query = (options?: RouteQueryOptions): RouteDefinition<'query'> => ({
+    url: RedirectController.url(options),
+    method: 'query',
 })
 
 export default RedirectController

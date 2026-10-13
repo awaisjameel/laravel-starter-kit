@@ -108,11 +108,11 @@ final class GenerateModuleCommand extends Command
 
     private function resolveInput(): GenerateModuleInput
     {
-        $moduleName = ModuleName::fromString($this->argument('module'));
-        $pageName = (string) $this->option('page');
-        $basePathOption = $this->option('base-path');
+        $moduleName = ModuleName::fromString($this->input()->string('module')->toString());
+        $pageName = $this->input()->string('page')->toString();
+        $basePathOption = $this->input()->string('base-path')->toString();
         $basePath = mb_trim(
-            $basePathOption !== null && $basePathOption !== ''
+            $basePathOption !== ''
                 ? $basePathOption
                 : base_path(),
         );
@@ -188,7 +188,7 @@ final class GenerateModuleCommand extends Command
             scaffoldType: $scaffoldType,
             generateCrud: $generateCrud,
             generateApi: $generateApi,
-            extend: $this->option('extend'),
+            extend: $this->input()->boolean('extend'),
             generatePage: $generatePage,
             routeProfile: $routeProfile,
             routePrefix: $routePrefix,
@@ -202,8 +202,8 @@ final class GenerateModuleCommand extends Command
             generateModel: $generateModel,
             generateApiResource: $generateApiResource,
             generateApiFeatureTest: $generateApiFeatureTest,
-            force: $this->option('force'),
-            dryRun: $this->option('dry-run'),
+            force: $this->input()->boolean('force'),
+            dryRun: $this->input()->boolean('dry-run'),
             basePath: $basePath,
             crudResourceManifest: $resolvedCrudResourceManifest,
         );
@@ -211,10 +211,10 @@ final class GenerateModuleCommand extends Command
 
     private function resolveScaffoldType(): string
     {
-        $providedScaffoldType = mb_strtolower(mb_trim((string) $this->option('scaffold')));
+        $providedScaffoldType = mb_strtolower(mb_trim($this->input()->string('scaffold')->toString()));
 
         if ($providedScaffoldType === '') {
-            $defaultScaffoldType = $this->option('extend')
+            $defaultScaffoldType = $this->input()->boolean('extend')
                 ? ScaffoldType::PAGE
                 : ScaffoldType::CRUD;
 
@@ -247,7 +247,7 @@ final class GenerateModuleCommand extends Command
 
     private function resolveRouteProfile(?string $defaultProfile = null): string
     {
-        $providedProfile = mb_strtolower(mb_trim((string) $this->option('route-profile')));
+        $providedProfile = mb_strtolower(mb_trim($this->input()->string('route-profile')->toString()));
 
         if ($providedProfile === '') {
             if (! $this->input->isInteractive()) {
@@ -326,9 +326,9 @@ final class GenerateModuleCommand extends Command
                 default => throw new RuntimeException(sprintf('Unsupported route profile "%s".', $routeProfile)),
             };
 
-        $routePrefix = mb_trim((string) $this->option('route-prefix'));
-        $routeNamePrefix = mb_trim((string) $this->option('route-name-prefix'));
-        $middlewareOption = mb_trim((string) $this->option('middleware'));
+        $routePrefix = mb_trim($this->input()->string('route-prefix')->toString());
+        $routeNamePrefix = mb_trim($this->input()->string('route-name-prefix')->toString());
+        $middlewareOption = mb_trim($this->input()->string('middleware')->toString());
 
         if ($routeProfile === RouteProfile::CUSTOM && $this->input->isInteractive()) {
             if ($routePrefix === '') {
@@ -370,7 +370,7 @@ final class GenerateModuleCommand extends Command
             return [];
         }
 
-        $roleOption = mb_strtolower(mb_trim((string) $this->option('roles')));
+        $roleOption = mb_strtolower(mb_trim($this->input()->string('roles')->toString()));
 
         if ($roleOption === '') {
             if (! $this->input->isInteractive()) {
@@ -518,7 +518,7 @@ final class GenerateModuleCommand extends Command
      */
     private function resolveApiRouteConfiguration(ModuleName $moduleName, ?CrudResourceManifest $crudResourceManifest = null): array
     {
-        $providedApiProfile = mb_strtolower(mb_trim((string) $this->option('api-route-profile')));
+        $providedApiProfile = mb_strtolower(mb_trim($this->input()->string('api-route-profile')->toString()));
         $manifestApi = $crudResourceManifest?->api;
 
         if ($providedApiProfile === '') {
@@ -559,9 +559,9 @@ final class GenerateModuleCommand extends Command
         $defaultNamePrefix = $manifestApi instanceof CrudApiManifest ? $manifestApi->routeNamePrefix : $computedNamePrefix;
         $defaultMiddleware = $manifestApi instanceof CrudApiManifest ? $manifestApi->middleware : $computedMiddleware;
 
-        $apiRoutePrefix = mb_trim((string) $this->option('api-route-prefix'));
-        $apiRouteNamePrefix = mb_trim((string) $this->option('api-route-name-prefix'));
-        $apiMiddlewareOption = mb_trim((string) $this->option('api-middleware'));
+        $apiRoutePrefix = mb_trim($this->input()->string('api-route-prefix')->toString());
+        $apiRouteNamePrefix = mb_trim($this->input()->string('api-route-name-prefix')->toString());
+        $apiMiddlewareOption = mb_trim($this->input()->string('api-middleware')->toString());
 
         if ($providedApiProfile === ApiRouteProfile::CUSTOM && $this->input->isInteractive()) {
             if ($apiRoutePrefix === '') {
@@ -649,16 +649,16 @@ final class GenerateModuleCommand extends Command
 
     private function resolveGeneratePage(bool $generateCrud): bool
     {
-        return $generateCrud && ! $this->option('no-page');
+        return $generateCrud && ! $this->input()->boolean('no-page');
     }
 
     private function resolveGenerateModel(bool $hasBackendScaffold, ModuleName $moduleName, string $basePath): bool
     {
-        if (! $hasBackendScaffold || $this->option('no-model')) {
+        if (! $hasBackendScaffold || $this->input()->boolean('no-model')) {
             return false;
         }
 
-        if (! $this->option('extend')) {
+        if (! $this->input()->boolean('extend')) {
             return true;
         }
 
@@ -684,14 +684,14 @@ final class GenerateModuleCommand extends Command
     private function resolveGenerateApiResource(bool $generateApi, ?CrudResourceManifest $crudResourceManifest = null): bool
     {
         return $generateApi
-            && ! $this->option('no-api-resource')
+            && ! $this->input()->boolean('no-api-resource')
             && ($crudResourceManifest?->api->generatesResource ?? true);
     }
 
     private function resolveGenerateApiFeatureTest(bool $generateApi, ?CrudResourceManifest $crudResourceManifest = null): bool
     {
         return $generateApi
-            && ! $this->option('no-api-test')
+            && ! $this->input()->boolean('no-api-test')
             && ($crudResourceManifest?->api->generatesFeatureTest ?? true);
     }
 
@@ -774,7 +774,7 @@ final class GenerateModuleCommand extends Command
 
     private function shouldPromptPerFile(): bool
     {
-        return $this->input->isInteractive() && ! $this->option('no-file-prompts');
+        return $this->input->isInteractive() && ! $this->input()->boolean('no-file-prompts');
     }
 
     /**

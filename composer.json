@@ -11,9 +11,9 @@
     "require": {
         "php": "^8.4",
         "cweagans/composer-patches": "^2.0",
-        "inertiajs/inertia-laravel": "^3.3.3",
-        "laravel/framework": "^13.31.0",
-        "laravel/reverb": "^1.11.1",
+        "inertiajs/inertia-laravel": "^3.5.1",
+        "laravel/framework": "^13.36.0",
+        "laravel/reverb": "^1.12.0",
         "laravel/sanctum": "^4.3.3",
         "laravel/tinker": "^3.0.2",
         "laravel/wayfinder": "^0.1.21",
@@ -23,20 +23,20 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.24.1",
-        "larastan/larastan": "^3.11.0",
-        "laravel/boost": "^2.8.0",
+        "larastan/larastan": "^3.13.0",
+        "laravel/boost": "^2.10.3",
         "laravel/pail": "^1.2.7",
-        "laravel/pint": "^1.31.1",
-        "laravel/sail": "^1.67.0",
+        "laravel/pint": "^1.32.1",
+        "laravel/sail": "^1.69.0",
         "mockery/mockery": "^1.6.15",
         "nunomaduro/collision": "^8.9.5",
-        "pestphp/pest": "^5.1.4",
+        "pestphp/pest": "^5.3.2",
         "pestphp/pest-plugin-laravel": "^5.0.1",
-        "pestphp/pest-plugin-phpstan": "^5.2.1",
-        "phpstan/phpstan": "^2.2.13",
-        "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-strict-rules": "^2.0",
-        "rector/rector": "^2.6.6"
+        "pestphp/pest-plugin-phpstan": "^5.2.2",
+        "phpstan/phpstan": "^2.3.1",
+        "phpstan/phpstan-deprecation-rules": "^2.0.5",
+        "phpstan/phpstan-strict-rules": "^2.1.0",
+        "rector/rector": "^2.7.0"
     },
     "autoload": {
         "psr-4": {
@@ -167,7 +167,8 @@
     "extra": {
         "patches": {
             "laravel/wayfinder": {
-                "Generate identical LF output on Windows and Linux": "patches/wayfinder-portable-newlines.patch"
+                "Generate identical LF output on Windows and Linux": "patches/wayfinder-portable-newlines.patch",
+                "Support Laravel 13 QUERY route helpers": "patches/wayfinder-query-method.patch"
             }
         },
         "laravel": {

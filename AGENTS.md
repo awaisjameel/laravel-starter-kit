@@ -113,30 +113,31 @@ For every non-trivial change, explicitly verify all affected layers before consi
 ## Current Stack
 
 - PHP: `^8.4`
-- Laravel: `^13.31`
-- Inertia Laravel: `^3.3`
-- Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.7`
-- Reverb: `^1.11.1`
+- Laravel: `^13.36`
+- Inertia Laravel: `^3.5`
+- Inertia client (`@inertiajs/vue3`, `@inertiajs/vite`): `^3.9`
+- Reverb: `^1.12`
 - Sanctum: `^4.3.3`
 - Wayfinder: `^0.1.21` (sole route surface; Ziggy is deliberately not installed)
 - Spatie Laravel Data: `^4.23`
 - Spatie TypeScript Transformer: `^3.3`
-- Pest: `^5.0` with Laravel and PHPStan plugins `^5.0` (PHPUnit 13 engine)
-- PHPStan/Larastan: `^2.2` / `^3.11` at level 9 with official strict and deprecation rules
-- Rector: `^2.6`
-- Vue: `^3.5.42`
-- TypeScript checker: `7.0.2` through `typescript-native-bridge` (`6.0.3-bridge.16.tsgo.7.0.2`), retaining the classic compiler API for Vue and ESLint
+- Pest: `^5.3` with Laravel `^5.0` and PHPStan `^5.2` plugins (PHPUnit 13 engine)
+- PHPStan/Larastan: `^2.3` / `^3.13` at level 9 with official strict and deprecation rules
+- Rector: `^2.7`
+- Vue: `^3.5.44`
+- VueUse: `^15.0`
+- TypeScript checker: `7.0.2` through `typescript-native-bridge` (`6.0.3-bridge.18.tsgo.7.0.2`), retaining the classic compiler API for Vue and ESLint
 - Vitest: `^5.0`
-- Vite: `^8.2` (Rolldown bundler)
+- Vite: `^8.3` (Rolldown bundler)
 - `laravel-vite-plugin`: `^3.2`
 - Tailwind CSS: `^4.3`
 - Pinia: `^4.0`
-- Icons: Iconify collections compiled by `unplugin-icons` `^23.0`; runtime icon component packages are deliberately not installed
+- Icons: Iconify collections compiled by `unplugin-icons` `^24.0`; runtime icon component packages are deliberately not installed
 - Node: `>=24.15.0`
 - npm: `>=11.2.1`
 - Package manager: `npm` ONLY. This is enforced by `ensure-node-env.js`. Do not use yarn, pnpm, or bun.
 - `.npmrc` enables `engine-strict` so installs reject incompatible dependency runtimes. Node 24.15+ is required by jsdom 30; CI uses the latest Node 24 release.
-- npm's `allowScripts` pins the reviewed `vue-demi` postinstall that selects its Vue 3 adapter. Review and update that entry when the transitive package changes; do not allow all dependency scripts globally.
+- npm's `allowScripts` has no approved dependency scripts. VueUse 15 no longer needs the `vue-demi` adapter; review any new install scripts individually.
 - `composer.lock` and `package-lock.json` are committed application contracts; CI and local reproducible installs must honor them.
 - Published Sail Docker contexts are limited to `docker/8.4` and `docker/8.5`, matching the Composer PHP constraint.
 
@@ -144,13 +145,17 @@ For every non-trivial change, explicitly verify all affected layers before consi
 
 - Wayfinder 0.1.21 has platform-dependent newline cleanup. `cweagans/composer-patches` applies `patches/wayfinder-portable-newlines.patch` during installation so Artisan, Composer, and Vite emit identical LF helpers. Commit `patches.lock.json` with the patch; do not edit vendor files or format generated helpers separately. Remove the patch after an upstream release passes the portability regression tests on Windows and Linux.
 - After changing a Composer patch, run `composer patches-relock`, `composer patches-repatch`, and the generation/quality gates. CI vendor caches include the patch lock and patch files so an older unpatched vendor directory cannot be restored.
+- Wayfinder 0.1.21's method union predates Laravel 13's `QUERY` verb. `patches/wayfinder-query-method.patch` adds it to the generated type contract. Remove this patch when upstream supports `QUERY` and the query-route regression and Vue typecheck pass.
 - `typescript` is an exact npm alias to `typescript-native-bridge`, with `overrides.typescript = "$typescript"` so Vue, ESLint, and Prettier share the TypeScript 7 checker and classic API adapter. The version's `6.0.3` prefix identifies the API facade; `tsgo.7.0.2` identifies the checker. Do not replace it with stock `typescript@7` until Vue and the compiler-API consumers support it. Never use forced installs or disable strict checks to upgrade.
 - Keep the bridge exactly pinned and revalidate compiler diagnostics, formatting, lint, client/SSR builds, and clean `npm ci` when changing it. `resources/js/types/__tests__/compiler.test.ts` checks TypeScript 7 Unicode inference and rejection of invalid Vue props, template methods, and nullable backend fields.
 - The bridge supports Windows/macOS and glibc Linux (2.31+), including the Ubuntu 24.04 Sail images and Ubuntu CI. Alpine/musl is unsupported; run frontend tooling in a glibc build stage. Platform binaries come from its locked optional dependencies; do not omit optional dependencies during installation.
 - VS Code should use the workspace SDK in `node_modules/typescript/lib` with Vue - Official. Keep the classic language service for Vue plugin support; see `docs/frontend-automation.md` for editor setup and the bridge removal criteria.
-- `concurrently` 10 pins a vulnerable `shell-quote`. `package.json` carries an `overrides` entry forcing `shell-quote ^1.10.0`; drop it once upstream repins.
+- `concurrently` 10.0.6 pins the fixed `shell-quote` 1.12.0, so no security override is needed.
+- `fontaine` stays on `^0.8.2`, the latest release supported by `laravel-vite-plugin` 3.2's optional `^0.8.0` peer. Upgrade it to 1.x when the plugin supports that peer; keep metric-matched self-hosted font fallbacks and strict peer checks.
 - `optionalDependencies` pin the Linux x64 native binaries used by CI/Docker. Vite 8 bundles with Rolldown, so the binding is `@rolldown/binding-linux-x64-gnu` (not `@rollup/rollup-*`).
 - Those three entries must use exact versions that match the resolved core packages (`rolldown`, `lightningcss`, `@tailwindcss/oxide`). A caret range can hoist a newer binding than the core package expects and break the Linux build. Re-check them after any Vite or Tailwind bump.
+- Vite 8.3 uses Lightning CSS 1.33, while Tailwind 4.3.3 pins 1.32. Keep each core's matching binding in the lockfile; npm may install Tailwind's binding beneath its older core.
+- ESLint composes `typescript-eslint`'s recommended configs with `eslint-plugin-vue` and `vue-eslint-parser` directly. Preserve the Vue script/template parser, `vue/block-lang`, and every module/import guard. `@vue/eslint-config-typescript` was removed because its `fast-glob` dependency pulls in unpatched vulnerable `braces`; no project file scan is needed for this non-type-aware lint configuration.
 
 ## Current Runtime And Tooling
 
@@ -288,6 +293,7 @@ For every non-trivial change, explicitly verify all affected layers before consi
 ### Request / Controller / Handler Conventions
 
 - Every PHP file must declare `strict_types=1`.
+- Console commands use Laravel's typed `input()->string(...)->toString()` and `input()->boolean(...)` readers for signature-defined strings and flags.
 - Transport-layer input must be typed through request DTOs.
 - Prefer extending `DataFormRequest` for validated form payloads.
 - Prefer extending `DataQueryRequest` for query payloads so trimming, defaults, pagination, and enum casting stay centralized.
