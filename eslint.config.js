@@ -1,9 +1,11 @@
 import prettier from 'eslint-config-prettier'
 import vue from 'eslint-plugin-vue'
+import { defineConfig } from 'eslint/config'
 import fs from 'node:fs'
 import path from 'node:path'
+import tseslint from 'typescript-eslint'
+import vueParser from 'vue-eslint-parser'
 
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import { autoImportRestrictedPaths, autoImportRestrictedPatterns, autoImportSourceGlobs } from './frontend-auto-import.config.mjs'
 
 const modulesRoot = path.resolve(process.cwd(), 'resources/js/modules')
@@ -124,9 +126,25 @@ const pageDataAccessGuardConfig = {
     }
 }
 
-export default defineConfigWithVueTs(
+export default defineConfig(
     vue.configs['flat/essential'],
-    vueTsConfigs.recommended,
+    tseslint.configs.recommended.map((config) => (config.files ? { ...config, files: [...config.files, '**/*.vue'] } : config)),
+    vue.configs['flat/base'],
+    {
+        files: ['**/*.vue'],
+        languageOptions: {
+            parser: vueParser,
+            parserOptions: {
+                parser: { js: 'espree', jsx: 'espree', ts: tseslint.parser, tsx: tseslint.parser },
+                ecmaVersion: 2024,
+                ecmaFeatures: { jsx: false },
+                extraFileExtensions: ['.vue']
+            }
+        },
+        rules: {
+            'vue/block-lang': ['error', { script: { lang: ['ts'], allowNoLang: false } }]
+        }
+    },
     {
         ignores: [
             'vendor/**',

@@ -23,9 +23,9 @@ final class CacheModuleRegistryCommand extends Command
 
     public function handle(): int
     {
-        $basePathOption = $this->option('base-path');
+        $basePathOption = $this->input()->string('base-path')->toString();
         $basePath = mb_trim(
-            $basePathOption !== null && $basePathOption !== ''
+            $basePathOption !== ''
                 ? $basePathOption
                 : base_path(),
         );

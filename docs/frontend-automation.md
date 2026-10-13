@@ -4,7 +4,7 @@
 
 `npm run typecheck` runs `vue-tsc --noEmit` with the TypeScript 7.0.2 native checker through
 [TypeScript Native Bridge](https://github.com/johnsoncodehk/typescript-native-bridge).
-The `typescript` dependency is an exact npm alias to `6.0.3-bridge.16.tsgo.7.0.2`, and
+The `typescript` dependency is an exact npm alias to `6.0.3-bridge.18.tsgo.7.0.2`, and
 `overrides.typescript = "$typescript"` keeps all compiler consumers on the same implementation.
 The `6.0.3` prefix describes the classic JavaScript API facade; `tsgo.7.0.2` describes the checker.
 The bridge prints `TNB ACTIVE` when its checker starts; this is an informational message.
@@ -144,7 +144,11 @@ different indentation and blank lines on Windows and Linux. The locked Composer 
 to all existing generation commands, including Vite's automatic regeneration. Keep generated
 helpers excluded from manual formatting and keep the CI drift check strict.
 
-`composer install` applies the patch to a fresh dependency installation and requires Git.
+`patches/wayfinder-query-method.patch` adds Laravel 13's `QUERY` verb to Wayfinder's generated
+method union so query routes and redirects remain type-safe. Its regression covers route,
+action, and form helpers. Remove it when upstream supports the verb and the regression passes.
+
+`composer install` applies both patches to a fresh dependency installation and requires Git.
 For an existing vendor installation, run `composer patches-repatch` after adopting the patch.
 If the patch changes, run `composer patches-relock` followed by `composer patches-repatch`, then
 regenerate and run the quality gates. Commit the patch, `patches.lock.json`, and regenerated
@@ -152,6 +156,11 @@ helpers together. Remove this patch when the upstream generator passes the porta
 on both Windows and Linux.
 
 ### Import rules
+
+ESLint combines `typescript-eslint`'s recommended configuration with `eslint-plugin-vue` and
+`vue-eslint-parser` directly, including TypeScript expressions in templates and the `vue/block-lang`
+rule. This preserves the existing rules without the unpatched `braces` dependency pulled in by
+`@vue/eslint-config-typescript`. Vue typechecking remains a separate `vue-tsc` gate.
 
 Vue typechecking and ESLint cover UI primitives as well as application components. Primitives keep explicit imports because the shadcn-vue CLI regenerates them.
 
