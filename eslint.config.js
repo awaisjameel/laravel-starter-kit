@@ -149,6 +149,7 @@ export default defineConfig(
         ignores: [
             'vendor/**',
             'node_modules/**',
+            'storage/**',
             'public/**',
             'bootstrap/ssr/**',
             'tailwind.config.js',
