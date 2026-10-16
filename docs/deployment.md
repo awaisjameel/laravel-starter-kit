@@ -20,7 +20,7 @@ Use exactly one of the two site files.
 
 HTTPS is required. Inertia history encryption (`INERTIA_ENCRYPT_HISTORY=true`) needs a secure context, which browsers only grant to HTTPS and `localhost`.
 
-- **Behind a TLS-terminating proxy** (`app.conf`): Cloudflare Tunnel, a cloud load balancer, Coolify/Caddy, or another nginx. The proxy must forward `X-Forwarded-For`, `X-Forwarded-Proto`, and `X-Forwarded-Host` and allow websocket upgrades. Set `TRUSTED_PROXIES` to the proxy's address, or Laravel generates `http://` URLs and the browser blocks the page's assets as mixed content. Block port `8001` from everything except the proxy.
+- **Behind a TLS-terminating proxy** (`app.conf`): Cloudflare Tunnel, a cloud load balancer, Coolify/Caddy, or another nginx. The proxy must forward `X-Forwarded-For`, `X-Forwarded-Proto`, and `X-Forwarded-Host` and allow websocket upgrades. Set `TRUSTED_PROXIES` to the proxy's address (`config/trustedproxy.php` feeds it to Laravel's global `TrustProxies` middleware), or Laravel generates `http://` URLs and the browser blocks the page's assets as mixed content. Block port `8001` from everything except the proxy.
 - **nginx terminates TLS** (`app-https.conf`): nginx is the public edge. Leave `TRUSTED_PROXIES` unset so forwarded headers sent by clients are ignored.
 
 ## 1. Prepare The Server
@@ -65,7 +65,7 @@ REVERB_SERVER_PORT=8080
 ```
 
 - `REVERB_HOST`, `REVERB_PORT`, and `REVERB_SCHEME` are the public address: browsers open `wss://example.com/app/{key}`, and the queue workers publish to `https://example.com/apps/{id}/events`. nginx forwards both to Reverb, so the application key can be any value.
-- `REVERB_SERVER_HOST=127.0.0.1` keeps Reverb reachable only through nginx. PM2 starts it without flags, so these values are read from `.env`.
+- `REVERB_SERVER_HOST=127.0.0.1` keeps Reverb reachable only through nginx. PM2 starts it without flags, so these values are read from `.env`; shell-expanded flags would bypass it.
 - The `VITE_*` variables are compiled into the frontend. Rebuild the assets whenever a Reverb or app-name value changes.
 - `SANCTUM_STATEFUL_DOMAINS` defaults to the `APP_URL` host. Set it explicitly only when the frontend is served from additional hosts.
 - Use a real database (`DB_CONNECTION`, `DB_*`) and mail transport (`MAIL_*`) for production.
@@ -117,7 +117,7 @@ pm2 save
 pm2 startup   # run the command it prints so PM2 starts on boot
 ```
 
-Run the scheduler on one host only.
+Run the scheduler on one host only. Running it on several hosts requires Laravel's shared-cache scheduling locks.
 
 ## Deploying Updates
 
@@ -156,6 +156,12 @@ Services that exit after `queue:restart` or `reverb:restart` are restarted by PM
 - **Caching and compression.** Content-hashed Vite output under `/build/assets/` is cached for a year as immutable, other static files for a week, and text assets are gzip-compressed.
 - **Hidden files.** Dotfiles such as `.env` are denied except `/.well-known/`.
 - **Security headers.** Application responses carry the headers set by `App\Http\Middleware\SecurityHeaders`; nginx adds HSTS in `app-https.conf` only.
+
+## Changing The nginx Setup
+
+- `snippets/app-locations.conf` owns all routing; the site files only add listeners around it, plus TLS and HSTS in `app-https.conf`.
+- Route Reverb by the `Upgrade: websocket` header under `/app/`, never by a literal application key.
+- Change the configs and this document together. No automated suite covers these files, so verify with `nginx -t` plus request checks against the affected routes.
 
 ## Troubleshooting
 

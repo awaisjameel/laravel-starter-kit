@@ -1,5 +1,7 @@
 # Starter kit branch audit
 
+> Historical record of a point-in-time review. It is not maintained guidance; current architecture lives in [AGENTS.md](../AGENTS.md) and [docs/architecture](architecture/).
+
 Audit date: 2026-09-09. Branch: `fix/starter-kit-architecture-and-type-safety-audit`.
 Compared `origin/main` (`7a6dda1abe37bea1479bde1db28633bf234bfbbd`) with
 `1f987b8ba26cad9bda46c82cea3f0bf6bca083da`, then reviewed the maintainer fixes in this checkout.
